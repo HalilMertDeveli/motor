@@ -1,0 +1,39 @@
+@model string
+
+@* Renders the MotorDark line icon that best matches a category name (Turkish and English keywords). *@
+
+@functions {
+    static readonly (string Icon, string[] Keywords)[] IconMap =
+    [
+        ("mi-helmet", ["kask", "sürücü", "surucu", "helmet", "rider"]),
+        ("mi-jacket", ["mont", "giyim", "eldiven", "bot", "jacket", "apparel", "clothing"]),
+        ("mi-brake", ["fren", "balata", "brake"]),
+        ("mi-exhaust", ["egzoz", "exhaust", "performans", "performance"]),
+        ("mi-gear", ["şanzıman", "sanziman", "aktarma", "zincir", "dişli", "transmission", "chain"]),
+        ("mi-suspension", ["süspansiyon", "suspansiyon", "amortisör", "direksiyon", "suspension"]),
+        ("mi-fuel", ["yakıt", "yakit", "hava", "filtre", "fuel", "filter"]),
+        ("mi-light", ["aydınlatma", "aydinlatma", "far", "lamba", "light"]),
+        ("mi-bolt", ["elektrik", "elektronik", "akü", "aku", "electr", "battery"]),
+        ("mi-tire", ["lastik", "jant", "tekerlek", "tire", "tyre", "wheel"]),
+        ("mi-oil", ["yağ", "yag", "bakım", "bakim", "oil", "care", "maintenance"]),
+        ("mi-fairing", ["kaporta", "grenaj", "gövde", "fairing", "body"]),
+        ("mi-engine", ["motor", "piston", "silindir", "krank", "conta", "engine"]),
+        ("mi-tool", ["aksesuar", "accessor", "alet", "tool"])
+    ];
+
+    static string GetIcon(string name)
+    {
+        var lower = name.EmptyNull().ToLowerInvariant();
+        foreach (var (icon, keywords) in IconMap)
+        {
+            if (keywords.Any(lower.Contains))
+            {
+                return icon;
+            }
+        }
+
+        return "mi-grid";
+    }
+}
+
+<svg class="motor-cat-icon" aria-hidden="true" focusable="false"><use href="#@GetIcon(Model)" /></svg>

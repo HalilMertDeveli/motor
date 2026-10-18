@@ -1,0 +1,69 @@
+@model string
+
+@*
+    MotorDark homepage hero. The artwork is an original inline SVG (no third-party image).
+    To use a photograph instead, place it at Themes/MotorDark/wwwroot/images/hero.jpg and
+    set the theme variable "motor-hero-photo" to true.
+*@
+
+@{
+    var primaryCtaUrl = Model.NullEmpty() ?? "#motor-categories";
+    var usePhoto = Display.GetThemeVariable<bool>("motor-hero-photo");
+}
+
+<section lang="tr" class="motor-hero@(usePhoto ? " motor-hero--photo" : "")" aria-labelledby="motor-hero-title" data-motor-hero>
+    <div class="motor-hero-backdrop" aria-hidden="true">
+        <div class="motor-hero-glow"></div>
+        <div class="motor-hero-grid"></div>
+        <div class="motor-hero-streaks">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        @if (usePhoto)
+        {
+            <img class="motor-hero-photo" src="~/themes/motordark/images/hero.jpg" alt="" fetchpriority="high" decoding="async" />
+        }
+    </div>
+
+    <div class="container motor-hero-container">
+        <div class="motor-hero-content">
+            <span class="motor-eyebrow motor-hero-eyebrow">Parça · Bakım · Ekipman</span>
+            <h1 id="motor-hero-title" class="motor-hero-title">
+                <span class="motor-hero-line"><span>Yola</span></span>
+                <span class="motor-hero-line"><span>hakim <em>ol.</em></span></span>
+            </h1>
+            <p class="motor-hero-subtitle">Motorunun performansını tamamlayan parçalar ve ekipmanlar.</p>
+            <div class="motor-hero-actions">
+                <a href="@primaryCtaUrl" class="btn btn-primary btn-motor">
+                    <span>Ürünleri Keşfet</span>
+                    <svg class="motor-btn-arrow" aria-hidden="true"><use href="#mi-arrow" /></svg>
+                </a>
+                <a href="#motor-categories" class="btn btn-motor btn-motor-ghost">
+                    <span>Kategorilere Göz At</span>
+                </a>
+            </div>
+        </div>
+
+        @if (!usePhoto)
+        {
+            <div class="motor-hero-art" aria-hidden="true">
+                <partial name="Home.HeroArt" />
+            </div>
+        }
+    </div>
+
+    <div class="motor-hero-ticker" aria-hidden="true">
+        <div class="motor-hero-ticker-track">
+            @for (var i = 0; i < 2; i++)
+            {
+                <span>Fren Sistemleri</span><i></i>
+                <span>Egzoz &amp; Performans</span><i></i>
+                <span>Kask &amp; Koruma</span><i></i>
+                <span>Motor Bakım</span><i></i>
+                <span>Aydınlatma</span><i></i>
+                <span>Lastik &amp; Jant</span><i></i>
+                <span>Elektrik &amp; Elektronik</span><i></i>
+                <span>Mont &amp; Giyim</span><i></i>
+            }
+        </div>
+    </div>
+</section>

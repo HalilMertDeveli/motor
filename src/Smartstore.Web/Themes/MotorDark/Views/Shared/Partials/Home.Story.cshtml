@@ -1,0 +1,52 @@
+@* MotorDark homepage storytelling band. Copy describes the assortment only; no commercial claims. *@
+
+<section lang="tr" class="motor-story" aria-labelledby="motor-story-title">
+    <div class="motor-story-bg" aria-hidden="true">
+        <svg class="motor-story-road" viewBox="0 0 1200 400" preserveAspectRatio="none" focusable="false">
+            <path d="M0 330 C300 300 520 210 760 160 S1100 90 1200 60" fill="none" stroke="rgba(255,90,31,.55)" stroke-width="2" />
+            <path d="M0 360 C320 335 560 250 800 200 S1120 130 1200 105" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1" />
+            <path d="M0 300 C280 268 480 175 720 122 S1080 52 1200 20" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="1" stroke-dasharray="14 18" />
+        </svg>
+    </div>
+
+    <div class="container motor-story-inner">
+        <div class="motor-story-head" data-motor-reveal>
+            <span class="motor-eyebrow">Garajdan yola</span>
+            <h2 id="motor-story-title" class="motor-story-title">
+                Her parça, bir sonraki <em>virajın</em> parçası.
+            </h2>
+            <p class="motor-story-lead">
+                İyi bir sürüş, doğru parçayla başlar. Bakım rutininden performans yükseltmesine,
+                sürücü güvenliğinden yol aksesuarlarına kadar ihtiyacını kategorilere ayırdık.
+            </p>
+            <div class="motor-story-actions">
+                <a href="#motor-categories" class="btn btn-primary btn-motor">
+                    <span>Kategorileri Keşfet</span>
+                    <svg class="motor-btn-arrow" aria-hidden="true"><use href="#mi-arrow" /></svg>
+                </a>
+                <a asp-route="ContactUs" class="btn btn-motor btn-motor-ghost">Parça Danış</a>
+            </div>
+        </div>
+
+        <ol class="motor-story-steps" data-motor-stagger>
+            <li class="motor-story-step">
+                <span class="motor-story-num">01</span>
+                <svg class="motor-story-icon" aria-hidden="true"><use href="#mi-oil" /></svg>
+                <h3>Bakım</h3>
+                <p>Yağ, filtre, buji ve balata gibi periyodik bakım parçaları.</p>
+            </li>
+            <li class="motor-story-step">
+                <span class="motor-story-num">02</span>
+                <svg class="motor-story-icon" aria-hidden="true"><use href="#mi-exhaust" /></svg>
+                <h3>Performans</h3>
+                <p>Egzoz, hava ve yakıt sistemleri, aktarma ve süspansiyon parçaları.</p>
+            </li>
+            <li class="motor-story-step">
+                <span class="motor-story-num">03</span>
+                <svg class="motor-story-icon" aria-hidden="true"><use href="#mi-helmet" /></svg>
+                <h3>Sürücü</h3>
+                <p>Kask, mont, eldiven ve bot ile yolda görünür ve korunaklı kal.</p>
+            </li>
+        </ol>
+    </div>
+</section>

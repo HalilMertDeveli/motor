@@ -1,0 +1,67 @@
+@using Microsoft.EntityFrameworkCore
+@using Smartstore.Core.Catalog
+@using Smartstore.Core.Catalog.Products
+@using Smartstore.Core.Data
+@using Smartstore.Core.Security
+@using Smartstore.Core.Stores
+@using Smartstore.Web.Controllers
+@using Smartstore.Web.Models.Catalog
+
+@inject SmartDbContext Db
+@inject CatalogHelper CatalogHelper
+@inject IAclService AclService
+@inject IStoreMappingService StoreMappingService
+@inject CatalogSettings CatalogSettings
+
+@*
+    Newest published products for the MotorDark homepage. Mirrors the filtering of the
+    HomeProducts view component (standard filter, ACL, store mapping) and respects the
+    "Recently added products" catalog setting.
+*@
+
+@{
+    const int maxItems = 8;
+
+    if (!CatalogSettings.RecentlyAddedProductsEnabled)
+    {
+        return;
+    }
+
+    var candidates = await Db.Products
+        .AsNoTracking()
+        .ApplyStandardFilter(false)
+        .OrderByDescending(x => x.CreatedOnUtc)
+        .ThenByDescending(x => x.Id)
+        .Take(maxItems * 2)
+        .SelectSummary()
+        .ToListAsync();
+
+    var products = await candidates
+        .WhereAwait(async x => (await AclService.AuthorizeAsync(x)) && (await StoreMappingService.AuthorizeAsync(x)))
+        .Take(maxItems)
+        .ToListAsync();
+
+    if (products.Count == 0)
+    {
+        return;
+    }
+
+    var settings = CatalogHelper.GetBestFitProductSummaryMappingSettings(ProductSummaryViewMode.Grid);
+    var model = await CatalogHelper.MapProductSummaryModelAsync(products, settings);
+    model.GridColumnSpan = GridColumnSpan.Max4Cols;
+}
+
+<div role="region" aria-labelledby="motor-new-title" class="product-grid motor-product-rail block">
+    <div lang="tr" class="motor-section-head" data-motor-reveal>
+        <div>
+            <span class="motor-eyebrow">Yeni gelenler</span>
+            <h2 id="motor-new-title" class="motor-section-title">Garaja yeni girenler</h2>
+        </div>
+        <a class="motor-section-link" asp-route="RecentlyAddedProducts">
+            Tümünü gör <svg aria-hidden="true"><use href="#mi-arrow" /></svg>
+        </a>
+    </div>
+    <div class="block-body artlist-no-separators">
+        <partial name="Product.List" model="model" />
+    </div>
+</div>

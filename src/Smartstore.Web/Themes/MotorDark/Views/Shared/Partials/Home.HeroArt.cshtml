@@ -1,0 +1,129 @@
+@* Original vector artwork: stylised sport motorcycle in side profile. *@
+<svg class="motor-bike" viewBox="0 0 820 470" xmlns="http://www.w3.org/2000/svg" focusable="false">
+    <defs>
+        <linearGradient id="mb-body" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#2b2f36" />
+            <stop offset=".55" stop-color="#15171b" />
+            <stop offset="1" stop-color="#0b0c0e" />
+        </linearGradient>
+        <linearGradient id="mb-tank" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3a3f47" />
+            <stop offset="1" stop-color="#14161a" />
+        </linearGradient>
+        <linearGradient id="mb-accent" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ff5a1f" stop-opacity="0" />
+            <stop offset=".35" stop-color="#ff5a1f" />
+            <stop offset="1" stop-color="#ffa157" />
+        </linearGradient>
+        <linearGradient id="mb-rim" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#5e636c" />
+            <stop offset="1" stop-color="#22262c" />
+        </linearGradient>
+        <radialGradient id="mb-shadow" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#000" stop-opacity=".85" />
+            <stop offset="1" stop-color="#000" stop-opacity="0" />
+        </radialGradient>
+        <radialGradient id="mb-headlight" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#fff6e8" />
+            <stop offset=".4" stop-color="#ffb46b" stop-opacity=".6" />
+            <stop offset="1" stop-color="#ff5a1f" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="mb-beam" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ffd2a3" stop-opacity=".35" />
+            <stop offset="1" stop-color="#ffd2a3" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+
+    <!-- ground shadow & reflection line -->
+    <ellipse cx="410" cy="418" rx="330" ry="22" fill="url(#mb-shadow)" />
+    <path d="M40 420 H780" stroke="rgba(255,255,255,.08)" stroke-width="1" />
+
+    <!-- headlight beam -->
+    <path class="mb-beam" d="M676 196 L820 150 L820 262 Z" fill="url(#mb-beam)" />
+
+    <!-- rear wheel -->
+    <g class="mb-wheel mb-wheel--rear" transform="translate(205 330)">
+        <circle r="92" fill="#0a0b0d" stroke="#1d2025" stroke-width="22" />
+        <circle r="92" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1" />
+        <circle r="70" fill="none" stroke="url(#mb-rim)" stroke-width="5" />
+        <g class="mb-spokes" stroke="#3a3f47" stroke-width="6" stroke-linecap="round">
+            <path d="M0 -14 V-66" /><path d="M13.3 4.3 L62.8 20.4" /><path d="M-13.3 4.3 L-62.8 20.4" />
+            <path d="M8.2 11.3 L38.8 53.4" /><path d="M-8.2 11.3 L-38.8 53.4" />
+        </g>
+        <circle r="40" fill="none" stroke="#2a2e35" stroke-width="7" stroke-dasharray="3 6" />
+        <circle r="14" fill="#1a1d22" stroke="#5e636c" stroke-width="2" />
+        <circle r="4" fill="#ff5a1f" />
+    </g>
+
+    <!-- front wheel -->
+    <g class="mb-wheel mb-wheel--front" transform="translate(632 330)">
+        <circle r="92" fill="#0a0b0d" stroke="#1d2025" stroke-width="22" />
+        <circle r="92" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1" />
+        <circle r="70" fill="none" stroke="url(#mb-rim)" stroke-width="5" />
+        <g class="mb-spokes" stroke="#3a3f47" stroke-width="6" stroke-linecap="round">
+            <path d="M0 -14 V-66" /><path d="M13.3 4.3 L62.8 20.4" /><path d="M-13.3 4.3 L-62.8 20.4" />
+            <path d="M8.2 11.3 L38.8 53.4" /><path d="M-8.2 11.3 L-38.8 53.4" />
+        </g>
+        <circle r="52" fill="none" stroke="#2a2e35" stroke-width="9" stroke-dasharray="4 7" />
+        <circle r="14" fill="#1a1d22" stroke="#5e636c" stroke-width="2" />
+        <circle r="4" fill="#ff5a1f" />
+    </g>
+
+    <!-- brake caliper (front) -->
+    <path d="M664 286 q22 10 24 36 l-14 2 q-2 -18 -16 -26 z" fill="#ff5a1f" />
+
+    <!-- swingarm -->
+    <path d="M205 330 L392 282 L402 300 L215 344 Z" fill="#22262c" stroke="#3a3f47" stroke-width="2" />
+
+    <!-- rear shock -->
+    <path d="M300 300 L338 222" stroke="#ff5a1f" stroke-width="8" stroke-linecap="round" />
+    <path d="M304 292 L334 230" stroke="#08090b" stroke-width="2" stroke-dasharray="3 4" />
+
+    <!-- front fork -->
+    <path d="M632 330 L566 140" stroke="#5e636c" stroke-width="14" stroke-linecap="round" />
+    <path d="M626 312 L590 208" stroke="#c9a14a" stroke-width="14" stroke-linecap="round" opacity=".85" />
+
+    <!-- engine block -->
+    <g class="mb-engine">
+        <path d="M352 238 L470 232 L494 300 L446 330 L372 322 L340 286 Z" fill="#16181c" stroke="#3a3f47" stroke-width="2" />
+        <path d="M372 256 H466 M366 272 H474 M362 288 H480" stroke="#2a2e35" stroke-width="5" />
+        <circle cx="430" cy="306" r="16" fill="#1f2228" stroke="#5e636c" stroke-width="2" />
+        <circle cx="380" cy="300" r="10" fill="#1f2228" stroke="#3a3f47" stroke-width="2" />
+    </g>
+
+    <!-- exhaust -->
+    <path d="M470 312 C430 352, 330 350, 292 318" fill="none" stroke="#3a3f47" stroke-width="10" stroke-linecap="round" />
+    <path d="M222 252 L320 270 L314 312 L214 292 Z" fill="#1f2228" stroke="#5e636c" stroke-width="2" />
+    <path d="M214 292 L222 252" stroke="#ff5a1f" stroke-width="4" />
+    <ellipse cx="218" cy="272" rx="5" ry="18" fill="#08090b" transform="rotate(10 218 272)" />
+
+    <!-- main body: tail, seat, tank, fairing -->
+    <path class="mb-body" d="M96 150 L168 168 L262 186 C300 154 344 134 398 128 C446 124 486 112 524 98 L578 72 L594 90 C612 118 626 150 628 192 L612 222 C584 252 538 268 486 270 L376 272 L336 256 L270 222 L178 206 L118 172 Z" fill="url(#mb-body)" stroke="rgba(255,255,255,.14)" stroke-width="1.5" />
+
+    <!-- tank highlight -->
+    <path d="M300 168 C340 140 390 132 440 128 C470 126 494 120 512 112 C486 140 446 156 396 162 C360 166 330 170 300 176 Z" fill="url(#mb-tank)" opacity=".9" />
+
+    <!-- seat -->
+    <path d="M150 166 L266 184 C276 176 286 170 296 164 L176 152 Z" fill="#0b0c0e" stroke="#2a2e35" stroke-width="1.5" />
+
+    <!-- accent livery stripe -->
+    <path class="mb-stripe" d="M236 214 C330 214 430 196 520 168 C560 156 596 140 622 124" fill="none" stroke="url(#mb-accent)" stroke-width="6" stroke-linecap="round" />
+    <path d="M380 238 C440 236 520 222 600 196" fill="none" stroke="rgba(255,90,31,.45)" stroke-width="2" stroke-linecap="round" />
+
+    <!-- number plate block -->
+    <text x="560" y="214" fill="#f4f4f2" font-family="Barlow Semi Condensed, Arial Narrow, sans-serif" font-style="italic" font-weight="700" font-size="34" letter-spacing="1">01</text>
+
+    <!-- windscreen -->
+    <path d="M524 98 L578 72 L590 86 L540 104 Z" fill="rgba(170,190,210,.25)" stroke="rgba(255,255,255,.25)" stroke-width="1" />
+
+    <!-- handlebar & mirror -->
+    <path d="M520 100 L548 92" stroke="#5e636c" stroke-width="5" stroke-linecap="round" />
+    <path d="M552 86 L566 74" stroke="#3a3f47" stroke-width="3" />
+
+    <!-- headlight -->
+    <path d="M606 186 L626 180 L630 198 L612 204 Z" fill="#fff4e0" />
+    <circle class="mb-headlight" cx="622" cy="192" r="34" fill="url(#mb-headlight)" />
+
+    <!-- tail light -->
+    <path d="M96 150 L112 154 L114 162 L100 160 Z" fill="#ff3b3b" />
+</svg>
