@@ -18,7 +18,7 @@
     [data-motor-reveal],
     [data-motor-stagger] > * {
         opacity: 0;
-        transform: translate3d(0, 22px, 0);
+        transform: translate3d(0, 16px, 0);
         transition:
             opacity var(--motor-dur-slow) var(--motor-ease-out),
             transform var(--motor-dur-slow) var(--motor-ease-out);
@@ -50,104 +50,86 @@
     }
 }
 
-// Hero entrance
+// Hero entrance: the photo "develops" out of black with a slow camera settle,
+// the headline is revealed behind a mask, then a single light pass crosses the bike.
 // --------------------------------------------------
 
 .motor-js .motor-hero {
+    .motor-hero-media picture {
+        opacity: 0;
+        transform: scale(1.1);
+        filter: brightness(0.55);
+        transition:
+            opacity 1.6s var(--motor-ease-out),
+            transform 3.2s var(--motor-ease-out),
+            filter 2.4s var(--motor-ease-out);
+    }
+
     .motor-hero-line > span {
-        transform: translate3d(0, 110%, 0) skewY(4deg);
-        transition: transform 1.1s var(--motor-ease-out);
+        transform: translate3d(0, 105%, 0);
+        transition: transform 1.2s var(--motor-ease-out) .35s;
     }
 
     .motor-hero-line:nth-child(2) > span {
-        transition-delay: .12s;
+        transition-delay: .48s;
     }
 
     .motor-hero-eyebrow,
     .motor-hero-subtitle,
-    .motor-hero-actions {
+    .motor-hero-actions,
+    .motor-hero-scroll {
         opacity: 0;
-        transform: translate3d(0, 16px, 0);
-        transition: opacity .8s var(--motor-ease-out), transform .8s var(--motor-ease-out);
+        transition: opacity 1s var(--motor-ease-out), transform 1s var(--motor-ease-out);
     }
 
-    .motor-hero-subtitle { transition-delay: .35s; }
-    .motor-hero-actions { transition-delay: .48s; }
-
-    .motor-hero-art {
-        opacity: 0;
-        transform: translate3d(8%, 0, 0);
-        transition: opacity 1.2s var(--motor-ease-out) .2s, transform 1.4s var(--motor-ease-out) .2s;
-    }
+    .motor-hero-eyebrow { transition-delay: .25s; }
+    .motor-hero-subtitle { transition-delay: .75s; }
+    .motor-hero-actions { transition-delay: .9s; }
+    .motor-hero-scroll { transition-delay: 1.6s; }
 
     &.is-ready {
-        .motor-hero-line > span,
+        .motor-hero-media picture {
+            opacity: 1;
+            transform: none;
+            filter: none;
+        }
+
+        .motor-hero-line > span {
+            transform: none;
+        }
+
         .motor-hero-eyebrow,
         .motor-hero-subtitle,
         .motor-hero-actions,
-        .motor-hero-art {
+        .motor-hero-scroll {
             opacity: 1;
-            transform: none;
+        }
+
+        .motor-hero-sweep {
+            animation: motor-sweep 2.8s var(--motor-ease-in-out) 1.6s 1 both;
         }
     }
 }
 
-// Parallax offset (set by motor.js) is applied on an inner element so it
-// never fights with the entrance transition above.
-.motor-hero-art .motor-bike {
-    transform: translate3d(0, var(--motor-parallax, 0px), 0);
-    will-change: transform;
+@keyframes motor-sweep {
+    0% { opacity: 0; transform: translate3d(-45%, 0, 0); }
+    25% { opacity: 1; }
+    75% { opacity: 1; }
+    100% { opacity: 0; transform: translate3d(45%, 0, 0); }
 }
 
-// Continuous hero details
-.motor-bike .mb-spokes {
-    animation: motor-spin 2.4s linear infinite;
+// Scroll cue: a slow travelling line, the only looping element on the page
+.motor-hero-scroll-line:after {
+    animation: motor-scroll-cue 2.4s var(--motor-ease-in-out) infinite;
 }
 
-.motor-bike .mb-wheel--front .mb-spokes {
-    animation-duration: 2.4s;
+@keyframes motor-scroll-cue {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(0, 350%, 0); }
 }
 
-.motor-bike .mb-headlight {
-    animation: motor-pulse 3.2s ease-in-out infinite;
-}
-
-@keyframes motor-spin {
-    to { transform: rotate(360deg); }
-}
-
-@keyframes motor-pulse {
-    0%, 100% { opacity: .75; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.12); }
-}
-
-.motor-hero-streaks span {
-    animation: motor-streak 6s cubic-bezier(.5, 0, .2, 1) infinite;
-}
-
-@keyframes motor-streak {
-    0% { opacity: 0; transform: translate3d(0, 0, 0); }
-    10% { opacity: 1; }
-    45% { opacity: 0; transform: translate3d(360%, 0, 0); }
-    100% { opacity: 0; transform: translate3d(360%, 0, 0); }
-}
-
-.motor-hero-ticker-track {
-    animation: motor-marquee 45s linear infinite;
-}
-
-@keyframes motor-marquee {
-    to { transform: translate3d(-50%, 0, 0); }
-}
-
-// Pause decorative loops when the hero is off-screen (class set by motor.js)
-.motor-hero.is-offscreen {
-    .mb-spokes,
-    .mb-headlight,
-    .motor-hero-streaks span,
-    .motor-hero-ticker-track {
-        animation-play-state: paused;
-    }
+.motor-hero.is-offscreen .motor-hero-scroll-line:after {
+    animation-play-state: paused;
 }
 
 // Add-to-cart button feedback
@@ -206,27 +188,31 @@
 @media (prefers-reduced-motion: reduce) {
     .motor-js [data-motor-reveal],
     .motor-js [data-motor-stagger] > *,
+    .motor-js .motor-hero .motor-hero-media picture,
     .motor-js .motor-hero .motor-hero-line > span,
     .motor-js .motor-hero .motor-hero-eyebrow,
     .motor-js .motor-hero .motor-hero-subtitle,
     .motor-js .motor-hero .motor-hero-actions,
-    .motor-js .motor-hero .motor-hero-art {
+    .motor-js .motor-hero .motor-hero-scroll {
         opacity: 1 !important;
         transform: none !important;
+        filter: none !important;
         transition: none !important;
     }
 
-    .motor-bike .mb-spokes,
-    .motor-bike .mb-headlight,
-    .motor-hero-streaks span,
-    .motor-hero-ticker-track,
+    .motor-hero-sweep,
+    .motor-hero-scroll-line:after,
     .motor-js .motor-product-rail .artlist-grid,
     .motor-js #main-product-list .artlist-grid,
     .offcanvas-cart-body:empty {
         animation: none !important;
     }
 
-    .motor-hero-art .motor-bike {
+    .motor-hero-sweep {
+        opacity: 0 !important;
+    }
+
+    [data-motor-parallax] {
         transform: none !important;
     }
 

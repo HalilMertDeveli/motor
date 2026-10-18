@@ -75,94 +75,103 @@
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    min-height: clamp(560px, 86vh, 820px);
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding-top: clamp(2.5rem, 6vh, 4.5rem);
-    background:
-        radial-gradient(120% 80% at 80% 60%, #16191e 0%, rgba($motor-bg, 0) 60%),
-        linear-gradient(180deg, $motor-bg 0%, #0b0c0f 100%);
+    align-items: center;
+    min-height: unquote("max(600px, calc(100vh - var(--motor-header-h, 170px)))");
+    padding-block: 3rem 5rem;
+    background: $motor-bg;
     border-bottom: 1px solid $motor-line;
+
+    @include media-breakpoint-down(md) {
+        align-items: flex-start;
+        min-height: unquote("max(640px, calc(100svh - var(--motor-header-h, 110px)))");
+        padding-block: 2.25rem 3rem;
+    }
 }
 
-.motor-hero-backdrop {
+// Photo layer: on desktop the photo fills the right side and the copy sits on black.
+.motor-hero-media {
     position: absolute;
     inset: 0;
     z-index: -1;
+    overflow: hidden;
     pointer-events: none;
+
+    picture {
+        position: absolute;
+        inset: 0;
+        display: block;
+        transform-origin: 62% 70%;
+    }
+
+    @include media-breakpoint-up(lg) {
+        left: 28%;
+    }
 }
 
-.motor-hero-glow {
-    position: absolute;
-    right: -10%;
-    bottom: -30%;
-    width: 80vw;
-    height: 80vw;
-    max-width: 1100px;
-    max-height: 1100px;
-    background: radial-gradient(closest-side, rgba($motor-accent, 0.28), rgba($motor-accent, 0.08) 45%, rgba($motor-accent, 0) 70%);
-    filter: blur(10px);
-}
-
-.motor-hero-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(#fff, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(#fff, 0.035) 1px, transparent 1px);
-    background-size: 72px 72px;
-    mask-image: radial-gradient(ellipse 70% 60% at 60% 50%, #000 0%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 60% 50%, #000 0%, transparent 75%);
-}
-
-.motor-hero-streaks span {
-    position: absolute;
-    left: -40%;
-    height: 1px;
-    width: 40%;
-    background: linear-gradient(90deg, rgba($motor-accent, 0), rgba($motor-accent, 0.8), rgba(#fff, 0));
-    opacity: 0;
-
-    &:nth-child(1) { top: 62%; animation-delay: .2s; }
-    &:nth-child(2) { top: 70%; animation-delay: 1.4s; width: 30%; }
-    &:nth-child(3) { top: 76%; animation-delay: 2.6s; }
-    &:nth-child(4) { top: 66%; animation-delay: 3.6s; width: 22%; }
-    &:nth-child(5) { top: 82%; animation-delay: 4.8s; width: 34%; }
-}
-
+// Taller than the frame so the parallax drift never reveals an edge
 .motor-hero-photo {
     position: absolute;
-    inset: 0;
+    inset: -8% 0;
     width: 100%;
-    height: 100%;
+    height: 116%;
     object-fit: cover;
-    opacity: 0.55;
+    object-position: 58% 64%;
+    transform: translate3d(0, var(--motor-parallax, 0px), 0);
+    will-change: transform;
+
+    @include media-breakpoint-down(md) {
+        object-position: 62% 100%;
+    }
 }
 
-.motor-hero--photo .motor-hero-backdrop:after {
-    content: '';
+// Shading keeps the copy legible and blends the photo into the page
+.motor-hero-shade {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba($motor-bg, 0.92) 0%, rgba($motor-bg, 0.55) 55%, rgba($motor-bg, 0.2) 100%);
+    background:
+        linear-gradient(0deg, $motor-bg 0%, rgba($motor-bg, 0) 26%),
+        linear-gradient(90deg, $motor-bg 0%, rgba($motor-bg, 0.78) 14%, rgba($motor-bg, 0) 46%),
+        radial-gradient(120% 90% at 70% 60%, rgba($motor-bg, 0) 45%, rgba($motor-bg, 0.55) 100%);
+
+    @include media-breakpoint-down(md) {
+        background:
+            linear-gradient(180deg, rgba($motor-bg, 0.96) 0%, rgba($motor-bg, 0.7) 34%, rgba($motor-bg, 0) 58%),
+            linear-gradient(0deg, $motor-bg 0%, rgba($motor-bg, 0) 22%);
+    }
+}
+
+// A single soft light pass across the metalwork after load (motion layer animates it)
+.motor-hero-sweep {
+    position: absolute;
+    inset: -10% -50%;
+    background: linear-gradient(105deg,
+        rgba(255, 255, 255, 0) 42%,
+        rgba(255, 226, 196, 0.22) 49%,
+        rgba(255, 255, 255, 0.34) 50%,
+        rgba(255, 226, 196, 0.22) 51%,
+        rgba(255, 255, 255, 0) 58%);
+    mix-blend-mode: overlay;
+    opacity: 0;
+}
+
+// Static film grain for a photographic finish
+.motor-hero-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .motor-hero-container {
     position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: center;
-    gap: 2rem;
-
-    @include media-breakpoint-up(lg) {
-        grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    }
 }
 
 .motor-hero-content {
     position: relative;
     z-index: 2;
-    max-width: 640px;
+    max-width: 620px;
 }
 
 .motor-hero-title {
@@ -174,7 +183,8 @@
     line-height: 0.86;
     letter-spacing: -0.005em;
     color: $motor-text;
-    font-size: clamp(3.5rem, 11vw, 7.75rem);
+    font-size: clamp(3.5rem, 10vw, 7.5rem);
+    text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
 
     em {
         font-style: inherit;
@@ -193,10 +203,10 @@
 }
 
 .motor-hero-subtitle {
-    max-width: 460px;
+    max-width: 440px;
     margin-bottom: 2rem;
-    color: $gray-700;
-    font-size: clamp(1rem, 1.6vw, 1.1875rem);
+    color: $gray-800;
+    font-size: clamp(1rem, 1.5vw, 1.1875rem);
     line-height: 1.5;
 }
 
@@ -206,66 +216,52 @@
     gap: 0.75rem;
 }
 
-.motor-hero-art {
-    position: relative;
-    z-index: 1;
-    margin-inline-end: -6vw;
+// Scroll cue
+.motor-hero-scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    transform: translateX(-50%);
+    color: rgba($motor-text, 0.55);
+    text-decoration: none !important;
 
-    .motor-bike {
-        display: block;
-        width: 100%;
-        height: auto;
-        filter: drop-shadow(0 40px 60px rgba(0, 0, 0, 0.6));
+    &:hover {
+        color: $motor-text;
     }
 
     @include media-breakpoint-down(md) {
-        order: -1;
-        margin: 0 -12% -2rem 6%;
-        opacity: 0.9;
+        display: none;
     }
 }
 
-.motor-bike {
-    .mb-headlight {
-        transform-box: fill-box;
-        transform-origin: center;
-    }
-
-    .mb-beam {
-        opacity: 0.8;
-    }
-}
-
-// Ticker
-.motor-hero-ticker {
+.motor-hero-scroll-line {
     position: relative;
-    margin-top: clamp(2rem, 6vh, 4rem);
-    border-top: 1px solid $motor-line;
+    width: 1px;
+    height: 46px;
     overflow: hidden;
-    padding-block: 1rem;
-    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    background: rgba(#fff, 0.18);
+
+    &:after {
+        content: '';
+        position: absolute;
+        top: -40%;
+        left: 0;
+        width: 100%;
+        height: 40%;
+        background: $motor-accent;
+    }
 }
 
-.motor-hero-ticker-track {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    width: max-content;
+.motor-hero-scroll-label {
     font-family: $headings-font-family;
+    font-size: 0.6875rem;
     font-weight: 600;
-    font-size: 0.9375rem;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: rgba($motor-text, 0.5);
-    white-space: nowrap;
-
-    i {
-        width: 8px;
-        height: 8px;
-        background: $motor-accent;
-        transform: skewX(-24deg);
-    }
 }
 
 // Category grid
@@ -355,7 +351,6 @@
     &:focus-visible {
         color: #fff;
         border-color: rgba($motor-accent, 0.55);
-        transform: translateY(-3px);
         box-shadow: 0 22px 40px -24px rgba(0, 0, 0, 0.9);
 
         &:before {
@@ -364,7 +359,7 @@
 
         .motor-cat-icon {
             color: $motor-accent;
-            transform: translate(-2px, 2px) rotate(-6deg) scale(1.06);
+            transform: translateY(-2px);
         }
 
         .motor-cat-cta {
@@ -501,11 +496,33 @@
     pointer-events: none;
 }
 
-.motor-story-road {
+.motor-story-photo {
     position: absolute;
-    inset: auto 0 0 0;
-    width: 100%;
-    height: 70%;
+    top: -8%;
+    right: 0;
+    width: 62%;
+    height: 116%;
+    object-fit: cover;
+    object-position: 50% 62%;
+    transform: translate3d(0, var(--motor-parallax, 0px), 0);
+    will-change: transform;
+
+    @include media-breakpoint-down(md) {
+        width: 100%;
+        opacity: 0.45;
+    }
+}
+
+.motor-story-shade {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, #0c0d10 0%, #0c0d10 38%, rgba(#0c0d10, 0.6) 55%, rgba(#0c0d10, 0.15) 100%),
+        linear-gradient(0deg, rgba(#0c0d10, 0.8) 0%, rgba(#0c0d10, 0) 35%);
+
+    @include media-breakpoint-down(md) {
+        background: linear-gradient(180deg, rgba(#0c0d10, 0.85) 0%, rgba(#0c0d10, 0.75) 100%);
+    }
 }
 
 .motor-story-inner {

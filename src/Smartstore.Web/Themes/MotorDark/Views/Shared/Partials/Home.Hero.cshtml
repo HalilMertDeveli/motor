@@ -1,27 +1,31 @@
 @model string
 
 @*
-    MotorDark homepage hero. The artwork is an original inline SVG (no third-party image).
-    To use a photograph instead, place it at Themes/MotorDark/wwwroot/images/hero.jpg and
-    set the theme variable "motor-hero-photo" to true.
+    MotorDark homepage hero: full-bleed photograph with a cinematic, restrained motion layer.
+    Photos live in Themes/MotorDark/wwwroot/images (see CREDITS.txt) and can be replaced
+    with the store's own photography using the same file names.
 *@
 
 @{
     var primaryCtaUrl = Model.NullEmpty() ?? "#motor-categories";
-    var usePhoto = Display.GetThemeVariable<bool>("motor-hero-photo");
 }
 
-<section lang="tr" class="motor-hero@(usePhoto ? " motor-hero--photo" : "")" aria-labelledby="motor-hero-title" data-motor-hero>
-    <div class="motor-hero-backdrop" aria-hidden="true">
-        <div class="motor-hero-glow"></div>
-        <div class="motor-hero-grid"></div>
-        <div class="motor-hero-streaks">
-            <span></span><span></span><span></span><span></span><span></span>
-        </div>
-        @if (usePhoto)
-        {
-            <img class="motor-hero-photo" src="~/themes/motordark/images/hero.jpg" alt="" fetchpriority="high" decoding="async" />
-        }
+<section lang="tr" class="motor-hero" aria-labelledby="motor-hero-title" data-motor-hero>
+    <div class="motor-hero-media" aria-hidden="true">
+        <picture>
+            <source media="(max-width: 767.98px)" srcset="~/themes/motordark/images/hero-mobile.jpg" />
+            <img class="motor-hero-photo"
+                 src="~/themes/motordark/images/hero.jpg"
+                 alt=""
+                 width="2000"
+                 height="2667"
+                 fetchpriority="high"
+                 decoding="async"
+                 data-motor-parallax="0.18" />
+        </picture>
+        <div class="motor-hero-sweep"></div>
+        <div class="motor-hero-shade"></div>
+        <div class="motor-hero-grain"></div>
     </div>
 
     <div class="container motor-hero-container">
@@ -42,28 +46,10 @@
                 </a>
             </div>
         </div>
-
-        @if (!usePhoto)
-        {
-            <div class="motor-hero-art" aria-hidden="true">
-                <partial name="Home.HeroArt" />
-            </div>
-        }
     </div>
 
-    <div class="motor-hero-ticker" aria-hidden="true">
-        <div class="motor-hero-ticker-track">
-            @for (var i = 0; i < 2; i++)
-            {
-                <span>Fren Sistemleri</span><i></i>
-                <span>Egzoz &amp; Performans</span><i></i>
-                <span>Kask &amp; Koruma</span><i></i>
-                <span>Motor Bakım</span><i></i>
-                <span>Aydınlatma</span><i></i>
-                <span>Lastik &amp; Jant</span><i></i>
-                <span>Elektrik &amp; Elektronik</span><i></i>
-                <span>Mont &amp; Giyim</span><i></i>
-            }
-        </div>
-    </div>
+    <a href="#motor-categories" class="motor-hero-scroll" aria-label="Kategorilere in">
+        <span class="motor-hero-scroll-line" aria-hidden="true"></span>
+        <span class="motor-hero-scroll-label" aria-hidden="true">Kaydır</span>
+    </a>
 </section>

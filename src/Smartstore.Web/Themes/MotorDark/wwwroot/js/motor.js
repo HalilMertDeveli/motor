@@ -3,7 +3,7 @@
  * Progressive enhancement only: the storefront works fully without this file.
  * - Sticky header state, scroll progress and measured header height
  * - Scroll reveal and staggered entrances (IntersectionObserver)
- * - Hero entrance and light parallax
+ * - Hero entrance and photo parallax
  * - Add-to-cart feedback hooked into Smartstore's EventBroker
  */
 (function () {
@@ -33,8 +33,15 @@
 
         var body = document.body;
         var ticking = false;
-        var hero = document.querySelector('[data-motor-hero]');
-        var bike = hero ? hero.querySelector('.motor-bike') : null;
+        // Photos that drift slower than the page (data-motor-parallax="<factor>")
+        var layers = reduceMotion ? [] : Array.prototype.map.call(document.querySelectorAll('[data-motor-parallax]'), function (el) {
+            return {
+                el: el,
+                factor: parseFloat(el.getAttribute('data-motor-parallax')) || 0.1,
+                frame: el.closest('section') || el.parentElement,
+                pinned: !!el.closest('[data-motor-hero]')
+            };
+        });
 
         function measure() {
             doc.style.setProperty('--motor-header-h', header.offsetHeight + 'px');
@@ -49,12 +56,19 @@
             body.classList.toggle('motor-scrolled', y > 8);
             header.style.setProperty('--motor-progress', Math.min(1, y / max).toFixed(4));
 
-            if (bike && !reduceMotion) {
-                var rect = hero.getBoundingClientRect();
-                if (rect.bottom > 0) {
-                    bike.style.setProperty('--motor-parallax', (Math.max(0, -rect.top) * 0.12).toFixed(1) + 'px');
-                }
-            }
+            var vh = window.innerHeight;
+            layers.forEach(function (layer) {
+                var rect = layer.frame.getBoundingClientRect();
+                if (rect.bottom < 0 || rect.top > vh) return;
+
+                // The hero starts at rest and drifts as it scrolls away; other sections
+                // drift around the viewport centre.
+                var offset = layer.pinned
+                    ? Math.max(0, -rect.top) * layer.factor
+                    : -(rect.top + rect.height / 2 - vh / 2) * layer.factor;
+
+                layer.el.style.setProperty('--motor-parallax', offset.toFixed(1) + 'px');
+            });
         }
 
         function requestUpdate() {
@@ -117,11 +131,26 @@
         var hero = document.querySelector('[data-motor-hero]');
         if (!hero) return;
 
-        window.requestAnimationFrame(function () {
+        // Start the entrance once the photo is decoded (or after a short fallback),
+        // so the "develop from black" transition never plays over an empty frame.
+        var started = false;
+        function start() {
+            if (started) return;
+            started = true;
             window.requestAnimationFrame(function () {
                 hero.classList.add('is-ready');
             });
-        });
+        }
+
+        var photo = hero.querySelector('.motor-hero-photo');
+        if (!photo || photo.complete) {
+            start();
+        }
+        else {
+            photo.addEventListener('load', start, { once: true });
+            photo.addEventListener('error', start, { once: true });
+            setTimeout(start, 1500);
+        }
 
         if ('IntersectionObserver' in window) {
             new IntersectionObserver(function (entries) {
