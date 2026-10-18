@@ -1,0 +1,36 @@
+@using Smartstore.Web.Models.Catalog
+
+@model BrandNavigationModel
+
+<div role="region" aria-labelledby="top-brands-title" class="motor-brands block">
+    <div lang="tr" class="motor-section-head" data-motor-reveal>
+        <div>
+            <span class="motor-eyebrow">Markalar</span>
+            <h2 id="top-brands-title" class="motor-section-title">Markana göre alışveriş</h2>
+        </div>
+        <a sm-if="Model.DisplayAllBrandsLink" asp-route="ManufacturerList" class="motor-section-link">
+            @T("Homepage.Brands.ShowAll") <svg aria-hidden="true"><use href="#mi-arrow" /></svg>
+        </a>
+    </div>
+
+    <div role="list" class="motor-brand-grid" data-motor-stagger>
+        @foreach (var item in Model.Brands)
+        {
+            var url = Url.RouteUrl("Manufacturer", new { SeName = item.SeName });
+            var hasImage = Model.DisplayImages && item.Image?.File != null && item.Image.HasImage();
+
+            <div role="listitem" class="motor-brand" data-id="@item.Id">
+                <a href="@url" class="motor-brand-link" title="@item.Name">
+                    @if (hasImage)
+                    {
+                        <img sm-model="item.Image" loading="lazy" attr-alt='(item.Image.Alt.IsEmpty(), item.Name)' class="motor-brand-logo" />
+                    }
+                    else
+                    {
+                        <span class="motor-brand-name" sm-language-attributes-for="item.Name">@item.Name</span>
+                    }
+                </a>
+            </div>
+        }
+    </div>
+</div>

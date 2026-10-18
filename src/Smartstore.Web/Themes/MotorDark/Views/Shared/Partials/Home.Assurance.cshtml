@@ -1,0 +1,37 @@
+@* Shopping reassurance. Each item links to the store's own policy pages and is hidden when the page does not exist. *@
+
+@{
+    var shippingUrl = await Url.TopicAsync("ShippingInfo");
+    var paymentUrl = await Url.TopicAsync("PaymentInfo");
+    var ordersUrl = Url.Action("Orders", "Customer");
+    var contactUrl = Url.RouteUrl("ContactUs");
+
+    var items = new List<(string Icon, string Title, string Text, string Url, string LinkText)>
+    {
+        ("mi-truck", "Kargo & İade", "Gönderim, teslimat ve iade koşullarını önceden öğren.", shippingUrl, "Koşulları incele"),
+        ("mi-shield", "Ödeme Seçenekleri", "Kullanılabilir ödeme yöntemlerini ve ödeme sürecini gör.", paymentUrl, "Ödeme bilgileri"),
+        ("mi-return", "Sipariş Takibi", "Siparişlerinin durumunu hesabından takip et.", ordersUrl, "Siparişlerim"),
+        ("mi-headset", "Parça Danışmanlığı", "Doğru parçadan emin değil misin? Bize yaz.", contactUrl, "İletişime geç")
+    };
+
+    items = items.Where(x => x.Url.HasValue()).ToList();
+}
+
+@if (items.Count > 0)
+{
+    <section lang="tr" class="motor-assurance" aria-label="Alışveriş güvencesi">
+        <ul class="motor-assurance-list" data-motor-stagger>
+            @foreach (var item in items)
+            {
+                <li class="motor-assurance-item">
+                    <svg class="motor-assurance-icon" aria-hidden="true"><use href="#@item.Icon" /></svg>
+                    <div>
+                        <h3 class="motor-assurance-title">@item.Title</h3>
+                        <p class="motor-assurance-text">@item.Text</p>
+                        <a class="motor-assurance-link" href="@item.Url">@item.LinkText <span aria-hidden="true">→</span></a>
+                    </div>
+                </li>
+            }
+        </ul>
+    </section>
+}

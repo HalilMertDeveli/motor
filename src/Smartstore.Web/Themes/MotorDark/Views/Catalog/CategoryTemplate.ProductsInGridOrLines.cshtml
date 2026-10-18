@@ -1,0 +1,163 @@
+@using Smartstore.Web.Models.Catalog
+@using Smartstore.Core.Catalog
+
+@model CategoryModel
+
+@{
+    var categoryName = Model.FullName.Value.HasValue() ? Model.FullName : Model.Name;
+
+    Assets.AppendTitleParts(Model.MetaTitle.HasValue() ? Model.MetaTitle : Model.Name);
+    Assets.AppendMetaDescriptionParts(Model.MetaDescription);
+    Assets.AppendMetaKeywordsParts(Model.MetaKeywords);
+
+    if (Model.CanonicalUrl.HasValue())
+    {
+        Assets.AppendCanonicalUrlParts(Model.CanonicalUrl);
+    }
+    
+    ViewBag.HideLeftCol = true; // ...on mobile
+
+    async Task SubCategoryList()
+    {
+        @* MotorDark: subcategories as icon/photo tiles (same language as the homepage category grid) *@
+        <div class="motor-cat-grid motor-cat-grid--sub mb-5"
+             attr-class='(Model.SubCategoryDisplayType == SubCategoryDisplayType.AboveProductList, "hide-on-active-filter")'
+             role="list">
+            @foreach (var item in Model.SubCategories)
+            {
+                var image = item.Image;
+                // Only real uploads count; Smartstore otherwise returns its generic placeholder image.
+                var hasImage = image?.File != null && image.HasImage();
+                var linkTitle = T("Media.Category.ImageLinkTitleFormat", item.Name);
+
+                <div class="motor-cat@(hasImage ? " motor-cat--image" : "")" data-id="@item.Id" role="listitem">
+                    <a class="motor-cat-link" href="@item.Url" title="@linkTitle">
+                        @if (hasImage)
+                        {
+                            <span class="motor-cat-media" aria-hidden="true">
+                                <img sm-model="image" loading="lazy" alt="" role="presentation" />
+                            </span>
+                        }
+                        <partial name="Motor.CategoryIcon" model="item.Name.Value" />
+                        <span class="motor-cat-name" sm-language-attributes-for="item.Name">@item.Name</span>
+                        <span lang="tr" class="motor-cat-cta" aria-hidden="true">
+                            <span>İncele</span>
+                            <svg><use href="#mi-arrow" /></svg>
+                        </span>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+}
+
+<partial name="MetaProperties" model="Model.MetaProperties" />
+
+<widget target-zone="left">
+    <menu name="Main" template="Categories" /> 
+    <partial name="Search.Filters" model="Model.Products" />
+</widget>
+
+<div class="page category-page">
+    <div class="page-title">
+        <h1 sm-language-attributes-for="categoryName" class="h3">
+            @Html.Raw(categoryName)
+        </h1>
+        @if (Model.SearchResult.TotalHitsCount > 0)
+        {
+            <partial name="SearchResultHitsCount" model="Model.SearchResult" />
+        }
+    </div>
+    <div class="page-body">
+        <zone name="categorydetails_top" />
+
+        @* Description *@
+        @if (Model.Description.Value.HasValue())
+        {
+            <div sm-language-attributes-for="Model.Description" class="category-description lead hide-on-active-filter html-editor-content">
+                <collapsed-content>
+                    @Html.Raw(Model.Description)
+                </collapsed-content>
+            </div>
+        }
+
+        @* Subcategories *@
+        @if (Model.SubCategories.Count > 0 && Model.SubCategoryDisplayType == SubCategoryDisplayType.AboveProductList)
+        {
+            <zone name="categorydetails_before_subcategories" />
+            await SubCategoryList();
+        }
+
+        @* Featured products *@
+        @if (Model.FeaturedProducts != null && Model.FeaturedProducts.Items.Count > 0)
+        {
+            <zone name="categorydetails_before_featured_products" />
+
+            <div role="region" aria-labelledby="featured-products-title" class="product-grid featured-product-grid block hide-on-active-filter">
+                <div class="heading heading-center">
+                    <h3 id="featured-products-title" class="heading-title fs-h1">@T("Products.FeaturedProducts")</h3>
+                </div>
+                <div class="block-body pt-3 artlist-no-separators">
+                    <partial name="Product.List" model="Model.FeaturedProducts" />
+                </div>
+            </div>
+        }
+
+        @* Product list *@
+        <zone name="categorydetails_before_product_list" />
+
+        <div id="main-product-list" class="product-list-container">
+            @if (Model.Products != null)
+            {
+                <partial name="Product.List" model="Model.Products" />
+                Assets.JsonLd.BuildProductItemList(Request, Model.Products.Items, categoryName, Model.CanonicalUrl);
+            }
+
+            @* MotorDark: explicit empty state instead of a blank area *@
+            @if (Model.Products == null || Model.Products.PagedList.TotalCount == 0)
+            {
+                <div lang="tr" class="motor-empty">
+                    <partial name="Motor.CategoryIcon" model="Model.Name.Value" />
+                    @if (Context.Request.QueryString.HasValue)
+                    {
+                        <p class="motor-empty-title">Sonuç bulunamadı</p>
+                        <p class="motor-empty-text">Seçili filtrelere uygun ürün yok. Filtreleri değiştirmeyi ya da kaldırmayı dene.</p>
+                    }
+                    else
+                    {
+                        <p class="motor-empty-title">Bu kategoride henüz ürün yok</p>
+                        <p class="motor-empty-text">
+                            @(Model.SubCategories.Count > 0
+                                ? "Alt kategorilere göz atabilir ya da aradığın parçayı bize sorabilirsin."
+                                : "Ürünler yayına alındığında burada listelenecek. Aradığın parçayı bize sorabilirsin.")
+                        </p>
+                    }
+                    <div class="motor-empty-actions">
+                        <a asp-route="Homepage" class="btn btn-secondary">Ana sayfa</a>
+                        <a asp-route="ContactUs" class="btn btn-outline-primary">Parça sor</a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Model.BottomDescription.Value.HasValue())
+        {
+            <div sm-language-attributes-for="Model.BottomDescription" class="category-description lead html-editor-content">
+                <collapsed-content>
+                    @Html.Raw(Model.BottomDescription)
+                </collapsed-content>
+            </div>
+        }
+
+        @* Subcategories *@
+        @if (Model.SubCategories.Count > 0 && Model.SubCategoryDisplayType == SubCategoryDisplayType.Bottom)
+        {
+            <zone name="categorydetails_before_subcategories" />
+            await SubCategoryList();
+        }
+
+        @* TODO: (mc) find more intelligent way of rendering RecentlyViewedProducts globally *@
+        @await Component.InvokeAsync("RecentlyViewedProducts")
+        <zone name="categorydetails_bottom" />
+    </div>
+</div>

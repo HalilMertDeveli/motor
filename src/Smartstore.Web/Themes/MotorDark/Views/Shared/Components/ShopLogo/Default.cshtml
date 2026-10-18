@@ -1,0 +1,41 @@
+@model ShopLogoModel
+
+@{
+    // The MOTOR wordmark is used unless the theme variable "motor-use-logo" is switched on
+    // (Admin > Configuration > Themes > Motor Dark) to show the uploaded store logo instead.
+    var useUploadedLogo = Model.LogoUploaded && Display.GetThemeVariable<bool>("motor-use-logo");
+}
+
+<a asp-route="Homepage" class="brand@(useUploadedLogo ? "" : " textual motor-wordmark")" aria-label="@Model.LogoTitle">
+    @if (useUploadedLogo)
+    {
+        var logoUrl = Model.LogoUrl.EmptyNull();
+
+        @* "Above the fold" image: preload logo to render it fast. *@
+        <link sm-target-zone="head_links" as="image" rel="preload" href="@logoUrl" />
+
+        <img src='@logoUrl'
+             alt="@Model.LogoTitle"
+             title="@Model.LogoTitle"
+             class="img-fluid"
+             attr-width="(Model.LogoWidth > 0, Model.LogoWidth.ToStringInvariant())"
+             attr-height="(Model.LogoHeight > 0, Model.LogoHeight.ToStringInvariant())" />
+
+        if (logoUrl.HasValue() && Assets.JsonLd.TryGetFragment("Organization", out var org))
+        {
+            org.Obj("logo", JsonLdFragment.Create("ImageObject", new
+            {
+                url = Request.ToAbsoluteUrl(logoUrl),
+                width = Model.LogoWidth,
+                height = Model.LogoHeight
+            }));
+        }
+    }
+    else
+    {
+        <span class="motor-wordmark-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 24" width="40" height="24" focusable="false"><path d="M2 22 14 2h8L10 22zM16 22 28 2h8L24 22z" fill="currentColor"/></svg>
+        </span>
+        <span class="motor-wordmark-text" aria-hidden="true">MOTOR</span>
+    }
+</a>

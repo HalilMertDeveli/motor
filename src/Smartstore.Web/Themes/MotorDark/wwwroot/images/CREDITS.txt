@@ -1,0 +1,15 @@
+MotorDark theme photography
+===========================
+
+hero.jpg, hero-mobile.jpg
+  Photo by Rohan Krishnan on Unsplash
+  https://unsplash.com/photos/a-black-motorcycle-with-a-black-background-PF4eZpZpGXw
+  Unsplash License (https://unsplash.com/license): free for commercial use, no attribution required.
+
+story.jpg
+  Photo by Rohan Krishnan on Unsplash
+  https://unsplash.com/photos/a-black-motorcycle-parked-in-a-dark-room-X6hEndRsYhQ
+  Unsplash License (https://unsplash.com/license): free for commercial use, no attribution required.
+
+Replace these files with the store's own photography at any time; keep the file names
+(or adjust Views/Shared/Partials/Home.Hero.cshtml and Home.Story.cshtml).

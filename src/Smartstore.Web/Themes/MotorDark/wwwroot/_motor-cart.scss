@@ -1,0 +1,442 @@
+//
+// MotorDark: off-canvas cart & menu, shopping cart, checkout
+// --------------------------------------------------
+
+// Off-canvas cart
+// --------------------------------------------------
+
+#offcanvas-cart {
+    .offcanvas-content,
+    .offcanvas-cart-body {
+        background: $motor-surface;
+    }
+
+    .nav-tabs {
+        background: $motor-bg;
+    }
+
+    .throbber {
+        background-color: rgba($motor-surface, 0.8);
+    }
+}
+
+.offcanvas-cart-item {
+    border-bottom-color: $motor-line;
+
+    .name {
+        color: $motor-text;
+        font-weight: 600;
+    }
+
+    .col-alpha img {
+        background: #eceeea;
+        border-radius: $border-radius;
+        mix-blend-mode: normal;
+    }
+
+    .unit-price {
+        font-family: $headings-font-family;
+        font-weight: 700;
+    }
+}
+
+.offcanvas-cart-body .no-items {
+    .no-item-icon {
+        color: rgba(#fff, 0.12);
+    }
+
+    .no-item-title {
+        font-family: $headings-font-family;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: $motor-text;
+    }
+
+    .no-item-info .fa {
+        color: $motor-accent;
+    }
+}
+
+.offcanvas-cart-footer {
+    background-color: $motor-bg;
+    border-top: 1px solid $motor-line;
+}
+
+.offcanvas-cart-footer-row {
+    color: $motor-text;
+
+    .sub-total-caption {
+        color: $motor-text-muted;
+        letter-spacing: 0.12em;
+    }
+
+    .sub-total {
+        font-family: $headings-font-family;
+        font-weight: 700;
+    }
+}
+
+.offcanvas-cart-external-checkout .heading-title {
+    background-color: $motor-bg;
+}
+
+// Off-canvas main menu (mobile navigation)
+// --------------------------------------------------
+
+#offcanvas-menu {
+    --ocm-header-bg: #{$motor-bg};
+    --ocm-footer-bg: #{$motor-bg};
+    --ocm-title-color: #{$motor-text};
+    --ocm-border-color: #{$motor-line};
+    --ocm-item-padding-y: 0.95rem;
+    --ocm-item-font-size: 0.9375rem;
+    --ocm-item-selected-color: #{$motor-accent};
+
+    .offcanvas-content {
+        background: $motor-surface;
+    }
+
+    .layer {
+        background: $motor-surface;
+    }
+
+    .nav-tabs .nav-link {
+        font-size: 0.8125rem;
+    }
+
+    .ocm-item,
+    .ocm-link,
+    .nav-link {
+        color: $motor-text;
+    }
+
+    .ocm-item > .ocm-link,
+    .ocm-link {
+        font-family: $headings-font-family;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .ocm-item.selected > .ocm-link,
+    .selected > .ocm-link {
+        color: $motor-accent;
+    }
+
+    .ocm-link:hover,
+    .ocm-item:hover > .ocm-link {
+        background-color: rgba(#fff, 0.04);
+        color: #fff;
+    }
+
+    .ocm-back,
+    .ocm-nav-heading {
+        background: $motor-bg;
+        color: $motor-text;
+    }
+
+    .offcanvas-closer {
+        color: $motor-text;
+    }
+}
+
+#ocm-service .menubar-link {
+    background-color: $motor-surface;
+    color: $motor-text;
+}
+
+// Shopping cart page
+// --------------------------------------------------
+
+.cart-page,
+.wishlist-page {
+    --cart-footer-bg: #{$motor-surface};
+    --cart-child-row-bg: #{$motor-surface-2};
+}
+
+.cart {
+    --cart-footer-bg: #{$motor-surface};
+    --cart-child-row-bg: #{$motor-surface-2};
+}
+
+.cart-row,
+.cart-head,
+.cart-body .cart-row {
+    border-color: $motor-line !important;
+}
+
+.cart-head {
+    color: $motor-text-muted;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.cart-item-name,
+.cart-item-link {
+    color: $motor-text;
+    font-weight: 600;
+
+    &:hover {
+        color: #fff;
+    }
+}
+
+.cart-item-img img,
+.cart-item .productpicture img,
+.order-summary-content .productpicture img {
+    background: #eceeea;
+    border-radius: $border-radius;
+}
+
+.cart-row-price,
+.cart-item-price,
+.unit-price,
+.sub-total {
+    font-family: $headings-font-family;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.cart-footer,
+.cart-summary,
+.order-summary-content .cart-footer {
+    background-color: $motor-surface;
+    border: 1px solid $motor-line;
+    border-radius: $border-radius-xl;
+}
+
+.cart-action-buttons .btn-primary,
+#checkout,
+.btn-checkout {
+    min-height: 52px;
+    font-family: $headings-font-family;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.order-total,
+.cart-summary .total-info {
+    color: $motor-text;
+}
+
+.order-total .cart-total-right,
+.order-total .value-summary,
+.cart-total .order-total td {
+    color: $motor-accent;
+    font-family: $headings-font-family;
+    font-weight: 700;
+}
+
+.cart-summary-neg {
+    color: #ff8f6b;
+}
+
+.cart-total td,
+.cart-total th {
+    border-color: $motor-line;
+}
+
+.cart-item-remove,
+.remove-cart-item,
+.ajax-action-link[data-type='cart'][data-action='remove'] {
+    color: $motor-text-muted;
+
+    &:hover {
+        color: #ff7577;
+    }
+}
+
+.cart-empty,
+.no-data {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: $gray-700;
+    background: $motor-surface;
+    border: 1px dashed $motor-line-strong;
+    border-radius: $border-radius-xl;
+}
+
+// Discount / gift card / estimate shipping boxes
+.coupon-box,
+.giftcard-box,
+.estimate-shipping,
+.checkout-attributes,
+.reward-points-box {
+    color: $body-color;
+}
+
+// Checkout steps
+// --------------------------------------------------
+
+.checkout-progress,
+.costeps {
+    .costep-label {
+        color: $motor-text-muted;
+        font-family: $headings-font-family;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .costep.visited .costep-label,
+    .costep.active .costep-label {
+        color: $motor-text;
+    }
+}
+
+.costep-icon,
+.costep:before,
+.costep:after {
+    background-color: $motor-surface-2 !important;
+    border-color: $motor-line-strong !important;
+    color: $motor-text-muted !important;
+}
+
+.costep.visited .costep-icon,
+.costep.visited:before,
+.costep.visited:after,
+.costep.active:before {
+    background-color: $motor-accent !important;
+    border-color: $motor-accent !important;
+    color: $motor-on-accent !important;
+}
+
+.costep.active .costep-icon {
+    background-color: $motor-bg !important;
+    border-color: $motor-accent !important;
+    color: $motor-accent !important;
+}
+
+// Option lists (shipping & payment methods)
+.opt-list {
+    .opt-control,
+    .opt-item,
+    .list-group-item {
+        background-color: $motor-surface;
+        border-color: $motor-line;
+        color: $body-color;
+    }
+
+    .opt-name {
+        color: $motor-text;
+        font-weight: 600;
+        background: transparent;
+    }
+
+    .opt-info,
+    .opt-info-item {
+        color: $motor-text-muted;
+    }
+
+    .active,
+    .opt-control.active,
+    .opt-item.active {
+        border-color: rgba($motor-accent, 0.6) !important;
+        background-color: rgba($motor-accent, 0.06);
+    }
+}
+
+.payment-method-page .opt-list-icons .payment-method-item.active {
+    background: rgba($motor-accent, 0.06);
+
+    .payment-brand {
+        background: #f4f4f2;
+    }
+}
+
+.payment-brand {
+    background: linear-gradient(to bottom right, #f4f4f2, #dcddda);
+    box-shadow: none;
+}
+
+// Address cards
+.address-list .card,
+.address-item,
+.address-box,
+.checkout-data .card {
+    background-color: $motor-surface;
+    border-color: $motor-line;
+}
+
+.address-item.active,
+.address-list .card.active,
+.select-address-item.active {
+    border-color: $motor-accent !important;
+}
+
+// Final "Confirm / Buy" button: Flex uses btn-danger; keep it the strongest CTA in brand colors
+.cart-buttons .btn-danger,
+.confirm-order-next-step-button,
+.btn-danger.btn-lg[class*="next-step"] {
+    --btn-color: #{$motor-on-accent};
+    --btn-bg: #{$motor-accent};
+    --btn-border-color: #{$motor-accent};
+    --btn-hover-color: #{$motor-on-accent};
+    --btn-hover-bg: #{$motor-accent-hover};
+    --btn-hover-border-color: #{$motor-accent-hover};
+    --btn-active-color: #{$motor-on-accent};
+    --btn-active-bg: #{darken($motor-accent, 6%)};
+    min-height: 54px;
+    font-family: $headings-font-family;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+// "Change" links on the confirm page: quiet outline buttons
+.change-checkout-data.btn-primary {
+    --btn-color: #{$motor-text};
+    --btn-bg: transparent;
+    --btn-border-color: #{$motor-line-strong};
+    --btn-hover-color: #{$motor-on-accent};
+    --btn-hover-bg: #{$motor-accent};
+    --btn-hover-border-color: #{$motor-accent};
+
+    &:hover {
+        box-shadow: none;
+    }
+}
+
+.order-review-heading,
+.checkout-data .heading-title {
+    background: transparent;
+}
+
+#terms-of-service-consent-box {
+    background: $motor-surface;
+    border: 1px solid $motor-line;
+    border-radius: $border-radius-lg;
+}
+
+.order-review-data .card,
+.confirm-order-summary {
+    background: $motor-surface;
+}
+
+// Order completed
+.order-completed,
+.checkout-completed-page {
+    .page-title h1 {
+        color: $motor-text;
+    }
+
+    .order-number strong,
+    .details-link a {
+        color: $motor-accent;
+    }
+}
+
+// Accordions used in checkout & account pages
+.accordion,
+.accordion-item {
+    --accordion-bg: #{$motor-surface};
+    --accordion-border-color: #{$motor-line};
+    --accordion-button-color: #{$motor-text};
+    --accordion-button-bg: #{$motor-surface};
+    --accordion-button-active-bg: #{$motor-surface-2};
+    --accordion-button-active-color: #fff;
+}

@@ -1,0 +1,103 @@
+//
+// MotorDark: footer
+// --------------------------------------------------
+
+#footer.footer-inverse {
+    --footer-bg: #050607;
+    --footer-color: #{$motor-text};
+    --footer-title-color: #{$motor-text};
+    --footer-link-color: #{rgba($motor-text, 0.62)};
+    --footer-link-hover-color: #fff;
+    --footer-line-color: #{$motor-line};
+    --footer-border-top: 1px solid #{$motor-line};
+    --footer-bottom-bg: #{rgba(#fff, 0.02)};
+    --footer-bottom-color: #{rgba($motor-text, 0.5)};
+    position: relative;
+    margin-top: 4rem;
+
+    // Accent "speed line" along the top edge
+    &:before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        inset-inline-start: 0;
+        width: 60%;
+        max-width: 420px;
+        height: 2px;
+        background: linear-gradient(90deg, $motor-accent, rgba($motor-accent, 0));
+    }
+
+    .footer-title {
+        font-family: $headings-font-family;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .footer-links a {
+        display: inline-block;
+        padding-block: 0.15rem;
+        transition: color .15s ease, transform .2s var(--motor-ease-out);
+
+        &:hover {
+            transform: translateX(3px);
+            text-decoration: none;
+        }
+    }
+
+    .footer-social .btn-social:hover {
+        color: $motor-on-accent;
+        background-color: $motor-accent;
+    }
+
+    #newsletter-email {
+        background-color: $motor-surface;
+        border-color: $motor-line-strong;
+        color: $motor-text;
+    }
+
+    .footer-bottom {
+        font-size: 0.8125rem;
+
+        a {
+            color: rgba($motor-text, 0.7);
+        }
+    }
+}
+
+.motor-footer-brand {
+    padding-block: 3rem 1rem;
+
+    .motor-footer-brand-inner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid $motor-line;
+    }
+
+    .motor-footer-claim {
+        font-family: $headings-font-family;
+        font-style: italic;
+        font-weight: 700;
+        text-transform: uppercase;
+        line-height: 0.95;
+        letter-spacing: 0.01em;
+        color: $motor-text;
+        @include rfs(3rem);
+
+        em {
+            font-style: inherit;
+            color: $motor-accent;
+        }
+    }
+
+    .motor-footer-note {
+        max-width: 420px;
+        color: $motor-text-muted;
+        margin: 0;
+    }
+}

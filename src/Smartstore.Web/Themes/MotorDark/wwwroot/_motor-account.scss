@@ -1,0 +1,161 @@
+//
+// MotorDark: login, registration, customer account, content & error pages
+// --------------------------------------------------
+
+.login-box,
+.register-box {
+    background-color: $motor-surface;
+    border: 1px solid $motor-line;
+    border-radius: $border-radius-xl;
+    color: $body-color;
+}
+
+.register-box {
+    background:
+        radial-gradient(120% 80% at 100% 0%, rgba($motor-accent, 0.12), rgba($motor-accent, 0) 60%),
+        $motor-surface;
+}
+
+// Flex uses yellow "warning" buttons for secondary CTAs (register, 404 contact): bring them on-brand
+.btn-warning {
+    --btn-color: #{$motor-text};
+    --btn-bg: transparent;
+    --btn-border-color: #{rgba($motor-accent, 0.7)};
+    --btn-hover-color: #{$motor-on-accent};
+    --btn-hover-bg: #{$motor-accent};
+    --btn-hover-border-color: #{$motor-accent};
+    --btn-active-color: #{$motor-on-accent};
+    --btn-active-bg: #{darken($motor-accent, 6%)};
+    font-family: $headings-font-family;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.login-page,
+.register-page,
+.password-recovery-page {
+    .page-title h1 {
+        font-style: italic;
+    }
+
+    .card {
+        background-color: $motor-surface;
+    }
+
+    h2, .h2, h3, .h3 {
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+}
+
+.pwd-policy {
+    background-color: $motor-surface-2;
+    @include bubble(top, near, 12, $motor-surface-2, $motor-surface-2);
+}
+
+.pwd-rules {
+    color: $motor-text-muted;
+}
+
+// My account
+// --------------------------------------------------
+
+.myaccount-menu,
+.my-account-menu,
+#content-left .list-group {
+    .list-group-item {
+        background: transparent;
+        color: $gray-700;
+        border-color: $motor-line;
+
+        &:hover {
+            color: #fff;
+            background: rgba(#fff, 0.04);
+        }
+
+        &.active {
+            background: rgba($motor-accent, 0.1);
+            border-color: $motor-line;
+            color: $motor-accent;
+            font-weight: 600;
+        }
+    }
+}
+
+.myaccount-header,
+.customer-header {
+    border-color: $motor-line;
+}
+
+.order-list .card,
+.order-item,
+.address-list .address-item {
+    background: $motor-surface;
+    border-color: $motor-line;
+}
+
+// Content pages (topics, contact, blog, news)
+// --------------------------------------------------
+
+.topic-page,
+.contact-page,
+.blog-page,
+.news-page {
+    .page-title h1 {
+        font-style: italic;
+    }
+}
+
+.contact-page form,
+.contactus-form {
+    max-width: 760px;
+}
+
+// 404 / error pages
+// --------------------------------------------------
+
+:is(.not-found-page, .unauthorized-page) .page-title h1 {
+    font-style: italic;
+    font-weight: 700;
+    color: transparent !important;
+    -webkit-text-stroke: 2px rgba($motor-accent, 0.85);
+    letter-spacing: 0.02em;
+}
+
+:is(.not-found-page, .unauthorized-page) .page-title:after {
+    display: none;
+}
+
+.page-not-found,
+.error-page {
+    text-align: center;
+    padding-block: 3rem;
+
+    h1, .h1 {
+        font-style: italic;
+        @include rfs(4rem);
+    }
+}
+
+// Compare page
+.compare-products-table,
+.table-compare {
+    color: $body-color;
+
+    th, td {
+        border-color: $motor-line !important;
+    }
+}
+
+// Cookie manager
+#cookie-manager-window .modal-content {
+    background-color: $motor-surface;
+    color: $body-color;
+}
+
+.cookie-consent,
+#cookie-consent {
+    background-color: rgba($motor-surface-2, 0.98);
+    color: $motor-text;
+    border-top: 1px solid $motor-line;
+}

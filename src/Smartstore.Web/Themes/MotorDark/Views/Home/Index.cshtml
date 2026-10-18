@@ -1,0 +1,125 @@
+@using Smartstore.Core.Content.Topics
+
+@{
+    Assets.BodyAttributes.AppendCssClass("home");
+    Assets.BodyAttributes.AppendCssClass("motor-home");
+    Assets.AppendTitleParts((string)ViewBag.MetaTitle);
+    Assets.AppendMetaDescriptionParts((string)ViewBag.MetaDescription);
+    Assets.AppendMetaKeywordsParts((string)ViewBag.MetaKeywords);
+
+    // Render catalog blocks up front, so CTAs only point to sections that actually exist.
+    var categoriesHtml = (await Component.InvokeAsync("HomeCategories")).ToHtmlString().ToString();
+    var productsHtml = (await Component.InvokeAsync("HomeProducts")).ToHtmlString().ToString();
+    var bestsellersHtml = (await Component.InvokeAsync("HomeBestsellers")).ToHtmlString().ToString();
+    var newArrivalsHtml = (await Html.PartialAsync("Home.NewArrivals")).ToHtmlString().ToString();
+    var brandsHtml = (await Component.InvokeAsync("HomeBrands")).ToHtmlString().ToString();
+
+    var hasCategories = categoriesHtml.HasValue();
+    var hasProducts = productsHtml.HasValue() || bestsellersHtml.HasValue() || newArrivalsHtml.HasValue();
+
+    var primaryCtaUrl = productsHtml.HasValue()
+        ? "#motor-featured"
+        : bestsellersHtml.HasValue()
+            ? "#motor-bestsellers"
+            : newArrivalsHtml.HasValue()
+                ? "#motor-new"
+                : "#motor-categories";
+}
+
+<widget target-zone="content_before" key="motor-hero">
+    <partial name="Home.Hero" model="primaryCtaUrl" />
+</widget>
+
+<div class="page home-page">
+    <div class="page-body">
+        <zone name="home_page_top" />
+
+        <zone name="home_page_after_intro" />
+
+        <section id="motor-categories" class="motor-section" aria-labelledby="motor-categories-title">
+            <div lang="tr" class="motor-section-head" data-motor-reveal>
+                <div>
+                    <span class="motor-eyebrow">Kategoriler</span>
+                    <h2 id="motor-categories-title" class="motor-section-title">Sürüşüne göre seç</h2>
+                </div>
+                <p class="motor-section-lead">Motor parçasından sürücü ekipmanına, ihtiyacın olan her şey tek bir garajda.</p>
+            </div>
+
+            @if (hasCategories)
+            {
+                @Html.Raw(categoriesHtml)
+            }
+            else
+            {
+                <div lang="tr" class="motor-empty" data-motor-reveal>
+                    <svg class="motor-empty-icon" aria-hidden="true"><use href="#mi-grid" /></svg>
+                    <p class="motor-empty-title">Kategoriler hazırlanıyor</p>
+                    <p class="motor-empty-text">Katalog yayına alındığında kategoriler burada görünecek.</p>
+                </div>
+            }
+        </section>
+        <zone name="home_page_after_categories" />
+
+        @if (productsHtml.HasValue())
+        {
+            <section id="motor-featured" class="motor-section motor-section--products">
+                @Html.Raw(productsHtml)
+            </section>
+        }
+        <zone name="home_page_after_products" />
+
+        <partial name="Home.Story" />
+
+        @if (newArrivalsHtml.HasValue())
+        {
+            <section id="motor-new" class="motor-section motor-section--products">
+                @Html.Raw(newArrivalsHtml)
+            </section>
+        }
+
+        @if (bestsellersHtml.HasValue())
+        {
+            <section id="motor-bestsellers" class="motor-section motor-section--products">
+                @Html.Raw(bestsellersHtml)
+            </section>
+        }
+        <zone name="home_page_after_bestsellers" />
+
+        @if (!hasProducts)
+        {
+            <section class="motor-section">
+                <div lang="tr" class="motor-empty motor-empty--wide" data-motor-reveal>
+                    <svg class="motor-empty-icon" aria-hidden="true"><use href="#mi-engine" /></svg>
+                    <p class="motor-empty-title">Ürünler çok yakında</p>
+                    <p class="motor-empty-text">Vitrin şu an hazırlanıyor. Bu sırada kategorilere göz atabilir ya da aradığın parçayı bize sorabilirsin.</p>
+                    <div lang="tr" class="motor-empty-actions">
+                        <a href="#motor-categories" class="btn btn-secondary">Kategorilere göz at</a>
+                        <a asp-route="ContactUs" class="btn btn-outline-primary">Bize ulaş</a>
+                    </div>
+                </div>
+            </section>
+        }
+
+        @if (brandsHtml.HasValue())
+        {
+            <section id="motor-brands" class="motor-section">
+                @Html.Raw(brandsHtml)
+            </section>
+        }
+        <zone name="home_page_after_manufacturers" />
+
+        <partial name="Home.Assurance" />
+
+        @* Store-managed intro text (Admin > CMS > Topics > HomePageText); the hero is the visual intro. *@
+        <section class="motor-section motor-home-text">
+            @await Component.InvokeAsync("TopicBlock", new { systemName = "HomePageText", isLead = true })
+        </section>
+
+        @await Component.InvokeAsync("PopularProductTags")
+        <zone name="home_page_after_tags" />
+
+        @await Component.InvokeAsync("RecentlyViewedProducts")
+
+        <zone name="home_page_bottom" />
+    </div>
+</div>

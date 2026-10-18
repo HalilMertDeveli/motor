@@ -1,0 +1,35 @@
+@using Smartstore.Web.Models.Catalog
+
+@model List<CategorySummaryModel>
+
+@if (Model.Count > 0)
+{
+    <div role="list" class="motor-cat-grid" data-motor-stagger aria-label="@T("Homepage.TopCategories")">
+        @for (var i = 0; i < Model.Count; i++)
+        {
+            var item = Model[i];
+            var image = item.Image;
+            // Only real uploads count; Smartstore otherwise returns its generic placeholder image.
+            var hasImage = image?.File != null && image.HasImage();
+            var linkTitle = T("Media.Category.ImageLinkTitleFormat", item.Name);
+
+            <div role="listitem" class="motor-cat@(hasImage ? " motor-cat--image" : "")" data-id="@item.Id">
+                <a class="motor-cat-link" href="@item.Url" title="@linkTitle">
+                    @if (hasImage)
+                    {
+                        <span class="motor-cat-media" aria-hidden="true">
+                            <img sm-model="image" loading="lazy" alt="" role="presentation" />
+                        </span>
+                    }
+                    <span class="motor-cat-index" aria-hidden="true">@((i + 1).ToString("00"))</span>
+                    <partial name="Motor.CategoryIcon" model="item.Name.Value" />
+                    <span class="motor-cat-name" sm-language-attributes-for="item.Name">@item.Name</span>
+                    <span lang="tr" class="motor-cat-cta" aria-hidden="true">
+                        <span>İncele</span>
+                        <svg><use href="#mi-arrow" /></svg>
+                    </span>
+                </a>
+            </div>
+        }
+    </div>
+}

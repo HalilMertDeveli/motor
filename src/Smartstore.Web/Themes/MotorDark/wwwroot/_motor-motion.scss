@@ -1,0 +1,224 @@
+//
+// MotorDark: motion system
+// Transform/opacity only. Every effect is opt-in through the "motor-js" class
+// (set by motor.js), so the page is fully visible without JavaScript, and
+// everything is switched off for users who prefer reduced motion.
+// --------------------------------------------------
+
+:root {
+    --motor-dur-fast: .18s;
+    --motor-dur-base: .45s;
+    --motor-dur-slow: .9s;
+}
+
+// Scroll reveal
+// --------------------------------------------------
+
+.motor-js {
+    [data-motor-reveal],
+    [data-motor-stagger] > * {
+        opacity: 0;
+        transform: translate3d(0, 16px, 0);
+        transition:
+            opacity var(--motor-dur-slow) var(--motor-ease-out),
+            transform var(--motor-dur-slow) var(--motor-ease-out);
+        transition-delay: calc(var(--motor-i, 0) * 70ms);
+    }
+
+    [data-motor-reveal].is-inview,
+    [data-motor-stagger].is-inview > * {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+// Product grids: one subtle, fast fade for the whole list (dense grids stay calm)
+.motor-js .motor-product-rail .artlist-grid,
+.motor-js #main-product-list .artlist-grid {
+    animation: motor-fade-up .6s var(--motor-ease-out) both;
+}
+
+@keyframes motor-fade-up {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+// Hero entrance: the photo "develops" out of black with a slow camera settle,
+// the headline is revealed behind a mask, then a single light pass crosses the bike.
+// --------------------------------------------------
+
+.motor-js .motor-hero {
+    .motor-hero-media picture {
+        opacity: 0;
+        transform: scale(1.1);
+        filter: brightness(0.55);
+        transition:
+            opacity 1.6s var(--motor-ease-out),
+            transform 3.2s var(--motor-ease-out),
+            filter 2.4s var(--motor-ease-out);
+    }
+
+    .motor-hero-line > span {
+        transform: translate3d(0, 105%, 0);
+        transition: transform 1.2s var(--motor-ease-out) .35s;
+    }
+
+    .motor-hero-line:nth-child(2) > span {
+        transition-delay: .48s;
+    }
+
+    .motor-hero-eyebrow,
+    .motor-hero-subtitle,
+    .motor-hero-actions,
+    .motor-hero-scroll {
+        opacity: 0;
+        transition: opacity 1s var(--motor-ease-out), transform 1s var(--motor-ease-out);
+    }
+
+    .motor-hero-eyebrow { transition-delay: .25s; }
+    .motor-hero-subtitle { transition-delay: .75s; }
+    .motor-hero-actions { transition-delay: .9s; }
+    .motor-hero-scroll { transition-delay: 1.6s; }
+
+    &.is-ready {
+        .motor-hero-media picture {
+            opacity: 1;
+            transform: none;
+            filter: none;
+        }
+
+        .motor-hero-line > span {
+            transform: none;
+        }
+
+        .motor-hero-eyebrow,
+        .motor-hero-subtitle,
+        .motor-hero-actions,
+        .motor-hero-scroll {
+            opacity: 1;
+        }
+
+        .motor-hero-sweep {
+            animation: motor-sweep 2.8s var(--motor-ease-in-out) 1.6s 1 both;
+        }
+    }
+}
+
+@keyframes motor-sweep {
+    0% { opacity: 0; transform: translate3d(-45%, 0, 0); }
+    25% { opacity: 1; }
+    75% { opacity: 1; }
+    100% { opacity: 0; transform: translate3d(45%, 0, 0); }
+}
+
+// Scroll cue: a slow travelling line, the only looping element on the page
+.motor-hero-scroll-line:after {
+    animation: motor-scroll-cue 2.4s var(--motor-ease-in-out) infinite;
+}
+
+@keyframes motor-scroll-cue {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(0, 350%, 0); }
+}
+
+.motor-hero.is-offscreen .motor-hero-scroll-line:after {
+    animation-play-state: paused;
+}
+
+// Add-to-cart button feedback
+// --------------------------------------------------
+
+.btn.motor-btn-done {
+    position: relative;
+    color: transparent !important;
+
+    > * {
+        visibility: hidden;
+    }
+
+    &:after {
+        content: '✓';
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $motor-on-accent;
+        font-weight: 700;
+        font-size: 1.125rem;
+        animation: motor-pop .45s var(--motor-ease-out);
+    }
+}
+
+.btn-secondary.motor-btn-done:after {
+    color: $motor-accent;
+}
+
+@keyframes motor-pop {
+    from { transform: scale(.4); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+// Skeleton shimmer for async regions (off-canvas cart, instant search)
+// --------------------------------------------------
+
+.offcanvas-cart-body:empty,
+.instasearch-drop-body:empty:not(:only-child) {
+    min-height: 120px;
+    background:
+        linear-gradient(90deg, rgba(#fff, 0) 0%, rgba(#fff, 0.05) 50%, rgba(#fff, 0) 100%) 0 0 / 200% 100% no-repeat,
+        $motor-surface;
+    animation: motor-shimmer 1.2s linear infinite;
+}
+
+@keyframes motor-shimmer {
+    to { background-position: -200% 0, 0 0; }
+}
+
+// Reduced motion
+// --------------------------------------------------
+
+@media (prefers-reduced-motion: reduce) {
+    .motor-js [data-motor-reveal],
+    .motor-js [data-motor-stagger] > *,
+    .motor-js .motor-hero .motor-hero-media picture,
+    .motor-js .motor-hero .motor-hero-line > span,
+    .motor-js .motor-hero .motor-hero-eyebrow,
+    .motor-js .motor-hero .motor-hero-subtitle,
+    .motor-js .motor-hero .motor-hero-actions,
+    .motor-js .motor-hero .motor-hero-scroll {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+        transition: none !important;
+    }
+
+    .motor-hero-sweep,
+    .motor-hero-scroll-line:after,
+    .motor-js .motor-product-rail .artlist-grid,
+    .motor-js #main-product-list .artlist-grid,
+    .offcanvas-cart-body:empty {
+        animation: none !important;
+    }
+
+    .motor-hero-sweep {
+        opacity: 0 !important;
+    }
+
+    [data-motor-parallax] {
+        transform: none !important;
+    }
+
+    .art:hover .art-picture img,
+    .motor-cat-link:hover,
+    .motor-cat-link:hover .motor-cat-icon {
+        transform: none !important;
+    }
+}
