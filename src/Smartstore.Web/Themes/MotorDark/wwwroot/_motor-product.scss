@@ -1,0 +1,393 @@
+//
+// MotorDark: product detail page
+// --------------------------------------------------
+
+// Sticky gallery / zoom sit below the sticky header (height measured by motor.js)
+.pd-data-col-inner,
+.pd-section .zoom-window-container {
+    top: calc(var(--motor-header-h, 0px) + 1rem);
+}
+
+.pd-section-top {
+    margin-top: 0.5rem;
+}
+
+// Gallery
+// --------------------------------------------------
+
+.pd-data-col .gal,
+#pd-gallery-container .gal-box {
+    border-radius: $border-radius-xl;
+}
+
+#pd-gallery-container .gal .gal-item-viewport {
+    border-radius: $border-radius-xl;
+    background: radial-gradient(110% 90% at 50% 10%, #fbfbfa 0%, #e6e7e3 70%, #d8d9d4 100%);
+
+    img {
+        mix-blend-mode: multiply;
+    }
+}
+
+.gal-nav .gal-item-viewport {
+    background: #eceeea;
+    border: 1px solid transparent;
+    border-radius: $border-radius;
+    opacity: 0.6;
+    transition: opacity .2s ease, border-color .2s ease;
+
+    img {
+        mix-blend-mode: multiply;
+    }
+}
+
+.gal-nav .gal-item-viewport:hover {
+    border-color: transparent;
+    opacity: 0.9;
+}
+
+.gal-nav .gal-current .gal-item-viewport {
+    border-color: $motor-accent;
+    opacity: 1;
+
+    &:not(:focus-visible) {
+        box-shadow: 0 0 0 1px $motor-accent;
+    }
+}
+
+.gal .slick-arrow,
+.gal-nav .slick-arrow {
+    color: $motor-text;
+}
+
+// Smooth slide transition for the gallery
+.gal .slick-track {
+    transition-timing-function: var(--motor-ease-out) !important;
+}
+
+.gal .gal-item-viewport.no-picture {
+    .gal-item-content {
+        opacity: 0.14;
+        filter: grayscale(1);
+        transform: scale(0.45);
+    }
+
+    &:before {
+        top: auto;
+        bottom: 12%;
+        color: #5e636c;
+        font-family: $headings-font-family;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        font-size: 0.9375rem;
+    }
+}
+
+// Info column
+// --------------------------------------------------
+
+.pd-info-col {
+    @include media-breakpoint-up(lg) {
+        padding-inline-start: 2rem;
+    }
+}
+
+.pd-brand,
+.pd-brand a {
+    font-family: $headings-font-family;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: $motor-accent;
+}
+
+.pd-name,
+.pd-info .page-title h1,
+.pd-info-mobile .pd-name {
+    font-family: $headings-font-family;
+    font-weight: 700;
+    font-style: italic;
+    text-transform: uppercase;
+    line-height: 1;
+    letter-spacing: 0.005em;
+    color: $motor-text;
+    @include rfs(2.5rem);
+}
+
+.pd-description,
+.pd-info .pd-description {
+    color: $gray-700;
+    line-height: 1.55;
+}
+
+.pd-attrs {
+    color: $motor-text-muted;
+
+    .pd-attr-value,
+    td {
+        color: $motor-text;
+    }
+}
+
+.pd-review-summary a {
+    color: $gray-700;
+}
+
+// Offer box (price, variants, quantity, add to cart)
+// --------------------------------------------------
+
+.pd-offer {
+    --pd-finalprice-color: #{$motor-text};
+    --pd-finalprice-offer-color: #{$motor-accent};
+    --pd-offer-muted-color: #{$motor-text-muted};
+    --pd-finalprice-font-size: 2.25rem;
+    padding: 1.5rem;
+    background: $motor-surface;
+    border: 1px solid $motor-line;
+    border-radius: $border-radius-xl;
+    position: relative;
+
+    &:before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        inset-inline-start: 1.5rem;
+        width: 64px;
+        height: 2px;
+        background: $motor-accent;
+    }
+}
+
+.pd-finalprice-amount,
+.pd-finalprice .pd-price {
+    font-family: $headings-font-family;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.pd-oldprice,
+.pd-pangv,
+.pd-legalinfo,
+.pd-muted {
+    color: $motor-text-muted;
+}
+
+.pd-legalinfo a,
+.pd-muted a {
+    color: $gray-700;
+    text-decoration: underline;
+}
+
+.pd-saving-badge,
+.pd-saving-percent {
+    background-color: $motor-accent;
+    color: $motor-on-accent;
+}
+
+.pd-tierprices .table {
+    background-color: transparent;
+}
+
+// Variants / attributes
+.pd-attr-container,
+.pd-variants {
+    .form-group > label,
+    .control-label,
+    .attr-caption {
+        font-family: $headings-font-family;
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: $gray-700;
+    }
+}
+
+.choice-item-label,
+.choice-box-content,
+.choice .choice-item {
+    color: $motor-text;
+}
+
+.choice-box-group {
+    --choice-box-strike-color: rgba(255, 255, 255, 0.55);
+}
+
+.choice-box-element {
+    background-color: $motor-surface-2;
+    border-color: $motor-line-strong;
+    color: $motor-text;
+    transition: border-color .15s ease, box-shadow .15s ease;
+
+    .choice-box-label:hover & {
+        border-color: rgba(#fff, 0.4);
+    }
+
+    .choice-box.unavailable & {
+        border-color: rgba(#fff, 0.25);
+    }
+}
+
+.choice-box-control-native:checked + :is(.choice-box-label, .choice-box-content) .choice-box-element {
+    border-color: $motor-accent;
+    box-shadow: inset 0 0 0 2px $motor-bg, 0 0 0 1px $motor-accent;
+}
+
+.pd-brand-picture,
+.art-brand-picture {
+    filter: grayscale(1) invert(1) contrast(1.15);
+    mix-blend-mode: screen;
+    opacity: 0.8;
+}
+
+// Quantity + add to cart
+.pd-offer-actions {
+    .btn-primary.btn-add-to-cart,
+    .btn-add-to-cart {
+        min-height: 54px;
+        font-family: $headings-font-family;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+}
+
+.numberinput-group,
+.qty-input .form-control,
+.qty-input .input-group-text {
+    background-color: $input-bg;
+    border-color: $motor-line-strong;
+    color: $motor-text;
+}
+
+.numberinput-group .btn,
+.qty-input .btn {
+    --btn-color: #{$motor-text};
+    --btn-hover-color: #fff;
+    --btn-hover-bg: #{$motor-surface-3};
+}
+
+// Stock & delivery
+.pd-stock,
+.delivery-time,
+.deliverytime-label {
+    color: $gray-700;
+}
+
+.pd-stock.text-success,
+.text-success {
+    color: #57d9a3 !important;
+}
+
+.delivery-date-block,
+.pd-offer .delivery-date-block {
+    color: $motor-text-muted;
+}
+
+// Secondary actions (wishlist, compare, ask question)
+.pd-actions-container {
+    border-color: $motor-line;
+}
+
+.pd-action-item .pd-action-link {
+    color: $gray-700;
+
+    &:hover {
+        color: #fff;
+
+        .pd-action-icon {
+            color: $motor-accent;
+        }
+    }
+}
+
+.pd-available-payment-methods,
+.pd-payment-icons-heading {
+    color: $motor-text-muted;
+}
+
+.payment-brand {
+    background-color: #f4f4f2;
+    border-radius: $border-radius-sm;
+}
+
+// Tabs: description, specifications, reviews
+// --------------------------------------------------
+
+.pd-tabs {
+    margin-top: 2rem;
+
+    > .nav-tabs {
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+.pd-tabs .tab-content,
+.pd-section .tab-content {
+    padding-top: 1.5rem;
+    color: $gray-800;
+}
+
+.pd-specs-table {
+    th, td {
+        border-color: $motor-line !important;
+    }
+}
+
+.pd-spec-name {
+    color: $motor-text-muted;
+}
+
+.pd-spec-value {
+    color: $motor-text;
+}
+
+// Related / also purchased
+.pd-section .block .heading-title,
+.pd-section .heading-title {
+    text-align: start;
+}
+
+// Grouped & bundled
+.pd-assoc-header {
+    background-color: $motor-surface-2;
+
+    &:hover {
+        background-color: $motor-surface-3;
+    }
+}
+
+.pd-bundle-item,
+.pd-group.card {
+    border-color: $motor-line;
+}
+
+// Reviews
+// --------------------------------------------------
+
+.review-item,
+.product-review-item {
+    border-color: $motor-line;
+}
+
+.rating .rating-inner,
+.star-rating .fa-star {
+    color: $motor-accent;
+}
+
+// Mobile purchase bar spacing
+@include media-breakpoint-down(md) {
+    .pd-offer {
+        padding: 1.125rem;
+    }
+
+    .pd-info-mobile .pd-name,
+    .pd-info-mobile .pd-name-sm,
+    .pd-info-mobile h1 {
+        font-size: 1.875rem;
+        margin-bottom: 0.35rem;
+    }
+}

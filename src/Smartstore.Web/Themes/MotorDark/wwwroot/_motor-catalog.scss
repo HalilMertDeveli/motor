@@ -1,0 +1,530 @@
+//
+// MotorDark: product lists, product cards, category & search pages, filters
+// --------------------------------------------------
+
+// Card tokens
+.artlist {
+    --art-padding: 0.875rem;
+    --art-gutter: 1rem;
+    --art-font-size: 0.875rem;
+    --art-font-size-lg: 0.9375rem;
+    --art-finalprice-font-size: 1.25rem;
+    --art-finalprice-color: #{$motor-text};
+    --art-finalprice-offer-color: #{$motor-accent};
+    --art-muted-color: #{$gray-600};
+    --art-muted-color-2: #{$motor-text-muted};
+    --art-divider-color: #{$motor-line};
+    --art-border-color: #{$motor-line};
+    --art-border-radius: #{$border-radius-lg};
+    --art-box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.95);
+    --art-active-bg-color: #{$motor-surface};
+    --art-active-border-color: #{$motor-line-strong};
+}
+
+// Grid: CSS grid with real gaps instead of Flex's collapsed borders
+// --------------------------------------------------
+
+.artlist-grid:not(.slick-slider) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0 0 2rem;
+
+    &:after {
+        display: none !important;
+    }
+
+    > .art {
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+
+    // "Skip list" a11y link injected by Smartstore must not take a grid cell
+    > .skip-content-container {
+        position: absolute;
+        top: 0;
+        inset-inline-start: 0;
+        z-index: 5;
+    }
+
+    @include media-breakpoint-up(sm) {
+        &:is(.artlist-4-cols, .artlist-5-cols, .artlist-6-cols) {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @include media-breakpoint-up(md) {
+        gap: 1rem;
+
+        &.artlist-6-cols {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    @include media-breakpoint-up(lg) {
+        &:is(.artlist-3-cols, .artlist-4-cols) {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        &:is(.artlist-5-cols, .artlist-6-cols) {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    @include media-breakpoint-up(xl) {
+        &.artlist-4-cols,
+        &.artlist-5-cols {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        &.artlist-6-cols {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+    }
+}
+
+// Homepage rails stay at four columns on wide screens
+.motor-product-rail .artlist-grid:not(.slick-slider) {
+    @include media-breakpoint-up(lg) {
+        &:is(.artlist-4-cols, .artlist-5-cols, .artlist-6-cols) {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    @include media-breakpoint-up(xl) {
+        &.artlist-6-cols {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    // Phones & small tablets: swipeable rail instead of a very long grid
+    @include media-breakpoint-down(md) {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: 46%;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 0;
+        padding-bottom: 0.75rem;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        > .art {
+            scroll-snap-align: start;
+        }
+    }
+
+    @include media-breakpoint-between(sm, md) {
+        grid-auto-columns: 31%;
+    }
+}
+
+// Product card
+// --------------------------------------------------
+
+.artlist-grid > .art {
+    background: $motor-surface;
+    border: 1px solid $motor-line !important;
+    border-radius: $border-radius-lg;
+    transition: border-color .3s ease, box-shadow .35s ease, transform .35s var(--motor-ease-out);
+
+    &:hover,
+    &.active {
+        border-color: $motor-line-strong !important;
+        box-shadow: var(--art-box-shadow);
+    }
+
+    &.active {
+        border-end-start-radius: 0 !important;
+        border-end-end-radius: 0 !important;
+    }
+}
+
+// Product image on a light "studio plate" so catalog photos with white
+// backgrounds read as intentional on the dark UI.
+.artlist-grid .art-picture-block,
+.artlist-lines .art-picture-block {
+    margin-bottom: 0.875rem;
+}
+
+.art-picture.img-center-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: $border-radius;
+    background: radial-gradient(120% 100% at 50% 0%, #fbfbfa 0%, #e7e8e4 70%, #dcddd8 100%);
+
+    img {
+        mix-blend-mode: multiply;
+        transition: transform .6s var(--motor-ease-out);
+        will-change: transform;
+    }
+
+    // Generic "no image" placeholder: keep it quiet so it doesn't read as a product photo
+    &.no-picture img {
+        opacity: 0.16;
+        filter: grayscale(1);
+        transform: scale(0.6);
+    }
+
+    &.no-picture:before {
+        color: #6b6f77;
+        font-size: 0.8125rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+.art:hover .art-picture img {
+    transform: scale(1.045);
+}
+
+.art:hover .art-picture.no-picture img {
+    transform: scale(0.62);
+}
+
+// Category / subcategory tiles reuse .art-picture but without the product plate
+.artlist-sub-categories .art-picture.img-center-container,
+.artlist-homepage-categories .art-picture.img-center-container {
+    background: $motor-surface-2;
+
+    img {
+        mix-blend-mode: normal;
+    }
+}
+
+.art-badges {
+    top: 0.5rem;
+    bottom: auto;
+    inset-inline-start: 0.5rem;
+}
+
+.art-badge.badge {
+    font-family: $headings-font-family;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 2px;
+}
+
+.art-brand {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: $motor-text-muted;
+}
+
+:is(.art-name, .art-genericname) > a.art-name-link {
+    color: $motor-text;
+
+    &:hover {
+        color: #fff;
+        text-decoration: underline;
+        text-decoration-color: $motor-accent;
+        text-decoration-thickness: 2px;
+    }
+}
+
+.art-name {
+    font-weight: 600;
+}
+
+.art-price-value {
+    font-family: $headings-font-family;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.art-price-offer .art-price-value {
+    color: $motor-accent;
+}
+
+.art-compareprice {
+    color: $motor-text-muted;
+}
+
+.art-delivery-info {
+    color: $motor-text-muted;
+}
+
+.art-drop {
+    background: $motor-surface;
+    border-color: $motor-line-strong !important;
+    box-shadow: 0 30px 40px -24px rgba(0, 0, 0, 0.95);
+}
+
+.art-btn-group .art-btn {
+    &.btn-secondary {
+        color: $gray-700;
+        background-color: $motor-surface-2;
+        border-inline-start: 1px solid $motor-line !important;
+
+        &:hover {
+            color: #fff;
+            background-color: $motor-surface-3;
+        }
+    }
+
+    &.btn-primary {
+        color: $motor-on-accent;
+    }
+}
+
+.sr-toggle .sr-toggle-info,
+.art .sr-toggle-info {
+    background-color: rgba($motor-accent, 0.9);
+    color: $motor-on-accent;
+}
+
+// Add-to-cart feedback (class toggled by motor.js)
+.art.motor-added {
+    animation: motor-card-added .9s var(--motor-ease-out);
+}
+
+@keyframes motor-card-added {
+    0% { box-shadow: 0 0 0 0 rgba($motor-accent, 0.55); }
+    100% { box-shadow: 0 0 0 14px rgba($motor-accent, 0); }
+}
+
+// List (lines) mode
+.artlist-lines .art {
+    border-bottom-color: $motor-line;
+}
+
+// Sub categories & generic category tiles
+.artlist-sub-categories,
+.artlist-homepage-categories {
+    .art {
+        justify-content: flex-end;
+    }
+
+    .art-genericname {
+        text-align: start;
+        font-family: $headings-font-family;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+
+        a.art-name-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+
+            &:after {
+                content: '→';
+                color: $motor-accent;
+                transition: transform .25s var(--motor-ease-out);
+            }
+
+            &:hover {
+                text-decoration: none;
+
+                &:after {
+                    transform: translateX(4px);
+                }
+            }
+        }
+    }
+
+    .art-picture-block:empty {
+        display: none;
+    }
+}
+
+.artlist-sub-categories.artlist-grid > .art {
+    padding: 1.125rem 1.25rem;
+    background: linear-gradient(160deg, $motor-surface-2, $motor-surface);
+
+    &:hover {
+        border-color: rgba($motor-accent, 0.5) !important;
+    }
+}
+
+// Category / search page header
+// --------------------------------------------------
+
+:is(.category-page, .manufacturer-page, .search-page, .product-tag-page, .recently-added-products-page) .page-title {
+    position: relative;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid $motor-line;
+
+    &:after {
+        content: '';
+        position: absolute;
+        inset-inline-start: 0;
+        bottom: -1px;
+        width: 72px;
+        height: 2px;
+        background: $motor-accent;
+    }
+
+    h1 {
+        font-style: italic;
+        font-weight: 700;
+        text-transform: uppercase;
+        @include rfs(3rem);
+        line-height: 0.95;
+        margin-bottom: 0.4rem;
+    }
+}
+
+.search-hitcount,
+.search-hits-count,
+.page-title .text-muted {
+    color: $motor-text-muted !important;
+    font-size: 0.875rem;
+}
+
+.category-description {
+    color: $gray-700;
+}
+
+// List actions (sort / filter / view mode)
+// --------------------------------------------------
+
+.artlist-actions--top {
+    padding: 0.75rem;
+    margin-bottom: 1.25rem;
+    background: $motor-surface;
+    border: 1px solid $motor-line;
+    border-radius: $border-radius-lg;
+}
+
+.btn-artlist-action {
+    border-color: $motor-line !important;
+}
+
+.artlist-action--filter #toggle-filter-widget {
+    font-family: $headings-font-family;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.artlist-pagination {
+    justify-content: center;
+}
+
+.active-filter-items .active-filter-item,
+.active-filters .badge {
+    background-color: $motor-surface-2;
+    border: 1px solid $motor-line-strong;
+    color: $motor-text;
+}
+
+// Facets (left column + mobile off-canvas filter)
+// --------------------------------------------------
+
+#content-left {
+    .block,
+    .nav-collapsible,
+    .facet-group {
+        border-color: $motor-line;
+    }
+}
+
+.facet-group,
+.facet-body {
+    color: $body-color;
+}
+
+.facet-toggle,
+.facet-group .facet-toggle,
+.block-title {
+    font-family: $headings-font-family;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $motor-text !important;
+}
+
+.facet-item .facet-label,
+.facet-control-native + .facet-label,
+.facet-label {
+    color: $gray-700;
+}
+
+.facet-item:hover .facet-label {
+    color: #fff;
+}
+
+.facet-control-ui {
+    border-color: rgba(#fff, 0.3) !important;
+    background-color: $input-bg;
+}
+
+.facet-control-native:checked + .facet-control-ui,
+.facet-control-native:checked ~ .facet-control-ui {
+    background-color: $motor-accent !important;
+    border-color: $motor-accent !important;
+    color: $motor-on-accent;
+}
+
+.facet-count,
+.facet-item .badge {
+    color: $motor-text-muted;
+    background: transparent;
+}
+
+// Left category tree
+.category-tree,
+.nav-categories {
+    a {
+        color: $gray-700;
+
+        &:hover {
+            color: #fff;
+        }
+    }
+
+    .active > a,
+    .selected > a {
+        color: $motor-accent;
+        font-weight: 600;
+    }
+}
+
+.badge-orderby {
+    background-color: $motor-surface-2;
+    border: 1px solid $motor-line;
+    color: $gray-700;
+
+    &.selected {
+        background-color: rgba($motor-accent, 0.14);
+        border-color: rgba($motor-accent, 0.6);
+        color: $motor-accent;
+    }
+}
+
+#filter-widget,
+.offcanvas.offcanvas-filter {
+    background: $motor-surface;
+}
+
+// Empty results
+.no-result,
+.search-page .alert-info,
+.category-page .alert-info {
+    background: $motor-surface;
+    border: 1px dashed $motor-line-strong;
+    color: $gray-700;
+    border-radius: $border-radius-lg;
+}
+
+// Instant search drop thumbnails
+.instasearch-hit-thumb {
+    background: #eceeea;
+    border-radius: $border-radius-sm;
+}
+
+// Manufacturer overview page
+.manufacturer-grid .art,
+.manufacturers-page .art {
+    background: $motor-surface;
+}
