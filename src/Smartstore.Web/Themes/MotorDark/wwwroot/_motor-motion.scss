@@ -1,0 +1,238 @@
+//
+// MotorDark: motion system
+// Transform/opacity only. Every effect is opt-in through the "motor-js" class
+// (set by motor.js), so the page is fully visible without JavaScript, and
+// everything is switched off for users who prefer reduced motion.
+// --------------------------------------------------
+
+:root {
+    --motor-dur-fast: .18s;
+    --motor-dur-base: .45s;
+    --motor-dur-slow: .9s;
+}
+
+// Scroll reveal
+// --------------------------------------------------
+
+.motor-js {
+    [data-motor-reveal],
+    [data-motor-stagger] > * {
+        opacity: 0;
+        transform: translate3d(0, 22px, 0);
+        transition:
+            opacity var(--motor-dur-slow) var(--motor-ease-out),
+            transform var(--motor-dur-slow) var(--motor-ease-out);
+        transition-delay: calc(var(--motor-i, 0) * 70ms);
+    }
+
+    [data-motor-reveal].is-inview,
+    [data-motor-stagger].is-inview > * {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+// Product grids: one subtle, fast fade for the whole list (dense grids stay calm)
+.motor-js .motor-product-rail .artlist-grid,
+.motor-js #main-product-list .artlist-grid {
+    animation: motor-fade-up .6s var(--motor-ease-out) both;
+}
+
+@keyframes motor-fade-up {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+// Hero entrance
+// --------------------------------------------------
+
+.motor-js .motor-hero {
+    .motor-hero-line > span {
+        transform: translate3d(0, 110%, 0) skewY(4deg);
+        transition: transform 1.1s var(--motor-ease-out);
+    }
+
+    .motor-hero-line:nth-child(2) > span {
+        transition-delay: .12s;
+    }
+
+    .motor-hero-eyebrow,
+    .motor-hero-subtitle,
+    .motor-hero-actions {
+        opacity: 0;
+        transform: translate3d(0, 16px, 0);
+        transition: opacity .8s var(--motor-ease-out), transform .8s var(--motor-ease-out);
+    }
+
+    .motor-hero-subtitle { transition-delay: .35s; }
+    .motor-hero-actions { transition-delay: .48s; }
+
+    .motor-hero-art {
+        opacity: 0;
+        transform: translate3d(8%, 0, 0);
+        transition: opacity 1.2s var(--motor-ease-out) .2s, transform 1.4s var(--motor-ease-out) .2s;
+    }
+
+    &.is-ready {
+        .motor-hero-line > span,
+        .motor-hero-eyebrow,
+        .motor-hero-subtitle,
+        .motor-hero-actions,
+        .motor-hero-art {
+            opacity: 1;
+            transform: none;
+        }
+    }
+}
+
+// Parallax offset (set by motor.js) is applied on an inner element so it
+// never fights with the entrance transition above.
+.motor-hero-art .motor-bike {
+    transform: translate3d(0, var(--motor-parallax, 0px), 0);
+    will-change: transform;
+}
+
+// Continuous hero details
+.motor-bike .mb-spokes {
+    animation: motor-spin 2.4s linear infinite;
+}
+
+.motor-bike .mb-wheel--front .mb-spokes {
+    animation-duration: 2.4s;
+}
+
+.motor-bike .mb-headlight {
+    animation: motor-pulse 3.2s ease-in-out infinite;
+}
+
+@keyframes motor-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes motor-pulse {
+    0%, 100% { opacity: .75; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.12); }
+}
+
+.motor-hero-streaks span {
+    animation: motor-streak 6s cubic-bezier(.5, 0, .2, 1) infinite;
+}
+
+@keyframes motor-streak {
+    0% { opacity: 0; transform: translate3d(0, 0, 0); }
+    10% { opacity: 1; }
+    45% { opacity: 0; transform: translate3d(360%, 0, 0); }
+    100% { opacity: 0; transform: translate3d(360%, 0, 0); }
+}
+
+.motor-hero-ticker-track {
+    animation: motor-marquee 45s linear infinite;
+}
+
+@keyframes motor-marquee {
+    to { transform: translate3d(-50%, 0, 0); }
+}
+
+// Pause decorative loops when the hero is off-screen (class set by motor.js)
+.motor-hero.is-offscreen {
+    .mb-spokes,
+    .mb-headlight,
+    .motor-hero-streaks span,
+    .motor-hero-ticker-track {
+        animation-play-state: paused;
+    }
+}
+
+// Add-to-cart button feedback
+// --------------------------------------------------
+
+.btn.motor-btn-done {
+    position: relative;
+    color: transparent !important;
+
+    > * {
+        visibility: hidden;
+    }
+
+    &:after {
+        content: '✓';
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $motor-on-accent;
+        font-weight: 700;
+        font-size: 1.125rem;
+        animation: motor-pop .45s var(--motor-ease-out);
+    }
+}
+
+.btn-secondary.motor-btn-done:after {
+    color: $motor-accent;
+}
+
+@keyframes motor-pop {
+    from { transform: scale(.4); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+// Skeleton shimmer for async regions (off-canvas cart, instant search)
+// --------------------------------------------------
+
+.offcanvas-cart-body:empty,
+.instasearch-drop-body:empty:not(:only-child) {
+    min-height: 120px;
+    background:
+        linear-gradient(90deg, rgba(#fff, 0) 0%, rgba(#fff, 0.05) 50%, rgba(#fff, 0) 100%) 0 0 / 200% 100% no-repeat,
+        $motor-surface;
+    animation: motor-shimmer 1.2s linear infinite;
+}
+
+@keyframes motor-shimmer {
+    to { background-position: -200% 0, 0 0; }
+}
+
+// Reduced motion
+// --------------------------------------------------
+
+@media (prefers-reduced-motion: reduce) {
+    .motor-js [data-motor-reveal],
+    .motor-js [data-motor-stagger] > *,
+    .motor-js .motor-hero .motor-hero-line > span,
+    .motor-js .motor-hero .motor-hero-eyebrow,
+    .motor-js .motor-hero .motor-hero-subtitle,
+    .motor-js .motor-hero .motor-hero-actions,
+    .motor-js .motor-hero .motor-hero-art {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .motor-bike .mb-spokes,
+    .motor-bike .mb-headlight,
+    .motor-hero-streaks span,
+    .motor-hero-ticker-track,
+    .motor-js .motor-product-rail .artlist-grid,
+    .motor-js #main-product-list .artlist-grid,
+    .offcanvas-cart-body:empty {
+        animation: none !important;
+    }
+
+    .motor-hero-art .motor-bike {
+        transform: none !important;
+    }
+
+    .art:hover .art-picture img,
+    .motor-cat-link:hover,
+    .motor-cat-link:hover .motor-cat-icon {
+        transform: none !important;
+    }
+}

@@ -1,0 +1,701 @@
+//
+// MotorDark: global surfaces, typography, controls
+// --------------------------------------------------
+
+:root {
+    --motor-bg: #{$motor-bg};
+    --motor-surface: #{$motor-surface};
+    --motor-surface-2: #{$motor-surface-2};
+    --motor-surface-3: #{$motor-surface-3};
+    --motor-line: #{$motor-line};
+    --motor-line-strong: #{$motor-line-strong};
+    --motor-text: #{$motor-text};
+    --motor-text-muted: #{$motor-text-muted};
+    --motor-accent: #{$motor-accent};
+    --motor-accent-hover: #{$motor-accent-hover};
+    --motor-accent-rgb: #{to-rgb($motor-accent)};
+    --motor-on-accent: #{$motor-on-accent};
+    --motor-font-display: #{$headings-font-family};
+    --motor-ease-out: cubic-bezier(.16, 1, .3, 1);
+    --motor-ease-in-out: cubic-bezier(.65, 0, .35, 1);
+    --motor-radius: #{$border-radius-lg};
+    --shadow-intensity: 2.2;
+
+    color-scheme: dark;
+}
+
+// Sticky header needs a non-scrolling ancestor chain: 'clip' keeps the
+// horizontal overflow protection of Flex without creating a scroll container.
+body,
+.touchevents body:not(.has-sticky-content):not(.content-overflow-initial) #page {
+    overflow-x: clip;
+}
+
+body {
+    background: $motor-bg;
+    color: $body-color;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+.page-main {
+    background: $motor-bg;
+    box-shadow: none;
+}
+
+::selection {
+    background: rgba($motor-accent, 0.85);
+    color: $motor-on-accent;
+}
+
+a {
+    text-underline-offset: 0.18em;
+    transition: color .15s ease;
+}
+
+// Display typography
+// --------------------------------------------------
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.fs-h1, .fs-h2, .fs-h3 {
+    font-family: $headings-font-family;
+    letter-spacing: 0.01em;
+}
+
+h1, .h1,
+.page-title h1 {
+    text-transform: uppercase;
+    letter-spacing: 0.015em;
+}
+
+.page-title {
+    margin-bottom: 1.75rem;
+
+    h1 {
+        @include rfs(2.75rem);
+        line-height: 1;
+        color: $motor-text;
+    }
+}
+
+.heading {
+    border: 0;
+    margin-bottom: 1.25rem;
+}
+
+.heading-title {
+    font-family: $headings-font-family;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: $motor-text;
+}
+
+.heading-center .heading-title:after {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: 0.75rem auto 0;
+    background: $motor-accent;
+    transform: skewX(-24deg);
+}
+
+.lead {
+    color: $gray-700;
+}
+
+.text-muted {
+    color: $motor-text-muted !important;
+}
+
+hr {
+    border-color: $motor-line;
+    opacity: 1;
+}
+
+// Eyebrow label used by MotorDark sections
+.motor-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: $headings-font-family;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: $motor-accent;
+
+    &:before {
+        content: '';
+        width: 28px;
+        height: 2px;
+        background: currentColor;
+        transform: skewX(-30deg);
+    }
+}
+
+// Buttons
+// --------------------------------------------------
+
+.btn {
+    --btn-font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: color .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s var(--motor-ease-out);
+
+    &:active:not(:disabled) {
+        transform: translateY(1px);
+    }
+}
+
+.btn-primary {
+    --btn-color: #{$motor-on-accent};
+    --btn-bg: #{$motor-accent};
+    --btn-border-color: #{$motor-accent};
+    --btn-hover-color: #{$motor-on-accent};
+    --btn-hover-bg: #{$motor-accent-hover};
+    --btn-hover-border-color: #{$motor-accent-hover};
+    --btn-active-color: #{$motor-on-accent};
+    --btn-active-bg: #{darken($motor-accent, 6%)};
+    --btn-active-border-color: #{darken($motor-accent, 6%)};
+    --btn-disabled-color: #{rgba($motor-on-accent, 0.7)};
+    --btn-disabled-bg: #{rgba($motor-accent, 0.45)};
+    --btn-disabled-border-color: transparent;
+    --btn-icon-color: currentcolor;
+    box-shadow: none;
+
+    &:hover {
+        box-shadow: 0 8px 24px -10px rgba($motor-accent, 0.75);
+    }
+}
+
+.btn-secondary,
+.btn-light,
+.btn-gray {
+    --btn-color: #{$motor-text};
+    --btn-bg: #{$motor-surface-2};
+    --btn-border-color: #{$motor-line};
+    --btn-hover-color: #fff;
+    --btn-hover-bg: #{$motor-surface-3};
+    --btn-hover-border-color: #{$motor-line-strong};
+    --btn-active-color: #fff;
+    --btn-active-bg: #{lighten($motor-surface-3, 3%)};
+    --btn-active-border-color: #{$motor-line-strong};
+    --btn-disabled-color: #{$motor-text-muted};
+    --btn-disabled-bg: #{$motor-surface-2};
+    --btn-disabled-border-color: #{$motor-line};
+    box-shadow: none;
+}
+
+.btn-outline-secondary,
+.btn-outline-light,
+.btn-outline-primary {
+    --btn-color: #{$motor-text};
+    --btn-border-color: #{$motor-line-strong};
+    --btn-hover-color: #fff;
+    --btn-hover-bg: #{$motor-surface-2};
+    --btn-hover-border-color: #{rgba(#fff, 0.3)};
+    --btn-active-color: #fff;
+    --btn-active-bg: #{$motor-surface-3};
+    --btn-disabled-color: #{$motor-text-muted};
+    --btn-disabled-border-color: #{$motor-line};
+}
+
+.btn-outline-primary {
+    --btn-color: #{$motor-accent};
+    --btn-border-color: #{rgba($motor-accent, 0.6)};
+    --btn-hover-color: #{$motor-on-accent};
+    --btn-hover-bg: #{$motor-accent};
+    --btn-hover-border-color: #{$motor-accent};
+    --btn-active-color: #{$motor-on-accent};
+    --btn-active-bg: #{darken($motor-accent, 6%)};
+}
+
+.btn-flat,
+.btn-clear,
+.btn-link {
+    --btn-color: #{$gray-700};
+    --btn-hover-color: #fff;
+}
+
+.btn-link {
+    --btn-color: #{$link-color};
+    --btn-hover-color: #{$motor-accent-hover};
+}
+
+// Large, editorial CTA used in MotorDark sections
+.btn-motor {
+    --btn-padding-x: 1.75rem;
+    --btn-padding-y: 0.9rem;
+    --btn-font-size: 0.9375rem;
+    --btn-border-radius: #{$border-radius};
+    font-family: $headings-font-family;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+
+    .motor-btn-arrow {
+        width: 18px;
+        height: 18px;
+        transition: transform .25s var(--motor-ease-out);
+    }
+
+    &:hover .motor-btn-arrow {
+        transform: translateX(4px);
+    }
+}
+
+.btn-motor-ghost {
+    --btn-color: #{$motor-text};
+    --btn-bg: #{rgba(#fff, 0.04)};
+    --btn-border-color: #{rgba(#fff, 0.22)};
+    --btn-hover-color: #fff;
+    --btn-hover-bg: #{rgba(#fff, 0.1)};
+    --btn-hover-border-color: #{rgba(#fff, 0.45)};
+    --btn-active-color: #fff;
+    --btn-active-bg: #{rgba(#fff, 0.14)};
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+
+// Focus
+// --------------------------------------------------
+
+:focus-visible {
+    outline: 2px solid $motor-accent;
+    outline-offset: 2px;
+}
+
+.btn:focus-visible,
+.form-control:focus,
+.custom-select:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 3px rgba($motor-accent, 0.35);
+}
+
+.form-control:focus,
+.custom-select:focus,
+.form-select:focus {
+    border-color: $motor-accent;
+}
+
+#skip-to-content {
+    color: $motor-on-accent;
+}
+
+// Forms
+// --------------------------------------------------
+
+.form-control,
+.custom-select,
+.form-select,
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    background-color: $input-bg;
+    border-color: $input-border-color;
+    color: $motor-text;
+}
+
+.form-control::placeholder {
+    color: $input-placeholder-color;
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+    background-color: $motor-surface-2;
+    color: $motor-text-muted;
+}
+
+label,
+.col-form-label,
+.form-group > label {
+    color: $gray-800;
+}
+
+.form-text,
+.form-hint {
+    color: $motor-text-muted;
+}
+
+label.required,
+.col-form-label.required {
+    color: $gray-800;
+}
+
+.required:after {
+    color: $motor-accent;
+}
+
+.input-group-text,
+.input-group-addon {
+    background-color: $motor-surface-2;
+    border-color: $input-border-color;
+    color: $motor-text-muted;
+}
+
+.form-check-input,
+.custom-control-label:before {
+    background-color: $input-bg;
+    border-color: rgba(#fff, 0.28);
+}
+
+.form-check-input:checked,
+.custom-control-input:checked ~ .custom-control-label:before {
+    background-color: $motor-accent;
+    border-color: $motor-accent;
+}
+
+.field-validation-error,
+.invalid-feedback,
+.text-danger {
+    color: #ff7577 !important;
+}
+
+.form-control.input-validation-error,
+.is-invalid {
+    border-color: #ff7577 !important;
+}
+
+// Select2 (dropdowns are rendered at body level)
+.select2-dropdown {
+    background-color: $motor-surface;
+    border-color: $motor-line-strong;
+    color: $motor-text;
+}
+
+.select2-container--default {
+    .select2-selection--single .select2-selection__rendered {
+        color: $motor-text;
+    }
+
+    .select2-results__option[aria-selected=true],
+    .select2-results__option--selected {
+        background-color: $motor-surface-3;
+    }
+
+    .select2-results__option--highlighted[aria-selected],
+    .select2-results__option--highlighted {
+        background-color: $motor-accent;
+        color: $motor-on-accent;
+    }
+
+    .select2-search--dropdown .select2-search__field {
+        background: $input-bg;
+        border-color: $motor-line-strong;
+        color: $motor-text;
+    }
+}
+
+// Surfaces
+// --------------------------------------------------
+
+.card {
+    --card-bg: #{$motor-surface};
+    --card-border-color: #{$motor-line};
+    --card-cap-bg: #{rgba(#fff, 0.025)};
+    background-color: $motor-surface;
+    border-color: $motor-line;
+    color: $body-color;
+}
+
+.card-header,
+.card-footer {
+    border-color: $motor-line;
+}
+
+.modal-content {
+    background-color: $motor-surface;
+    border: 1px solid $motor-line;
+    color: $body-color;
+}
+
+.modal-header,
+.modal-footer {
+    border-color: $motor-line;
+}
+
+.modal-backdrop.show {
+    opacity: 0.72;
+}
+
+.close,
+.btn-close {
+    color: #fff;
+    text-shadow: none;
+    opacity: 0.7;
+
+    &:hover {
+        color: #fff;
+        opacity: 1;
+    }
+}
+
+.dropdown-menu {
+    background-color: $dropdown-bg;
+    border: 1px solid $motor-line;
+    color: $body-color;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+}
+
+.dropdown-item {
+    color: $gray-700;
+
+    &:hover,
+    &:focus {
+        background-color: rgba(#fff, 0.06);
+        color: #fff;
+    }
+
+    &.active,
+    &:active {
+        background-color: rgba($motor-accent, 0.16);
+        color: $motor-accent;
+    }
+}
+
+.list-group-item {
+    background-color: transparent;
+    border-color: $motor-line;
+    color: $body-color;
+}
+
+.table {
+    --table-color: #{$body-color};
+    --table-bg: transparent;
+    --table-border-color: #{$motor-line};
+    color: $body-color;
+    border-color: $motor-line;
+
+    > :not(caption) > * > * {
+        border-color: $motor-line;
+    }
+
+    thead th {
+        color: $motor-text-muted;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        border-bottom-color: $motor-line-strong;
+    }
+}
+
+.nav-tabs-line {
+    --nav-underline-color: #{rgba(#fff, 0.12)};
+    --nav-underline-active-color: #{$motor-accent};
+}
+
+.nav-tabs {
+    border-bottom-color: $motor-line;
+}
+
+.nav-tabs:not(.nav-tabs-line) {
+    .nav-link {
+        color: $motor-text-muted;
+        border-width: 0 0 2px 0;
+        border-color: transparent;
+        font-family: $headings-font-family;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+
+        &:hover {
+            color: #fff;
+            border-color: transparent transparent $motor-line-strong;
+        }
+
+        &.active {
+            background: transparent;
+            color: #fff;
+            border-color: transparent transparent $motor-accent;
+        }
+    }
+}
+
+.nav-pills .nav-link.active {
+    background-color: $motor-accent;
+    color: $motor-on-accent;
+}
+
+// Alerts: dark tinted variants
+@each $name, $color in ("success": $success, "info": $info, "warning": $warning, "danger": $danger) {
+    .alert-#{$name} {
+        --alert-color: #{lighten($color, 18%)};
+        --alert-bg: #{rgba($color, 0.1)};
+        --alert-border-color: #{rgba($color, 0.3)};
+        --alert-link-color: #{lighten($color, 25%)};
+        color: lighten($color, 18%);
+        background-color: rgba($color, 0.1);
+        border-color: rgba($color, 0.3);
+    }
+}
+
+.alert-light,
+.alert-secondary {
+    color: $body-color;
+    background-color: $motor-surface;
+    border-color: $motor-line;
+}
+
+.badge-light,
+.badge-secondary {
+    background-color: $motor-surface-3;
+    color: $motor-text;
+}
+
+.badge-primary {
+    color: $motor-on-accent;
+}
+
+.bg-white {
+    background-color: $motor-surface !important;
+}
+
+.bg-light {
+    background-color: $motor-surface !important;
+}
+
+.text-dark {
+    color: $motor-text !important;
+}
+
+.border,
+.border-top,
+.border-bottom,
+.border-left,
+.border-right,
+.border-start,
+.border-end {
+    border-color: $motor-line !important;
+}
+
+.shadow-xs,
+.shadow-sm {
+    --shadow-intensity: 2.5;
+}
+
+// Breadcrumb
+// --------------------------------------------------
+
+.breadcrumb-container {
+    margin-bottom: 1.25rem;
+}
+
+.breadcrumb {
+    background: transparent;
+    padding-inline: 0;
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+
+    .breadcrumb-item,
+    .breadcrumb-item a {
+        color: $motor-text-muted;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #fff;
+    }
+
+    .breadcrumb-item.active,
+    .breadcrumb-item:last-child {
+        color: $motor-text;
+    }
+}
+
+// Pagination
+// --------------------------------------------------
+
+.pagination .page-link {
+    background: transparent;
+    border-color: $motor-line;
+    color: $motor-text;
+    min-width: 42px;
+    text-align: center;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: $motor-accent;
+    border-color: $motor-accent;
+    color: $motor-on-accent;
+}
+
+// Off-canvas & notifications
+// --------------------------------------------------
+
+.offcanvas {
+    background-color: $motor-surface;
+    color: $body-color;
+}
+
+.offcanvas-content {
+    background-color: $motor-surface;
+}
+
+.canvas-blocker {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.ui-pnotify .ui-pnotify-container,
+.ui-pnotify-container {
+    background-color: rgba($motor-surface-2, 0.98) !important;
+    border: 1px solid $motor-line-strong !important;
+    color: $motor-text !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55) !important;
+}
+
+// Scroll top
+// --------------------------------------------------
+
+#scroll-top {
+    background: $motor-surface-2;
+    color: $motor-text !important;
+    border: 1px solid $motor-line-strong;
+    border-radius: $border-radius-lg;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    &:hover {
+        background: $motor-accent;
+        color: $motor-on-accent !important;
+    }
+}
+
+// Throbber / loading overlays
+.throbber,
+.throbber-overlay {
+    background-color: rgba($motor-bg, 0.7);
+}
+
+// Scrollbar
+// --------------------------------------------------
+
+html {
+    scrollbar-color: #2e3239 $motor-bg;
+}
+
+// Topic / rich text content
+// --------------------------------------------------
+
+.html-editor-content,
+.topic-html-content,
+.text-expander-content {
+    color: $gray-800;
+
+    h1, h2, h3, h4 {
+        color: $motor-text;
+    }
+
+    a {
+        color: $link-color;
+    }
+}
+
+.block {
+    margin-bottom: 3rem;
+}
+
+.block-title,
+.block-header {
+    border-color: $motor-line;
+}

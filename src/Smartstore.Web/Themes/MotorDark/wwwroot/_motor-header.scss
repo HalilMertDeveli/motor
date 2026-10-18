@@ -1,0 +1,443 @@
+//
+// MotorDark: header, shopbar, search, mega menu
+// --------------------------------------------------
+
+$motor-menubar-height: 38px;
+
+#header.motor-header {
+    position: sticky;
+    // The utility strip (menubar) scrolls away, shopbar + navigation stay pinned.
+    top: 0;
+    z-index: $zindex-sticky;
+    background-color: rgba($motor-bg, 0.86);
+    -webkit-backdrop-filter: saturate(140%) blur(16px);
+    backdrop-filter: saturate(140%) blur(16px);
+    border-bottom: 1px solid $motor-line;
+    transition: background-color .3s ease, box-shadow .3s ease, border-color .3s ease;
+
+    @include media-breakpoint-up(lg) {
+        top: -$motor-menubar-height;
+    }
+
+    .motor-scrolled & {
+        background-color: rgba($motor-bg, 0.94);
+        box-shadow: 0 12px 40px -18px rgba(0, 0, 0, 0.9);
+        border-bottom-color: $motor-line-strong;
+    }
+}
+
+// Reading/scroll progress line at the header's bottom edge
+.motor-header-progress {
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, $motor-accent, #ffb15a);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--motor-progress, 0));
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+// Utility strip
+// --------------------------------------------------
+
+.menubar-section.menubar-inverse {
+    height: $motor-menubar-height;
+    background: transparent;
+    border-bottom: 1px solid $motor-line;
+
+    .menubar {
+        padding: 0;
+        height: $motor-menubar-height;
+        align-items: center;
+    }
+
+    .menubar-link {
+        color: $motor-text-muted;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        padding: 0.5em 0.75em;
+
+        &:hover,
+        .show > & {
+            color: #fff;
+            background-color: rgba(#fff, 0.06);
+        }
+    }
+
+    .menubar-group--special .menubar-link {
+        color: $motor-accent !important;
+    }
+}
+
+// Shopbar
+// --------------------------------------------------
+
+.shopbar-section {
+    padding: 0.875rem 0;
+    background: transparent;
+}
+
+.shopbar-section.shopbar-inverse {
+    .shopbar-button {
+        color: $motor-text !important;
+        border-radius: $border-radius-lg;
+
+        &:hover {
+            border-color: $motor-line;
+            background-color: rgba(#fff, 0.04);
+        }
+
+        &:active,
+        .open &,
+        .show & {
+            border-color: $motor-line-strong;
+            background-color: rgba(#fff, 0.08);
+            box-shadow: none;
+        }
+
+        .shopbar-button-label span,
+        .shopbar-button-label-sm {
+            color: $motor-text-muted;
+        }
+
+        .shopbar-button-label strong {
+            color: $motor-text;
+            font-weight: 600;
+        }
+    }
+}
+
+.shopbar-button .shopbar-button-icon {
+    transition: transform .25s var(--motor-ease-out);
+}
+
+.shopbar-button:hover .shopbar-button-icon {
+    transform: translateY(-1px);
+}
+
+.badge-counter {
+    background-color: $motor-accent !important;
+    color: $motor-on-accent !important;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px $motor-bg !important;
+}
+
+.motor-badge-bump {
+    animation: motor-bump .5s var(--motor-ease-out);
+}
+
+@keyframes motor-bump {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.45); }
+    100% { transform: scale(1); }
+}
+
+// Wordmark
+// --------------------------------------------------
+
+.shop-logo .brand.motor-wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: auto;
+    max-width: none;
+    color: $motor-text;
+    text-decoration: none;
+
+    .motor-wordmark-mark {
+        display: inline-flex;
+        color: $motor-accent;
+        transition: transform .35s var(--motor-ease-out);
+
+        svg {
+            width: 34px;
+            height: auto;
+        }
+    }
+
+    .motor-wordmark-text {
+        font-family: $headings-font-family;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 1.875rem;
+        line-height: 1;
+        letter-spacing: 0.08em;
+    }
+
+    &:hover .motor-wordmark-mark {
+        transform: translateX(3px) skewX(-6deg);
+    }
+
+    @include media-breakpoint-down(md) {
+        .motor-wordmark-text {
+            font-size: 1.5rem;
+        }
+
+        .motor-wordmark-mark svg {
+            width: 28px;
+        }
+    }
+}
+
+// Search
+// --------------------------------------------------
+
+.shopbar-search {
+    .instasearch-form {
+        max-width: 640px;
+        margin-inline: auto;
+    }
+
+    .instasearch-term {
+        height: 46px;
+        background-color: $motor-surface;
+        border: 1px solid $motor-line-strong;
+        border-radius: $border-radius-lg !important;
+        color: $motor-text;
+        font-size: 0.9375rem;
+        transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+
+        &::placeholder {
+            color: #7c8088;
+        }
+
+        &:hover {
+            border-color: rgba(#fff, 0.22);
+        }
+
+        &:focus {
+            background-color: #0d0f12;
+            border-color: $motor-accent;
+            box-shadow: 0 0 0 3px rgba($motor-accent, 0.25);
+        }
+    }
+
+    .instasearch-icon,
+    .instasearch-submit {
+        color: $motor-text-muted;
+    }
+}
+
+.instasearch-drop {
+    background-color: $motor-surface;
+    border: 1px solid $motor-line-strong;
+    border-radius: $border-radius-lg;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    color: $body-color;
+
+    .instasearch-hit,
+    a {
+        color: $motor-text;
+    }
+
+    .instasearch-hit:hover,
+    .key-hover {
+        background-color: rgba(#fff, 0.05);
+    }
+
+    .instasearch-group-header,
+    .instasearch-group-heading {
+        color: $motor-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.75rem;
+    }
+}
+
+// Mega menu
+// --------------------------------------------------
+
+.megamenu-section .navbar {
+    background: transparent;
+    border-top: 1px solid $motor-line;
+}
+
+.megamenu-container {
+    --mm-nav-padding-y: 0;
+    --mm-link-padding-y: 0.95em;
+    --mm-link-padding-x: 0.95em;
+    --mm-link-color: #{$gray-800};
+    --mm-link-bg-active: transparent;
+    --mm-link-border-radius: 0;
+}
+
+.navbar-inverse > .megamenu-container {
+    --mm-link-color: #{$gray-800};
+    --mm-link-bg-active: transparent;
+}
+
+.megamenu {
+    .nav-item > .nav-link {
+        position: relative;
+        font-family: $headings-font-family;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        transition: color .2s ease;
+
+        // Animated accent underline
+        &:after {
+            content: '';
+            position: absolute;
+            inset-inline: var(--mm-link-padding-x);
+            bottom: 0;
+            height: 2px;
+            background: $motor-accent;
+            transform: scaleX(0);
+            transform-origin: 0 50%;
+            transition: transform .3s var(--motor-ease-out);
+        }
+    }
+
+    .nav-item > .nav-link:hover,
+    .nav-item.active > .nav-link,
+    .nav-item.selected > .nav-link,
+    .nav-item.expanded > .nav-link {
+        color: #fff;
+
+        &:after {
+            transform: scaleX(1);
+        }
+    }
+
+    // Replace Flex's arrow + bar indicators with the underline above
+    .nav-item.active:before,
+    .nav-item.active:after,
+    .nav-item.selected .nav-link:before,
+    .nav-item.expanded .nav-link:before {
+        display: none;
+    }
+
+    .dropdown-toggle:after {
+        opacity: 0.6;
+    }
+}
+
+.megamenu-nav {
+    &.alpha {
+        background-image: linear-gradient(to left, rgba($motor-bg, 0), $motor-bg 40%, $motor-bg 100%);
+    }
+
+    &.omega {
+        background-image: linear-gradient(to right, rgba($motor-bg, 0), $motor-bg 40%, $motor-bg 100%);
+    }
+}
+
+.megamenu-container .megamenu-dropdown {
+    background-color: rgba($motor-surface, 0.98);
+    border: 1px solid $motor-line;
+    border-top: 2px solid $motor-accent;
+    border-radius: 0 0 $border-radius-xl $border-radius-xl;
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.85);
+
+    .megamenu-dropdown-heading {
+        font-family: $headings-font-family;
+        font-weight: 700;
+        font-size: 1.0625rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: $motor-text;
+
+        &:hover {
+            color: $motor-accent;
+        }
+    }
+
+    .megamenu-subitem,
+    .megamenu-dropdown-item,
+    a {
+        color: $motor-text-muted;
+
+        &:hover {
+            color: #fff;
+        }
+    }
+
+    .megamenu-dropdown-heading,
+    .megamenu-dropdown-heading:hover {
+        text-decoration: none;
+    }
+}
+
+.megamenu-container .rotator-container {
+    border-color: $motor-line;
+    background: $motor-surface-2;
+}
+
+// Mobile header
+// --------------------------------------------------
+
+@include media-breakpoint-down(md) {
+    .shopbar-section {
+        padding: 0.5rem 0 0.625rem;
+        border-bottom: 0;
+    }
+
+    .shopbar {
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    // Logo + tools on one row, search below
+    .shopbar-col-group-brand {
+        display: contents;
+    }
+
+    .shop-logo {
+        order: 1;
+        flex: 1 1 auto;
+    }
+
+    .shopbar-col-group-tools {
+        order: 2;
+        width: auto;
+    }
+
+    .shopbar-search {
+        order: 3;
+        flex: 1 0 100%;
+        padding-top: 0.25rem;
+
+        .instasearch-term {
+            height: 42px;
+        }
+    }
+
+    .shopbar-tools {
+        justify-content: flex-end;
+        gap: 0.125rem;
+    }
+
+    .shopbar-button {
+        min-width: 42px;
+        padding: 0.5rem;
+
+        .shopbar-button-icon {
+            font-size: 21px;
+        }
+
+        // Keep an accessible name without the visual label
+        .shopbar-button-label-sm {
+            position: absolute !important;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+    }
+
+    // Compare is reachable from product pages; keep the mobile bar focused.
+    #shopbar-compare {
+        display: none;
+    }
+}
+
+@media (max-width: 379.98px) {
+    #shopbar-wishlist {
+        display: none;
+    }
+}

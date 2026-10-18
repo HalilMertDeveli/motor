@@ -1,0 +1,87 @@
+/// <reference path="../../Flex/wwwroot/references.scss" />
+
+//
+// MotorDark: Bootstrap variable overrides for a dark-first UI.
+// Theme tokens (colors, fonts, header) live in theme.config;
+// this file only adjusts Bootstrap defaults that assume a light body.
+// --------------------------------------------------
+
+$motor-bg:                  #08090b;
+$motor-surface:             #111317;
+$motor-surface-2:           #1a1d22;
+$motor-surface-3:           #22262c;
+$motor-line:                rgba(#fff, 0.08);
+$motor-line-strong:         rgba(#fff, 0.14);
+$motor-text:                #f4f4f2;
+$motor-text-muted:          #9a9ca3;
+$motor-accent:              #ff5a1f;
+$motor-accent-hover:        #ff7440;
+$motor-on-accent:           #08090b;
+
+$component-active-color:    $motor-on-accent;
+$component-active-bg:       $motor-accent;
+
+$border-color:              $motor-line;
+$border-color-translucent:  $motor-line;
+$hr-opacity:                0.12;
+$mark-bg:                   rgba($motor-accent, 0.25);
+
+// Forms
+$input-bg:                  #0d0f12;
+$input-color:               $motor-text;
+$input-border-color:        $motor-line-strong;
+$input-disabled-bg:         $motor-surface-2;
+$input-placeholder-color:   #6f737b;
+$input-box-shadow:          none;
+$input-focus-bg:            #0d0f12;
+$input-focus-color:         $motor-text;
+$input-focus-border-color:  $motor-accent;
+$input-group-addon-bg:      $motor-surface-2;
+$input-group-addon-color:   $motor-text-muted;
+$form-check-input-bg:       #0d0f12;
+$form-check-input-border:   1px solid rgba(#fff, 0.28);
+$custom-control-indicator-bg: #0d0f12;
+$custom-control-indicator-border-color: rgba(#fff, 0.28);
+$custom-select-bg:          #0d0f12;
+$custom-select-color:       $motor-text;
+$custom-select-disabled-bg: $motor-surface-2;
+$custom-select-indicator-color: $motor-text-muted;
+
+// Navs & pagination
+$nav-tabs-border-color:             $motor-line;
+$nav-tabs-link-active-color:        $motor-text;
+$nav-tabs-link-active-bg:           transparent;
+$nav-tabs-link-hover-border-color:  transparent transparent $motor-line-strong;
+$nav-tabs-link-active-border-color: transparent transparent $motor-accent;
+
+$pagination-bg:                     transparent;
+$pagination-color:                  $motor-text;
+$pagination-border-color:           $motor-line;
+$pagination-hover-bg:               $motor-surface-2;
+$pagination-hover-color:            #fff;
+$pagination-hover-border-color:     $motor-line-strong;
+$pagination-disabled-bg:            transparent;
+$pagination-disabled-border-color:  $motor-line;
+
+// Overlays
+$tooltip-bg:                $motor-text;
+$tooltip-color:             $motor-bg;
+$popover-bg:                $motor-surface;
+$popover-border-color:      $motor-line;
+$popover-header-bg:         $motor-surface-2;
+$popover-header-color:      $motor-text;
+$popover-body-color:        $motor-text;
+$list-group-bg:             $motor-surface;
+$list-group-border-color:   $motor-line;
+$list-group-hover-bg:       $motor-surface-2;
+$list-group-action-color:   $motor-text;
+$list-group-action-hover-color: #fff;
+$list-group-action-active-bg: $motor-surface-3;
+$toast-background-color:    rgba($motor-surface, 0.96);
+$toast-header-background-color: $motor-surface-2;
+$toast-header-color:        $motor-text;
+$progress-bg:               $motor-surface-2;
+$close-color:               #fff;
+$table-head-bg:             $motor-surface-2;
+$table-head-color:          $motor-text-muted;
+$kbd-bg:                    $motor-surface-3;
