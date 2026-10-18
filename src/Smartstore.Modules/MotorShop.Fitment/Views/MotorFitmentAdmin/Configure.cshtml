@@ -1,0 +1,109 @@
+@model FitmentConfigurationModel
+
+@{
+    Layout = "_ConfigureModule";
+}
+
+<div class="alert alert-info">
+    @T("Plugins.MotorShop.Fitment.AdminInstruction")
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>@T("Plugins.MotorShop.Fitment.AddVehicle")</strong></div>
+            <div class="card-body">
+                <form asp-action="AddVehicle" asp-controller="MotorFitmentAdmin" asp-area="Admin" method="post">
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <smart-label asp-for="NewVehicle.Make" />
+                            <input asp-for="NewVehicle.Make" class="form-control" list="motor-makes" required />
+                            <datalist id="motor-makes">
+                                @foreach (var make in Model.Vehicles.Select(x => x.Make).Distinct())
+                                {
+                                    <option value="@make"></option>
+                                }
+                            </datalist>
+                        </div>
+                        <div class="col-sm-6">
+                            <smart-label asp-for="NewVehicle.Model" />
+                            <input asp-for="NewVehicle.Model" class="form-control" required />
+                        </div>
+                        <div class="col-sm-4">
+                            <smart-label asp-for="NewVehicle.YearFrom" />
+                            <input asp-for="NewVehicle.YearFrom" class="form-control" />
+                        </div>
+                        <div class="col-sm-4">
+                            <smart-label asp-for="NewVehicle.YearTo" />
+                            <input asp-for="NewVehicle.YearTo" class="form-control" />
+                        </div>
+                        <div class="col-sm-4">
+                            <smart-label asp-for="NewVehicle.EngineCc" />
+                            <input asp-for="NewVehicle.EngineCc" class="form-control" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">
+                        <i class="fa fa-plus"></i>
+                        <span>@T("Admin.Common.AddNew")</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>@T("Plugins.MotorShop.Fitment.BulkImport")</strong></div>
+            <div class="card-body">
+                <form asp-action="BulkImport" asp-controller="MotorFitmentAdmin" asp-area="Admin" method="post">
+                    <p class="text-muted small mb-2">@T("Plugins.MotorShop.Fitment.BulkImport.Hint")</p>
+                    <textarea asp-for="BulkImport" class="form-control font-monospace" rows="6" placeholder="Honda;CBR 250R;2011;2013;250&#10;Yamaha;NMAX 125;2015;2025;125"></textarea>
+                    <button type="submit" class="btn btn-secondary mt-3">
+                        <i class="fa fa-upload"></i>
+                        <span>@T("Common.Import")</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <strong>@T("Plugins.MotorShop.Fitment.Motorcycles")</strong>
+        <span class="badge badge-secondary ml-2">@Model.Vehicles.Count</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>@T("Plugins.MotorShop.Fitment.Make")</th>
+                    <th>@T("Plugins.MotorShop.Fitment.Model")</th>
+                    <th>@T("Plugins.MotorShop.Fitment.Years")</th>
+                    <th>@T("Plugins.MotorShop.Fitment.EngineCc")</th>
+                    <th>@T("Plugins.MotorShop.Fitment.ProductCount")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var v in Model.Vehicles)
+                {
+                    <tr>
+                        <td>@v.Make</td>
+                        <td>@v.Model</td>
+                        <td>@v.YearFrom – @v.YearTo</td>
+                        <td>@(v.EngineCc?.ToString() ?? "-")</td>
+                        <td>@(Model.ProductCounts.TryGetValue(v.Id, out var count) ? count : 0)</td>
+                        <td class="text-right">
+                            <form asp-action="DeleteVehicle" asp-controller="MotorFitmentAdmin" asp-area="Admin" asp-route-id="@v.Id" method="post"
+                                  onsubmit="return confirm('@T("Admin.Common.AskToProceed")');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="@T("Common.Delete")">
+                                    <i class="far fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

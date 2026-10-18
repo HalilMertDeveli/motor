@@ -1,0 +1,36 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Fitment" AppendRootKey="false"><Value>Motor Uyumluluğu</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Fitment" AppendRootKey="false"><Value>Parçaları uyumlu motorlarla (marka / model / yıl) eşleştirir, müşterinin kendi motoruna uyan parçayı bulmasını sağlar.</Value></LocaleResource>
+    <LocaleResource Name="CompatibleMotorcycles"><Value>Uyumlu Motorlar</Value></LocaleResource>
+    <LocaleResource Name="Motorcycles"><Value>Motorlar</Value></LocaleResource>
+    <LocaleResource Name="Make"><Value>Marka</Value></LocaleResource>
+    <LocaleResource Name="Model"><Value>Model</Value></LocaleResource>
+    <LocaleResource Name="Year"><Value>Yıl</Value></LocaleResource>
+    <LocaleResource Name="Years"><Value>Yıllar</Value></LocaleResource>
+    <LocaleResource Name="YearFrom"><Value>Başlangıç yılı</Value></LocaleResource>
+    <LocaleResource Name="YearTo"><Value>Bitiş yılı</Value></LocaleResource>
+    <LocaleResource Name="EngineCc"><Value>Motor hacmi (cc)</Value></LocaleResource>
+    <LocaleResource Name="ProductCount"><Value>Parça sayısı</Value></LocaleResource>
+    <LocaleResource Name="AddVehicle"><Value>Motor ekle</Value></LocaleResource>
+    <LocaleResource Name="BulkImport"><Value>Toplu içe aktarma</Value></LocaleResource>
+    <LocaleResource Name="BulkImport.Hint"><Value>Her satıra bir motor: Marka;Model;BaşlangıçYılı;BitişYılı;cc (cc isteğe bağlı). Birebir aynı kayıtlar atlanır.</Value></LocaleResource>
+    <LocaleResource Name="AdminInstruction"><Value>Motor listesini buradan yönetin. Sonra bir ürünü açıp "Uyumlu Motorlar" sekmesinden uyduğu motorları seçin.</Value></LocaleResource>
+    <LocaleResource Name="MakeModelRequired"><Value>Marka ve model zorunludur.</Value></LocaleResource>
+    <LocaleResource Name="InvalidLines"><Value>Şu satırlar okunamadı: {0}</Value></LocaleResource>
+    <LocaleResource Name="VehiclesAdded"><Value>{0} motor eklendi.</Value></LocaleResource>
+    <LocaleResource Name="NoVehicles"><Value>Henüz motor tanımlanmadı.</Value></LocaleResource>
+    <LocaleResource Name="ManageVehicles"><Value>Motorları yönet</Value></LocaleResource>
+    <LocaleResource Name="SelectMotorcycles"><Value>Motor seçin...</Value></LocaleResource>
+    <LocaleResource Name="ProductTabHint"><Value>Bu motorlardan birini seçen müşteriler bu parçayı görecek.</Value></LocaleResource>
+    <LocaleResource Name="Picker.Title"><Value>Motoruna uygun parçayı bul</Value></LocaleResource>
+    <LocaleResource Name="Picker.YourBike"><Value>Motorun</Value></LocaleResource>
+    <LocaleResource Name="Picker.Clear"><Value>Temizle</Value></LocaleResource>
+    <LocaleResource Name="Picker.SelectMake"><Value>Marka seçin</Value></LocaleResource>
+    <LocaleResource Name="Picker.SelectModel"><Value>Model seçin</Value></LocaleResource>
+    <LocaleResource Name="Picker.SelectYear"><Value>Yıl seçin</Value></LocaleResource>
+    <LocaleResource Name="Picker.Find"><Value>Parça bul</Value></LocaleResource>
+    <LocaleResource Name="FitsYourBike"><Value>Motorunuza uyar: {0}</Value></LocaleResource>
+    <LocaleResource Name="NotListedForYourBike"><Value>Motorunuz için uyumlu olarak listelenmemiş: {0}</Value></LocaleResource>
+    <LocaleResource Name="Results.Title"><Value>{0} için parçalar</Value></LocaleResource>
+    <LocaleResource Name="Results.Empty"><Value>{0} için henüz uyumlu parça bulunamadı.</Value></LocaleResource>
+</Language>

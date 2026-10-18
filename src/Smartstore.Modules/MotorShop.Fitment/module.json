@@ -1,0 +1,12 @@
+{
+  "$schema": "../module.schema.json",
+  "Author": "MotorShop",
+  "Group": "Storefront",
+  "SystemName": "MotorShop.Fitment",
+  "FriendlyName": "Motor Fitment (make / model / year)",
+  "Description": "Maps products to compatible motorcycles and lets customers find parts for their bike.",
+  "Version": "1.0.0",
+  "MinAppVersion": "6.4.0",
+  "Order": 1,
+  "ResourceRootKey": "Plugins.MotorShop.Fitment"
+}

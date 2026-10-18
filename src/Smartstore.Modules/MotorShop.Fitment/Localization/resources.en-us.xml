@@ -1,0 +1,36 @@
+<Language Name="English" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Fitment" AppendRootKey="false"><Value>Motor Fitment</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Fitment" AppendRootKey="false"><Value>Maps parts to compatible motorcycles (make / model / year) and lets customers find parts for their bike.</Value></LocaleResource>
+    <LocaleResource Name="CompatibleMotorcycles"><Value>Compatible motorcycles</Value></LocaleResource>
+    <LocaleResource Name="Motorcycles"><Value>Motorcycles</Value></LocaleResource>
+    <LocaleResource Name="Make"><Value>Make</Value></LocaleResource>
+    <LocaleResource Name="Model"><Value>Model</Value></LocaleResource>
+    <LocaleResource Name="Year"><Value>Year</Value></LocaleResource>
+    <LocaleResource Name="Years"><Value>Years</Value></LocaleResource>
+    <LocaleResource Name="YearFrom"><Value>Year from</Value></LocaleResource>
+    <LocaleResource Name="YearTo"><Value>Year to</Value></LocaleResource>
+    <LocaleResource Name="EngineCc"><Value>Engine (cc)</Value></LocaleResource>
+    <LocaleResource Name="ProductCount"><Value>Parts</Value></LocaleResource>
+    <LocaleResource Name="AddVehicle"><Value>Add motorcycle</Value></LocaleResource>
+    <LocaleResource Name="BulkImport"><Value>Bulk import</Value></LocaleResource>
+    <LocaleResource Name="BulkImport.Hint"><Value>One motorcycle per line: Make;Model;YearFrom;YearTo;Cc (cc is optional). Exact duplicates are skipped.</Value></LocaleResource>
+    <LocaleResource Name="AdminInstruction"><Value>Maintain the list of motorcycles here. Then open a product and select the motorcycles it fits on the "Compatible motorcycles" tab.</Value></LocaleResource>
+    <LocaleResource Name="MakeModelRequired"><Value>Make and model are required.</Value></LocaleResource>
+    <LocaleResource Name="InvalidLines"><Value>These lines could not be read: {0}</Value></LocaleResource>
+    <LocaleResource Name="VehiclesAdded"><Value>{0} motorcycle(s) added.</Value></LocaleResource>
+    <LocaleResource Name="NoVehicles"><Value>No motorcycles defined yet.</Value></LocaleResource>
+    <LocaleResource Name="ManageVehicles"><Value>Manage motorcycles</Value></LocaleResource>
+    <LocaleResource Name="SelectMotorcycles"><Value>Select motorcycles...</Value></LocaleResource>
+    <LocaleResource Name="ProductTabHint"><Value>Customers who pick one of these motorcycles will see this part.</Value></LocaleResource>
+    <LocaleResource Name="Picker.Title"><Value>Find parts for your motorcycle</Value></LocaleResource>
+    <LocaleResource Name="Picker.YourBike"><Value>Your motorcycle</Value></LocaleResource>
+    <LocaleResource Name="Picker.Clear"><Value>Clear</Value></LocaleResource>
+    <LocaleResource Name="Picker.SelectMake"><Value>Select make</Value></LocaleResource>
+    <LocaleResource Name="Picker.SelectModel"><Value>Select model</Value></LocaleResource>
+    <LocaleResource Name="Picker.SelectYear"><Value>Select year</Value></LocaleResource>
+    <LocaleResource Name="Picker.Find"><Value>Find parts</Value></LocaleResource>
+    <LocaleResource Name="FitsYourBike"><Value>Fits your motorcycle: {0}</Value></LocaleResource>
+    <LocaleResource Name="NotListedForYourBike"><Value>Not listed as compatible with your motorcycle: {0}</Value></LocaleResource>
+    <LocaleResource Name="Results.Title"><Value>Parts for {0}</Value></LocaleResource>
+    <LocaleResource Name="Results.Empty"><Value>No compatible parts found for {0} yet.</Value></LocaleResource>
+</Language>

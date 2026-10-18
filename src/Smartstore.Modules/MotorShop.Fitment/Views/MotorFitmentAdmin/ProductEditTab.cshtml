@@ -1,0 +1,48 @@
+@model ProductFitmentEditModel
+
+@{
+    Layout = "";
+    var vehicles = (List<MotorVehicle>)ViewBag.Vehicles;
+    var selected = Model.VehicleIds.ToHashSet();
+}
+
+<input type="hidden" name="CustomProperties[MotorFitment].__Type__" value="@Model.GetType().AssemblyQualifiedName" />
+<input type="hidden" asp-for="ProductId" />
+
+<div class="adminContent">
+    <div class="adminRow">
+        <div class="adminTitle">
+            <label>@T("Plugins.MotorShop.Fitment.CompatibleMotorcycles")</label>
+        </div>
+        <div class="adminData wide">
+            @if (vehicles.Count == 0)
+            {
+                <div class="alert alert-warning mb-0">
+                    @T("Plugins.MotorShop.Fitment.NoVehicles")
+                    <a asp-action="Configure" asp-controller="MotorFitmentAdmin" asp-area="Admin">@T("Plugins.MotorShop.Fitment.ManageVehicles")</a>
+                </div>
+            }
+            else
+            {
+                @* Empty value keeps the field in the form post when nothing is selected, so mappings can be cleared. *@
+                <input type="hidden" name="@Html.NameFor(m => m.VehicleIds)" value="0" />
+                <select name="@Html.NameFor(m => m.VehicleIds)" multiple="multiple" class="form-control"
+                        data-placeholder="@T("Plugins.MotorShop.Fitment.SelectMotorcycles")">
+                    @foreach (var group in vehicles.GroupBy(x => x.Make))
+                    {
+                        <optgroup label="@group.Key">
+                            @foreach (var v in group)
+                            {
+                                <option value="@v.Id" selected="@selected.Contains(v.Id)">@v.DisplayName</option>
+                            }
+                        </optgroup>
+                    }
+                </select>
+                <div class="form-text text-muted">
+                    @T("Plugins.MotorShop.Fitment.ProductTabHint")
+                    <a asp-action="Configure" asp-controller="MotorFitmentAdmin" asp-area="Admin">@T("Plugins.MotorShop.Fitment.ManageVehicles")</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

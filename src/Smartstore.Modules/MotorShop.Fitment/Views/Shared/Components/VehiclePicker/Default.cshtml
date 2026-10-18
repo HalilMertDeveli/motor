@@ -1,0 +1,89 @@
+@model VehiclePickerModel
+
+@{
+    var selection = Model.Selection;
+}
+
+<div class="motor-picker card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap align-items-baseline justify-content-between mb-3">
+            <h2 class="h4 mb-0">
+                <i class="fa fa-motorcycle mr-2"></i>@T("Plugins.MotorShop.Fitment.Picker.Title")
+            </h2>
+            @if (selection != null)
+            {
+                <div class="small">
+                    <span class="text-muted">@T("Plugins.MotorShop.Fitment.Picker.YourBike"):</span>
+                    <a href="@Url.RouteUrl("MotorFitment.Results")" class="font-weight-medium">@selection.DisplayName</a>
+                    <a href="@Url.Action("Clear", "MotorFitment")" class="text-muted ml-2">@T("Plugins.MotorShop.Fitment.Picker.Clear")</a>
+                </div>
+            }
+        </div>
+        <form class="motor-picker-form row g-2" method="get" action="@Url.RouteUrl("MotorFitment.Results")"
+              data-models-url="@Url.Action("Models", "MotorFitment")"
+              data-years-url="@Url.Action("Years", "MotorFitment")">
+            <div class="col-md-3">
+                <select name="make" class="form-control motor-picker-make noskin" required aria-label="@T("Plugins.MotorShop.Fitment.Make")">
+                    <option value="">@T("Plugins.MotorShop.Fitment.Picker.SelectMake")</option>
+                    @foreach (var make in Model.Makes)
+                    {
+                        <option value="@make" selected="@(selection?.Make == make)">@make</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="model" class="form-control motor-picker-model noskin" disabled="@(Model.Models.Count == 0)" aria-label="@T("Plugins.MotorShop.Fitment.Model")">
+                    <option value="">@T("Plugins.MotorShop.Fitment.Picker.SelectModel")</option>
+                    @foreach (var m in Model.Models)
+                    {
+                        <option value="@m" selected="@(selection?.Model == m)">@m</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="year" class="form-control motor-picker-year noskin" disabled="@(Model.Years.Count == 0)" aria-label="@T("Plugins.MotorShop.Fitment.Year")">
+                    <option value="">@T("Plugins.MotorShop.Fitment.Picker.SelectYear")</option>
+                    @foreach (var y in Model.Years)
+                    {
+                        <option value="@y" selected="@(selection?.Year == y)">@y</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-grid">
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fa fa-magnifying-glass mr-1"></i>@T("Plugins.MotorShop.Fitment.Picker.Find")
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script sm-target-zone="scripts" data-origin="motor-picker">
+    $(function () {
+        $('.motor-picker-form').each(function () {
+            const form = $(this);
+            const make = form.find('.motor-picker-make');
+            const model = form.find('.motor-picker-model');
+            const year = form.find('.motor-picker-year');
+
+            function fill(select, items) {
+                select.find('option:not(:first)').remove();
+                items.forEach(x => select.append($('<option>').val(x).text(x)));
+                select.prop('disabled', items.length === 0).val('');
+            }
+
+            make.on('change', function () {
+                fill(model, []);
+                fill(year, []);
+                if (!make.val()) return;
+                $.getJSON(form.data('models-url'), { make: make.val() }, items => fill(model, items));
+            });
+
+            model.on('change', function () {
+                fill(year, []);
+                if (!model.val()) return;
+                $.getJSON(form.data('years-url'), { make: make.val(), model: model.val() }, items => fill(year, items));
+            });
+        });
+    });
+</script>

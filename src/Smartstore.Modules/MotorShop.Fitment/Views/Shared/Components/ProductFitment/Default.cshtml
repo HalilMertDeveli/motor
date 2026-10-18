@@ -1,0 +1,37 @@
+@model ProductFitmentModel
+
+@if (Model.Selection != null)
+{
+    var fits = Model.Vehicles.Any(Model.Fits);
+    <div class="alert @(fits ? "alert-success" : "alert-warning")">
+        <span>
+            @(fits
+                ? T("Plugins.MotorShop.Fitment.FitsYourBike", Model.Selection.DisplayName)
+                : T("Plugins.MotorShop.Fitment.NotListedForYourBike", Model.Selection.DisplayName))
+        </span>
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-sm table-striped mb-0">
+        <thead>
+            <tr>
+                <th>@T("Plugins.MotorShop.Fitment.Make")</th>
+                <th>@T("Plugins.MotorShop.Fitment.Model")</th>
+                <th>@T("Plugins.MotorShop.Fitment.Years")</th>
+                <th>@T("Plugins.MotorShop.Fitment.EngineCc")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var v in Model.Vehicles)
+            {
+                <tr class="@(Model.Fits(v) ? "table-success" : null)">
+                    <td>@v.Make</td>
+                    <td>@v.Model</td>
+                    <td>@v.YearFrom – @v.YearTo</td>
+                    <td>@(v.EngineCc.HasValue ? $"{v.EngineCc} cc" : "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
