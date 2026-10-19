@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<Product>MotorShop Tracking</Product>
+		<OutputPath>..\..\Smartstore.Web\Modules\MotorShop.Tracking</OutputPath>
+		<OutDir>$(OutputPath)</OutDir>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Smartstore.Web\Smartstore.Web.csproj">
+			<Private>False</Private>
+			<CopyLocal>False</CopyLocal>
+			<CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+		<!-- Turkish shipment e-mail texts, applied as localized template values on install. -->
+		<Content Include="App_Data\EmailTemplates\**\*.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+</Project>

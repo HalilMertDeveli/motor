@@ -1,0 +1,12 @@
+[Unit]
+Description=Run the MOTOR backup every night
+
+[Timer]
+# 03:30 Europe/Istanbul is a quiet hour for a Turkish store; set the server's
+# timezone (timedatectl set-timezone Europe/Istanbul) or adjust.
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -111,7 +111,7 @@ Losing them signs everyone out; leaking them lets someone forge cookies.
 
 ## Production notes
 
-- The container speaks plain HTTP on port 80. Terminate TLS at a reverse proxy
+- The container speaks plain HTTP on port 8080. Terminate TLS at a reverse proxy
   (nginx, Caddy, Traefik, a load balancer) and keep `MOTOR_HTTP_BIND=127.0.0.1`
   when the proxy runs on the same host.
 - Tell the app which proxies to trust, and which host names to answer:
@@ -125,10 +125,25 @@ Losing them signs everyone out; leaking them lets someone forge cookies.
 
 - `Config/*.json` files are loaded after environment variables: a mounted
   `Config/usersettings.Production.json` overrides `Smartstore__...` variables.
-- The container health check requests `/`. Once MotorShop.Security is
-  installed, `/healthz` (liveness) is the cheaper probe.
-- Open item: the container still runs as root. Moving to the non-root `app`
-  user needs the volumes re-owned and a port above 1024.
+- The container health check requests `/healthz` (liveness, MotorShop.Security).
+  `/healthz/ready` also checks the database and the task scheduler; the VPS stack
+  uses it (`MOTOR_HEALTH_PATH`).
+
+### Non-root image
+
+The Linux images run as the non-root `app` user of the .NET base image
+(UID/GID 1654) and listen on port **8080**. That user can write only the
+directories Smartstore writes at runtime and checks during installation
+(`Smartstore/IO/FilePermissionChecker.cs`): `App_Data`, `Modules`,
+`wwwroot/exchange` and `runtimes/<rid>/native`. All other files stay owned by root. Volumes created by an older image (root, port 80) keep root-owned files,
+and the app then fails to write `Settings.txt`, logs or data protection keys. Re-own
+them once before starting the new image:
+
+```sh
+docker compose run --rm --no-deps --user root --entrypoint chown web -R 1654:1654 /app/App_Data
+```
+
+The command is idempotent; on a new installation it is not needed.
 - Keep `ASPNETCORE_ENVIRONMENT=Production`. With `Development` the app moves the
   data protection keys out of the `tenants` volume and loses them on every
   container rebuild.

@@ -1,0 +1,25 @@
+<Language Name="English" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Tracking" AppendRootKey="false"><Value>Shipment tracking (carrier neutral)</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Tracking" AppendRootKey="false"><Value>Builds the tracking link from a URL template per carrier and shows carrier, tracking number and status on the customer order details page. No courier API.</Value></LocaleResource>
+    <LocaleResource Name="Title"><Value>Shipment tracking</Value></LocaleResource>
+    <LocaleResource Name="Shipped"><Value>Shipped on {0}</Value></LocaleResource>
+    <LocaleResource Name="Delivered"><Value>Delivered on {0}</Value></LocaleResource>
+    <LocaleResource Name="Carrier"><Value>Carrier</Value></LocaleResource>
+    <LocaleResource Name="TrackingNumber"><Value>Tracking number</Value></LocaleResource>
+    <LocaleResource Name="TrackShipment"><Value>Track shipment</Value></LocaleResource>
+    <LocaleResource Name="Carriers"><Value>Carriers</Value></LocaleResource>
+    <LocaleResource Name="Carriers.Hint"><Value>One carrier per line: "Carrier name | https://.../{0}". {0} is replaced by the tracking number. Only https URLs are accepted. Lines starting with # are ignored.</Value></LocaleResource>
+    <LocaleResource Name="DefaultCarrier"><Value>Default carrier</Value></LocaleResource>
+    <LocaleResource Name="DefaultCarrier.Hint"><Value>Used when a shipment has no carrier name. Must match a name in the list above.</Value></LocaleResource>
+    <LocaleResource Name="DefaultCarrierUnknown"><Value>The default carrier is not one of the valid carriers.</Value></LocaleResource>
+    <LocaleResource Name="ShowOnOrderDetails"><Value>Show on order details</Value></LocaleResource>
+    <LocaleResource Name="ShowOnOrderDetails.Hint"><Value>Shows carrier, tracking number, tracking link and status on the customer order details page.</Value></LocaleResource>
+    <LocaleResource Name="ActiveCarriers"><Value>Valid carriers</Value></LocaleResource>
+    <LocaleResource Name="NoCarriers"><Value>No carrier configured yet. No tracking link is generated.</Value></LocaleResource>
+    <LocaleResource Name="InvalidLines"><Value>Ignored lines (no "|", no {0}, not https or duplicate name):</Value></LocaleResource>
+    <LocaleResource Name="AdminInstruction"><Value>When a shipment gets a tracking number, the tracking link is built from the carrier's template and stored in the shipment's "Tracking URL". A URL entered manually is never replaced. The carrier is read from the "Carrier" field of the shipment edit page.</Value></LocaleResource>
+    <LocaleResource Name="TurkishTemplates"><Value>Turkish shipment e-mails</Value></LocaleResource>
+    <LocaleResource Name="TurkishTemplates.Hint"><Value>Adds Turkish subject and body to the "shipment sent" and "shipment delivered" e-mails. Templates that already have Turkish text are not changed.</Value></LocaleResource>
+    <LocaleResource Name="TurkishTemplates.Apply"><Value>Apply Turkish texts</Value></LocaleResource>
+    <LocaleResource Name="TemplatesApplied"><Value>{0} Turkish template values written.</Value></LocaleResource>
+</Language>
