@@ -1,0 +1,11 @@
+@model PartPublicationState
+@{
+    var css = Model switch
+    {
+        PartPublicationState.ReadyForSale => "success",
+        PartPublicationState.VerifiedReference => "info",
+        PartPublicationState.Rejected => "danger",
+        _ => "secondary"
+    };
+}
+<span class="badge badge-@css bg-@css">@T("Plugins.MotorShop.CatalogImport.State." + Model)</span>

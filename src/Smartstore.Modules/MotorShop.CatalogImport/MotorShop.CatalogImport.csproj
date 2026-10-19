@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<Product>MotorShop Catalog Import</Product>
+		<OutputPath>..\..\Smartstore.Web\Modules\MotorShop.CatalogImport</OutputPath>
+		<OutDir>$(OutputPath)</OutDir>
+	</PropertyGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="MotorShop.CatalogImport.Tests" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Smartstore.Web\Smartstore.Web.csproj">
+			<Private>False</Private>
+			<CopyLocal>False</CopyLocal>
+			<CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+		<!-- Loaded by the module system (see DependsOn in module.json), not copied. -->
+		<ProjectReference Include="..\MotorShop.Fitment\MotorShop.Fitment.csproj">
+			<Private>False</Private>
+			<CopyLocal>False</CopyLocal>
+			<CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+	</ItemGroup>
+</Project>

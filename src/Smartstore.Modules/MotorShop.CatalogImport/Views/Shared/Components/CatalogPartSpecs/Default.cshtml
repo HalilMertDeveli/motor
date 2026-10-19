@@ -1,0 +1,36 @@
+@model PublicPartModel
+@{
+    var res = "Plugins.MotorShop.CatalogImport.Public.";
+}
+
+<div class="motor-part-specs">
+    <table class="table table-sm">
+        <tbody>
+            <tr><th class="w-50">@T(res + "Brand")</th><td>@Model.Brand</td></tr>
+            <tr><th>@T(res + "PartNumber")</th><td class="font-monospace">@Model.Mpn</td></tr>
+            @if (Model.Classification != PartClassification.Unknown)
+            {
+                <tr><th>@T(res + "Type")</th><td>@T("Plugins.MotorShop.CatalogImport.Classification." + Model.Classification)</td></tr>
+            }
+            @if (Model.OemReferences.HasValue())
+            {
+                <tr><th>@T(res + "OemReferences")</th><td class="font-monospace">@Model.OemReferences</td></tr>
+            }
+            @if (Model.PackageQuantity.HasValue)
+            {
+                <tr><th>@T(res + "PackageQuantity")</th><td>@Model.PackageQuantity</td></tr>
+            }
+            @foreach (var (key, value) in Model.Specs)
+            {
+                <tr><th>@key</th><td>@value</td></tr>
+            }
+        </tbody>
+    </table>
+
+    @if (Model.SourceOrganization.HasValue() || Model.SourceUrl.HasValue())
+    {
+        <p class="small text-muted mb-0">
+            @T(res + "SourceAttribution", Model.SourceOrganization ?? Model.SourceUrl, Model.AccessedOn?.ToString("yyyy-MM-dd") ?? "-")
+        </p>
+    }
+</div>

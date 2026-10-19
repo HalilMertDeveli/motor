@@ -1,0 +1,13 @@
+{
+  "$schema": "../module.schema.json",
+  "Author": "MotorShop",
+  "Group": "Admin",
+  "SystemName": "MotorShop.CatalogImport",
+  "FriendlyName": "Motor Catalog Import (staged, permission-aware)",
+  "Description": "Stages verified motorcycle reference data and spare-part research records with provenance and source permissions, matches stated fitment to verified motorcycles and publishes products only after admin approval.",
+  "Version": "1.0.0",
+  "MinAppVersion": "6.4.0",
+  "Order": 2,
+  "DependsOn": [ "MotorShop.Fitment" ],
+  "ResourceRootKey": "Plugins.MotorShop.CatalogImport"
+}
