@@ -65,6 +65,12 @@ public class IyzicoSettings : ISettings
     /// </summary>
     public bool TryCancelOnSameDayFullRefund { get; set; } = true;
 
+    /// <summary>
+    /// Cancels iyzico orders that are still unpaid after this many hours and have no open payment attempt.
+    /// Cancelling releases the reserved stock. 0 turns it off.
+    /// </summary>
+    public int CancelUnpaidOrdersAfterHours { get; set; } = 24;
+
     public decimal AdditionalFee { get; set; }
 
     public bool AdditionalFeePercentage { get; set; }

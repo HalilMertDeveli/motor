@@ -30,8 +30,17 @@ The same verification runs for:
   and expires abandoned attempts after 3 hours.
 - **Return page reload** by the order owner while the payment is still open.
 
-All processing of a token runs under a distributed lock. The row also has an optimistic concurrency token, and order
-transitions are idempotent, so a racing callback and webhook mark the order paid once.
+All processing of a token runs under a distributed token lock and a per-order lock (Order has no concurrency token,
+so two tabs/tokens of one order must not pass CanMarkOrderAsPaid in parallel). The row also has an optimistic
+concurrency token, and order transitions are idempotent, so racing callbacks and webhooks mark the order paid once.
+Amount and currency are checked against the stored attempt and against the current order (OrderTotal x CurrencyRate,
+CustomerCurrencyCode); an order edited after the payment started is flagged ORDER_CHANGED and not marked paid.
+
+The module follows Smartstore order processing (docs/motor/order-operations.md): stock is reserved once by
+PlaceOrderAsync, MarkOrderAsPaidAsync / MarkAsAuthorizedAsync send the standard notifications, no own e-mails.
+A failed attempt does not cancel the order (the customer can retry). The reconciliation task cancels orders that are
+still unpaid after CancelUnpaidOrdersAfterHours (default 24, 0 = off) and have only failed/expired attempts, through
+CancelOrderAsync(order, true), which restocks the items.
 
 ## After-sales
 
@@ -59,6 +68,7 @@ Admin: Plugins > Payment > iyzico > Configure.
 | Buyer identity number | `11111111111` | See owner decisions |
 | Send order lines | on | Falls back to one basket item when lines do not add up (discounts, gift cards) |
 | Cancel same-day full refunds | on | |
+| Cancel unpaid orders after (hours) | 24 | 0 turns it off; releases stock |
 
 Configuration values take precedence over the admin keys (recommended for production):
 
@@ -90,8 +100,8 @@ The callback URL `https://<store>/iyzico/callback` is sent with every payment.
    or decide to collect a TCKN (legal/KVKK impact).
 2. **Installment commission**: when installments pass commission to the customer, iyzico charges `paidPrice` above
    the order total. The order total in Smartstore is not changed. Decide how to invoice it (KDV).
-3. **Pending orders**: the order is created before payment. Unpaid orders stay Pending (stock reserved) until
-   cancelled. Decide whether to auto-cancel them after some time.
+3. **Unpaid orders**: the order is created before payment. Unpaid orders are cancelled (stock released, customer
+   notified) after 24 hours by default. Confirm the window or set 0 to keep them.
 
 ## Sources (checked 2026-10-19)
 

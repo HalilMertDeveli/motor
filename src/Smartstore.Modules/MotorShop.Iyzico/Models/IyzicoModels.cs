@@ -67,6 +67,9 @@ public class ConfigurationModel : ModelBase
     [LocalizedDisplay("*TryCancelOnSameDayFullRefund")]
     public bool TryCancelOnSameDayFullRefund { get; set; }
 
+    [LocalizedDisplay("*CancelUnpaidOrdersAfterHours")]
+    public int CancelUnpaidOrdersAfterHours { get; set; }
+
     [LocalizedDisplay("*AdditionalFee")]
     public decimal AdditionalFee { get; set; }
 

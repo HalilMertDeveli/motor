@@ -53,6 +53,7 @@ public abstract class IyzicoTestBase
     protected int MarkPaidCalls;
     protected int MarkAuthorizedCalls;
     protected int VoidOfflineCalls;
+    protected int CancelOrderCalls;
 
     /// <summary>
     /// Number of upcoming MarkOrderAsPaidAsync calls that throw, to simulate a database failure.
@@ -127,6 +128,7 @@ public abstract class IyzicoTestBase
         MarkPaidCalls = 0;
         MarkAuthorizedCalls = 0;
         VoidOfflineCalls = 0;
+        CancelOrderCalls = 0;
         FailNextMarkPaid = 0;
 
         await using var db = NewDbContext();
@@ -231,6 +233,15 @@ public abstract class IyzicoTestBase
             {
                 Interlocked.Increment(ref VoidOfflineCalls);
                 order.PaymentStatus = PaymentStatus.Voided;
+                await db.SaveChangesAsync();
+            });
+
+        orderProcessing
+            .Setup(x => x.CancelOrderAsync(It.IsAny<Order>(), It.IsAny<bool>()))
+            .Returns<Order, bool>(async (order, _) =>
+            {
+                Interlocked.Increment(ref CancelOrderCalls);
+                order.OrderStatus = OrderStatus.Cancelled;
                 await db.SaveChangesAsync();
             });
 

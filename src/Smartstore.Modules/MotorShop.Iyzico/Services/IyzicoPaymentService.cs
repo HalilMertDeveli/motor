@@ -115,7 +115,8 @@ public class IyzicoPaymentService
             return new(IyzicoStartStatus.UnsupportedCurrency);
         }
 
-        await using var orderLock = await _lockProvider.GetLock($"motorshop.iyzico.order:{order.Id}").AcquireAsync(LockTimeout, cancelToken);
+        // Serializes payment starts of one order. Taken before token and order locks (lock order: start, token, order).
+        await using var startLock = await _lockProvider.GetLock($"motorshop.iyzico.start:{order.Id}").AcquireAsync(LockTimeout, cancelToken);
 
         // Settle earlier attempts first: the customer may have paid in another tab. Prevents double charges.
         var earlier = await _db.IyzicoTransactions()
@@ -272,6 +273,11 @@ public class IyzicoPaymentService
     private async Task<IyzicoProcessResult> ProcessLockedAsync(string token, IyzicoEventSource source, CancellationToken cancelToken)
     {
         var tx = await _db.IyzicoTransactions().FirstAsync(x => x.Token == token, cancelToken);
+
+        // Per-order lock: Order has no concurrency token, so two tokens of the same order (two tabs) must not
+        // pass CanMarkOrderAsPaid in parallel. Also serializes against the stale order cancellation.
+        await using var orderLock = await AcquireOrderLockAsync(tx.OrderId, cancelToken);
+
         await _db.Entry(tx).ReloadAsync(cancelToken);
 
         var order = await _db.Orders.FirstOrDefaultAsync(x => x.Id == tx.OrderId, cancelToken);
@@ -324,6 +330,14 @@ public class IyzicoPaymentService
         }
 
         var verdict = IyzicoVerifier.Evaluate(tx, result, credentials.SecretKey, settings.VerifyResponseSignature);
+
+        if (verdict.Status is IyzicoTransactionStatus.Paid or IyzicoTransactionStatus.FraudReview &&
+            (IyzicoRequestBuilder.GetOrderAmount(order) != IyzicoRequestBuilder.Round(tx.Amount) ||
+             !string.Equals(order.CustomerCurrencyCode, tx.Currency, StringComparison.OrdinalIgnoreCase)))
+        {
+            // The order total or currency was edited after the payment page was opened.
+            verdict = new(IyzicoTransactionStatus.VerificationFailed, "ORDER_CHANGED", "Order total or currency changed after the payment was started.");
+        }
         var previous = tx.Status;
 
         switch (verdict.Status)
@@ -709,12 +723,103 @@ public class IyzicoPaymentService
             }
         }
 
+        await CancelStaleUnpaidOrdersAsync(maxTransactions, cancelToken);
+
         return open.Count;
+    }
+
+    /// <summary>
+    /// Cancels iyzico orders that stayed unpaid longer than <see cref="IyzicoSettings.CancelUnpaidOrdersAfterHours"/>
+    /// and have no open, paid or disputed attempt. Cancelling restocks the items (Smartstore CancelOrderAsync).
+    /// A failed attempt alone never cancels an order: the customer can retry the payment until then.
+    /// </summary>
+    public async Task<int> CancelStaleUnpaidOrdersAsync(int maxOrders = 50, CancellationToken cancelToken = default)
+    {
+        var now = UtcNow();
+        var minAge = now.AddHours(-1);
+
+        var candidates = await _db.Orders
+            .AsNoTracking()
+            .Where(x =>
+                !x.Deleted &&
+                x.PaymentMethodSystemName == IyzicoProvider.SystemName &&
+                x.PaymentStatusId == (int)PaymentStatus.Pending &&
+                x.OrderStatusId == (int)OrderStatus.Pending &&
+                x.CreatedOnUtc < minAge)
+            .OrderBy(x => x.CreatedOnUtc)
+            .Take(maxOrders)
+            .Select(x => new { x.Id, x.StoreId, x.CreatedOnUtc })
+            .ToListAsync(cancelToken);
+
+        var cancelled = 0;
+
+        foreach (var candidate in candidates)
+        {
+            cancelToken.ThrowIfCancellationRequested();
+
+            var settings = await _settingFactory.LoadSettingsAsync<IyzicoSettings>(candidate.StoreId);
+            if (settings.CancelUnpaidOrdersAfterHours <= 0 || candidate.CreatedOnUtc > now.AddHours(-settings.CancelUnpaidOrdersAfterHours))
+            {
+                continue;
+            }
+
+            // Settle open attempts first, outside the order lock (processing takes token, then order lock).
+            var openTokens = await _db.IyzicoTransactions()
+                .AsNoTracking()
+                .Where(x => x.OrderId == candidate.Id && (x.Status == IyzicoTransactionStatus.Initialized || x.Status == IyzicoTransactionStatus.Pending))
+                .Select(x => x.Token)
+                .ToListAsync(cancelToken);
+
+            foreach (var token in openTokens)
+            {
+                await ProcessTokenAsync(token, IyzicoEventSource.Reconciliation, cancelToken);
+            }
+
+            await using var orderLock = await AcquireOrderLockAsync(candidate.Id, cancelToken);
+
+            var order = await _db.Orders.FirstOrDefaultAsync(x => x.Id == candidate.Id, cancelToken);
+            if (order == null)
+            {
+                continue;
+            }
+
+            await _db.Entry(order).ReloadAsync(cancelToken);
+
+            var statuses = await _db.IyzicoTransactions()
+                .AsNoTracking()
+                .Where(x => x.OrderId == order.Id)
+                .Select(x => x.Status)
+                .ToListAsync(cancelToken);
+
+            var onlyDeadAttempts = statuses.All(x => x is IyzicoTransactionStatus.Failed or IyzicoTransactionStatus.Expired);
+            if (!onlyDeadAttempts || order.PaymentStatus != PaymentStatus.Pending || !order.CanCancelOrder() || order.OrderStatus != OrderStatus.Pending)
+            {
+                continue;
+            }
+
+            try
+            {
+                await _orderProcessingService.CancelOrderAsync(order, true);
+                _db.OrderNotes.Add(order, $"iyzico: order cancelled automatically because it was not paid within {settings.CancelUnpaidOrdersAfterHours} hours. Reserved stock was released.");
+                await _db.SaveChangesAsync(cancelToken);
+                cancelled++;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                Logger.LogError(ex, "iyzico: could not cancel unpaid order {OrderId}.", order.Id);
+                DetachAll();
+            }
+        }
+
+        return cancelled;
     }
 
     #endregion
 
     #region Utilities
+
+    private Task<ILockHandle> AcquireOrderLockAsync(int orderId, CancellationToken cancelToken)
+        => _lockProvider.GetLock($"motorshop.iyzico.order:{orderId}").AcquireAsync(LockTimeout, cancelToken);
 
     private void Touch(IyzicoTransaction tx, IyzicoVerdict verdict)
     {

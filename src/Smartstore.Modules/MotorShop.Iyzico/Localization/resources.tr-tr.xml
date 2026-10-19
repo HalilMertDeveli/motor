@@ -48,6 +48,8 @@
     <LocaleResource Name="BasketItemCategory.Hint"><Value>Sepet kalemleri için iyzico'ya gönderilen kategori.</Value></LocaleResource>
     <LocaleResource Name="TryCancelOnSameDayFullRefund"><Value>Aynı gün tam iadede iptal et</Value></LocaleResource>
     <LocaleResource Name="TryCancelOnSameDayFullRefund.Hint"><Value>Ödeme günü yapılan tam iadede önce iyzico iptal servisi denenir; kart ekstresinde işlem görünmez. Başarısız olursa iade yapılır.</Value></LocaleResource>
+    <LocaleResource Name="CancelUnpaidOrdersAfterHours"><Value>Ödenmemiş siparişleri iptal et (saat)</Value></LocaleResource>
+    <LocaleResource Name="CancelUnpaidOrdersAfterHours.Hint"><Value>Bu kadar saat sonra hâlâ ödenmemiş ve açık ödeme denemesi olmayan iyzico siparişlerini iptal eder. İptal, ayrılan stoğu serbest bırakır ve müşteriye bildirim gönderir. 0 kapatır.</Value></LocaleResource>
     <LocaleResource Name="AdditionalFee"><Value>Ek ücret</Value></LocaleResource>
     <LocaleResource Name="AdditionalFee.Hint"><Value>Bu ödeme yöntemi için müşteriden alınan ek ücret.</Value></LocaleResource>
     <LocaleResource Name="AdditionalFeePercentage"><Value>Ek ücret yüzde olarak</Value></LocaleResource>

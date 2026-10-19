@@ -48,6 +48,8 @@
     <LocaleResource Name="BasketItemCategory.Hint"><Value>Category sent to iyzico for basket items.</Value></LocaleResource>
     <LocaleResource Name="TryCancelOnSameDayFullRefund"><Value>Cancel same-day full refunds</Value></LocaleResource>
     <LocaleResource Name="TryCancelOnSameDayFullRefund.Hint"><Value>A full refund on the payment day first tries the iyzico cancel service, which leaves no entry on the card statement. Falls back to a refund.</Value></LocaleResource>
+    <LocaleResource Name="CancelUnpaidOrdersAfterHours"><Value>Cancel unpaid orders after (hours)</Value></LocaleResource>
+    <LocaleResource Name="CancelUnpaidOrdersAfterHours.Hint"><Value>Cancels iyzico orders that are still unpaid after this many hours and have no open payment attempt. Cancelling releases the reserved stock and notifies the customer. 0 turns it off.</Value></LocaleResource>
     <LocaleResource Name="AdditionalFee"><Value>Additional fee</Value></LocaleResource>
     <LocaleResource Name="AdditionalFee.Hint"><Value>Additional fee charged to the customer for this payment method.</Value></LocaleResource>
     <LocaleResource Name="AdditionalFeePercentage"><Value>Additional fee as percentage</Value></LocaleResource>
