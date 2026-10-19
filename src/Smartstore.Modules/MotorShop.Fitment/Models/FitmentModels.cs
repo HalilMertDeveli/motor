@@ -35,7 +35,7 @@ public class ProductFitmentModel
 
         return vehicle.Make.Equals(Selection.Make, StringComparison.OrdinalIgnoreCase)
             && (string.IsNullOrEmpty(Selection.Model) || vehicle.Model.Equals(Selection.Model, StringComparison.OrdinalIgnoreCase))
-            && (!Selection.Year.HasValue || (vehicle.YearFrom <= Selection.Year && vehicle.YearTo >= Selection.Year));
+            && (!Selection.Year.HasValue || vehicle.CoversYear(Selection.Year.Value));
     }
 }
 
@@ -51,11 +51,11 @@ public class MotorVehicleModel : EntityModelBase
     public string Model { get; set; }
 
     [LocalizedDisplay("*YearFrom")]
-    [Range(1950, 2100)]
+    [Range(VehicleInput.MinYear, VehicleInput.MaxYear)]
     public int YearFrom { get; set; } = DateTime.Now.Year;
 
     [LocalizedDisplay("*YearTo")]
-    [Range(1950, 2100)]
+    [Range(VehicleInput.MinYear, VehicleInput.MaxYear)]
     public int YearTo { get; set; } = DateTime.Now.Year;
 
     [LocalizedDisplay("*EngineCc")]

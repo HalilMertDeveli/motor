@@ -28,7 +28,7 @@
                 <tr class="@(Model.Fits(v) ? "table-success" : null)">
                     <td>@v.Make</td>
                     <td>@v.Model</td>
-                    <td>@v.YearFrom – @v.YearTo</td>
+                    <td>@v.FirstYear – @v.LastYear</td>
                     <td>@(v.EngineCc.HasValue ? $"{v.EngineCc} cc" : "-")</td>
                 </tr>
             }

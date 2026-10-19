@@ -90,7 +90,7 @@
                     <tr>
                         <td>@v.Make</td>
                         <td>@v.Model</td>
-                        <td>@v.YearFrom – @v.YearTo</td>
+                        <td>@v.FirstYear – @v.LastYear</td>
                         <td>@(v.EngineCc?.ToString() ?? "-")</td>
                         <td>@(Model.ProductCounts.TryGetValue(v.Id, out var count) ? count : 0)</td>
                         <td class="text-right">

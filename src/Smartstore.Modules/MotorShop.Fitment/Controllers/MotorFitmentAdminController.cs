@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Fitment.Domain;
 using MotorShop.Fitment.Models;
+using MotorShop.Fitment.Services;
 using Smartstore;
 using Smartstore.Core.Data;
 using Smartstore.Core.Security;
@@ -49,16 +50,13 @@ public class MotorFitmentAdminController : AdminController
         {
             NotifyError(T("Plugins.MotorShop.Fitment.MakeModelRequired"));
         }
+        else if (VehicleInput.TryCreate(v.Make, v.Model, v.YearFrom, v.YearTo, v.EngineCc, out var vehicle))
+        {
+            await AddVehiclesAsync([vehicle]);
+        }
         else
         {
-            await AddVehiclesAsync([new MotorVehicle
-            {
-                Make = v.Make.Trim(),
-                Model = v.Model.Trim(),
-                YearFrom = Math.Min(v.YearFrom, v.YearTo),
-                YearTo = Math.Max(v.YearFrom, v.YearTo),
-                EngineCc = v.EngineCc
-            }]);
+            NotifyError(T("Plugins.MotorShop.Fitment.InvalidLines", $"{v.Make};{v.Model};{v.YearFrom};{v.YearTo}"));
         }
 
         return RedirectToAction(nameof(Configure));
@@ -76,22 +74,9 @@ public class MotorFitmentAdminController : AdminController
 
         foreach (var line in model.BulkImport.EmptyNull().Split('\n').Select(x => x.Trim()).Where(x => x.Length > 0))
         {
-            var parts = line.Split([';', '\t'], StringSplitOptions.TrimEntries);
-
-            if (parts.Length >= 4
-                && parts[0].HasValue()
-                && parts[1].HasValue()
-                && int.TryParse(parts[2], out var from)
-                && int.TryParse(parts[3], out var to))
+            if (VehicleInput.TryParseLine(line, out var vehicle))
             {
-                vehicles.Add(new MotorVehicle
-                {
-                    Make = parts[0],
-                    Model = parts[1],
-                    YearFrom = Math.Min(from, to),
-                    YearTo = Math.Max(from, to),
-                    EngineCc = parts.Length > 4 && int.TryParse(parts[4], out var cc) ? cc : null
-                });
+                vehicles.Add(vehicle);
             }
             else
             {
