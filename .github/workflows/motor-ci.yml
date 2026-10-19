@@ -1,0 +1,63 @@
+name: MOTOR build and test
+
+on:
+  pull_request:
+    branches: [motor]
+  push:
+    branches: [motor]
+  workflow_dispatch:
+
+concurrency:
+  group: motor-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+  # Avoids InternalLoggerException on .NET CI images
+  MSBUILDTERMINALLOGGER: "off"
+
+jobs:
+  build-test:
+    name: Build and test (Release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Uses the SDK pinned in global.json, the same one used for local builds.
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props', 'global.json') }}
+        restore-keys: nuget-${{ runner.os }}-
+
+    - name: Restore
+      run: dotnet restore Smartstore.sln
+
+    - name: Build
+      run: dotnet build Smartstore.sln -c Release --no-restore
+
+    - name: Test
+      run: dotnet test Smartstore.sln -c Release --no-restore --no-build --logger trx --results-directory TestResults
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: TestResults/*.trx
+        if-no-files-found: ignore
+        retention-days: 14
