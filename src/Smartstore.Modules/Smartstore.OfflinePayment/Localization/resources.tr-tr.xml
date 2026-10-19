@@ -1,0 +1,175 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+
+    <LocaleResource Name="Plugins.FriendlyName.SmartStore.OfflinePayment" AppendRootKey="false">
+        <Value>Çevrim dışı ödeme yöntemleri</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.SmartStore.OfflinePayment" AppendRootKey="false">
+        <Value>Otomatik ödeme talimatı, kredi kartı, fatura ile ödeme, ön ödeme, kapıda ödeme gibi çevrim dışı ödeme yöntemleri sunar.</Value>
+    </LocaleResource>
+
+    <!-- CashOnDelivery -->
+    <LocaleResource Name="Plugins.FriendlyName.Payments.CashOnDelivery" AppendRootKey="false">
+        <Value>Kapıda ödeme</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.CashOnDelivery" AppendRootKey="false">
+        <Value>Siparişiniz oluşturulduktan sonra siparişi onaylamak için ekibimiz sizinle iletişime geçecektir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Payment.CashOnDelivery" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="AdminInstruction">
+                <Value><![CDATA[ ]]></Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <!-- Invoice -->
+    <LocaleResource Name="Plugins.FriendlyName.Payments.Invoice" AppendRootKey="false">
+        <Value>Fatura ile ödeme</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.Invoice" AppendRootKey="false">
+        <Value>Siparişiniz oluşturulduktan sonra siparişi onaylamak için ekibimiz sizinle iletişime geçecektir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Payment.Invoice" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="AdminInstruction">
+                <Value><![CDATA[ ]]></Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <!-- PayInStore -->
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayInStore" AppendRootKey="false">
+        <Value>Mağazada ödeme</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.PayInStore" AppendRootKey="false">
+        <Value>Ürünleri mağazamızda ayırtabilir, siparişinizi teslim alırken ödemeyi mağazada yapabilirsiniz.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Payment.PayInStore" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="AdminInstruction">
+                <Value><![CDATA[ ]]></Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <!-- Prepayment -->
+    <LocaleResource Name="Plugins.FriendlyName.Payments.Prepayment" AppendRootKey="false">
+        <Value>Havale / EFT ile ön ödeme</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.Prepayment" AppendRootKey="false">
+        <Value>Siparişiniz oluşturulduktan sonra siparişi onaylamak için ekibimiz sizinle iletişime geçecektir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Payment.Prepayment" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="AdminInstruction">
+                <Value><![CDATA[ ]]></Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <!-- Manual -->
+    <LocaleResource Name="Plugins.FriendlyName.Payments.Manual" AppendRootKey="false">
+        <Value>Kredi kartı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.Manual" AppendRootKey="false">
+        <Value>Siparişiniz oluşturulduktan sonra siparişi onaylamak için ekibimiz sizinle iletişime geçecektir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Payments.Manual" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="AdminInstruction">
+                <Value><![CDATA[ ]]></Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.TransactMode">
+                <Value>Sipariş tamamlandıktan sonraki ödeme durumu</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.TransactMode.Hint">
+                <Value>Sipariş tamamlandıktan sonraki ödeme durumunu belirler.</Value>
+            </LocaleResource>
+            <LocaleResource Name="CreditCardBrands">
+                <Value>Visa|MasterCard;Master Card|Discover|Amex;American Express</Value>
+            </LocaleResource>
+            <LocaleResource Name="ExcludedCreditCards">
+                <Value>Hariç tutulan kredi kartları</Value>
+            </LocaleResource>
+            <LocaleResource Name="ExcludedCreditCards.Hint">
+                <Value>Müşterilerin ödeme için kullanamayacağı kredi kartları.</Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <!-- DirectDebit -->
+    <LocaleResource Name="Plugins.FriendlyName.Payments.DirectDebit" AppendRootKey="false">
+        <Value>Otomatik ödeme talimatı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.DirectDebit" AppendRootKey="false">
+        <Value>Siparişiniz oluşturulduktan sonra siparişi onaylamak için ekibimiz sizinle iletişime geçecektir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Payments.DirectDebit" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="AdminInstruction">
+                <Value><![CDATA[ ]]></Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitAccountHolder">
+                <Value>Hesap sahibinin adı</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitAccountHolder.Hint">
+                <Value>Banka hesabı sahibinin adı</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitAccountNumber">
+                <Value>Hesap numarası</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitBankCode">
+                <Value>Banka kodu</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitBankCode.Hint">
+                <Value>Banka kodu numarası</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitCountry">
+                <Value>Ülke</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitCountry.Hint">
+                <Value>Banka hesabınızın bulunduğu ülke.</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitBankName">
+                <Value>Banka adı</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitIban">
+                <Value>IBAN</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitIban.Hint">
+                <Value>Uluslararası Banka Hesap Numarası</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitBic">
+                <Value>BIC</Value>
+            </LocaleResource>
+            <LocaleResource Name="DirectDebitBic.Hint">
+                <Value>Banka tanımlayıcı kodu (SWIFT)</Value>
+            </LocaleResource>
+            <LocaleResource Name="EnterIban">
+                <Value>IBAN girin</Value>
+            </LocaleResource>
+            <LocaleResource Name="NoEnterIban">
+                <Value>Hayır</Value>
+            </LocaleResource>
+            <LocaleResource Name="YesEnterIban">
+                <Value>Evet</Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <!-- PuchaseOrderNumber -->
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PurchaseOrderNumber" AppendRootKey="false">
+        <Value>Satın alma siparişi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Payments.PurchaseOrder" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="AdminInstruction">
+                <Value><![CDATA[ ]]></Value>
+            </LocaleResource>
+            <LocaleResource Name="PurchaseOrderNumber">
+                <Value>Satın alma sipariş numarası</Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+</Language>

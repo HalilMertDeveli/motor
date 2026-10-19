@@ -1,0 +1,42 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.Smartstore.Facebook.Auth" AppendRootKey="false">
+        <Value>Facebook ile giriş</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Smartstore.Facebook.Auth" AppendRootKey="false">
+        <Value>Mağazaya Facebook ile kimlik doğrulama ekler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[
+			<p>Facebook ile kimlik doğrulamayı ayarlamak için:</p>
+			<ul>
+				<li><a href="https://developers.facebook.com/apps/create/" target="_blank">Facebook</a> üzerinde <b>Consumer</b> türünde yeni bir uygulama oluşturun. </li>
+				<li>Erişim bilgilerini (App-ID &amp; App-Secret) aşağıdaki forma girin.</li>
+				<li>Aşağıda listelenen URL'yi <b>My app &gt; Facebook Login &gt; Settings &gt; Valid OAuth Redirect URIs</b> alanına girin.</li>
+				<li>Oluşturulan uygulamanın gelişmiş ayarlarında, Domain Manager bölümüne alan adınızı girin.</li>
+			</ul>
+			]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Login">
+        <Value>Facebook ile giriş yap</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientKeyIdentifier">
+        <Value>App ID</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientKeyIdentifier.Hint">
+        <Value>App ID değerinizi buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientSecret">
+        <Value>App Secret</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientSecret.Hint">
+        <Value>App Secret değerinizi buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri">
+        <Value>OAuth yönlendirme URI'si</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri.Hint">
+        <Value>Facebook'ta girilmesi gereken OAuth yönlendirme URI'si.</Value>
+    </LocaleResource>
+</Language>

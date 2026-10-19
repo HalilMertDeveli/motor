@@ -1,0 +1,67 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+
+    <LocaleResource Name="Plugins.FriendlyName.SmartStore.Tax" AppendRootKey="false">
+        <Value>Standart vergi hesaplaması</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.SmartStore.Tax" AppendRootKey="false">
+        <Value>Sabit vergi oranı, bölgeye göre vergi oranı vb. dahil standart vergi hesaplama modülleri sunar.</Value>
+    </LocaleResource>
+
+    <!-- FixedRate -->
+    <LocaleResource Name="Plugins.FriendlyName.Tax.FixedRate" AppendRootKey="false">
+        <Value>Sabit vergi oranı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Tax.FixedRate" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="Fields.TaxCategoryName">
+                <Value>Vergi kategorisi</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.Rate">
+                <Value>Oran</Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <!-- ByRegion -->
+    <LocaleResource Name="Plugins.FriendlyName.Tax.CountryStateZip" AppendRootKey="false">
+        <Value>Bölgeye göre vergi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Tax.CountryStateZip" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="NoTaxCategoriesFound">
+                <Value>Hiç vergi kategorisi bulunamadı.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.Country">
+                <Value>Ülke</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.StateProvince">
+                <Value>İl</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.StateProvince.Hint">
+                <Value>Yıldız işareti (*) seçilirse bu vergi oranı, ilden bağımsız olarak seçilen ülkedeki tüm müşterilere uygulanır.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.Zip">
+                <Value>Posta kodu</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.Zip.Hint">
+                <Value>Posta kodu. Posta kodu boş bırakılırsa bu vergi oranı, posta kodundan bağımsız olarak seçilen ülke veya ildeki tüm müşterilere uygulanır.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.TaxCategory">
+                <Value>Vergi kategorisi</Value>
+            </LocaleResource>
+            <LocaleResource Name="Fields.Percentage">
+                <Value>Yüzde</Value>
+            </LocaleResource>
+            <LocaleResource Name="AddRecord">
+                <Value>Vergi oranı ekle</Value>
+            </LocaleResource>
+            <LocaleResource Name="AddRecord.Hint">
+                <Value>Yeni bir vergi oranı ekler</Value>
+            </LocaleResource>
+            <LocaleResource Name="AddNewRecord.Success">
+                <Value>Yeni vergi oranı başarıyla eklendi.</Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+</Language>
