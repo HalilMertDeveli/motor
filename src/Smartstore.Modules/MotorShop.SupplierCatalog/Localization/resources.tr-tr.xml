@@ -1,0 +1,22 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.SupplierCatalog" AppendRootKey="false"><Value>Tedarikçi kataloğu içe aktarma</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.SupplierCatalog" AppendRootKey="false"><Value>Tedarikçi katalog paketini (products.json + görseller) kategori, marka, beden ve görselleriyle içe aktarır.</Value></LocaleResource>
+    <LocaleResource Name="AdminInstruction"><Value>Katalog paketini yükleyin (.zip: products.json ve images klasörü). Eksik kategori ve markalar oluşturulur, ürünler stok koduna (SKU) göre eşleştirilir; aynı paketi tekrar yüklemek kopya oluşturmaz, günceller. Görseller yalnızca hiç görseli olmayan ürünlere eklenir.</Value></LocaleResource>
+    <LocaleResource Name="ImportPackage"><Value>Katalog paketini içe aktar</Value></LocaleResource>
+    <LocaleResource Name="Package"><Value>Katalog paketi (.zip)</Value></LocaleResource>
+    <LocaleResource Name="Package.Hint"><Value>products.json ve images/*.jpg içerir. En fazla 512 MB.</Value></LocaleResource>
+    <LocaleResource Name="PackageRequired"><Value>Lütfen bir katalog paketi (.zip) seçin.</Value></LocaleResource>
+    <LocaleResource Name="UpdateExistingProducts"><Value>Mevcut ürünlerin adını, açıklamasını ve fiyatını güncelle</Value></LocaleResource>
+    <LocaleResource Name="PublishUnpricedProducts"><Value>Fiyatı olmayan ürünleri yayınla</Value></LocaleResource>
+    <LocaleResource Name="StartImport"><Value>İçe aktarmayı başlat</Value></LocaleResource>
+    <LocaleResource Name="ImportCompleted"><Value>Katalog içe aktarıldı.</Value></LocaleResource>
+    <LocaleResource Name="ImportFailed"><Value>Katalog içe aktarılamadı. Ayrıntılar için günlüğe bakın.</Value></LocaleResource>
+    <LocaleResource Name="LastResult"><Value>İçe aktarma sonucu</Value></LocaleResource>
+    <LocaleResource Name="Result.Products"><Value>Ürünler: {0} yeni, {1} güncellendi</Value></LocaleResource>
+    <LocaleResource Name="Result.Unpublished"><Value>Yayında değil (fiyatsız): {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Categories"><Value>Yeni kategori: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Brands"><Value>Yeni marka: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Pictures"><Value>Eklenen görsel: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Duration"><Value>Süre: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Warnings"><Value>{0} uyarı</Value></LocaleResource>
+</Language>

@@ -1,0 +1,22 @@
+<Language Name="English" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.SupplierCatalog" AppendRootKey="false"><Value>Supplier catalog import</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.SupplierCatalog" AppendRootKey="false"><Value>Imports a supplier catalog package (products.json + images) with categories, brands, sizes and pictures.</Value></LocaleResource>
+    <LocaleResource Name="AdminInstruction"><Value>Upload a catalog package (.zip with products.json and an images folder). Categories and brands are created when missing, products are matched by SKU, so importing the same package again updates instead of duplicating. Pictures are only added to products that have none.</Value></LocaleResource>
+    <LocaleResource Name="ImportPackage"><Value>Import catalog package</Value></LocaleResource>
+    <LocaleResource Name="Package"><Value>Catalog package (.zip)</Value></LocaleResource>
+    <LocaleResource Name="Package.Hint"><Value>Contains products.json and images/*.jpg. Max. 512 MB.</Value></LocaleResource>
+    <LocaleResource Name="PackageRequired"><Value>Please select a catalog package (.zip).</Value></LocaleResource>
+    <LocaleResource Name="UpdateExistingProducts"><Value>Update name, description and price of existing products</Value></LocaleResource>
+    <LocaleResource Name="PublishUnpricedProducts"><Value>Publish products without a price</Value></LocaleResource>
+    <LocaleResource Name="StartImport"><Value>Start import</Value></LocaleResource>
+    <LocaleResource Name="ImportCompleted"><Value>The catalog has been imported.</Value></LocaleResource>
+    <LocaleResource Name="ImportFailed"><Value>The catalog import failed. See the log for details.</Value></LocaleResource>
+    <LocaleResource Name="LastResult"><Value>Import result</Value></LocaleResource>
+    <LocaleResource Name="Result.Products"><Value>Products: {0} created, {1} updated</Value></LocaleResource>
+    <LocaleResource Name="Result.Unpublished"><Value>Unpublished (no price): {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Categories"><Value>New categories: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Brands"><Value>New brands: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Pictures"><Value>Pictures added: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Duration"><Value>Duration: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Warnings"><Value>{0} warnings</Value></LocaleResource>
+</Language>

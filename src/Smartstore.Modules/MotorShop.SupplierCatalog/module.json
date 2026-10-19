@@ -1,0 +1,12 @@
+{
+  "$schema": "../module.schema.json",
+  "Author": "MotorShop",
+  "Group": "Admin",
+  "SystemName": "MotorShop.SupplierCatalog",
+  "FriendlyName": "Supplier catalog import",
+  "Description": "Imports a supplier catalog package (products.json + images) with categories, brands, sizes and pictures.",
+  "Version": "1.0.0",
+  "MinAppVersion": "6.4.0",
+  "Order": 2,
+  "ResourceRootKey": "Plugins.MotorShop.SupplierCatalog"
+}
