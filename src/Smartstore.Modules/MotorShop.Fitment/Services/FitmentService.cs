@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Fitment.Domain;
@@ -19,6 +20,12 @@ public record VehicleSelection(string Make, string Model, int? Year)
 public class FitmentService
 {
     const string CookieName = ".MotorShop.Vehicle";
+
+    /// <summary>
+    /// Marks the cookie format "v2|Make|Model|Year" with each part URL-encoded separately.
+    /// Cookies without it use the legacy format.
+    /// </summary>
+    const string CookieVersionPrefix = "v2|";
 
     private readonly SmartDbContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -68,8 +75,9 @@ public class FitmentService
             .Select(x => new { x.YearFrom, x.YearTo })
             .ToListAsync();
 
+        // Same rule as GetFittingProductIdsAsync: a range is [min(YearFrom, YearTo), max(YearFrom, YearTo)].
         return [.. ranges
-            .SelectMany(x => Enumerable.Range(x.YearFrom, Math.Max(0, x.YearTo - x.YearFrom) + 1))
+            .SelectMany(x => Enumerable.Range(Math.Min(x.YearFrom, x.YearTo), Math.Abs(x.YearTo - x.YearFrom) + 1))
             .Distinct()
             .OrderByDescending(x => x)];
     }
@@ -94,7 +102,10 @@ public class FitmentService
         if (selection.Year.HasValue)
         {
             var year = selection.Year.Value;
-            vehicles = vehicles.Where(x => x.YearFrom <= year && x.YearTo >= year);
+            // Inclusive in either direction, so a reversed range (YearTo < YearFrom) still matches every year GetYearsAsync offers.
+            vehicles = vehicles.Where(x =>
+                (x.YearFrom <= year && x.YearTo >= year) ||
+                (x.YearTo <= year && x.YearFrom >= year));
         }
 
         return _db.ProductMotorVehicles()
@@ -125,12 +136,28 @@ public class FitmentService
             return null;
         }
 
-        var parts = Uri.UnescapeDataString(raw).Split('|');
+        string[] parts;
+        if (raw.StartsWith(CookieVersionPrefix, StringComparison.Ordinal))
+        {
+            parts = raw[CookieVersionPrefix.Length..].Split('|');
+            if (parts.Length != 3)
+            {
+                return null;
+            }
+
+            parts = [.. parts.Select(Uri.UnescapeDataString)];
+        }
+        else
+        {
+            // Legacy cookie: "Make|Model|Year" escaped as a whole. Still readable unless make or model contained '|'.
+            parts = Uri.UnescapeDataString(raw).Split('|');
+        }
+
         var make = parts.ElementAtOrDefault(0);
         var model = parts.ElementAtOrDefault(1);
-        int? year = int.TryParse(parts.ElementAtOrDefault(2), out var y) ? y : null;
+        int? year = int.TryParse(parts.ElementAtOrDefault(2), NumberStyles.None, CultureInfo.InvariantCulture, out var y) ? y : null;
 
-        var selection = new VehicleSelection(make, model, year);
+        var selection = new VehicleSelection(make, string.IsNullOrWhiteSpace(model) ? null : model, year);
         return selection.IsEmpty ? null : selection;
     }
 
@@ -148,7 +175,12 @@ public class FitmentService
             return;
         }
 
-        var value = Uri.EscapeDataString($"{selection.Make}|{selection.Model}|{selection.Year}");
+        // Escape each part on its own, so a '|' inside make or model can never be taken for the separator.
+        var value = CookieVersionPrefix + string.Join('|',
+            Uri.EscapeDataString(selection.Make),
+            Uri.EscapeDataString(selection.Model ?? string.Empty),
+            selection.Year?.ToString(CultureInfo.InvariantCulture));
+
         response.Cookies.Append(CookieName, value, new CookieOptions
         {
             Expires = DateTimeOffset.UtcNow.AddDays(365),
