@@ -29,19 +29,22 @@ public class MotorCatalogAdminController : AdminController
     private readonly CatalogPublicationService _publication;
     private readonly VehicleReferenceService _vehicles;
     private readonly FitmentMatcher _matcher;
+    private readonly BundledResearchService _bundled;
 
     public MotorCatalogAdminController(
         SmartDbContext db,
         CatalogImportService importService,
         CatalogPublicationService publication,
         VehicleReferenceService vehicles,
-        FitmentMatcher matcher)
+        FitmentMatcher matcher,
+        BundledResearchService bundled)
     {
         _db = db;
         _importService = importService;
         _publication = publication;
         _vehicles = vehicles;
         _matcher = matcher;
+        _bundled = bundled;
     }
 
     private string CurrentUser
@@ -115,6 +118,15 @@ public class MotorCatalogAdminController : AdminController
         }
 
         return RedirectToAction(nameof(Batch), new { id = result.Batch.Id });
+    }
+
+    [HttpPost]
+    [Permission(Permissions.Catalog.Product.Update)]
+    public async Task<IActionResult> LoadBundledResearch()
+    {
+        var result = await _bundled.LoadAsync();
+        NotifySuccess(T(ResRoot + "Bundled.Loaded", result.SourcesAdded, result.Vehicles.Batch.Id, result.Parts.Batch.Id));
+        return RedirectToAction(nameof(Index));
     }
 
     [Permission(Permissions.Catalog.Product.Read)]

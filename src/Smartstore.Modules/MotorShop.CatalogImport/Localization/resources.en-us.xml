@@ -16,6 +16,10 @@
     <LocaleResource Name="Stage.NoFile"><Value>Choose a file.</Value></LocaleResource>
     <LocaleResource Name="Stage.TooLarge"><Value>The file is larger than 5 MB.</Value></LocaleResource>
     <LocaleResource Name="Stage.AlreadyProcessed"><Value>This file was already processed in batch #{0}; nothing was changed.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Title"><Value>Bundled research dataset 2026-10</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Hint"><Value>Source register (43 sources), 92 motorcycle reference records and 78 spare-part research candidates with their sources. Loading only stages them; publishing still needs your review. Parts stay research candidates while their source is PERMISSION_REQUIRED.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Load"><Value>Load dataset</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Loaded"><Value>{0} sources added. Motorcycles: batch #{1}, parts: batch #{2}.</Value></LocaleResource>
     <LocaleResource Name="Sources"><Value>Data sources and permissions</Value></LocaleResource>
     <LocaleResource Name="Source"><Value>Source</Value></LocaleResource>
     <LocaleResource Name="Source.Key"><Value>Key</Value></LocaleResource>

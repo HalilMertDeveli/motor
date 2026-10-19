@@ -34,6 +34,18 @@
 </div>
 
 <div class="card mb-4">
+    <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <strong>@T("Plugins.MotorShop.CatalogImport.Bundled.Title")</strong>
+            <div class="small text-muted">@T("Plugins.MotorShop.CatalogImport.Bundled.Hint")</div>
+        </div>
+        <form asp-action="LoadBundledResearch" method="post">
+            <button type="submit" class="btn btn-secondary">@T("Plugins.MotorShop.CatalogImport.Bundled.Load")</button>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
     <div class="card-header"><strong>@T("Plugins.MotorShop.CatalogImport.Stage.Title")</strong></div>
     <div class="card-body">
         <form asp-action="Stage" method="post" enctype="multipart/form-data">

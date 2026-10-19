@@ -16,6 +16,10 @@
     <LocaleResource Name="Stage.NoFile"><Value>Bir dosya seçin.</Value></LocaleResource>
     <LocaleResource Name="Stage.TooLarge"><Value>Dosya 5 MB sınırını aşıyor.</Value></LocaleResource>
     <LocaleResource Name="Stage.AlreadyProcessed"><Value>Bu dosya #{0} numaralı işlemde zaten işlendi; hiçbir şey değişmedi.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Title"><Value>Paketli araştırma veri seti 2026-10</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Hint"><Value>Kaynak kaydı (43 kaynak), 92 motosiklet referans kaydı ve 78 yedek parça araştırma adayı, kaynaklarıyla birlikte. Yükleme yalnızca ara alana alır; yayın yine sizin incelemenizi gerektirir. Kaynağı PERMISSION_REQUIRED olan parçalar araştırma adayı olarak kalır.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Load"><Value>Veri setini yükle</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Loaded"><Value>{0} kaynak eklendi. Motosikletler: işlem #{1}, parçalar: işlem #{2}.</Value></LocaleResource>
     <LocaleResource Name="Sources"><Value>Veri kaynakları ve izinler</Value></LocaleResource>
     <LocaleResource Name="Source"><Value>Kaynak</Value></LocaleResource>
     <LocaleResource Name="Source.Key"><Value>Anahtar</Value></LocaleResource>

@@ -8,6 +8,12 @@
 		<InternalsVisibleTo Include="MotorShop.CatalogImport.Tests" />
 	</ItemGroup>
 	<ItemGroup>
+		<!-- Bundled research datasets, read by BundledResearchService. -->
+		<Content Remove="Research\**" />
+		<None Remove="Research\**" />
+		<EmbeddedResource Include="Research\**\*.json" LogicalName="MotorShop.CatalogImport.Research.%(Filename)%(Extension)" />
+	</ItemGroup>
+	<ItemGroup>
 		<ProjectReference Include="..\..\Smartstore.Web\Smartstore.Web.csproj">
 			<Private>False</Private>
 			<CopyLocal>False</CopyLocal>

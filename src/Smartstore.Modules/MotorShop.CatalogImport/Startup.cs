@@ -24,6 +24,7 @@ internal class Startup : StarterBase
         builder.RegisterType<FitmentMatcher>().AsSelf().InstancePerLifetimeScope();
         builder.RegisterType<CatalogPublicationService>().AsSelf().InstancePerLifetimeScope();
         builder.RegisterType<VehicleReferenceService>().AsSelf().InstancePerLifetimeScope();
+        builder.RegisterType<BundledResearchService>().AsSelf().InstancePerLifetimeScope();
 
         if (appContext.IsInstalled)
         {
