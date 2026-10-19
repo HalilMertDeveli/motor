@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData;
+using Smartstore.Engine;
 using Smartstore.Web.Api.Models;
 
 namespace Smartstore.Web.Api.Security;
@@ -29,10 +30,12 @@ public sealed class BasicAuthenticationHandler : AuthenticationHandler<BasicAuth
 
     private readonly IWebApiService _apiService;
     private readonly IApiUserStore _apiUserStore;
+    private readonly IApplicationContext _appContext;
 
     public BasicAuthenticationHandler(
         IWebApiService apiService,
         IApiUserStore apiUserStore,
+        IApplicationContext appContext,
         IOptionsMonitor<BasicAuthenticationOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder)
@@ -40,6 +43,7 @@ public sealed class BasicAuthenticationHandler : AuthenticationHandler<BasicAuth
     {
         _apiService = apiService;
         _apiUserStore = apiUserStore;
+        _appContext = appContext;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -120,7 +124,15 @@ public sealed class BasicAuthenticationHandler : AuthenticationHandler<BasicAuth
         }
         catch (Exception ex)
         {
-            return Failure(ex.Message, ex);
+            // Reachable without valid credentials (e.g. a malformed authorization header),
+            // so only expose exception details if configured.
+            if (_appContext.AppConfiguration.ShowCustomErrors)
+            {
+                return Failure(ex.Message, ex);
+            }
+
+            Logger.LogWarning(ex, "Unexpected error while authenticating a Web API request.");
+            return Failure(ODataHelper.UnknownErrorMessage);
         }
     }
 
