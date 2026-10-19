@@ -1,0 +1,25 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Tracking" AppendRootKey="false"><Value>Kargo Takibi</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Tracking" AppendRootKey="false"><Value>Kargo firmasına göre ayarlanan adres şablonundan takip bağlantısı oluşturur, müşterinin sipariş detayında kargo firmasını, takip numarasını ve durumu gösterir. Kargo firması API'si kullanılmaz.</Value></LocaleResource>
+    <LocaleResource Name="Title"><Value>Kargo takibi</Value></LocaleResource>
+    <LocaleResource Name="Shipped"><Value>Kargoya verildi: {0}</Value></LocaleResource>
+    <LocaleResource Name="Delivered"><Value>Teslim edildi: {0}</Value></LocaleResource>
+    <LocaleResource Name="Carrier"><Value>Kargo firması</Value></LocaleResource>
+    <LocaleResource Name="TrackingNumber"><Value>Takip numarası</Value></LocaleResource>
+    <LocaleResource Name="TrackShipment"><Value>Kargonu takip et</Value></LocaleResource>
+    <LocaleResource Name="Carriers"><Value>Kargo firmaları</Value></LocaleResource>
+    <LocaleResource Name="Carriers.Hint"><Value>Her satıra bir firma: "Firma adı | https://.../{0}". {0} takip numarasıyla değiştirilir. Yalnızca https adresleri kabul edilir. # ile başlayan satırlar yok sayılır.</Value></LocaleResource>
+    <LocaleResource Name="DefaultCarrier"><Value>Varsayılan kargo firması</Value></LocaleResource>
+    <LocaleResource Name="DefaultCarrier.Hint"><Value>Gönderide kargo firması girilmemişse kullanılır. Yukarıdaki listedeki bir adla aynı olmalıdır.</Value></LocaleResource>
+    <LocaleResource Name="DefaultCarrierUnknown"><Value>Varsayılan kargo firması geçerli firmalar arasında yok.</Value></LocaleResource>
+    <LocaleResource Name="ShowOnOrderDetails"><Value>Sipariş detayında göster</Value></LocaleResource>
+    <LocaleResource Name="ShowOnOrderDetails.Hint"><Value>Müşterinin sipariş detay sayfasında kargo firması, takip numarası, takip bağlantısı ve durum gösterilir.</Value></LocaleResource>
+    <LocaleResource Name="ActiveCarriers"><Value>Geçerli kargo firmaları</Value></LocaleResource>
+    <LocaleResource Name="NoCarriers"><Value>Henüz kargo firması tanımlanmadı. Takip bağlantısı oluşturulmaz.</Value></LocaleResource>
+    <LocaleResource Name="InvalidLines"><Value>Yok sayılan satırlar ("|" yok, {0} yok, https değil veya tekrar eden ad):</Value></LocaleResource>
+    <LocaleResource Name="AdminInstruction"><Value>Takip bağlantısı, gönderiye takip numarası girildiğinde kargo firmasının şablonundan oluşturulur ve gönderinin "Takip URL" alanına yazılır. Elle girilen bir URL değiştirilmez. Kargo firması, gönderi düzenleme sayfasındaki "Kargo firması" alanından okunur.</Value></LocaleResource>
+    <LocaleResource Name="TurkishTemplates"><Value>Türkçe kargo e-postaları</Value></LocaleResource>
+    <LocaleResource Name="TurkishTemplates.Hint"><Value>"Kargoya verildi" ve "Teslim edildi" e-postalarına Türkçe konu ve metin ekler. Türkçe metni zaten olan şablonlar değiştirilmez.</Value></LocaleResource>
+    <LocaleResource Name="TurkishTemplates.Apply"><Value>Türkçe metinleri uygula</Value></LocaleResource>
+    <LocaleResource Name="TemplatesApplied"><Value>{0} Türkçe şablon değeri yazıldı.</Value></LocaleResource>
+</Language>
