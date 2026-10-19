@@ -238,6 +238,7 @@ src/Smartstore.Web/wwwroot/.well-known/*
 
 # User settings
 src/Smartstore.Web/Config/usersettings*
+src/Smartstore.Web/Config/connections*
 
 # Tools
 src/Tools/Smartstore.WebApi.Client/packages
