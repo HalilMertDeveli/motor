@@ -52,13 +52,13 @@
 }
 
 <div role="region" aria-labelledby="motor-new-title" class="product-grid motor-product-rail block">
-    <div lang="tr" class="motor-section-head" data-motor-reveal>
+    <div class="motor-section-head" data-motor-reveal>
         <div>
-            <span class="motor-eyebrow">Yeni gelenler</span>
-            <h2 id="motor-new-title" class="motor-section-title">Garaja yeni girenler</h2>
+            <span class="motor-eyebrow">@T("Themes.MotorDark.NewArrivals.Eyebrow")</span>
+            <h2 id="motor-new-title" class="motor-section-title">@T("Themes.MotorDark.NewArrivals.Title")</h2>
         </div>
         <a class="motor-section-link" asp-route="RecentlyAddedProducts">
-            Tümünü gör <svg aria-hidden="true"><use href="#mi-arrow" /></svg>
+            @T("Themes.MotorDark.NewArrivals.ViewAll") <svg aria-hidden="true"><use href="#mi-arrow" /></svg>
         </a>
     </div>
     <div class="block-body artlist-no-separators">
