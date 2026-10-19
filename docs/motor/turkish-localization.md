@@ -48,7 +48,9 @@ The migration is additive and idempotent. It:
 2. Imports the Turkish app pack and the installed modules' Turkish resources. **Insert only**: existing
    or admin-edited Turkish resources are never overwritten.
 3. Adds Turkish `Subject`/`Body` translations to message templates that have none for Turkish yet
-   (the English base template is kept).
+   (the English base template is kept). `ShipmentSent` and `ShipmentDelivered` are skipped: their Turkish
+   texts belong to MotorShop.Tracking (same "only if empty" rule). If Tracking was installed before the
+   Turkish language existed, click *Apply Turkish templates* in the Tracking configuration once.
 4. Adds the 81 provinces to Türkiye only if it has no state/provinces, sets the Turkish address format
    only if empty, adds the localized name "Türkiye".
 5. Sets the TRY display format only if TRY has no custom format.
@@ -89,6 +91,22 @@ Back up the database before changing currency or tax settings.
 6. **Countries**: `Admin > Configuration > Countries`: unpublish countries you do not ship to.
 7. **Default language**: if a store has an explicit default language, set it to Türkçe in
    `Admin > Configuration > Stores`.
+
+## Turkish "I" (dotted/dotless) — known risk
+
+Smartstore runs each request in the working language's culture. In tr-TR, `"I".ToLower()` is `"ı"` and
+`"i".ToUpper()` is `"İ"`, so culture-sensitive casing breaks ASCII keys. Found and fixed: the SQLite
+`NOCASE` collation and `lower()`/`upper()` overrides compared with the current culture, so every
+`Tax.TaxProvider.FixedRate.TaxCategoryId…` lookup failed and all KDV rates read as 0 (now invariant).
+PostgreSQL (`citext`) and SQL Server compare in the database and were not affected by that bug.
+About 130 other `ToLower()`/`ToUpper()` calls without an invariant culture remain in upstream code; they
+are mostly cache keys, file extensions and enum names. A dedicated audit is recommended before go-live.
+
+## Topic slugs
+
+Fresh tr-TR installs use Turkish slugs. Smartstore's *Disclaimer* topic uses `cayma-bilgilendirmesi`,
+because `cayma-hakki` belongs to MotorShop.Legal's own withdrawal topic. Which of the two withdrawal
+pages stays in the footer is a decision for the legal workstream.
 
 ## Business decisions — NEEDS OWNER / ACCOUNTANT CONFIRMATION
 

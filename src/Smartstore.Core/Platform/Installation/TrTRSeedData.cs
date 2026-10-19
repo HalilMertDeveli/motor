@@ -362,7 +362,7 @@ public class TrTRSeedData : InvariantSeedData
                 "privacyinfo" => "gizlilik-politikasi",
                 "shippinginfo" => "kargo-ve-iade",
                 "imprint" => "kunye",
-                "disclaimer" => "cayma-hakki",
+                "disclaimer" => "cayma-bilgilendirmesi", // "cayma-hakki" belongs to MotorShop.Legal's withdrawal topic
                 "paymentinfo" => "odeme-secenekleri",
                 _ => entity.Slug,
             };
