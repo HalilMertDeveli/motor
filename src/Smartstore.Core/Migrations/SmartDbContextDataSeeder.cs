@@ -28,6 +28,7 @@ public class SmartDbContextDataSeeder : IDataSeeder<SmartDbContext>
         builder.AddOrUpdate("Enums.JpegColorType.YCbCrRatio411", "YCbCr 4:1:1", "YCbCr 4:1:1");
         builder.AddOrUpdate("Enums.JpegColorType.YCbCrRatio410", "YCbCr 4:1:0", "YCbCr 4:1:0");
         builder.AddOrUpdate("Admin.Configuration.Settings.Media.GifQuantizationMethod", "GIF palette quantization", "GIF-Palettenquantisierung");
+        builder.AddOrUpdate("Admin.Configuration.Settings.Media.PngInterlaced", "Interlaced PNG (Adam7)", "PNG mit Zeilensprung (Adam7)");
 
         builder.AddOrUpdate("Admin.Configuration.Settings.Media.JpegColorType",
             "JPEG color type",
