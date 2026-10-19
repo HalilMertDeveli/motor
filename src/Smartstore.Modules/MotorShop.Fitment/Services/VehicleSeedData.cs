@@ -3,8 +3,9 @@ using MotorShop.Fitment.Domain;
 namespace MotorShop.Fitment.Services;
 
 /// <summary>
-/// Starter list of common motorcycles, imported on module installation.
-/// Year ranges are approximate and meant to be reviewed by the merchant.
+/// Sample list of common motorcycles. Seeded on app installation only when sample data is requested
+/// (see Module), and by the Initial migration when the module is added to an existing store.
+/// Year ranges are approximate and meant to be reviewed by the merchant. No product mappings are seeded.
 /// </summary>
 internal static class VehicleSeedData
 {
