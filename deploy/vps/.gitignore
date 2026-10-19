@@ -1,0 +1,10 @@
+# Server-local files: never commit
+.env
+.env.*
+!.env.example
+secrets/*
+!secrets/.gitkeep
+backups/
+state/
+test/secrets/
+test/.env.test
