@@ -4,7 +4,7 @@
   "Group": "Security",
   "SystemName": "MotorShop.Security",
   "FriendlyName": "Motor security hardening",
-  "Description": "Adds security response headers, hides the platform version header and exposes a /healthz liveness endpoint.",
+  "Description": "Adds security response headers, hides the platform version header, exposes /healthz (liveness) and /healthz/ready (database, task scheduler) and warns about unsafe production settings.",
   "Version": "1.0.0",
   "MinAppVersion": "6.4.0",
   "Order": 1

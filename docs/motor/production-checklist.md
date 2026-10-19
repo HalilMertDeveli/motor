@@ -6,6 +6,10 @@ network, paths) go into `src/Smartstore.Web/Config/usersettings.Production.json`
 on the server. That file and `Config/connections*.json` are ignored by git and
 Docker and must never be committed.
 
+Details on secrets, key backup, credential rotation, security headers and health
+checks: [security-operations.md](security-operations.md). A full example server file:
+[config/usersettings.Production.example.json](config/usersettings.Production.example.json).
+
 ## 1. Application settings
 
 Example `Config/usersettings.Production.json`:
@@ -37,7 +41,9 @@ Example `Config/usersettings.Production.json`:
 - Install **MotorShop.Security** (Admin > Plugins). It adds
   `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy`, removes the
   `X-Powered-By: Smartstore <version>` header and the Kestrel `Server` header, and
-  answers `GET /healthz` with `200 Healthy` for uptime monitors.
+  answers `GET /healthz` (liveness) and `GET /healthz/ready` (database and task
+  scheduler; `503` when the database is unreachable) for probes and uptime monitors.
+  At start-up it logs a warning for each unsafe production setting it finds.
   - It only runs once installed. After installing it, check the headers with
     `curl -I https://<host>/`.
 - Do not install **Smartstore.DevTools** in production (MiniProfiler, debug output).
