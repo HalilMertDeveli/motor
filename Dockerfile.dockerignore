@@ -56,6 +56,7 @@ src/Smartstore.Web/App_Data/*
 
 src/Smartstore.Web/wwwroot/[Ee]xchange/*
 src/Smartstore.Web/[Cc]onfig/usersettings*
+src/Smartstore.Web/[Cc]onfig/connections*
 
 # Themes
 src/Smartstore.Web/Themes/*

@@ -1,0 +1,11 @@
+{
+  "$schema": "../module.schema.json",
+  "Author": "MotorShop",
+  "Group": "Security",
+  "SystemName": "MotorShop.Security",
+  "FriendlyName": "Motor security hardening",
+  "Description": "Adds security response headers, hides the platform version header and exposes a /healthz liveness endpoint.",
+  "Version": "1.0.0",
+  "MinAppVersion": "6.4.0",
+  "Order": 1
+}
