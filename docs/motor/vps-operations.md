@@ -116,8 +116,9 @@ docker compose up -d          # back to the normal stack, port 8080 closes
 ```
 
 Then run `deploy/supabase/02-verify-exposure.sql` in the Supabase SQL editor
-(all rows `ok = true`), open `https://<domain>/admin`, and install/enable
-MotorShop.Security (then set `MOTOR_HEALTH_PATH=/healthz/ready`).
+(all rows `ok = true`), open `https://<domain>/admin`, and check that
+MotorShop.Security is installed (it is part of a fresh install; the default
+`MOTOR_HEALTH_PATH=/healthz/ready` depends on it).
 
 ### Enable backups and monitoring
 
