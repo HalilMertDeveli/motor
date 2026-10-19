@@ -1,0 +1,9 @@
+[Unit]
+Description=MOTOR self-check (health, HTTPS, certificate, disk, backup age)
+After=docker.service
+
+[Service]
+Type=oneshot
+User=motor
+WorkingDirectory=/opt/motor/deploy/vps
+ExecStart=/opt/motor/deploy/vps/scripts/monitor.sh

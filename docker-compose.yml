@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
     ports:
       # Loopback by default: put a TLS reverse proxy in front for public traffic.
-      - "${MOTOR_HTTP_BIND:-127.0.0.1}:${MOTOR_HTTP_PORT:-8080}:80"
+      - "${MOTOR_HTTP_BIND:-127.0.0.1}:${MOTOR_HTTP_PORT:-8080}:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       TZ: ${MOTOR_TZ:-Europe/Istanbul}
@@ -29,7 +29,7 @@ services:
       - tenants:/app/App_Data/Tenants
       - logs:/app/App_Data/Logs
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1"]
       interval: 30s
       timeout: 15s
       retries: 3
