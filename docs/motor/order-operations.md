@@ -43,20 +43,28 @@ moment** can both pass `CanMarkOrderAsPaid()` (check-then-act). The effect is li
 
 The payment module owns the integration (`payment-iyzico` session). The contract with Smartstore order processing:
 
-1. **Placement.** Implement `IPaymentMethod` (blueprint `Smartstore.PayPal`). For 3-D Secure / hosted checkout use the
-   confirm flow: `RequiresConfirmation = true`, `GetConfirmationUrlAsync` (redirect), `CompletePaymentAsync` (return).
-   The order is created by `PlaceOrderAsync` after the return; stock is decremented there, once.
-   Put the iyzico conversation id / token into `ProcessPaymentRequest` so it ends up on the order
-   (`AuthorizationTransactionId` or `CaptureTransactionId`) and set `OrderGuid` as the iyzico `basketId` / conversation reference.
+1. **Placement.** Implement `IPaymentMethod` (blueprint `Smartstore.PayPal`). Smartstore offers two flows for 3-D Secure / hosted checkout:
+   - *Pay first* (`RequiresConfirmation = true`, `GetConfirmationUrlAsync`, `CompletePaymentAsync`): the order is created after the
+     customer returns. A browser that never returns, or a cross-site callback without the session cookie, leaves a payment without an order.
+   - *Order first* (`PaymentMethodType.Redirection`, `PostProcessPaymentAsync` redirects to the payment page): the order is created by
+     the normal confirm button, then paid. Every payment belongs to an order. **This is the flow the iyzico module uses** (PR #21).
+
+   In both flows `PlaceOrderAsync` decrements stock once, and the confirm POST runs the legal acknowledgment filter (`MotorShop.Legal`).
+   Store the iyzico payment id on the order (`AuthorizationTransactionId` / `CaptureTransactionId`) and use `OrderGuid` as the iyzico
+   `basketId` / conversation reference.
 2. **Callback / webhook** (`[WebhookEndpoint]`, like PayPal and Stripe):
    - Verify the request with iyzico (signature, or retrieve the payment by token from the iyzico API). Never trust form values alone.
    - Find the order by `OrderGuid` or the stored transaction id **and** `PaymentMethodSystemName`.
    - Serialise per order: `await using var handle = await lockProvider.GetLock($"iyzico:{order.OrderGuid}").AcquireAsync(TimeSpan.FromSeconds(30));`
      (`IDistributedLockProvider`; the default provider is in-process, which matches a single VPS container), then reload the order.
-   - Compare the paid amount and currency with `order.OrderTotal` / `CustomerCurrencyCode`.
+   - Compare the paid amount and currency with the current order: `OrderTotal × CurrencyRate` and `CustomerCurrencyCode`
+     (order totals are stored in the primary currency). A mismatch is never marked paid.
    - Paid: `if (order.CanMarkOrderAsPaid()) { order.CaptureTransactionId = paymentId; await orderProcessingService.MarkOrderAsPaidAsync(order); }`
      otherwise do nothing and answer 200 (idempotent).
-   - Failed / cancelled payment before capture: `CancelOrderAsync(order, notifyCustomer: true)` if `CanCancelOrder()`, which restocks.
+   - Failed payment: with order first, the customer may retry on the same order, so do not cancel at once. Cancel with
+     `CancelOrderAsync(order, notifyCustomer: true)` (restocks) only when the order has stayed unpaid for a configured time and no attempt
+     is still open. The iyzico module does this in its reconciliation task (`CancelUnpaidOrdersAfterHours`, default 24, 0 = off; orders in
+     fraud review, with a failed verification or a duplicate payment are not auto-cancelled).
    - Always answer the webhook with 2xx once handled; return 5xx only if iyzico should retry (order not found yet).
    - Write one order note per callback with the iyzico payment id, never card data.
 3. **Refund.** Implement `RefundAsync` (and partial) in the provider so admin "Refund" calls iyzico. Remember: refund does not
@@ -84,7 +92,7 @@ Operational recommendation: monitor `QueuedEmail` rows with `SentTries >= 3` or 
 
 | # | Topic | Risk | Owner decision / follow-up |
 |---|---|---|---|
-| 1 | Stock at placement | Unpaid orders (bank transfer, abandoned 3-D Secure after placement) hold stock until cancelled | Define a rule: cancel unpaid orders after N hours (manual or a scheduled task, not built) |
+| 1 | Stock at placement | Unpaid orders hold stock until cancelled | iyzico orders: auto-cancel after `CancelUnpaidOrdersAfterHours` (default 24, PR #21) — owner confirms the window. Other offline methods (bank transfer): manual rule |
 | 2 | Cancel ≠ refund | Cancelling a paid order does not refund | Process: cancel **and** refund via iyzico |
 | 3 | Refund ≠ restock | Refund leaves stock unchanged | Use return requests or adjust stock manually |
 | 4 | No "payment received" e-mail | Customer only gets "order placed" | Decide whether a paid e-mail is needed (template + event consumer) |
