@@ -121,6 +121,18 @@ public partial class InstallationService : IInstallationService
             Logger.Info(x.ProgressMessage);
         });
 
+        // MOTOR: a database configured in the environment always wins over the form,
+        // so a staging or production stack cannot be installed against another database.
+        // The model is echoed back to the client in the result, so the secret never goes into it.
+        var envConnectionString = DataSettings.EnvironmentConnectionString;
+        if (envConnectionString != null)
+        {
+            model.DataProvider = DataSettings.EnvironmentDataProvider ?? model.DataProvider;
+            model.UseRawConnectionString = true;
+            model.DbRawConnectionString = DataSettings.EnvironmentPlaceholder;
+            Logger.Info($"Using the database connection from the '{DataSettings.ConnectionStringEnvVar}' environment variable.");
+        }
+
         DbFactory dbFactory = null;
 
         try
@@ -143,7 +155,11 @@ public partial class InstallationService : IInstallationService
         try
         {
             // Try to create connection string
-            if (model.UseRawConnectionString)
+            if (envConnectionString != null)
+            {
+                conStringBuilder = dbFactory.CreateConnectionStringBuilder(envConnectionString);
+            }
+            else if (model.UseRawConnectionString)
             {
                 conStringBuilder = dbFactory.CreateConnectionStringBuilder(model.DbRawConnectionString);
             }
