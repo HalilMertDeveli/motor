@@ -183,6 +183,7 @@
     <LocaleResource Name="Vehicles.Selector"><Value>In selector</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Publishable"><Value>Ready to publish</Value></LocaleResource>
     <LocaleResource Name="Vehicles.NotPublishable"><Value>Not publishable (unverified years or displacement)</Value></LocaleResource>
+    <LocaleResource Name="Vehicles.OtherMarket"><Value>Other market (kept as reference, not shown in the Turkish selector)</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Resync"><Value>Apply changes</Value></LocaleResource>
     <LocaleResource Name="Vehicles.None"><Value>No reference records yet.</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Audit"><Value>Selector audit: {0} of {1} motorcycles have no verified source</Value></LocaleResource>

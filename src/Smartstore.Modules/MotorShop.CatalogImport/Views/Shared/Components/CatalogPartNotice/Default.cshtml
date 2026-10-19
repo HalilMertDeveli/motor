@@ -5,8 +5,8 @@
 
 <div class="motor-part-identity mb-3">
     <div class="d-flex flex-wrap align-items-center gap-2 small">
-        <span class="text-muted">@T(res + "Brand"):</span> <strong>@Model.Brand</strong>
-        <span class="text-muted ml-2 ms-2">@T(res + "PartNumber"):</span> <strong class="font-monospace">@Model.Mpn</strong>
+        <span class="text-nowrap"><span class="text-muted">@T(res + "Brand"):</span> <strong>@Model.Brand</strong></span>
+        <span class="text-nowrap"><span class="text-muted">@T(res + "PartNumber"):</span> <strong class="font-monospace">@Model.Mpn</strong></span>
         @if (Model.Classification != PartClassification.Unknown)
         {
             <span class="badge badge-@(Model.Classification == PartClassification.Oem ? "primary" : "secondary") bg-@(Model.Classification == PartClassification.Oem ? "primary" : "secondary")">

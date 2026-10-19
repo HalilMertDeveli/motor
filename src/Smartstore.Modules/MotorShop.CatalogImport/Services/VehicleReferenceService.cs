@@ -51,8 +51,17 @@ public class VehicleReferenceService
         return from.HasValue && to.HasValue && to >= from ? (from.Value, to.Value) : null;
     }
 
+    /// <summary>
+    /// Markets whose motorcycles belong in a Turkish selector. Records for other markets (e.g. India-only models
+    /// or engine versions) stay reference data; their parts often do not interchange.
+    /// </summary>
+    public static readonly IReadOnlySet<string> SelectorMarkets = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "TR", "EU", "GLOBAL" };
+
+    public static bool IsSelectorMarket(CatalogVehicleReference r)
+        => string.IsNullOrWhiteSpace(r.Market) || SelectorMarkets.Contains(r.Market);
+
     public static bool IsPublishable(CatalogVehicleReference r)
-        => r.Status == VehicleReferenceStatus.Verified && r.EngineCc.HasValue && SelectorYears(r).HasValue;
+        => r.Status == VehicleReferenceStatus.Verified && r.EngineCc.HasValue && SelectorYears(r).HasValue && IsSelectorMarket(r);
 
     /// <summary>
     /// Creates a MotorVehicle for each publishable reference that has none. An existing motorcycle with the same

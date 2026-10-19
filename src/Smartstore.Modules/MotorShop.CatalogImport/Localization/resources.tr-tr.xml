@@ -183,6 +183,7 @@
     <LocaleResource Name="Vehicles.Selector"><Value>Seçicide</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Publishable"><Value>Yayına hazır</Value></LocaleResource>
     <LocaleResource Name="Vehicles.NotPublishable"><Value>Yayınlanamaz (yıl veya motor hacmi doğrulanmadı)</Value></LocaleResource>
+    <LocaleResource Name="Vehicles.OtherMarket"><Value>Başka pazar (referans olarak saklanır, Türkiye seçicisinde gösterilmez)</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Resync"><Value>Değişiklikleri uygula</Value></LocaleResource>
     <LocaleResource Name="Vehicles.None"><Value>Henüz referans kaydı yok.</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Audit"><Value>Seçici denetimi: {1} motosikletten {0} tanesinin doğrulanmış kaynağı yok</Value></LocaleResource>

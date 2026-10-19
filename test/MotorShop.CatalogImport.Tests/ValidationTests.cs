@@ -316,4 +316,14 @@ public class ValidationTests
         reference = new CatalogVehicleReference { YearFrom = null, YearTo = null, VerifiedYears = null };
         Assert.That(VehicleReferenceService.SelectorYears(reference), Is.Null);
     }
+
+    [TestCase("TR", true)]
+    [TestCase("EU", true)]
+    [TestCase("global", true)]
+    [TestCase("IN", false)]
+    public void Only_selector_markets_are_publishable(string market, bool publishable)
+    {
+        var reference = new CatalogVehicleReference { Status = VehicleReferenceStatus.Verified, EngineCc = 199.5m, YearFrom = 2015, VerifiedYears = "2015,2025", Market = market };
+        Assert.That(VehicleReferenceService.IsPublishable(reference), Is.EqualTo(publishable));
+    }
 }
