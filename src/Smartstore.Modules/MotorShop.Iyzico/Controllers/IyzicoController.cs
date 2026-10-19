@@ -87,7 +87,9 @@ public class IyzicoController : PublicController
     /// Customer return from the hosted form. iyzico posts the token cross-site, usually without the session cookie,
     /// so the payment is correlated through the stored transaction only.
     /// </summary>
-    [HttpPost, Route("iyzico/callback"), IgnoreAntiforgeryToken]
+    // WebhookEndpoint: without the cross-site (Lax) cookie Smartstore would otherwise create a new guest and overwrite
+    // the buyer's visitor cookie, so the buyer could no longer reach Completed or retry. The callback needs no customer.
+    [HttpPost, Route("iyzico/callback"), IgnoreAntiforgeryToken, WebhookEndpoint]
     [RequestSizeLimit(16 * 1024)]
     public async Task<IActionResult> Callback([FromForm] string token)
     {
