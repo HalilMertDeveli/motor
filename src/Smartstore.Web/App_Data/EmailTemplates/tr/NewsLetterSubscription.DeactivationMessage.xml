@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MessageTemplate>
+	<To>{{ NewsletterSubscription.Email }}</To>
+	<Subject>{{ Store.Name }}. E-bülten aboneliğinin iptali</Subject>
+	<ModelTypes>NewsletterSubscription</ModelTypes>
+	<Body><![CDATA[{% extends 'master' %}
+
+{% block 'body' %}
+<h1>
+  Merhaba {{ Customer.FullName }},
+</h1>
+
+<p>
+  E-bülten aboneliğinizi iptal etmek için lütfen aşağıdaki bağlantıya tıklayın:
+</p>
+
+<p class="text-center mt-4 mb-4">
+  <a class="btn btn-danger" href="{{ NewsletterSubscription.DeactivationUrl }}">Aboneliği iptal et</a>
+</p>
+
+<p>
+	Bağlantı açılmıyorsa lütfen aşağıdaki URL'yi kopyalayıp tarayıcınızın adres çubuğuna yapıştırın:
+</p>
+
+<p>
+	<a href="{{ NewsletterSubscription.DeactivationUrl }}">{{ NewsletterSubscription.DeactivationUrl }}</a> 
+</p>
+{% endblock %}]]></Body>
+</MessageTemplate>
