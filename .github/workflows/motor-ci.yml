@@ -3,12 +3,12 @@ name: MOTOR build and test
 # Build and test only. This workflow never publishes packages, images or deployments.
 on:
   pull_request:
-    branches: [motor]
+    branches: [motor, preview]
   push:
-    branches: [motor]
+    branches: [motor, preview]
   workflow_dispatch:
 
-# Superseded PR runs are cancelled; every push to motor is verified to the end.
+# Superseded PR runs are cancelled; every push to motor or preview is verified to the end.
 concurrency:
   group: motor-ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}

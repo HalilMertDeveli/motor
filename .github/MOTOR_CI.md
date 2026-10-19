@@ -1,6 +1,6 @@
 # MOTOR CI
 
-`motor` dalının derleme ve test hattı. Kaynak: [`workflows/motor-ci.yml`](workflows/motor-ci.yml).
+`motor` ve `preview` dallarının derleme ve test hattı. Kaynak: [`workflows/motor-ci.yml`](workflows/motor-ci.yml).
 
 ## Ne yapar
 
@@ -15,8 +15,9 @@
 | Özet | Derleme sonuç sayfasında assembly başına test tablosu ve başarısız testlerin listesi. |
 | Artifact | `TestResults/` (`.trx` dosyaları) 14 gün saklanır. |
 
-Tetikleyiciler: `motor` dalına açılan PR'lar, `motor` dalına push ve elle çalıştırma (`workflow_dispatch`).
-Aynı PR'a yeni commit gelirse eski koşu iptal edilir; `motor` push'larında iptal yoktur.
+Tetikleyiciler: `motor` veya `preview` dalına açılan PR'lar, bu iki dala push ve elle çalıştırma (`workflow_dispatch`).
+Akış: özellik dalı → `preview` (entegrasyon) → `motor`.
+Aynı PR'a yeni commit gelirse eski koşu iptal edilir; `motor` ve `preview` push'larında iptal yoktur.
 
 Yetki: yalnız `contents: read`. Checkout token'ı diske yazılmaz (`persist-credentials: false`).
 Paket, imaj, registry veya deploy adımı yoktur.
@@ -47,7 +48,7 @@ Repo özel ve GitHub Free planında olduğu için dal koruması ve rulesets şu 
 (`/branches/motor/protection` ve `/rulesets` API'leri 403 döner). Seçenekler: GitHub Pro'ya geçmek veya repoyu herkese açık yapmak.
 Bu PR hiçbir repo ayarını değiştirmez.
 
-Kullanılabilir olduğunda `motor` için önerilen ruleset:
+Kullanılabilir olduğunda `motor` ve `preview` için önerilen ruleset (ikisine aynı kural uygulanabilir):
 
 | Ayar | Öneri | Neden |
 |---|---|---|
@@ -64,7 +65,7 @@ Ek öneriler (repo ayarı, sahibinin onayıyla):
 
 - Settings → Actions → General: izinli eylemleri "GitHub tarafından yazılanlar + seçilenler" ile sınırlayın (`Mattraks/delete-workflow-runs`). Varsayılan token yetkisi zaten "read" ve Actions'ın PR onaylaması kapalı; böyle kalmalı.
 - "Automatically delete head branches" açılabilir.
-- Dal koruması gelene kadar: `motor`'a yalnız yeşil PR'lar üzerinden merge edin. `motor` push'unda CI yine çalışır, ama hatayı ancak merge'den sonra yakalar.
+- Dal koruması gelene kadar: `preview` ve `motor` dallarına yalnız yeşil PR'lar üzerinden merge edin. Bu dallara push'ta CI yine çalışır, ama hatayı ancak merge'den sonra yakalar.
 
 ## Bilinen açıklar
 
