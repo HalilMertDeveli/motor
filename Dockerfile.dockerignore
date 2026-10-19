@@ -1,6 +1,7 @@
 **/.classpath
 **/.dockerignore
 **/.env
+**/.env.*
 **/.DS_Store
 **/.git
 **/.gitignore
@@ -28,6 +29,16 @@
 # LICENSE stays in the context: the images ship it (AGPL v3)
 README.md
 
+# Repository tooling, docs and key material: never part of an image
+.claude
+.github
+.nuke
+dev-docs
+docs
+**/*.pfx
+**/*.p12
+**/*.key
+**/secrets
 
 # Build
 # -------------------------------------
@@ -56,6 +67,7 @@ src/Smartstore.Web/App_Data/*
 
 src/Smartstore.Web/wwwroot/[Ee]xchange/*
 src/Smartstore.Web/[Cc]onfig/usersettings*
+src/Smartstore.Web/[Cc]onfig/connections*
 
 # Themes
 src/Smartstore.Web/Themes/*

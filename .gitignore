@@ -13,6 +13,9 @@
 *.secrets
 *.csr
 *.pem
+.env
+.env.*
+!.env.example
 
 # Build results
 [Dd]ebug/

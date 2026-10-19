@@ -1,22 +1,30 @@
+# SQL Server database for MOTOR. Use together with docker-compose.yml.
+# In the installer: server "db", SQL authentication, user "sa" and
+# MOTOR_DB_ROOT_PASSWORD from .env (see docs/motor/docker.md for a
+# dedicated login in production).
+
 services:
   web:
-    volumes:
-      - "D:/mount/smtenants/sqlserver:/app/App_Data/Tenants"
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
-    image: "mcr.microsoft.com/mssql/server"
-    container_name: sqlserver
+    image: mcr.microsoft.com/mssql/server:${MOTOR_MSSQL_TAG:-2022-latest}
+    restart: unless-stopped
     environment:
-      SA_PASSWORD: "Smartstore2022!"
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
-    ports:
-      - '1434:1433'
-    expose:
-      - '1433'
+      MSSQL_PID: ${MOTOR_MSSQL_PID:-Express}
+      MSSQL_SA_PASSWORD: ${MOTOR_DB_ROOT_PASSWORD:?Set MOTOR_DB_ROOT_PASSWORD in .env}
+    # No host port: only the web container reaches the database.
     volumes:
-      - mssql_system:/var/opt/mssql/
-      - mssql_user:/var/opt/sqlserver/
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S 127.0.0.1 -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -b -o /dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
 volumes:
-  mssql_system:
-  mssql_user:
+  mssql-data:
