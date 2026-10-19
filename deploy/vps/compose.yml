@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     # No published ports: only Caddy reaches the app, over the private edge network.
     expose:
-      - "80"
+      - "8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       TZ: ${MOTOR_TZ:-Europe/Istanbul}
@@ -48,7 +48,7 @@ services:
       - no-new-privileges:true
     healthcheck:
       # Host header must match AllowedHosts, otherwise host filtering answers 400.
-      test: ["CMD-SHELL", "wget -q -O /dev/null --header \"Host: $${AllowedHosts%%;*}\" http://127.0.0.1${MOTOR_HEALTH_PATH:-/} || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null --header \"Host: $${AllowedHosts%%;*}\" http://127.0.0.1:8080${MOTOR_HEALTH_PATH:-/healthz/ready} || exit 1"]
       interval: 30s
       timeout: 15s
       retries: 3

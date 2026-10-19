@@ -29,7 +29,7 @@
 	@install path /install /install/*
 	respond @install 404
 
-	reverse_proxy web:80 {
+	reverse_proxy web:8080 {
 		# Caddy sets X-Forwarded-For/-Proto/-Host; the app trusts them only
 		# from the edge network (Smartstore__ReverseProxy__KnownNetworks).
 		transport http {

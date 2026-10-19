@@ -38,8 +38,9 @@ LABEL org.opencontainers.image.title="MOTOR" \
       org.opencontainers.image.licenses="AGPL-3.0-only" \
       org.opencontainers.image.version="${MOTOR_REVISION}" \
       org.opencontainers.image.revision="${MOTOR_REVISION}"
-EXPOSE 80
-ENV ASPNETCORE_URLS="http://+:80"
+# Unprivileged port: the app runs as the non-root "app" user of the .NET image (F8).
+EXPOSE 8080
+ENV ASPNETCORE_URLS="http://+:8080"
 WORKDIR /app
 COPY --from=build /app/release/publish .
 COPY LICENSE ./
@@ -52,4 +53,14 @@ RUN sed -i 's/\r$//' /tmp/install-wkhtmltopdf.sh && \
     /tmp/install-wkhtmltopdf.sh && \
     rm /tmp/install-wkhtmltopdf.sh
 
-ENTRYPOINT ["./Smartstore.Web", "--urls", "http://0.0.0.0:80"]
+# Run as the non-root "app" user ($APP_UID, 1654) of the .NET base image. Writable are
+# only the directories Smartstore writes at runtime and checks during installation
+# (Smartstore/IO/FilePermissionChecker.cs): App_Data, Modules, wwwroot/exchange and
+# runtimes/<rid>/native. All other application files stay owned by root. Volumes created
+# by older root images need a one-time chown, see docs/motor/docker.md ("Non-root image").
+RUN rid="linux-$(case "$(uname -m)" in aarch64) echo arm64 ;; *) echo x64 ;; esac)" && \
+    mkdir -p /app/App_Data/Tenants /app/App_Data/Logs /app/Modules /app/wwwroot/exchange "/app/runtimes/$rid/native" && \
+    chown -R $APP_UID:$APP_UID /app/App_Data /app/Modules /app/wwwroot/exchange "/app/runtimes/$rid/native"
+USER $APP_UID
+
+ENTRYPOINT ["./Smartstore.Web", "--urls", "http://0.0.0.0:8080"]
