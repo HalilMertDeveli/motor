@@ -103,7 +103,14 @@
                 }
             });
         },
-        initWalletButtonElement: function (publicApiKey, requestData, isCartPage, apiVersion) {
+        handleNextAction: function (publicApiKey, apiVersion, clientSecret) {
+            if (!stripe) {
+                stripe = Stripe(publicApiKey, { apiVersion: apiVersion });
+            }
+
+            return stripe.handleNextAction({ clientSecret: clientSecret });
+        },
+        initWalletButtonElement: function (publicApiKey, requestData, isCartPage, apiVersion, currencyMinorUnitFactor) {
             stripe = Stripe(publicApiKey, {
                 apiVersion: apiVersion,
             });
@@ -183,8 +190,8 @@
                             total = $('#CartSummarySubtotal').data('subtotal');
                         }
 
-                        // Convert total to smallest currency unit.
-                        total = total * 100;
+                        // Convert total to the currency-specific integer minor unit expected by Stripe.
+                        total = Math.round(total * currencyMinorUnitFactor);
 
                         // Update payment request.
                         paymentRequest.update({ total: { label: "Updated total", amount: total } });
@@ -193,8 +200,8 @@
             }
             else {
                 EventBroker.subscribe("ajaxcart.updated", function (msg, data) {
-                    // Convert total to smallest currency unit.
-                    var total = data.SubTotalValue * 100;
+                    // Convert total to the currency-specific integer minor unit expected by Stripe.
+                    var total = Math.round(data.SubTotalValue * currencyMinorUnitFactor);
 
                     // Update payment request.
                     paymentRequest.update({ total: { label: "Updated total", amount: total } });

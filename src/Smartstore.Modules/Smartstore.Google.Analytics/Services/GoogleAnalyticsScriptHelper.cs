@@ -276,7 +276,7 @@ public class GoogleAnalyticsScriptHelper
             .Take(5)
             .ToList();
 
-        return string.Join(',', categoryItems);
+        return string.Join(',', categoryItems) + ",";
     }
 
 
@@ -381,7 +381,7 @@ public class GoogleAnalyticsScriptHelper
     {
         return @$"
                 gtag('event', 'search', {{
-                  search_term: '{searchTerm}'
+                  search_term: '{searchTerm.EncodeJsStringUnquoted()}'
                 }});
             ";
     }
