@@ -37,6 +37,17 @@ internal sealed class InstallationStarter : StarterBase
                 m.For(em => em.FlagImageFileName, "de.png");
             })
             .InstancePerLifetimeScope();
+        // MOTOR: Turkish storefront (TRY, KDV, Turkey provinces).
+        builder.RegisterType<TrTRSeedData>()
+            .As<InvariantSeedData>()
+            .WithMetadata<InstallationAppLanguageMetadata>(m =>
+            {
+                m.For(em => em.Culture, TurkishStoreDefaults.Culture);
+                m.For(em => em.Name, TurkishStoreDefaults.LanguageName);
+                m.For(em => em.UniqueSeoCode, TurkishStoreDefaults.UniqueSeoCode);
+                m.For(em => em.FlagImageFileName, TurkishStoreDefaults.FlagImageFileName);
+            })
+            .InstancePerLifetimeScope();
     }
 
     public override void BuildPipeline(RequestPipelineBuilder builder)

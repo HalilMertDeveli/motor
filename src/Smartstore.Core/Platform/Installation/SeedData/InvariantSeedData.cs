@@ -34,6 +34,7 @@ using Smartstore.Core.Rules;
 using Smartstore.Core.Security;
 using Smartstore.Core.Seo;
 using Smartstore.Core.Stores;
+using Smartstore.Core.Theming;
 using Smartstore.Net.Mail;
 using Smartstore.Scheduling;
 
@@ -41,6 +42,11 @@ namespace Smartstore.Core.Installation;
 
 public abstract partial class InvariantSeedData
 {
+    /// <summary>
+    /// MOTOR: storefront theme activated on fresh installs (see also the MotorTurkishLocalization migration).
+    /// </summary>
+    internal const string MotorDefaultTheme = "MotorDark";
+
     private SmartDbContext _db;
     private Language _language;
     private IApplicationContext _appContext;
@@ -656,6 +662,13 @@ public abstract partial class InvariantSeedData
                 currencySettings.PrimaryCurrencyId = currency.Id;
                 currencySettings.PrimaryExchangeCurrencyId = currency.Id;
             }
+        }
+
+        // MOTOR: the MotorDark storefront theme is the default for every install language.
+        var themeSettings = settings.OfType<ThemeSettings>().FirstOrDefault();
+        if (themeSettings != null && _appContext.ContentRoot.FileExists($"Themes/{MotorDefaultTheme}/theme.config"))
+        {
+            themeSettings.DefaultTheme = MotorDefaultTheme;
         }
 
         var priceSettings = settings.OfType<PriceSettings>().FirstOrDefault();
