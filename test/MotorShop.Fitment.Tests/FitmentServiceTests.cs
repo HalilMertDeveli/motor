@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using Moq;
 using MotorShop.Fitment.Domain;
+using MotorShop.Fitment.Models;
 using MotorShop.Fitment.Services;
 using NUnit.Framework;
 
@@ -59,13 +60,13 @@ public class FitmentServiceTests : FitmentTestBase
     }
 
     [Test]
-    public async Task GetYears_inverted_range_yields_only_YearFrom()
+    public async Task GetYears_reversed_range_is_read_as_min_to_max()
     {
-        await AddVehicleAsync("Honda", "CBR 250R", 2015, 2010);
+        await AddVehicleAsync("Honda", "CBR 250R", 2015, 2012);
 
         var years = await CreateService().GetYearsAsync("Honda", "CBR 250R");
 
-        Assert.That(years, Is.EqualTo(new[] { 2015 }));
+        Assert.That(years, Is.EqualTo(new[] { 2015, 2014, 2013, 2012 }));
     }
 
     [TestCase(null, "CBR 250R")]
@@ -148,18 +149,56 @@ public class FitmentServiceTests : FitmentTestBase
     }
 
     [Test]
-    [Ignore("Known bug, reported not fixed: GetYearsAsync offers YearFrom for an inverted range (YearTo < YearFrom), but GetFittingProductIdsAsync requires YearFrom <= year <= YearTo, so that year finds no product.")]
     public async Task GetFittingProductIds_matches_every_year_offered_by_GetYears()
     {
         var vehicle = await AddVehicleAsync("Honda", "CBR 250R", 2015, 2010);
         await AddMappingAsync(500, vehicle);
         var service = CreateService();
 
-        foreach (var year in await service.GetYearsAsync("Honda", "CBR 250R"))
+        var years = await service.GetYearsAsync("Honda", "CBR 250R");
+        Assert.That(years, Has.Count.EqualTo(6));
+
+        foreach (var year in years)
         {
             var ids = await service.GetFittingProductIdsAsync(new VehicleSelection("Honda", "CBR 250R", year));
             Assert.That(ids, Does.Contain(500), $"Year {year}");
         }
+    }
+
+    [TestCase(2009, false)]
+    [TestCase(2010, true)]
+    [TestCase(2012, true)]
+    [TestCase(2015, true)]
+    [TestCase(2016, false)]
+    public async Task GetFittingProductIds_reversed_range_is_read_as_min_to_max(int year, bool expectMatch)
+    {
+        var vehicle = await AddVehicleAsync("Honda", "CBR 250R", 2015, 2010);
+        await AddMappingAsync(500, vehicle);
+
+        var ids = await CreateService().GetFittingProductIdsAsync(new VehicleSelection("Honda", "CBR 250R", year));
+
+        Assert.That(ids.Contains(500), Is.EqualTo(expectMatch));
+    }
+
+    [TestCase(2015, 2010, 2012, true)]
+    [TestCase(2015, 2010, 2016, false)]
+    [TestCase(2010, 2015, 2010, true)]
+    [TestCase(2010, 2015, 2009, false)]
+    public void ProductFitmentModel_Fits_uses_the_same_year_rule(int yearFrom, int yearTo, int year, bool expected)
+    {
+        var vehicle = new MotorVehicle { Make = "Honda", Model = "CBR 250R", YearFrom = yearFrom, YearTo = yearTo };
+        var model = new ProductFitmentModel { Selection = new VehicleSelection("honda", "cbr 250r", year) };
+
+        Assert.That(model.Fits(vehicle), Is.EqualTo(expected));
+        Assert.That(vehicle.CoversYear(year), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void Vehicle_DisplayName_shows_reversed_range_as_min_to_max()
+    {
+        var vehicle = new MotorVehicle { Make = "Honda", Model = "CBR 250R", YearFrom = 2015, YearTo = 2010 };
+
+        Assert.That(vehicle.DisplayName, Is.EqualTo("Honda CBR 250R (2010-2015)"));
     }
 
     #endregion
@@ -218,8 +257,51 @@ public class FitmentServiceTests : FitmentTestBase
 
         Assert.That(selection, Is.Not.Null);
         Assert.That(selection.Make, Is.EqualTo("Honda"));
-        Assert.That(selection.Model, Is.Null.Or.Empty);
+        Assert.That(selection.Model, Is.Null);
         Assert.That(selection.Year, Is.Null);
+    }
+
+    [Test]
+    public void Selection_with_null_model_and_year_reads_back_null_model()
+    {
+        Assert.That(RoundTrip(new VehicleSelection("Honda", null, 2012)), Is.EqualTo(new VehicleSelection("Honda", null, 2012)));
+    }
+
+    [TestCase("v2|Honda", "CBR 250R", 2012)]
+    [TestCase("Honda", "%7C|%20", 2012)]
+    [TestCase("Honda", "a||b", null)]
+    public void Selection_round_trips_separator_and_prefix_lookalikes(string make, string model, int? year)
+    {
+        var original = new VehicleSelection(make, model, year);
+
+        Assert.That(RoundTrip(original), Is.EqualTo(original));
+    }
+
+    // Values written by the previous format (Make|Model|Year, escaped as a whole) must stay readable.
+    [TestCase("Honda", "CBR 250R", 2012)]
+    [TestCase("Ducati & Söhne", "Monster 821", null)]
+    [TestCase("Honda", null, null)]
+    public void GetSelection_reads_legacy_cookie(string make, string model, int? year)
+    {
+        var legacyContext = new DefaultHttpContext();
+        legacyContext.Response.Cookies.Append(CookieName, Uri.EscapeDataString($"{make}|{model}|{year}"));
+        var legacyCookie = GetResponseCookie(legacyContext);
+
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Cookie = $"{CookieName}={legacyCookie.Value}";
+
+        Assert.That(CreateService(context).GetSelection(), Is.EqualTo(new VehicleSelection(make, model, year)));
+    }
+
+    [TestCase("v2%7CHonda")]
+    [TestCase("v2%7CHonda%7CCBR%7C2012%7Cextra")]
+    [TestCase("v2%7C%7CCBR%7C2012")]
+    public void GetSelection_rejects_malformed_v2_cookie(string rawCookie)
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Cookie = $"{CookieName}={rawCookie}";
+
+        Assert.That(CreateService(context).GetSelection(), Is.Null);
     }
 
     [TestCase(null)]
@@ -265,7 +347,6 @@ public class FitmentServiceTests : FitmentTestBase
 
     [TestCase("Har|ley", "Sportster", 2010)]
     [TestCase("Honda", "CBR|250R", 2012)]
-    [Ignore("Known bug, reported not fixed: '|' is the field separator and is not escaped, so a make or model containing it is split into the wrong fields.")]
     public void Selection_round_trips_pipe_in_make_or_model(string make, string model, int year)
     {
         var original = new VehicleSelection(make, model, year);

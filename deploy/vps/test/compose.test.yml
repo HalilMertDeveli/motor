@@ -1,0 +1,22 @@
+# Test only: runs the production stack on a developer machine or CI runner.
+#   - Caddy uses its internal CA instead of Let's Encrypt
+#   - ports moved to loopback 8081/8443 so they do not clash with the host
+#   - the database is a local container reached via host.docker.internal
+#
+#   docker compose --env-file test/.env.test -f compose.yml -f test/compose.test.yml up -d
+
+services:
+  web:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes: !override
+      - tenants:/app/App_Data/Tenants
+      - logs:/app/App_Data/Logs
+      - ./test/secrets/test-ca.crt:/run/secrets/supabase-ca.crt:ro
+
+  caddy:
+    ports: !override
+      - "127.0.0.1:8081:80"
+      - "127.0.0.1:8443:443"
+    environment:
+      MOTOR_CADDY_LOCAL_CERTS: local_certs
