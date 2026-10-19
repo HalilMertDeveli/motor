@@ -1,0 +1,13 @@
+@model List<(string Title, string Url)>
+
+<div class="card mb-3 motor-legal-order-documents">
+    <div class="card-body">
+        <h2 class="h5">@T("Plugins.MotorShop.Legal.OrderDocuments")</h2>
+        <ul class="list-unstyled mb-0">
+            @foreach (var link in Model)
+            {
+                <li><a href="@link.Url">@link.Title</a></li>
+            }
+        </ul>
+    </div>
+</div>
