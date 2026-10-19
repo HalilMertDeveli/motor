@@ -17,6 +17,7 @@ ARG SOURCE=build/artifacts/${EDITION}.${VERSION}.${RUNTIME}
 
 WORKDIR /app
 COPY ${SOURCE} ./
+COPY LICENSE ./
 
 # Install wkhtmltopdf
 COPY install-wkhtmltopdf.sh /tmp/

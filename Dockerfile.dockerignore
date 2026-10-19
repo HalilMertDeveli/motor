@@ -25,7 +25,7 @@
 **/secrets.dev.yaml
 **/[Tt]humbs.db
 **/values.dev.yaml
-LICENSE
+# LICENSE stays in the context: the images ship it (AGPL v3)
 README.md
 
 
@@ -62,3 +62,4 @@ src/Smartstore.Web/Themes/*
 !src/Smartstore.Web/Themes/Flex/
 !src/Smartstore.Web/Themes/FlexBlue/
 !src/Smartstore.Web/Themes/FlexBlack/
+!src/Smartstore.Web/Themes/MotorDark/
