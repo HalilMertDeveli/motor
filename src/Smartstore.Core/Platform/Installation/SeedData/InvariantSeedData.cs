@@ -669,6 +669,7 @@ public abstract partial class InvariantSeedData
         if (themeSettings != null && _appContext.ContentRoot.FileExists($"Themes/{MotorDefaultTheme}/theme.config"))
         {
             themeSettings.DefaultTheme = MotorDefaultTheme;
+            themeSettings.AllowCustomerToSelectTheme = false;
         }
 
         var priceSettings = settings.OfType<PriceSettings>().FirstOrDefault();

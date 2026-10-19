@@ -280,7 +280,7 @@ internal class MotorTurkishLocalization : Migration, ILocaleResourcesProvider, I
     }
 
     /// <summary>
-    /// Makes MotorDark the storefront theme where the theme is still Smartstore's default "Flex".
+    /// Makes MotorDark the storefront theme (and hides the customer theme switcher) where the theme is still Smartstore's default "Flex".
     /// A theme an admin chose on purpose (any other value, globally or per store) is kept.
     /// </summary>
     private static async Task ActivateMotorDarkThemeAsync(SmartDbContext db, IApplicationContext appContext, CancellationToken cancelToken)
@@ -298,15 +298,39 @@ internal class MotorTurkishLocalization : Migration, ILocaleResourcesProvider, I
             .Where(x => x.Name == settingName)
             .ToListAsync(cancelToken);
 
+        // Store scopes (0 = all stores) that still use the Smartstore default theme.
+        var switchedStoreIds = new List<int>();
         foreach (var setting in settings.Where(x => x.Value.IsEmpty() || x.Value.EqualsNoCase(smartstoreDefaultTheme)))
         {
             setting.Value = theme;
+            switchedStoreIds.Add(setting.StoreId);
         }
 
         if (settings.Count == 0)
         {
             // Never saved: the class default "Flex" applies to all stores.
             db.Settings.Add(new Setting { Name = settingName, Value = theme, StoreId = 0 });
+            switchedStoreIds.Add(0);
+        }
+
+        // Hide the customer theme switcher, but only where the theme was still the default:
+        // a store whose admin chose a theme keeps its switcher setting as well.
+        const string selectThemeName = "ThemeSettings.AllowCustomerToSelectTheme";
+        var selectThemeSettings = await db.Settings
+            .Where(x => x.Name == selectThemeName)
+            .ToListAsync(cancelToken);
+
+        foreach (var storeId in switchedStoreIds)
+        {
+            var setting = selectThemeSettings.FirstOrDefault(x => x.StoreId == storeId);
+            if (setting == null)
+            {
+                db.Settings.Add(new Setting { Name = selectThemeName, Value = "False", StoreId = storeId });
+            }
+            else
+            {
+                setting.Value = "False";
+            }
         }
 
         await db.SaveChangesAsync(cancelToken);
