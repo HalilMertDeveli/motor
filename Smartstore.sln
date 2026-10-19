@@ -87,9 +87,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartstore.Data.MySql", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.Fitment", "src\Smartstore.Modules\MotorShop.Fitment\MotorShop.Fitment.csproj", "{050E87E9-0F50-4647-B456-8CDE7E40CAFE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.Legal", "src\Smartstore.Modules\MotorShop.Legal\MotorShop.Legal.csproj", "{C35DCB4D-E3E0-4E3D-9699-40EA888B4651}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.Security", "src\Smartstore.Modules\MotorShop.Security\MotorShop.Security.csproj", "{81C7D225-BE19-41CF-9362-236AE339E5D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MotorShop.Fitment.Tests", "test\MotorShop.Fitment.Tests\MotorShop.Fitment.Tests.csproj", "{CAEA12FA-18E6-4826-BB32-8532908851CC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MotorShop.Legal.Tests", "test\MotorShop.Legal.Tests\MotorShop.Legal.Tests.csproj", "{C7688EEC-42B2-43FF-B1F7-D25FC0277D69}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -290,6 +294,12 @@ Global
 		{050E87E9-0F50-4647-B456-8CDE7E40CAFE}.DebugNoRazorCompile|Any CPU.Build.0 = DebugNoRazorCompile|Any CPU
 		{050E87E9-0F50-4647-B456-8CDE7E40CAFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{050E87E9-0F50-4647-B456-8CDE7E40CAFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C35DCB4D-E3E0-4E3D-9699-40EA888B4651}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C35DCB4D-E3E0-4E3D-9699-40EA888B4651}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C35DCB4D-E3E0-4E3D-9699-40EA888B4651}.DebugNoRazorCompile|Any CPU.ActiveCfg = DebugNoRazorCompile|Any CPU
+		{C35DCB4D-E3E0-4E3D-9699-40EA888B4651}.DebugNoRazorCompile|Any CPU.Build.0 = DebugNoRazorCompile|Any CPU
+		{C35DCB4D-E3E0-4E3D-9699-40EA888B4651}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C35DCB4D-E3E0-4E3D-9699-40EA888B4651}.Release|Any CPU.Build.0 = Release|Any CPU
 		{81C7D225-BE19-41CF-9362-236AE339E5D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{81C7D225-BE19-41CF-9362-236AE339E5D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81C7D225-BE19-41CF-9362-236AE339E5D8}.DebugNoRazorCompile|Any CPU.ActiveCfg = DebugNoRazorCompile|Any CPU
@@ -302,6 +312,12 @@ Global
 		{CAEA12FA-18E6-4826-BB32-8532908851CC}.DebugNoRazorCompile|Any CPU.Build.0 = DebugNoRazorCompile|Any CPU
 		{CAEA12FA-18E6-4826-BB32-8532908851CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAEA12FA-18E6-4826-BB32-8532908851CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7688EEC-42B2-43FF-B1F7-D25FC0277D69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7688EEC-42B2-43FF-B1F7-D25FC0277D69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7688EEC-42B2-43FF-B1F7-D25FC0277D69}.DebugNoRazorCompile|Any CPU.ActiveCfg = DebugNoRazorCompile|Any CPU
+		{C7688EEC-42B2-43FF-B1F7-D25FC0277D69}.DebugNoRazorCompile|Any CPU.Build.0 = DebugNoRazorCompile|Any CPU
+		{C7688EEC-42B2-43FF-B1F7-D25FC0277D69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7688EEC-42B2-43FF-B1F7-D25FC0277D69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -335,8 +351,10 @@ Global
 		{A7E56AC6-2ECF-029F-4CA1-522EAE8AE087} = {E5C1AA43-6B44-4EFA-8DE9-6070EE007CE3}
 		{86AFBE84-F22E-84F3-7D95-3BC3937D5572} = {82A38DDA-C944-4C15-AF43-86732F8ED15A}
 		{050E87E9-0F50-4647-B456-8CDE7E40CAFE} = {E5C1AA43-6B44-4EFA-8DE9-6070EE007CE3}
+		{C35DCB4D-E3E0-4E3D-9699-40EA888B4651} = {E5C1AA43-6B44-4EFA-8DE9-6070EE007CE3}
 		{81C7D225-BE19-41CF-9362-236AE339E5D8} = {E5C1AA43-6B44-4EFA-8DE9-6070EE007CE3}
 		{CAEA12FA-18E6-4826-BB32-8532908851CC} = {B3391994-AE0F-4C8C-AE8E-968F6013B4B6}
+		{C7688EEC-42B2-43FF-B1F7-D25FC0277D69} = {B3391994-AE0F-4C8C-AE8E-968F6013B4B6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A0A0B995-5D0B-458E-BCC0-1071B76949D1}

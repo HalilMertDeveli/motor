@@ -1,0 +1,53 @@
+@using MotorShop.Legal.Components
+
+@model LegalCheckoutModel
+
+@{
+    var checkboxId = "motor-legal-accept";
+}
+
+<section id="motor-legal-checkout" class="card mb-3" aria-labelledby="motor-legal-heading">
+    <div class="card-body">
+        <h2 id="motor-legal-heading" class="h5 mb-3">@T("Plugins.MotorShop.Legal.Heading")</h2>
+
+        @foreach (var doc in Model.Documents)
+        {
+            <details class="motor-legal-doc mb-2" data-doc="@doc.Key">
+                <summary class="font-weight-medium">@doc.Title</summary>
+                <div class="motor-legal-doc-body border rounded p-3 mt-2 small" style="max-height: 18rem; overflow-y: auto;" tabindex="0">
+                    @Html.Raw(doc.Html)
+                </div>
+            </details>
+        }
+
+        <ul class="list-unstyled small mb-3">
+            <li sm-if="Model.WithdrawalUrl.HasValue()">
+                <a href="@Model.WithdrawalUrl" target="_blank" rel="noopener">@T("Plugins.MotorShop.Legal.WithdrawalLink")</a>
+            </li>
+            <li sm-if="Model.PrivacyNoticeUrl.HasValue()">
+                <a href="@Model.PrivacyNoticeUrl" target="_blank" rel="noopener">@T("Plugins.MotorShop.Legal.PrivacyNoticeLink")</a>
+            </li>
+        </ul>
+
+        <div sm-if="Model.Documents.Count > 0" class="form-check">
+            <input type="checkbox" class="form-check-input" id="@checkboxId" name="@Model.FormFieldName" value="true"
+                   aria-required="@(Model.RequireAcknowledgment ? "true" : "false")"
+                   aria-describedby="motor-legal-heading" />
+            <label class="form-check-label" for="@checkboxId">@T("Plugins.MotorShop.Legal.AcceptLabel")</label>
+        </div>
+    </div>
+</section>
+
+<script sm-if="Model.RequireAcknowledgment && Model.Documents.Count > 0" sm-target-zone="scripts" data-origin="motor-legal-checkout">
+    $(function () {
+        // The confirm script triggers 'submitOrder' before it submits the form.
+        $(document).on('submitOrder', function (e) {
+            if (!$('#@checkboxId').is(':checked')) {
+                e.isOrderValid = false;
+                e.disableBuyButton = false;
+                displayNotification(@T("Plugins.MotorShop.Legal.PleaseAccept").JsValue, 'error');
+                $.scrollTo($('#motor-legal-checkout'), { offset: -20 });
+            }
+        });
+    });
+</script>
