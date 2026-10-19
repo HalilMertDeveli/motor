@@ -14,9 +14,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# MOTOR: no token scopes by default; the upstream-only job below requests its own.
+permissions: {}
+
 jobs:
   publish-release:
     name: Build, Publish and Deploy stable release Docker image
+    # Pushes to ghcr.io/smartstore, so it only runs in the upstream repository.
+    if: github.repository == 'smartstore/Smartstore'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
