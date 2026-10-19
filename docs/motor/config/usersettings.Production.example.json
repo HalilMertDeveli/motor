@@ -1,0 +1,39 @@
+{
+  // Copy to src/Smartstore.Web/Config/usersettings.Production.json ON THE SERVER (or the publish folder's Config/).
+  // That path is git- and docker-ignored. Replace the example values; never commit the real file.
+  // Secrets do not belong here either: the database connection string lives in
+  // App_Data/Tenants/<tenant>/Settings.txt (written by the installer) or Config/connections.Production.json.
+
+  // Host names the store answers to. Requests with any other Host header get HTTP 400.
+  "AllowedHosts": "motor.example.com;www.motor.example.com",
+
+  "Smartstore": {
+    "ReverseProxy": {
+      "Enabled": true,
+      // Address(es) of the proxy / load balancer that terminates TLS. Use either list.
+      "KnownProxies": [],
+      // e.g. the Docker network of the proxy container, or the load balancer subnet.
+      "KnownNetworks": [ "172.18.0.0/16" ],
+      // Values accepted from X-Forwarded-Host.
+      "AllowedHosts": [ "motor.example.com", "www.motor.example.com" ],
+      // Exactly one proxy in front of the app.
+      "ForwardLimit": 1
+    },
+    // Absolute public URL, so that background jobs do not depend on the first request's host.
+    "TaskSchedulerBaseUrl": "https://motor.example.com",
+    "ContentSecurityPolicy": {
+      "Enabled": true,
+      "FrameAncestors": [ "'self'" ],
+      // Only once every page and asset is served over HTTPS.
+      "UpgradeInsecureRequests": true
+    }
+  },
+
+  "MotorShop": {
+    "Security": {
+      // Optional: trial a stricter policy without enforcing it; violations show in the browser console.
+      // "ContentSecurityPolicyReportOnly": "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; frame-src 'self' https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self' https:",
+      "ReadinessTimeoutSeconds": 5
+    }
+  }
+}

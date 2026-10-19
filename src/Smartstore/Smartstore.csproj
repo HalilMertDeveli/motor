@@ -24,7 +24,7 @@
 	</ItemGroup>-->
 	
     <ItemGroup>
-        <PackageReference Include="AngleSharp" Version="1.4.0" />
+        <PackageReference Include="AngleSharp" Version="1.5.0" />
         <PackageReference Include="AngleSharp.Css" Version="1.0.0-beta.164" />
         <PackageReference Include="AsyncKeyedLock" Version="8.0.2" />
         <PackageReference Include="Autofac" Version="9.1.0" />
@@ -47,6 +47,8 @@
         <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.2" />
         <PackageReference Include="System.Memory.Data" Version="10.0.8" />
         <PackageReference Include="System.ServiceModel.Syndication" Version="10.0.8" />
+        <!-- Pins the transitive version past CVE-2026-84008 (GHSA-846f-f764-76mx). -->
+        <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
     </ItemGroup>
 
     <ItemGroup>
