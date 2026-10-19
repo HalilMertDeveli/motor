@@ -1,0 +1,84 @@
+<Language Name="English" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Iyzico" AppendRootKey="false"><Value>iyzico</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Iyzico" AppendRootKey="false"><Value>Card payments through the iyzico hosted Checkout Form with server-side verification, webhooks and refunds.</Value></LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.Iyzico" AppendRootKey="false"><Value>Credit / debit card (iyzico)</Value></LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.Iyzico" AppendRootKey="false"><Value>After placing the order you are redirected to the secure iyzico payment page. Card details are entered only there.</Value></LocaleResource>
+
+    <LocaleResource Name="AdminInstruction">
+        <Value><![CDATA[
+<p>To set up <b>iyzico</b>:</p>
+<ul>
+<li>Get the API key and secret key from the iyzico merchant panel (Settings / Merchant Settings). Sandbox keys come from sandbox-merchant.iyzipay.com.</li>
+<li>Production: prefer the environment variables <code>MotorShop__Iyzico__ApiKey</code> and <code>MotorShop__Iyzico__SecretKey</code>. They override the keys entered here.</li>
+<li>Keys entered here are encrypted with ASP.NET Core Data Protection. The data protection key folder of the tenant must be on a persistent volume, otherwise the keys must be entered again after a redeploy.</li>
+<li>Enter the webhook URL below in the iyzico merchant panel and ask iyzico (entegrasyon@iyzico.com) to enable the X-IYZ-SIGNATURE-V3 header.</li>
+<li>The callback URL must be reachable over HTTPS.</li>
+</ul>
+]]></Value>
+    </LocaleResource>
+    <LocaleResource Name="SandboxActive"><Value>Sandbox mode is on. No real payments are taken.</Value></LocaleResource>
+    <LocaleResource Name="EffectiveEndpoint"><Value>API endpoint</Value></LocaleResource>
+    <LocaleResource Name="KeysFromConfiguration"><Value>API keys are provided by the server configuration (environment variables). Keys entered here are not used.</Value></LocaleResource>
+    <LocaleResource Name="KeyStored"><Value>Stored (encrypted). Leave empty to keep.</Value></LocaleResource>
+    <LocaleResource Name="KeyNotSet"><Value>Not set</Value></LocaleResource>
+    <LocaleResource Name="KeysHint"><Value>Keys are never displayed again after saving. Enter a new value to replace them.</Value></LocaleResource>
+    <LocaleResource Name="ClearKeys"><Value>Delete stored keys</Value></LocaleResource>
+    <LocaleResource Name="KeysCleared"><Value>The stored iyzico keys have been deleted.</Value></LocaleResource>
+    <LocaleResource Name="KeysAllStoresOnly"><Value>API keys can only be saved for all stores. Switch the store scope to "All stores" and enter them again.</Value></LocaleResource>
+
+    <LocaleResource Name="UseSandbox"><Value>Sandbox mode</Value></LocaleResource>
+    <LocaleResource Name="UseSandbox.Hint"><Value>Uses the iyzico sandbox (sandbox-api.iyzipay.com). Turn off only with production keys.</Value></LocaleResource>
+    <LocaleResource Name="ApiKey"><Value>API key</Value></LocaleResource>
+    <LocaleResource Name="ApiKey.Hint"><Value>iyzico API key. Stored encrypted.</Value></LocaleResource>
+    <LocaleResource Name="SecretKey"><Value>Secret key</Value></LocaleResource>
+    <LocaleResource Name="SecretKey.Hint"><Value>iyzico secret key. Stored encrypted. Also used to verify response and webhook signatures.</Value></LocaleResource>
+    <LocaleResource Name="EnableInstallments"><Value>Offer installments</Value></LocaleResource>
+    <LocaleResource Name="EnableInstallments.Hint"><Value>Offers installments on the iyzico payment page. Installment commission passed on to the customer is charged by iyzico on top of the order total.</Value></LocaleResource>
+    <LocaleResource Name="EnabledInstallments"><Value>Installment options</Value></LocaleResource>
+    <LocaleResource Name="EnabledInstallments.Hint"><Value>Comma separated, e.g. 1,2,3,6,9. Single payment (1) is always offered.</Value></LocaleResource>
+    <LocaleResource Name="RequireWebhookSignature"><Value>Require webhook signature</Value></LocaleResource>
+    <LocaleResource Name="RequireWebhookSignature.Hint"><Value>Rejects webhooks without a valid X-IYZ-SIGNATURE-V3 header. Webhooks never mark an order as paid by themselves; the result is always retrieved from iyzico first.</Value></LocaleResource>
+    <LocaleResource Name="VerifyResponseSignature"><Value>Verify response signatures</Value></LocaleResource>
+    <LocaleResource Name="VerifyResponseSignature.Hint"><Value>Checks the HMAC-SHA256 signature of iyzico API responses. Keep this on.</Value></LocaleResource>
+    <LocaleResource Name="PlaceholderIdentityNumber"><Value>Buyer identity number sent to iyzico</Value></LocaleResource>
+    <LocaleResource Name="PlaceholderIdentityNumber.Hint"><Value>iyzico requires buyer.identityNumber. The store does not collect a TCKN, so this value is sent for every buyer. Whether to collect a real TCKN is an owner decision.</Value></LocaleResource>
+    <LocaleResource Name="ItemizeBasket"><Value>Send order lines</Value></LocaleResource>
+    <LocaleResource Name="ItemizeBasket.Hint"><Value>Sends one basket item per order line if the lines add up to the order total. Otherwise one item for the whole order is sent.</Value></LocaleResource>
+    <LocaleResource Name="BasketItemCategory"><Value>Basket item category</Value></LocaleResource>
+    <LocaleResource Name="BasketItemCategory.Hint"><Value>Category sent to iyzico for basket items.</Value></LocaleResource>
+    <LocaleResource Name="TryCancelOnSameDayFullRefund"><Value>Cancel same-day full refunds</Value></LocaleResource>
+    <LocaleResource Name="TryCancelOnSameDayFullRefund.Hint"><Value>A full refund on the payment day first tries the iyzico cancel service, which leaves no entry on the card statement. Falls back to a refund.</Value></LocaleResource>
+    <LocaleResource Name="AdditionalFee"><Value>Additional fee</Value></LocaleResource>
+    <LocaleResource Name="AdditionalFee.Hint"><Value>Additional fee charged to the customer for this payment method.</Value></LocaleResource>
+    <LocaleResource Name="AdditionalFeePercentage"><Value>Additional fee as percentage</Value></LocaleResource>
+    <LocaleResource Name="AdditionalFeePercentage.Hint"><Value>Applies the additional fee as a percentage of the order total.</Value></LocaleResource>
+    <LocaleResource Name="CallbackUrl"><Value>Callback URL</Value></LocaleResource>
+    <LocaleResource Name="CallbackUrl.Hint"><Value>Sent with every payment. iyzico posts the customer back to this URL.</Value></LocaleResource>
+    <LocaleResource Name="WebhookUrl"><Value>Webhook URL</Value></LocaleResource>
+    <LocaleResource Name="WebhookUrl.Hint"><Value>Enter this URL as the notification URL in the iyzico merchant panel.</Value></LocaleResource>
+
+    <LocaleResource Name="RecentTransactions"><Value>Recent iyzico transactions</Value></LocaleResource>
+    <LocaleResource Name="NoTransactions"><Value>No transactions yet.</Value></LocaleResource>
+    <LocaleResource Name="Status"><Value>Status</Value></LocaleResource>
+    <LocaleResource Name="Amount"><Value>Amount</Value></LocaleResource>
+    <LocaleResource Name="PaidPrice"><Value>Charged</Value></LocaleResource>
+    <LocaleResource Name="Refunded"><Value>Refunded</Value></LocaleResource>
+    <LocaleResource Name="Installment"><Value>Installments</Value></LocaleResource>
+    <LocaleResource Name="LastError"><Value>Last error</Value></LocaleResource>
+    <LocaleResource Name="Updated"><Value>Updated</Value></LocaleResource>
+
+    <LocaleResource Name="UnsupportedCurrency"><Value>iyzico does not support the currency {0}.</Value></LocaleResource>
+    <LocaleResource Name="NotConfigured"><Value>Card payment is currently not available. Please choose another payment method or contact us.</Value></LocaleResource>
+    <LocaleResource Name="StartFailed"><Value>The payment page could not be opened. Please try again in a moment.</Value></LocaleResource>
+    <LocaleResource Name="UnknownPayment"><Value>The payment could not be assigned to an order. If money was taken, please contact us.</Value></LocaleResource>
+
+    <LocaleResource Name="Return.Title"><Value>Payment</Value></LocaleResource>
+    <LocaleResource Name="Return.Paid"><Value>Thank you, your payment was received.</Value></LocaleResource>
+    <LocaleResource Name="Return.InReview"><Value>Your payment was received and is being checked. We will ship your order once the check is complete.</Value></LocaleResource>
+    <LocaleResource Name="Return.Processing"><Value>Your payment is being verified. This page refreshes automatically.</Value></LocaleResource>
+    <LocaleResource Name="Return.Failed"><Value>The payment was not completed. No money was taken for this attempt. You can try again.</Value></LocaleResource>
+    <LocaleResource Name="Return.Retry"><Value>Try payment again</Value></LocaleResource>
+    <LocaleResource Name="Return.ViewOrder"><Value>View order {0}</Value></LocaleResource>
+    <LocaleResource Name="Return.SignIn"><Value>Sign in to see the status of your order.</Value></LocaleResource>
+    <LocaleResource Name="Return.ContinueShopping"><Value>Continue shopping</Value></LocaleResource>
+</Language>

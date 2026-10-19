@@ -1,0 +1,84 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Iyzico" AppendRootKey="false"><Value>iyzico</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Iyzico" AppendRootKey="false"><Value>iyzico ortak ödeme formu ile kartlı ödeme; sunucu tarafı doğrulama, webhook ve iade desteği.</Value></LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.Iyzico" AppendRootKey="false"><Value>Kredi / banka kartı (iyzico)</Value></LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.Iyzico" AppendRootKey="false"><Value>Siparişi verdikten sonra güvenli iyzico ödeme sayfasına yönlendirilirsiniz. Kart bilgileri yalnızca orada girilir.</Value></LocaleResource>
+
+    <LocaleResource Name="AdminInstruction">
+        <Value><![CDATA[
+<p><b>iyzico</b> kurulumu:</p>
+<ul>
+<li>API anahtarını ve gizli anahtarı iyzico üye işyeri panelinden (Ayarlar / Firma Ayarları) alın. Sandbox anahtarları sandbox-merchant.iyzipay.com adresindedir.</li>
+<li>Canlı ortamda <code>MotorShop__Iyzico__ApiKey</code> ve <code>MotorShop__Iyzico__SecretKey</code> ortam değişkenlerini tercih edin. Bunlar burada girilen anahtarların yerine geçer.</li>
+<li>Burada girilen anahtarlar ASP.NET Core Data Protection ile şifrelenir. Tenant'ın data protection anahtar klasörü kalıcı bir volume üzerinde olmalıdır; aksi halde yeniden dağıtımdan sonra anahtarlar tekrar girilmelidir.</li>
+<li>Aşağıdaki webhook adresini iyzico panelinde bildirim adresi olarak girin ve iyzico'dan (entegrasyon@iyzico.com) X-IYZ-SIGNATURE-V3 başlığını açmasını isteyin.</li>
+<li>Callback adresine HTTPS ile erişilebilmelidir.</li>
+</ul>
+]]></Value>
+    </LocaleResource>
+    <LocaleResource Name="SandboxActive"><Value>Sandbox modu açık. Gerçek ödeme alınmaz.</Value></LocaleResource>
+    <LocaleResource Name="EffectiveEndpoint"><Value>API adresi</Value></LocaleResource>
+    <LocaleResource Name="KeysFromConfiguration"><Value>API anahtarları sunucu yapılandırmasından (ortam değişkenleri) geliyor. Burada girilen anahtarlar kullanılmaz.</Value></LocaleResource>
+    <LocaleResource Name="KeyStored"><Value>Kayıtlı (şifreli). Korumak için boş bırakın.</Value></LocaleResource>
+    <LocaleResource Name="KeyNotSet"><Value>Girilmedi</Value></LocaleResource>
+    <LocaleResource Name="KeysHint"><Value>Anahtarlar kaydedildikten sonra bir daha gösterilmez. Değiştirmek için yeni değer girin.</Value></LocaleResource>
+    <LocaleResource Name="ClearKeys"><Value>Kayıtlı anahtarları sil</Value></LocaleResource>
+    <LocaleResource Name="KeysCleared"><Value>Kayıtlı iyzico anahtarları silindi.</Value></LocaleResource>
+    <LocaleResource Name="KeysAllStoresOnly"><Value>API anahtarları yalnızca tüm mağazalar için kaydedilebilir. Mağaza kapsamını "Tüm mağazalar" yapıp tekrar girin.</Value></LocaleResource>
+
+    <LocaleResource Name="UseSandbox"><Value>Sandbox modu</Value></LocaleResource>
+    <LocaleResource Name="UseSandbox.Hint"><Value>iyzico test ortamını (sandbox-api.iyzipay.com) kullanır. Yalnızca canlı anahtarlarla kapatın.</Value></LocaleResource>
+    <LocaleResource Name="ApiKey"><Value>API anahtarı</Value></LocaleResource>
+    <LocaleResource Name="ApiKey.Hint"><Value>iyzico API anahtarı. Şifreli saklanır.</Value></LocaleResource>
+    <LocaleResource Name="SecretKey"><Value>Gizli anahtar</Value></LocaleResource>
+    <LocaleResource Name="SecretKey.Hint"><Value>iyzico gizli anahtarı. Şifreli saklanır. Yanıt ve webhook imzalarını doğrulamak için de kullanılır.</Value></LocaleResource>
+    <LocaleResource Name="EnableInstallments"><Value>Taksit seçenekleri sun</Value></LocaleResource>
+    <LocaleResource Name="EnableInstallments.Hint"><Value>iyzico ödeme sayfasında taksit sunar. Müşteriye yansıtılan taksit komisyonunu iyzico sipariş tutarının üzerine ekleyerek tahsil eder.</Value></LocaleResource>
+    <LocaleResource Name="EnabledInstallments"><Value>Taksit seçenekleri</Value></LocaleResource>
+    <LocaleResource Name="EnabledInstallments.Hint"><Value>Virgülle ayrılmış, ör. 1,2,3,6,9. Tek çekim (1) her zaman sunulur.</Value></LocaleResource>
+    <LocaleResource Name="RequireWebhookSignature"><Value>Webhook imzası zorunlu</Value></LocaleResource>
+    <LocaleResource Name="RequireWebhookSignature.Hint"><Value>Geçerli X-IYZ-SIGNATURE-V3 başlığı olmayan webhook'ları reddeder. Webhook tek başına siparişi ödendi yapmaz; sonuç her zaman önce iyzico'dan sorgulanır.</Value></LocaleResource>
+    <LocaleResource Name="VerifyResponseSignature"><Value>Yanıt imzalarını doğrula</Value></LocaleResource>
+    <LocaleResource Name="VerifyResponseSignature.Hint"><Value>iyzico API yanıtlarının HMAC-SHA256 imzasını kontrol eder. Açık tutun.</Value></LocaleResource>
+    <LocaleResource Name="PlaceholderIdentityNumber"><Value>iyzico'ya gönderilen alıcı kimlik numarası</Value></LocaleResource>
+    <LocaleResource Name="PlaceholderIdentityNumber.Hint"><Value>iyzico buyer.identityNumber alanını zorunlu tutar. Mağaza TCKN toplamadığı için her alıcıda bu değer gönderilir. Gerçek TCKN toplanıp toplanmayacağı mağaza sahibinin kararıdır.</Value></LocaleResource>
+    <LocaleResource Name="ItemizeBasket"><Value>Sipariş satırlarını gönder</Value></LocaleResource>
+    <LocaleResource Name="ItemizeBasket.Hint"><Value>Satırlar sipariş toplamına eşitse her satır ayrı sepet kalemi olarak gönderilir. Aksi halde sipariş için tek kalem gönderilir.</Value></LocaleResource>
+    <LocaleResource Name="BasketItemCategory"><Value>Sepet kalemi kategorisi</Value></LocaleResource>
+    <LocaleResource Name="BasketItemCategory.Hint"><Value>Sepet kalemleri için iyzico'ya gönderilen kategori.</Value></LocaleResource>
+    <LocaleResource Name="TryCancelOnSameDayFullRefund"><Value>Aynı gün tam iadede iptal et</Value></LocaleResource>
+    <LocaleResource Name="TryCancelOnSameDayFullRefund.Hint"><Value>Ödeme günü yapılan tam iadede önce iyzico iptal servisi denenir; kart ekstresinde işlem görünmez. Başarısız olursa iade yapılır.</Value></LocaleResource>
+    <LocaleResource Name="AdditionalFee"><Value>Ek ücret</Value></LocaleResource>
+    <LocaleResource Name="AdditionalFee.Hint"><Value>Bu ödeme yöntemi için müşteriden alınan ek ücret.</Value></LocaleResource>
+    <LocaleResource Name="AdditionalFeePercentage"><Value>Ek ücret yüzde olarak</Value></LocaleResource>
+    <LocaleResource Name="AdditionalFeePercentage.Hint"><Value>Ek ücreti sipariş toplamının yüzdesi olarak uygular.</Value></LocaleResource>
+    <LocaleResource Name="CallbackUrl"><Value>Callback adresi</Value></LocaleResource>
+    <LocaleResource Name="CallbackUrl.Hint"><Value>Her ödemede gönderilir. iyzico müşteriyi bu adrese geri yönlendirir.</Value></LocaleResource>
+    <LocaleResource Name="WebhookUrl"><Value>Webhook adresi</Value></LocaleResource>
+    <LocaleResource Name="WebhookUrl.Hint"><Value>Bu adresi iyzico panelinde bildirim adresi olarak girin.</Value></LocaleResource>
+
+    <LocaleResource Name="RecentTransactions"><Value>Son iyzico işlemleri</Value></LocaleResource>
+    <LocaleResource Name="NoTransactions"><Value>Henüz işlem yok.</Value></LocaleResource>
+    <LocaleResource Name="Status"><Value>Durum</Value></LocaleResource>
+    <LocaleResource Name="Amount"><Value>Tutar</Value></LocaleResource>
+    <LocaleResource Name="PaidPrice"><Value>Tahsil edilen</Value></LocaleResource>
+    <LocaleResource Name="Refunded"><Value>İade edilen</Value></LocaleResource>
+    <LocaleResource Name="Installment"><Value>Taksit</Value></LocaleResource>
+    <LocaleResource Name="LastError"><Value>Son hata</Value></LocaleResource>
+    <LocaleResource Name="Updated"><Value>Güncelleme</Value></LocaleResource>
+
+    <LocaleResource Name="UnsupportedCurrency"><Value>iyzico {0} para birimini desteklemiyor.</Value></LocaleResource>
+    <LocaleResource Name="NotConfigured"><Value>Kartla ödeme şu anda kullanılamıyor. Lütfen başka bir ödeme yöntemi seçin veya bizimle iletişime geçin.</Value></LocaleResource>
+    <LocaleResource Name="StartFailed"><Value>Ödeme sayfası açılamadı. Lütfen biraz sonra tekrar deneyin.</Value></LocaleResource>
+    <LocaleResource Name="UnknownPayment"><Value>Ödeme bir siparişle eşleştirilemedi. Hesabınızdan para çekildiyse lütfen bizimle iletişime geçin.</Value></LocaleResource>
+
+    <LocaleResource Name="Return.Title"><Value>Ödeme</Value></LocaleResource>
+    <LocaleResource Name="Return.Paid"><Value>Teşekkürler, ödemeniz alındı.</Value></LocaleResource>
+    <LocaleResource Name="Return.InReview"><Value>Ödemeniz alındı ve kontrol ediliyor. Kontrol tamamlanınca siparişiniz kargoya verilecek.</Value></LocaleResource>
+    <LocaleResource Name="Return.Processing"><Value>Ödemeniz doğrulanıyor. Bu sayfa otomatik olarak yenilenir.</Value></LocaleResource>
+    <LocaleResource Name="Return.Failed"><Value>Ödeme tamamlanmadı. Bu deneme için hesabınızdan para çekilmedi. Tekrar deneyebilirsiniz.</Value></LocaleResource>
+    <LocaleResource Name="Return.Retry"><Value>Ödemeyi tekrar dene</Value></LocaleResource>
+    <LocaleResource Name="Return.ViewOrder"><Value>{0} numaralı siparişi görüntüle</Value></LocaleResource>
+    <LocaleResource Name="Return.SignIn"><Value>Siparişinizin durumunu görmek için giriş yapın.</Value></LocaleResource>
+    <LocaleResource Name="Return.ContinueShopping"><Value>Alışverişe devam et</Value></LocaleResource>
+</Language>
