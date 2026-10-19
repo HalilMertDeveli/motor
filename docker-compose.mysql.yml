@@ -1,0 +1,29 @@
+# MySQL database for MOTOR. Use together with docker-compose.yml.
+# In the installer: server "db", database/user/password from .env.
+
+services:
+  web:
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:${MOTOR_MYSQL_TAG:-8.4}
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MOTOR_DB_ROOT_PASSWORD:?Set MOTOR_DB_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MOTOR_DB_NAME:-motor}
+      MYSQL_USER: ${MOTOR_DB_USER:-motor}
+      MYSQL_PASSWORD: ${MOTOR_DB_PASSWORD:?Set MOTOR_DB_PASSWORD in .env}
+    # No host port: only the web container reaches the database.
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  mysql-data:
