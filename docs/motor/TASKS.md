@@ -12,7 +12,7 @@ Last updated: 2026-10-19
 
 ## Phase 1: integration of existing work (done)
 
-Merged into `preview` in dependency order (`preview` = f3bdc88809):
+Merged into `preview` in dependency order:
 
 | PR | Branch | Content | Merge |
 | --- | --- | --- | --- |
@@ -30,18 +30,48 @@ Merged into `preview` in dependency order (`preview` = f3bdc88809):
 Pre-merge verification: all ten branches merged in a scratch worktree, then
 `dotnet build Smartstore.sln -c Release` (0 errors) and `dotnet test`
 (1029 passed, 0 failed, 3 skipped: the known `[Ignore]`d Fitment bug tests).
-The final `preview` tree is identical to the tested tree except for one
-`EndProject` line in `Smartstore.sln`.
+The final tree is identical to the tested tree except for one `EndProject`
+line in `Smartstore.sln`. GitHub CI on `preview` f3bdc88809: success
+(run 39238354682).
 
-## Active workstreams
+### Runtime QA of `preview` f3bdc88809 (local, SQLite, sample data, port 5100)
+
+| Check | Result |
+| --- | --- |
+| Headless install (`/install/install` + `/install/finalize`) | Pass |
+| Storefront `/`, `/login`, `/cart`, `/search`, `/sitemap.xml` | 200 |
+| `/admin` and `/checkout` as guest | 302 to login (expected) |
+| `/healthz` (MotorShop.Security readiness) | 200 |
+| Security headers (nosniff, frame-ancestors, X-Frame-Options, Referrer-Policy, Permissions-Policy) | Present |
+| Admin login, module list | MotorShop.Fitment and MotorShop.Security installed; `MotorVehicle` and `ProductMotorVehicle` tables exist |
+| Thumbnails after ImageSharp 4 (`/media/...?size=256`) | 200, correct dimensions |
+| Add to cart (product page, AJAX) and cart totals | Pass via a direct request; one UI click attempt did not add the item, still to be re-checked in E2E QA |
+| **Fresh install theme** | **Flex, not MotorDark.** Fix assigned to workstream C (seed + idempotent migration) |
+
+Not verified yet: MotorDark rendering on preview, Fitment selector UI,
+checkout to order completion, PostgreSQL install (workstream E), Docker image
+of preview.
+
+## Phase 2+: merged into `preview` after Phase 1
+
+| PR | Branch | Content | Merge |
+| --- | --- | --- | --- |
+| #13 | fix/fitment-cookie-year-range | Per-part encoded vehicle cookie (`v2|`), one [min,max] year rule, admin input validation; `[Ignore]` removed | d065c92ef7 |
+| #14 | infra/motor-vps-docker | VPS Compose (Caddy + Supabase), image and manual deploy workflows, F7 upload limit | 9d342812c4 |
+| #16 | infra/motor-backup-monitoring | GPG-encrypted backups, isolated restore, monitoring, systemd timers (stacked on #14) | c6aa378849 |
+| #17 | docs/motor-vps-operations | VPS setup and operations runbook | 1f500f4959 |
+| #15 | fix/drop-amazonpay-bouncycastle | F3: AmazonPay out of the build, Portable.BouncyCastle removed | 191ecc13df |
+
+## Workstreams
 
 | ID | Agent / session | Scope | Branch(es) | Owns | Depends on | Status | PR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| A | Orchestrator | Integration, merges into preview, registry, QA gate | chore/motor-task-registry | `docs/motor/TASKS.md`, `Smartstore.sln` conflict resolution | — | Phase 1 done | — |
-| B | "MOTOR repository Git protocol" | VPS compose, Caddy/HTTPS, image/deploy workflows, backup/restore/monitoring, VPS docs | infra/motor-vps-docker, infra/motor-backup-monitoring, docs/motor-vps-operations | `deploy/vps/**`, `.github/workflows/motor-image.yml`, `motor-deploy.yml`, `docs/motor/vps-*.md` | #7, #11 | In progress | — |
-| C | tr-localization | tr-TR default, TRY, KDV-inclusive prices, Turkish emails, TR addresses, MotorDark text to resources | feat/tr-localization | Locale resources, MotorDark view text, language/currency/tax settings and seeds | Phase 1 | In progress | — |
+| A | Orchestrator | Integration, merges into preview, registry, QA gate | chore/motor-task-registry | `docs/motor/TASKS.md`, `Smartstore.sln` conflict resolution | — | Ongoing | #12 |
+| B | "MOTOR repository Git protocol" (session ended) | VPS compose, Caddy/HTTPS, image/deploy workflows, backup/restore/monitoring, VPS docs | infra/motor-vps-docker, infra/motor-backup-monitoring, docs/motor-vps-operations | `deploy/vps/**`, `.github/workflows/motor-image.yml`, `motor-deploy.yml`, `docs/motor/vps-*.md` | #7, #11 | Merged; follow-ups unowned (see blockers) | #14, #16, #17 |
+| C | tr-localization | tr-TR default, TRY, KDV-inclusive prices, Turkish emails, TR addresses, MotorDark text to resources, MotorDark as default theme | feat/tr-localization | Locale resources, MotorDark view text, language/currency/tax/theme settings and seeds | Phase 1 | In progress | — |
 | D | payment-iyzico | iyzico Checkout Form module: server-side verification, webhooks, 3DS, idempotency, refund/cancel | feat/payment-iyzico | `src/Smartstore.Modules/MotorShop.Iyzico/**`, its test project | Phase 1; tax/identity decisions from C before finalizing | In progress | — |
-| E | fitment-fixes | Pipe in vehicle cookie, invalid year ranges, missing ProductMotorVehicle FKs on PostgreSQL | fix/fitment-cookie-year-range, fix/fitment-postgres-fk | `src/Smartstore.Modules/MotorShop.Fitment/**`, `test/MotorShop.Fitment.Tests/**` | #6, #11 | In progress | — |
+| E | fitment-fixes | Pipe in vehicle cookie, invalid year ranges, missing ProductMotorVehicle FKs on PostgreSQL | fix/fitment-cookie-year-range, fix/fitment-postgres-fk | `src/Smartstore.Modules/MotorShop.Fitment/**`, `test/MotorShop.Fitment.Tests/**` | #6, #11 | Cookie/year merged; PG FK in progress | #13 |
+| E-cat | "Motorcycle catalog research and integration" | Staged, validated catalog import; sourced motorcycle reference data (research candidates only) | feat/catalog-import-pipeline, feat/motorcycle-reference-catalog | `src/Smartstore.Modules/MotorShop.CatalogImport/**`, its tests, `docs/motor/catalog-research/**`, CI module check entry | Fitment PRs | In progress | — |
 | F | legal-shipping-ops | Distance-sales acknowledgments, provider-neutral shipment tracking, order-ops audit, e-Arşiv boundary | feat/legal-checkout, feat/shipment-tracking, docs/order-ops-invoicing | Topics/checkout settings, shipment tracking, `docs/motor/invoicing.md` | Phase 1 | In progress | — |
 | G | not started | MotorDark UX, mobile, performance | — | MotorDark CSS/JS/layout | C (shares MotorDark views) | Waiting | — |
 | H | Orchestrator | End-to-end QA, release gates | — | — | C, D, E, F | Waiting | — |
@@ -51,12 +81,13 @@ The final `preview` tree is identical to the tested tree except for one
 | Item | State | Needed |
 | --- | --- | --- |
 | Six Labors licence key | PR #9 ships upstream Smartstore's assembly-scoped community key (`src/Smartstore/sixlabors.lic`, expires 2028-01-07). Release builds fail without a key. | **Owner:** apply for MOTOR's own key at licensing.sixlabors.com and replace the file, or provide it as the `SixLaborsLicenseKey` CI secret/build arg. Blocks Gate F, not preview. |
-| ProductMotorVehicle FKs on PostgreSQL | Missing in a PostgreSQL install (finding from #11) | Workstream E |
-| Fitment cookie pipe / year range | Pinned by `[Ignore]`d tests | Workstream E |
-| F3 BouncyCastle 1.9.0 via AmazonPay | Open | Drop AmazonPay from the MOTOR build (not offered in Turkey) |
-| F6 DataProtection keys unencrypted at rest | Open | Workstream B (deployment) |
-| F7 `MaxRequestBodySize` 2 GB | Open | Workstream B (proxy limit + production setting) |
-| F8 Containers run as root, HTTP only | Open (Dockerfiles have no `USER`) | Workstream B |
+| ProductMotorVehicle FKs on PostgreSQL | Missing in a PostgreSQL install (finding from #11) | Workstream E (fix/fitment-postgres-fk) |
+| MotorDark not default on fresh install | Found in preview runtime QA | Workstream C |
+| F2 SQLitePCLRaw 2.1.11 (CVE-2025-6965) | Open; SQLite provider only | Production uses PostgreSQL; never use SQLite in production. Move to 3.x with upstream |
+| F6 DataProtection keys unencrypted at rest | Partly mitigated (#14/#16: root-only volume, GPG-encrypted backups) | Key-ring encryption with a certificate is application work; unowned |
+| F8 Containers run as root, HTTP :80 | Open (Dockerfiles have no `USER`) | Planned as infra/motor-nonroot-image (needs port 8080 and Compose/Caddy change); unowned since session B ended |
+| Health check path | `MOTOR_HEALTH_PATH` defaults to `/` | Use `/healthz` (readiness check, verified 200); unowned small follow-up |
+| Fresh-clone local build | `Smartstore.Data.*.dll` are not copied to `Smartstore.Web/bin` on the first build of a fresh clone (upstream glob evaluation); a second build of `Smartstore.Web` fixes it | Docker and CI unaffected (publish re-evaluates); local only |
 | iyzico sandbox | No credentials | **Owner:** iyzico merchant + sandbox account; set credentials via environment/admin, never in chat |
 | Supabase / VPS | No access | **Owner:** Supabase projects (staging + production), VPS, domain |
 | Business data | Not available | **Owner:** tax rates, real prices, stock, verified fitment data, carrier, approved legal texts, e-invoice provider |
@@ -65,8 +96,8 @@ The final `preview` tree is identical to the tested tree except for one
 
 | Gate | State |
 | --- | --- |
-| A Infrastructure | CI and integration done; Docker/PostgreSQL runtime on preview and real Supabase/VPS not yet verified |
-| B Turkish storefront | Not reached |
+| A Infrastructure | CI green on preview; local runtime smoke passed; Docker image of preview, PostgreSQL install with FKs, real Supabase/VPS not yet verified; F8 open |
+| B Turkish storefront | Not reached (workstream C) |
 | C Payments | Not reached (sandbox blocked on credentials) |
 | D Catalog & operations | Not reached |
 | E Preview release candidate | Not reached |
