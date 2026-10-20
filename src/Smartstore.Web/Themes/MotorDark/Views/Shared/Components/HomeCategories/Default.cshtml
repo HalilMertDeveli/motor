@@ -11,9 +11,11 @@
             var image = item.Image;
             // Only real uploads count; Smartstore otherwise returns its generic placeholder image.
             var hasImage = image?.File != null && image.HasImage();
+            // Product photos (white background) get a plate; uploaded category pictures fill the tile.
+            var tileClass = !hasImage ? "" : item.IsProductImage ? " motor-cat--product" : " motor-cat--image";
             var linkTitle = T("Media.Category.ImageLinkTitleFormat", item.Name);
 
-            <div role="listitem" class="motor-cat@(hasImage ? " motor-cat--image" : "")" data-id="@item.Id">
+            <div role="listitem" class="motor-cat@(tileClass)" data-id="@item.Id">
                 <a class="motor-cat-link" href="@item.Url" title="@linkTitle">
                     @if (hasImage)
                     {

@@ -410,6 +410,7 @@ public partial class CatalogHelper
             .ToArray();
 
         var files = (await _mediaService.GetFilesByIdsAsync(fileIds)).ToDictionarySafe(x => x.Id);
+        var productPictures = await GetProductPicturesForCategoriesAsync(categories.Where(x => !files.ContainsKey(x.MediaFileId ?? 0)));
 
         return await categories
             .SelectAwait(async c =>
@@ -438,7 +439,10 @@ public partial class CatalogHelper
                     model.Url = _urlHelper.RouteUrl(nameof(Category), new { SeName = c.GetActiveSlug() });
                 }
 
-                files.TryGetValue(c.MediaFileId ?? 0, out var file);
+                if (!files.TryGetValue(c.MediaFileId ?? 0, out var file) && productPictures.TryGetValue(c.Id, out file))
+                {
+                    model.IsProductImage = true;
+                }
 
                 model.Image = new ImageModel(file, thumbSize)
                 {
@@ -452,6 +456,68 @@ public partial class CatalogHelper
                 return model;
             })
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// MOTOR: main picture of the first published product (by display order) of each category, or of its
+    /// subcategories when the category has no products itself. Imported supplier categories have no pictures.
+    /// </summary>
+    private async Task<Dictionary<int, MediaFileInfo>> GetProductPicturesForCategoriesAsync(IEnumerable<Category> categories)
+    {
+        var result = new Dictionary<int, MediaFileInfo>();
+        var categoryIds = categories.Select(x => x.Id).Distinct().ToArray();
+        if (categoryIds.Length == 0)
+        {
+            return result;
+        }
+
+        var pictureIds = await FirstProductPictureIdsAsync(categoryIds);
+
+        // Categories without own products (e.g. "Helmets" above "Full face helmets"): first subcategory with one.
+        foreach (var id in categoryIds.Where(x => !pictureIds.ContainsKey(x)))
+        {
+            var childIds = (await GetChildCategoryIdsAsync(id)).ToArray();
+            if (childIds.Length > 0)
+            {
+                var childPictures = await FirstProductPictureIdsAsync(childIds);
+                var first = childIds.FirstOrDefault(childPictures.ContainsKey);
+                if (first != 0)
+                {
+                    pictureIds[id] = childPictures[first];
+                }
+            }
+        }
+
+        var files = (await _mediaService.GetFilesByIdsAsync(pictureIds.Values.Distinct().ToArray())).ToDictionarySafe(x => x.Id);
+        foreach (var (categoryId, pictureId) in pictureIds)
+        {
+            if (files.TryGetValue(pictureId, out var file))
+            {
+                result[categoryId] = file;
+            }
+        }
+
+        return result;
+    }
+
+    private async Task<Dictionary<int, int>> FirstProductPictureIdsAsync(int[] categoryIds)
+    {
+        var rows = await _db.ProductCategories
+            .AsNoTracking()
+            .Where(x => categoryIds.Contains(x.CategoryId)
+                && x.Product.Published
+                && !x.Product.Deleted
+                && x.Product.Visibility != ProductVisibility.Hidden
+                && x.Product.MainPictureId != null)
+            .GroupBy(x => x.CategoryId)
+            .Select(g => g
+                .OrderBy(x => x.DisplayOrder)
+                .ThenBy(x => x.Id)
+                .Select(x => new { x.CategoryId, PictureId = x.Product.MainPictureId.Value })
+                .FirstOrDefault())
+            .ToListAsync();
+
+        return rows.Where(x => x != null).ToDictionarySafe(x => x.CategoryId, x => x.PictureId);
     }
 
     public async Task<IEnumerable<int>> GetChildCategoryIdsAsync(int parentCategoryId, bool deep = true)
