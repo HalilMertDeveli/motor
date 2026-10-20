@@ -16,7 +16,7 @@ import { ffmpeg, rawRgb, grayThumb, matchScore, productBox, colorSignature, colo
 const args = Object.fromEntries(process.argv.slice(2).map(a => a.replace(/^--/, '').split(/=(.*)/s).slice(0, 2)));
 for (const k of ['products', 'images', 'store', 'out']) {
     if (!args[k]) {
-        console.error('Usage: node fetch-web-photos.mjs --products=products.json --images=<package images dir> --store=https://shop.example --out=<output dir> [--fallback-images=<dir>] [--canvas=1200] [--max-photos=4] [--refresh=1] [--references=shad-references.json [--references-brand=SHAD]]');
+        console.error('Usage: node fetch-web-photos.mjs --products=products.json --images=<package images dir> --store=https://shop.example --out=<output dir> [--fallback-images=<dir>] [--canvas=1200] [--max-photos=4] [--refresh=1] [--references=shad-references.json [--references-brand=SHAD]] [--reject=SKU1,SKU2]');
         process.exit(2);
     }
 }
@@ -43,14 +43,24 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function download(url, target) {
     if (fs.existsSync(target) && fs.statSync(target).size > 0) return target;
     for (let attempt = 1; ; attempt++) {
-        const res = await fetch(url, { headers: { 'User-Agent': UA } });
-        if (res.ok) {
-            fs.writeFileSync(target, Buffer.from(await res.arrayBuffer()));
-            await sleep(REQUEST_DELAY_MS);
-            return target;
+        let error;
+        try {
+            const res = await fetch(url, { headers: { 'User-Agent': UA } });
+            if (res.ok) {
+                // Write to a temporary file first: a dropped connection must not leave a truncated photo in the cache.
+                fs.writeFileSync(`${target}.part`, Buffer.from(await res.arrayBuffer()));
+                fs.renameSync(`${target}.part`, target);
+                await sleep(REQUEST_DELAY_MS);
+                return target;
+            }
+            error = new Error(`${res.status} ${url}`);
+            if (res.status === 404) throw error;
+        } catch (e) {
+            if (e === error && error.message.startsWith('404')) throw e;
+            error = e;
         }
-        if (attempt >= 3 || res.status === 404) throw new Error(`${res.status} ${url}`);
-        await sleep(2000 * attempt);
+        if (attempt >= 4) throw error;
+        await sleep(3000 * attempt);
     }
 }
 
@@ -258,12 +268,23 @@ if (args.references) {
         const keys = [alnum(modelCode(p)), ...words(p.variant)];
         const hit = keys.map(k => refs.get(k)).find(Boolean);
         if (!hit) continue;
+        const images = hit.images.map(src => ({ id: 'ref-' + path.basename(new URL(src).pathname).replace(/\.\w+$/, ''), src }));
+        // Tank bag fitting kits: the first photo shows the bare motorcycle, the second the ring itself. (Side and top
+        // case kits are only shown mounted on the motorcycle, also by SHAD; their order is kept.)
+        if (/tank bag fitting/i.test(hit.title) && images.length > 1) images.push(images.shift());
         Object.assign(r, {
             decision: 'accepted',
             reason: 'exact manufacturer reference',
-            pick: { name: hit.title, url: hit.url, images: hit.images.map(src => ({ id: 'ref-' + path.basename(new URL(src).pathname).replace(/\.\w+$/, ''), src })) }
+            pick: { name: hit.title, url: hit.url, images }
         });
     }
+}
+
+// Human review has the last word (see review.html): rejected products keep the package picture.
+for (const sku of (args.reject ?? '').split(',').map(s => s.trim()).filter(Boolean)) {
+    const r = report.find(x => x.sku === sku);
+    if (!r) console.log(`--reject: unknown SKU ${sku}`);
+    else Object.assign(r, { decision: 'review', reason: 'rejected in manual review' });
 }
 
 const shopById = new Map(shop.map(s => [s.id, s]));
@@ -276,17 +297,27 @@ for (const [i, p] of products.entries()) {
         const all = r.pick.images ?? shopById.get(r.pick.id).images;
         // The photo that matched comes first.
         const ordered = [...all].sort((a, b) => (b.id === r.pick.visual?.image) - (a.id === r.pick.visual?.image)).slice(0, MAX_PHOTOS);
-        for (const [n, img] of ordered.entries()) {
+        r.photos = [];
+        for (const img of ordered) {
             const ext = path.extname(new URL(img.src).pathname) || '.jpg';
-            const full = await download(img.src, path.join(cache, 'full', `${img.id}${ext}`));
-            if (n === 0) r.photoFile = full;
-            const name = `${p.sku.replace(/[^A-Za-z0-9._-]+/g, '-')}-${n + 1}.jpg`;
+            let full;
+            try {
+                full = await download(img.src, path.join(cache, 'full', `${img.id}${ext}`));
+            } catch (e) {
+                console.log(`photo skipped (${e.message}): ${img.src}`);
+                continue;
+            }
+            r.photoFile ??= full;
+            // "-web-" keeps these apart from package picture names (also on case-insensitive file systems).
+            const name = `${p.sku.replace(/[^A-Za-z0-9._-]+/g, '-').toLowerCase()}-web-${images.length + 1}.jpg`;
             if (!fs.existsSync(path.join(outImages, name))) render(full, path.join(outImages, name));
             images.push(name);
+            r.photos.push(img.src);
             photos++;
         }
-        r.photos = ordered.map(img => img.src);
-    } else {
+        if (!images.length) Object.assign(r, { decision: 'review', reason: 'web photos could not be downloaded' });
+    }
+    if (r.decision !== 'accepted') {
         for (const name of p.images ?? []) {
             const src = path.join(fallbackImages, name);
             if (fs.existsSync(src)) fs.copyFileSync(src, path.join(outImages, name));

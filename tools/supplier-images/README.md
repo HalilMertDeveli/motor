@@ -75,7 +75,15 @@ node tools/supplier-images/fetch-web-photos.mjs \
   of at most `--canvas` (1200) px. Photos are never enlarged.
 - Output: `products.json` + `images/` (a complete package), `photo-report.json`, and `review.html`: package picture
   next to the chosen web photo, with the decision. Unclear pairs are listed as `review` and keep the package picture.
-- Results are cached in `cache/` and `visual-cache.json`; reruns take minutes.
+- Check `review.html` (or contact sheets) before importing. A wrong pair is excluded with
+  `--reject=SKU1,SKU2`; it keeps the package picture. Motosev 2026 run (2026-10-20): 625 of 1148 products got web
+  photos; of the 630 automatic pairs, 5 were rejected in review (`JY01-0460-RED`, `D320-0730`, `3027-0515`,
+  `SH-47-WHITE-REF-07750`, `SH-44-05530`).
+- SHAD side and top case fitting kits are only photographed mounted on the motorcycle (also on shad.es), so their main
+  picture shows a motorcycle with cases. The product name says what is sold; replace the pictures if that confuses.
+- Results are cached in `cache/` and `visual-cache.json`; reruns take minutes. Output photos are named
+  `<sku>-web-<n>.jpg`. To import, zip `products.json` and `images/` with forward-slash paths
+  (`cd work/web && zip -r ../package.zip products.json images`).
 - Requests are sequential with a pause (shop) or limited to `--concurrency` (SHAD); both sites allow the paths used
   in robots.txt (Store API, sitemaps, product pages without query strings).
 
