@@ -69,8 +69,10 @@ node tools/supplier-images/enhance-supplier-images.mjs \
 - Input per picture: the PDF original at native size, or the package picture shrunk back by
   `FALLBACK_NATIVE_DIVISOR` (2). The upscaler (4×, `realesrgan-x4plus`) also removes JPEG artefacts; the result
   then gets the same white square canvas.
-- Review: `review.html` and `review.csv` list pictures with text (Windows OCR, `detect-text.ps1`) or strong
-  local change (`--review-change`, default 15). `review-src/` holds the genuine native pictures for comparison.
-  The list is a pre-selection: check at least these before publishing.
+- Review: `review.html` and `review.csv` list pictures in three tiers: (1) text found by Windows OCR
+  (`detect-text.ps1`: brand names, model codes, catalog labels), (2) PDF original changed strongly, (3) package
+  picture changed strongly (`--review-change`, default 15). `review-src/` holds the genuine native pictures for
+  comparison. The list is a pre-selection: check at least these before publishing. `--review-only=1` rebuilds it
+  from `image-report.json` without running the upscaler again.
 - `--only` limits rendering; the assignment always considers all pictures, so variants are not mixed up.
 

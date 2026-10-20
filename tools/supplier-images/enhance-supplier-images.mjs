@@ -15,7 +15,7 @@ import path from 'node:path';
 const args = Object.fromEntries(process.argv.slice(2).map(a => a.replace(/^--/, '').split(/=(.*)/s).slice(0, 2)));
 for (const k of ['products', 'images', 'pdf-images', 'pdf-list', 'out']) {
     if (!args[k]) {
-        console.error(`Usage: node enhance-supplier-images.mjs --products=products.json --images=<package images dir> --pdf-images=<pdfimages -all -p output dir> --pdf-list=<pdfimages -list output> --out=<output dir> [--only=name1,name2] [--reuse-matches=1] [--matches=matches.json] [--ai-upscaler=realesrgan-ncnn-vulkan.exe [--ai-model=realesrgan-x4plus] [--review-change=15]]`);
+        console.error(`Usage: node enhance-supplier-images.mjs --products=products.json --images=<package images dir> --pdf-images=<pdfimages -all -p output dir> --pdf-list=<pdfimages -list output> --out=<output dir> [--only=name1,name2] [--reuse-matches=1] [--matches=matches.json] [--ai-upscaler=realesrgan-ncnn-vulkan.exe [--ai-model=realesrgan-x4plus] [--review-change=15] [--review-only=1]]`);
         process.exit(2);
     }
 }
@@ -355,6 +355,76 @@ function aiChange(native, upscaled) {
     return diffs.length ? +diffs[Math.floor(diffs.length * 0.95)].toFixed(1) : 0;
 }
 
+// Review list for AI pictures: text found by Windows OCR (detect-text.ps1) and strong local change by the upscaler.
+// Tier 1: text (logos, model codes, catalog labels); tier 2: PDF original changed strongly; tier 3: package
+// picture (blurry source) changed strongly. Can be rebuilt from image-report.json with --review-only=1.
+function writeReview(report, runOcr) {
+    const ocrFile = path.join(args.out, 'ocr.jsonl');
+    if (runOcr) {
+        if (process.platform === 'win32') {
+            const script = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1')), 'detect-text.ps1');
+            execFileSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, '-ImageDir', outImages, '-Out', ocrFile], { stdio: 'ignore' });
+        } else {
+            console.warn('OCR is only available on Windows; the review list uses the change metric only.');
+        }
+    }
+
+    const ocr = new Map();
+    if (fs.existsSync(ocrFile)) {
+        fs.readFileSync(ocrFile, 'utf8').split(/\r?\n/).filter(Boolean).map(l => JSON.parse(l)).forEach(x => ocr.set(x.file, x));
+    }
+
+    for (const x of report.filter(r => r.ai)) {
+        const found = ocr.get(x.name);
+        x.ocrText = found?.text ?? '';
+        x.reviewReasons = [
+            ...(found?.words ? ['text'] : []),
+            ...(x.aiChange >= reviewChange ? ['strong-change'] : [])
+        ];
+        x.reviewTier = !x.reviewReasons.length ? null : x.reviewReasons.includes('text') ? 1 : x.status === 'pdf-original' ? 2 : 3;
+    }
+    fs.writeFileSync(path.join(args.out, 'image-report.json'), JSON.stringify(report, null, 1));
+
+    const flagged = report.filter(x => x.reviewTier).sort((a, b) => a.reviewTier - b.reviewTier || b.aiChange - a.aiChange);
+    const esc = v => String(v ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+    const csvCell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const reason = x => x.reviewReasons.map(r => r === 'text' ? `yazı: ${x.ocrText}` : `güçlü değişim ${x.aiChange}`).join(' · ');
+
+    fs.writeFileSync(path.join(args.out, 'review.csv'), '﻿tier;image;sku;product;reasons;ocr_text;ai_change;source\n' +
+        flagged.map(x => [x.reviewTier, x.name, x.sku, csvCell(x.product), x.reviewReasons.join('+'), csvCell(x.ocrText), x.aiChange, x.status].join(';')).join('\n'));
+
+    const card = x => `<figure><div class="pair"><div><img loading="lazy" src="review-src/${esc(x.name.replace(/\.\w+$/, '.png'))}"><span>gerçek piksel</span></div><div><img loading="lazy" src="images/${esc(x.name)}"><span>yapay zekâ</span></div></div>
+<figcaption><b>${esc(x.product)}</b><br><code>${esc(x.name)}</code> · ${esc(x.sku)}<br>${esc(reason(x))}</figcaption></figure>`;
+    const tiers = [
+        [1, 'Öncelik 1: içinde yazı olan görseller', 'Marka adı, model kodu veya katalog etiketi (ör. "MAT BLACK S-M-L-XL-2XL") var. Yapay zekâ küçük yazıları yanlış çizebilir; katalog etiketleri ürün fotoğrafında olmamalı.'],
+        [2, 'Öncelik 2: PDF orijinali belirgin değişmiş', 'Kaynak temiz ama yapay zekâ yerel olarak belirgin değişiklik yapmış (doku, ince ayrıntı).'],
+        [3, 'Öncelik 3: bulanık paket görselinden büyütülmüş, belirgin değişmiş', 'PDF\'te temiz orijinali bulunamayan görseller. Kaynak bulanık olduğu için yapay zekâ daha çok ayrıntı uydurur; şüphede gerçek piksel paketini kullanın.']
+    ];
+    const sections = tiers.map(([t, title, text]) => {
+        const items = flagged.filter(x => x.reviewTier === t);
+        return items.length ? `<h2 id="t${t}">${esc(title)} (${items.length})</h2><p>${esc(text)}</p><div class="grid">${items.map(card).join('\n')}</div>` : '';
+    }).join('\n');
+
+    fs.writeFileSync(path.join(args.out, 'review.html'), `<!doctype html><html lang="tr"><meta charset="utf-8"><title>AI review</title>
+<style>body{font-family:system-ui,sans-serif;margin:16px;background:#f4f4f2}h1{font-size:20px}h2{font-size:17px;margin-top:28px}p{max-width:900px}
+nav a{margin-right:16px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px}
+figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:8px;padding:8px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pair img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border:1px solid #eee}
+.pair span{font-size:11px;color:#666;text-align:center;display:block}figcaption{font-size:13px;margin-top:6px}code{font-size:12px}</style>
+<h1>Yapay zekâ ile büyütülen görseller: kontrol listesi (${flagged.length} / ${report.length})</h1>
+<p>Sol: gerçek piksel (PDF'teki boyutunda). Sağ: yapay zekâ ile büyütülmüş hali. Sorunlu bir görsel için gerçek piksel paketindeki aynı adlı
+dosyayı kullanın. Bu liste otomatik bir ön elemedir (Windows OCR + değişim ölçümü); listede olmayan görsellerde de küçük farklar olabilir.</p>
+<nav>${tiers.map(([t, title]) => `<a href="#t${t}">${esc(title.split(':')[0])} (${flagged.filter(x => x.reviewTier === t).length})</a>`).join('')}</nav>
+${sections}</html>`);
+    console.log(`review: ${flagged.length} pictures (tier 1 text ${flagged.filter(x => x.reviewTier === 1).length}, tier 2 ${flagged.filter(x => x.reviewTier === 2).length}, tier 3 ${flagged.filter(x => x.reviewTier === 3).length}) -> review.html, review.csv`);
+}
+
+if (args['review-only']) {
+    const existing = JSON.parse(fs.readFileSync(path.join(args.out, 'image-report.json'), 'utf8'));
+    writeReview(existing, !fs.existsSync(path.join(args.out, 'ocr.jsonl')));
+    process.exit(0);
+}
+
 const jobs = [];
 for (const ref of refs) {
     if (only && !only.has(ref.name)) continue;
@@ -427,51 +497,7 @@ fs.writeFileSync(path.join(args.out, 'image-report.json'), JSON.stringify(report
 fs.rmSync(tmp, { recursive: true, force: true });
 
 if (ai) {
-    // Text in the picture (brand names, model codes): Windows OCR, see detect-text.ps1.
-    const ocr = new Map();
-    if (process.platform === 'win32') {
-        const ocrFile = path.join(args.out, 'ocr.jsonl');
-        execFileSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1')), 'detect-text.ps1'),
-            '-ImageDir', outImages, '-Out', ocrFile], { stdio: 'ignore' });
-        fs.readFileSync(ocrFile, 'utf8').split(/\r?\n/).filter(Boolean).map(l => JSON.parse(l)).forEach(x => ocr.set(x.file, x));
-    } else {
-        console.warn('OCR is only available on Windows; the review list uses the change metric only.');
-    }
-
-    for (const x of report.filter(r => r.ai)) {
-        const found = ocr.get(x.name);
-        x.ocrText = found?.text ?? '';
-        x.reviewReasons = [
-            ...(found?.words ? ['text'] : []),
-            ...(x.aiChange >= reviewChange ? ['strong-change'] : [])
-        ];
-    }
-    fs.writeFileSync(path.join(args.out, 'image-report.json'), JSON.stringify(report, null, 1));
-
-    const flagged = report.filter(x => x.reviewReasons?.length)
-        .sort((a, b) => b.reviewReasons.length - a.reviewReasons.length || b.aiChange - a.aiChange);
-    const esc = v => String(v ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-    const csvCell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const reason = x => x.reviewReasons.map(r => r === 'text' ? `yazı: ${x.ocrText}` : `güçlü değişim ${x.aiChange}`).join(' · ');
-
-    fs.writeFileSync(path.join(args.out, 'review.csv'), '\ufeffimage;sku;product;reasons;ocr_text;ai_change;source\n' +
-        flagged.map(x => [x.name, x.sku, csvCell(x.product), x.reviewReasons.join('+'), csvCell(x.ocrText), x.aiChange, x.status].join(';')).join('\n'));
-
-    const cards = flagged.map(x => `<figure><div class="pair"><div><img loading="lazy" src="review-src/${esc(x.name.replace(/\.\w+$/, '.png'))}"><span>gerçek piksel</span></div><div><img loading="lazy" src="images/${esc(x.name)}"><span>yapay zekâ</span></div></div>
-<figcaption><b>${esc(x.product)}</b><br><code>${esc(x.name)}</code> · ${esc(x.sku)}<br>${esc(reason(x))}</figcaption></figure>`).join('\n');
-
-    fs.writeFileSync(path.join(args.out, 'review.html'), `<!doctype html><html lang="tr"><meta charset="utf-8"><title>AI review</title>
-<style>body{font-family:system-ui,sans-serif;margin:16px;background:#f4f4f2}h1{font-size:20px}p{max-width:900px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px}
-figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:8px;padding:8px}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pair img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border:1px solid #eee}
-.pair span{font-size:11px;color:#666;text-align:center;display:block}figcaption{font-size:13px;margin-top:6px}code{font-size:12px}</style>
-<h1>Yapay zekâ ile büyütülen görseller: kontrol listesi (${flagged.length} / ${report.length})</h1>
-<p>Sol: gerçek piksel (PDF'teki boyutunda). Sağ: yapay zekâ ile büyütülmüş hali. Listede, içinde yazı bulunan (Windows OCR) veya yapay zekânın
-belirgin biçimde değiştirdiği görseller var. Logo, model kodu ve küçük yazıların doğru olup olmadığını kontrol edin. Sorunlu bir görsel için
-gerçek piksel paketindeki aynı adlı dosyayı kullanın. Bu liste otomatik bir ön elemedir; listede olmayan görsellerde de küçük farklar olabilir.</p>
-<div class="grid">${cards}</div></html>`);
-    console.log(`review: ${flagged.length} pictures (text found or strong change >= ${reviewChange}) -> review.html, review.csv`);
+    writeReview(report, true);
 }
 
 const by = st => report.filter(x => x.status === st).length;
