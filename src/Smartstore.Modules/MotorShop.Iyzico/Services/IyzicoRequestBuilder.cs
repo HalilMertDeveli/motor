@@ -12,12 +12,36 @@ namespace MotorShop.Iyzico.Services;
 public static class IyzicoRequestBuilder
 {
     /// <summary>
-    /// Currencies accepted by the checkout form (https://docs.iyzico.com, CF initialize).
+    /// Currencies accepted by the checkout form (https://docs.iyzico.com, CF initialize). Technical upper bound only:
+    /// the method is offered for <see cref="IyzicoSettings.AllowedCurrencies"/> (default TRY).
     /// </summary>
     public static readonly IReadOnlySet<string> SupportedCurrencies
         = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "TRY", "USD", "EUR", "GBP", "NOK", "CHF" };
 
     const string DateFormat = "yyyy-MM-dd HH:mm:ss";
+
+    /// <summary>
+    /// Currencies configured in <see cref="IyzicoSettings.AllowedCurrencies"/> that iyzico accepts. Empty if none.
+    /// </summary>
+    public static IReadOnlySet<string> GetAllowedCurrencies(IyzicoSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var part in (settings.AllowedCurrencies ?? string.Empty).Split(',', ';', ' '))
+        {
+            var code = part.Trim();
+            if (SupportedCurrencies.Contains(code))
+            {
+                result.Add(code.ToUpperInvariant());
+            }
+        }
+
+        return result;
+    }
+
+    public static bool IsCurrencyAllowed(IyzicoSettings settings, string currencyCode)
+        => currencyCode.HasValue() && GetAllowedCurrencies(settings).Contains(currencyCode);
 
     /// <summary>
     /// The amount iyzico must charge for <paramref name="order"/>, in the customer currency, rounded to 2 decimals.

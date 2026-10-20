@@ -7,7 +7,9 @@ global using Smartstore;
 global using Smartstore.Core.Localization;
 global using Smartstore.Web.Modelling;
 using MotorShop.Iyzico.Configuration;
+using MotorShop.Iyzico.Services;
 using MotorShop.Iyzico.Tasks;
+using Smartstore.Core.Data;
 using Smartstore.Engine.Modularity;
 using Smartstore.Http;
 using Smartstore.Scheduling;
@@ -17,10 +19,12 @@ namespace MotorShop.Iyzico;
 internal class Module : ModuleBase, IConfigurable
 {
     private readonly ITaskStore _taskStore;
+    private readonly SmartDbContext _db;
 
-    public Module(ITaskStore taskStore)
+    public Module(ITaskStore taskStore, SmartDbContext db)
     {
         _taskStore = taskStore;
+        _db = db;
     }
 
     public RouteInfo GetConfigurationRoute()
@@ -37,6 +41,10 @@ internal class Module : ModuleBase, IConfigurable
             x.CronExpression = "*/10 * * * *";
             x.Enabled = true;
         });
+
+        // Payments.Manual stores card numbers in the shop database. On a fresh install (AppInstallation) the settings
+        // are seeded before modules are installed and module migrations are only stamped, so remove it here.
+        await BlockedPaymentMethods.DeactivateAsync(_db);
 
         await base.InstallAsync(context);
     }

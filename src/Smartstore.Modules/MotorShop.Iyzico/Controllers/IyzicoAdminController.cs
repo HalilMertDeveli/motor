@@ -20,12 +20,18 @@ public class IyzicoAdminController : ModuleController
     private readonly SmartDbContext _db;
     private readonly IIyzicoCredentialProvider _credentialProvider;
     private readonly IProviderManager _providerManager;
+    private readonly IyzicoPaymentService _paymentService;
 
-    public IyzicoAdminController(SmartDbContext db, IIyzicoCredentialProvider credentialProvider, IProviderManager providerManager)
+    public IyzicoAdminController(
+        SmartDbContext db,
+        IIyzicoCredentialProvider credentialProvider,
+        IProviderManager providerManager,
+        IyzicoPaymentService paymentService)
     {
         _db = db;
         _credentialProvider = credentialProvider;
         _providerManager = providerManager;
+        _paymentService = paymentService;
     }
 
     [LoadSetting, AuthorizeAdmin]
@@ -88,6 +94,44 @@ public class IyzicoAdminController : ModuleController
         return RedirectToAction(nameof(Configure));
     }
 
+    /// <summary>
+    /// Asks the iyzico transaction report whether unconfirmed refunds of a transaction were processed.
+    /// </summary>
+    [HttpPost, AuthorizeAdmin, ValidateAntiForgeryToken, Permission(Permissions.Order.Update)]
+    public async Task<IActionResult> CheckRefunds(int transactionId)
+    {
+        var confirmed = await _paymentService.CheckPendingRefundsAsync(transactionId, HttpContext.RequestAborted);
+        if (confirmed > 0)
+        {
+            NotifySuccess(T("Plugins.MotorShop.Iyzico.PendingRefunds.Confirmed", confirmed));
+        }
+        else
+        {
+            NotifyWarning(T("Plugins.MotorShop.Iyzico.PendingRefunds.NotConfirmed"));
+        }
+
+        return RedirectToAction(nameof(Configure));
+    }
+
+    /// <summary>
+    /// Admin decision on a refund with an unknown outcome, after checking the iyzico merchant panel.
+    /// </summary>
+    [HttpPost, AuthorizeAdmin, ValidateAntiForgeryToken, Permission(Permissions.Order.Update)]
+    public async Task<IActionResult> ResolveRefund(int transactionId, string conversationId, bool processed)
+    {
+        var resolvedBy = $"admin (customer id {Services.WorkContext.CurrentCustomer.Id})";
+        if (await _paymentService.ResolvePendingRefundAsync(transactionId, conversationId, processed, resolvedBy, HttpContext.RequestAborted))
+        {
+            NotifySuccess(T(processed ? "Plugins.MotorShop.Iyzico.PendingRefunds.ResolvedProcessed" : "Plugins.MotorShop.Iyzico.PendingRefunds.ResolvedNotProcessed"));
+        }
+        else
+        {
+            NotifyWarning(T("Plugins.MotorShop.Iyzico.PendingRefunds.NotFound"));
+        }
+
+        return RedirectToAction(nameof(Configure));
+    }
+
     private async Task PrepareModelAsync(ConfigurationModel model, IyzicoSettings settings)
     {
         ViewBag.Provider = _providerManager.GetProvider(IyzicoProvider.SystemName).Metadata;
@@ -100,6 +144,9 @@ public class IyzicoAdminController : ModuleController
         model.HasApiKey = settings.ApiKeyProtected.HasValue();
         model.HasSecretKey = settings.SecretKeyProtected.HasValue();
         model.HasConfigurationOverride = _credentialProvider.HasConfigurationOverride;
+        model.SkipResponseSignatureVerification = _credentialProvider.SkipResponseSignatureVerification;
+        model.AllowUnsignedWebhooks = _credentialProvider.AllowUnsignedWebhooks;
+        model.PendingRefunds = await _paymentService.GetPendingRefundsAsync();
         model.EffectiveEndpoint = credentials.BaseUrl;
         model.CallbackUrl = store.GetAbsoluteUrl("iyzico/callback");
         model.WebhookUrl = store.GetAbsoluteUrl("iyzico/webhook");

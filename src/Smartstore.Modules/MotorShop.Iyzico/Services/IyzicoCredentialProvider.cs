@@ -25,6 +25,19 @@ public interface IIyzicoCredentialProvider
     /// Gets a value indicating whether the API and secret keys come from configuration.
     /// </summary>
     bool HasConfigurationOverride { get; }
+
+    /// <summary>
+    /// Disables the HMAC check of initialize, retrieve and refund response signatures. Configuration only
+    /// (MotorShop:Iyzico:SkipResponseSignatureVerification=true), never an admin setting. For local mocks without signatures.
+    /// </summary>
+    bool SkipResponseSignatureVerification { get; }
+
+    /// <summary>
+    /// Accepts webhooks without a valid X-IYZ-SIGNATURE-V3 header. Configuration only (MotorShop:Iyzico:AllowUnsignedWebhooks=true).
+    /// iyzico sends the header only after the merchant asked iyzico to enable it. A webhook never marks an order as paid
+    /// by itself: it only triggers a server-side retrieve of the payment result.
+    /// </summary>
+    bool AllowUnsignedWebhooks { get; }
 }
 
 public class IyzicoCredentialProvider : IIyzicoCredentialProvider
@@ -52,6 +65,15 @@ public class IyzicoCredentialProvider : IIyzicoCredentialProvider
 
     public bool HasConfigurationOverride
         => _configuration[$"{ConfigSection}:ApiKey"].HasValue() && _configuration[$"{ConfigSection}:SecretKey"].HasValue();
+
+    public bool SkipResponseSignatureVerification
+        => IsTrue($"{ConfigSection}:SkipResponseSignatureVerification");
+
+    public bool AllowUnsignedWebhooks
+        => IsTrue($"{ConfigSection}:AllowUnsignedWebhooks");
+
+    private bool IsTrue(string key)
+        => bool.TryParse(_configuration[key], out var value) && value;
 
     public async Task<IyzicoCredentials> GetCredentialsAsync(int storeId)
     {

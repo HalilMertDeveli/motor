@@ -147,4 +147,35 @@ public class IyzicoItemTransaction
     public string ItemId { get; set; }
     public decimal PaidPrice { get; set; }
     public decimal RefundedAmount { get; set; }
+
+    /// <summary>
+    /// conversationId of a refund or cancel sent to iyzico whose outcome is unknown (no answer, or an answer that
+    /// could not be verified). iyzico may have processed it, so no further refund of this payment is sent until it is
+    /// confirmed through the transaction report or resolved by an admin.
+    /// </summary>
+    public string PendingRefundConversationId { get; set; }
+
+    /// <summary>
+    /// Amount of the unconfirmed refund for this item.
+    /// </summary>
+    public decimal? PendingRefundAmount { get; set; }
+
+    /// <summary>
+    /// <c>true</c> if the unconfirmed operation is a cancel of the whole payment (then every open item carries it).
+    /// </summary>
+    public bool PendingRefundIsCancel { get; set; }
+
+    public DateTime? PendingRefundSinceUtc { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool HasPendingRefund
+        => PendingRefundConversationId != null;
+
+    public void ClearPendingRefund()
+    {
+        PendingRefundConversationId = null;
+        PendingRefundAmount = null;
+        PendingRefundIsCancel = false;
+        PendingRefundSinceUtc = null;
+    }
 }

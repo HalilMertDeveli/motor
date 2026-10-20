@@ -24,15 +24,18 @@ public class IyzicoController : PublicController
     private readonly SmartDbContext _db;
     private readonly IyzicoPaymentService _paymentService;
     private readonly IIyzicoCredentialProvider _credentialProvider;
+    private readonly IyzicoReturnThrottle _returnThrottle;
 
     public IyzicoController(
         SmartDbContext db,
         IyzicoPaymentService paymentService,
-        IIyzicoCredentialProvider credentialProvider)
+        IIyzicoCredentialProvider credentialProvider,
+        IyzicoReturnThrottle returnThrottle)
     {
         _db = db;
         _paymentService = paymentService;
         _credentialProvider = credentialProvider;
+        _returnThrottle = returnThrottle;
     }
 
     /// <summary>
@@ -128,17 +131,18 @@ public class IyzicoController : PublicController
         var isOwner = order.CustomerId == Services.WorkContext.CurrentCustomer.Id;
         if (isOwner && order.PaymentStatus == PaymentStatus.Pending)
         {
-            // The owner reloads the page while the payment is still open: check iyzico again.
-            var openToken = await _db.IyzicoTransactions()
+            // The owner reloads the page while the payment is still open: check iyzico again, throttled per order.
+            var open = await _db.IyzicoTransactions()
                 .AsNoTracking()
                 .Where(x => x.OrderId == order.Id && (x.Status == IyzicoTransactionStatus.Initialized || x.Status == IyzicoTransactionStatus.Pending))
                 .OrderByDescending(x => x.Id)
-                .Select(x => x.Token)
+                .Select(x => new { x.Token, x.UpdatedOnUtc })
                 .FirstOrDefaultAsync();
 
-            if (openToken != null)
+            var now = DateTime.UtcNow;
+            if (open != null && now - open.UpdatedOnUtc >= IyzicoReturnThrottle.MinInterval && _returnThrottle.TryAcquire(order.Id, now))
             {
-                await _paymentService.ProcessTokenAsync(openToken, IyzicoEventSource.Callback, HttpContext.RequestAborted);
+                await _paymentService.ProcessTokenAsync(open.Token, IyzicoEventSource.PaymentPage, HttpContext.RequestAborted);
                 order = await _db.Orders.AsNoTracking().FirstAsync(x => x.Id == order.Id);
             }
         }
@@ -185,9 +189,8 @@ public class IyzicoController : PublicController
             .FirstOrDefaultAsync();
 
         var storeId = tx?.StoreId ?? Services.StoreContext.CurrentStore.Id;
-        var settings = await Services.SettingFactory.LoadSettingsAsync<IyzicoSettings>(storeId);
         var credentials = await _credentialProvider.GetCredentialsAsync(storeId);
-        var auth = IyzicoWebhookVerifier.Verify(payload, Request.Headers[SignatureHeader].ToString(), credentials.SecretKey, settings.RequireWebhookSignature);
+        var auth = IyzicoWebhookVerifier.Verify(payload, Request.Headers[SignatureHeader].ToString(), credentials.SecretKey, !_credentialProvider.AllowUnsignedWebhooks);
         if (auth is IyzicoWebhookAuth.Invalid or IyzicoWebhookAuth.Missing)
         {
             Logger.LogWarning("iyzico webhook rejected: signature {Auth} (event {EventType}).", auth, payload.IyziEventType);

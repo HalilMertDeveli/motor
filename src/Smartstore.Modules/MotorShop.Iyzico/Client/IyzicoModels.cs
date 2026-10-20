@@ -181,6 +181,57 @@ public sealed class CancelResponse : IyzicoResponse
 }
 
 /// <summary>
+/// Response of the transaction detail report (GET /v2/reporting/payment/details).
+/// Used to find out whether a refund or cancel with an unknown outcome was processed.
+/// </summary>
+public sealed class PaymentDetailsReportResponse : IyzicoResponse
+{
+    public List<ReportedPayment> Payments { get; set; }
+}
+
+public sealed class ReportedPayment
+{
+    [JsonConverter(typeof(FlexibleStringConverter))]
+    public string PaymentId { get; set; }
+
+    public string PaymentConversationId { get; set; }
+    public string PaymentRefundStatus { get; set; }
+    public string Currency { get; set; }
+    public List<ReportedCancel> Cancels { get; set; }
+    public List<ReportedItemTransaction> ItemTransactions { get; set; }
+}
+
+public sealed class ReportedItemTransaction
+{
+    [JsonConverter(typeof(FlexibleStringConverter))]
+    public string PaymentTransactionId { get; set; }
+
+    public List<ReportedRefund> Refunds { get; set; }
+}
+
+public sealed class ReportedRefund
+{
+    [JsonConverter(typeof(FlexibleStringConverter))]
+    public string RefundTxId { get; set; }
+
+    public string RefundConversationId { get; set; }
+    public decimal? RefundPrice { get; set; }
+    public int? RefundStatus { get; set; }
+    public string CurrencyCode { get; set; }
+}
+
+public sealed class ReportedCancel
+{
+    [JsonConverter(typeof(FlexibleStringConverter))]
+    public string RefundId { get; set; }
+
+    public string CancelConversationId { get; set; }
+    public decimal? RefundPrice { get; set; }
+    public int? RefundStatus { get; set; }
+    public string CurrencyCode { get; set; }
+}
+
+/// <summary>
 /// Webhook body for hosted payment pages (Checkout Form, Pay with iyzico).
 /// See https://docs.iyzico.com/en/advanced/webhook
 /// </summary>
