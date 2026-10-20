@@ -1,0 +1,33 @@
+@model List<MotorShop.Tracking.Models.ShipmentTrackingModel>
+
+<section class="card mt-4 motor-shipment-tracking" aria-labelledby="motor-tracking-title">
+    <div id="motor-tracking-title" class="card-header border-0 h5">@T("Plugins.MotorShop.Tracking.Title")</div>
+    <ul class="list-group list-group-flush">
+        @foreach (var item in Model)
+        {
+            <li class="list-group-item">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div class="mr-3">
+                        <div class="font-weight-medium">
+                            @if (item.DeliveredOn.HasValue)
+                            {
+                                @T("Plugins.MotorShop.Tracking.Delivered", item.DeliveredOn.Value.ToNativeString("D"))
+                            }
+                            else
+                            {
+                                @T("Plugins.MotorShop.Tracking.Shipped", item.ShippedOn.ToNativeString("D"))
+                            }
+                        </div>
+                        <div class="text-muted small">
+                            <span sm-if="item.Carrier.HasValue()">@T("Plugins.MotorShop.Tracking.Carrier"): @item.Carrier</span>
+                            <span sm-if="item.TrackingNumber.HasValue()" class="ml-2">@T("Plugins.MotorShop.Tracking.TrackingNumber"): @item.TrackingNumber</span>
+                        </div>
+                    </div>
+                    <a sm-if="item.TrackingUrl.HasValue()" href="@item.TrackingUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm mt-2 mt-md-0">
+                        @T("Plugins.MotorShop.Tracking.TrackShipment")
+                    </a>
+                </div>
+            </li>
+        }
+    </ul>
+</section>

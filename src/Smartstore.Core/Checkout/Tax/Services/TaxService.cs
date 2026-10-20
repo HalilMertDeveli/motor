@@ -159,7 +159,7 @@ public partial class TaxService : AsyncDbSaveHook<TaxCategory>, ITaxService
 
         try
         {
-            var response = await _client.CheckVatAsync(vatNumber.Replace(" ", string.Empty), twoLetterIsoCode.ToUpper());
+            var response = await _client.CheckVatAsync(vatNumber.Replace(" ", string.Empty), twoLetterIsoCode.ToUpperInvariant());
 
             return new(response.IsValid ? VatNumberStatus.Valid : VatNumberStatus.Invalid, fullVatNumber)
             {

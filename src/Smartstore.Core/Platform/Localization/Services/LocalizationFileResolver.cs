@@ -64,7 +64,7 @@ public class LocalizationFileResolver : ILocalizationFileResolver
             return result;
         }
 
-        var cacheKey = "core:locfile:" + left.ToLower() + pattern + "/" + culture;
+        var cacheKey = "core:locfile:" + left.ToLowerInvariant() + pattern + "/" + culture;
 
         if (cache && _cache.TryGet(cacheKey, out string resolvedCulture))
         {

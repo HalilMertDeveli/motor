@@ -1,3 +1,3 @@
 cd ..
-docker build -t ghcr.io/smartstore/smartstore-linux -f NoBuild.Dockerfile .
+docker build -t motor-web:local -f NoBuild.Dockerfile .
 echo 'Press enter to exit...'; read dummy;

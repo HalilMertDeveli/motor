@@ -465,7 +465,7 @@ public static partial class IFileSystemExtensions
             throw new DirectoryNotFoundException("Directory " + source.SubPath + "does not exist.");
         }
 
-        if (destination.SubPath.EnsureEndsWith('/').StartsWith(source.SubPath.EnsureEndsWith('/'), StringComparison.CurrentCultureIgnoreCase))
+        if (destination.SubPath.EnsureEndsWith('/').StartsWith(source.SubPath.EnsureEndsWith('/'), StringComparison.OrdinalIgnoreCase))
         {
             throw new FileSystemException($"Cannot copy a directory '{source.SubPath}' into itself.");
         }
@@ -522,7 +522,7 @@ public static partial class IFileSystemExtensions
             throw new DirectoryNotFoundException("Directory " + source.SubPath + "does not exist.");
         }
 
-        if (destination.SubPath.EnsureEndsWith('/').StartsWith(source.SubPath.EnsureEndsWith('/'), StringComparison.CurrentCultureIgnoreCase))
+        if (destination.SubPath.EnsureEndsWith('/').StartsWith(source.SubPath.EnsureEndsWith('/'), StringComparison.OrdinalIgnoreCase))
         {
             throw new FileSystemException($"Cannot copy a directory '{source.SubPath}' into itself.");
         }

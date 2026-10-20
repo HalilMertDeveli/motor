@@ -1,0 +1,24 @@
+@model PublicPartModel
+@{
+    var res = "Plugins.MotorShop.CatalogImport.Public.";
+}
+
+<div class="motor-part-identity mb-3">
+    <div class="d-flex flex-wrap align-items-center gap-2 small">
+        <span class="text-nowrap"><span class="text-muted">@T(res + "Brand"):</span> <strong>@Model.Brand</strong></span>
+        <span class="text-nowrap"><span class="text-muted">@T(res + "PartNumber"):</span> <strong class="font-monospace">@Model.Mpn</strong></span>
+        @if (Model.Classification != PartClassification.Unknown)
+        {
+            <span class="badge badge-@(Model.Classification == PartClassification.Oem ? "primary" : "secondary") bg-@(Model.Classification == PartClassification.Oem ? "primary" : "secondary")">
+                @T("Plugins.MotorShop.CatalogImport.Classification." + Model.Classification)
+            </span>
+        }
+    </div>
+
+    @if (Model.IsReferenceOnly)
+    {
+        <div class="alert alert-secondary small mt-2 mb-0" role="note">
+            @T(res + "ReferenceNotice")
+        </div>
+    }
+</div>

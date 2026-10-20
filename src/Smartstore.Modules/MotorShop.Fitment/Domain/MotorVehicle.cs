@@ -23,7 +23,22 @@ public class MotorVehicle : BaseEntity
 
     public int? EngineCc { get; set; }
 
+    /// <summary>
+    /// Lower bound of the year range. A range stored with YearTo &lt; YearFrom is read as [YearTo, YearFrom].
+    /// </summary>
+    [NotMapped]
+    public int FirstYear => Math.Min(YearFrom, YearTo);
+
+    /// <summary>
+    /// Upper bound of the year range. A range stored with YearTo &lt; YearFrom is read as [YearTo, YearFrom].
+    /// </summary>
+    [NotMapped]
+    public int LastYear => Math.Max(YearFrom, YearTo);
+
     [NotMapped]
     public string DisplayName
-        => $"{Make} {Model} ({(YearFrom == YearTo ? YearFrom.ToString() : $"{YearFrom}-{YearTo}")})";
+        => $"{Make} {Model} ({(FirstYear == LastYear ? FirstYear.ToString() : $"{FirstYear}-{LastYear}")})";
+
+    public bool CoversYear(int year)
+        => year >= FirstYear && year <= LastYear;
 }

@@ -17,6 +17,47 @@ public static class FluentValidatorRuleExtensions
     }
 
     /// <summary>
+    /// MOTOR: lenient phone number check. Empty values pass (use NotEmpty() for required fields).
+    /// Accepts digits, spaces and + ( ) - . / with 7 to 15 digits, so national ("0532 123 45 67")
+    /// and international ("+90 532 123 45 67") notations are both valid.
+    /// </summary>
+    public static IRuleBuilderOptions<T, string> PhoneNumber<T>(this IRuleBuilder<T, string> ruleBuilder, Localizer localizer)
+        => ruleBuilder.Must(IsPlausiblePhoneNumber).WithMessage(localizer("Address.Fields.PhoneNumber.Invalid"));
+
+    public static bool IsPlausiblePhoneNumber(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return true;
+        }
+
+        var digits = 0;
+        var trimmed = value.Trim();
+
+        for (var i = 0; i < trimmed.Length; i++)
+        {
+            var c = trimmed[i];
+            if (char.IsAsciiDigit(c))
+            {
+                digits++;
+            }
+            else if (c == '+')
+            {
+                if (i != 0)
+                {
+                    return false;
+                }
+            }
+            else if (c is not (' ' or '(' or ')' or '-' or '.' or '/'))
+            {
+                return false;
+            }
+        }
+
+        return digits is >= 7 and <= 15;
+    }
+
+    /// <summary>
     /// Defines a CVV number validator on the current rule builder for string properties.
     /// Validation will fail if the value returned by the lambda is not a valid credit card CVV number.
     /// </summary>

@@ -11,5 +11,11 @@ story.jpg
   https://unsplash.com/photos/a-black-motorcycle-parked-in-a-dark-room-X6hEndRsYhQ
   Unsplash License (https://unsplash.com/license): free for commercial use, no attribution required.
 
-Replace these files with the store's own photography at any time; keep the file names
-(or adjust Views/Shared/Partials/Home.Hero.cshtml and Home.Story.cshtml).
+Responsive variants (same photos, resized and WebP-encoded, no other changes):
+  hero-1280.webp, hero-1600.webp, hero-2000.webp   <- hero.jpg
+  hero-mobile-600.webp, hero-mobile-900.webp       <- hero-mobile.jpg
+  story-800.webp, story-1200.webp, story-1600.webp <- story.jpg
+
+Browsers load the WebP variants; the JPEGs are the fallback. Replace these files with the
+store's own photography at any time: keep the file names and regenerate the WebP widths, or
+adjust Views/Shared/Partials/Home.Hero.cshtml and Home.Story.cshtml.

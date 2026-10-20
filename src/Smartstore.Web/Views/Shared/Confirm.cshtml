@@ -11,21 +11,18 @@
        class="confirmation-dialog"
        data-submit-button-id="@Model.ButtonId"
        data-action-url="@Model.ActionUrl">
-    @if (Model.Title.HasValue())
-    {
-        <modal-header sm-show-close="false" sm-title="@Model.Title"></modal-header>
-    }
+    <modal-header sm-show-close="false" sm-title="@Model.Title" sm-if="Model.Title.HasValue()"></modal-header>
     <modal-body>
         <div class="modal-box-body d-flex" attr-class='(Model.CenterContent, "flex-nowrap")'>
             <div class="modal-box-icon">
-                <i class="@(Model.IconClass) text-@(Model.IconColor.ToString().ToLower()) fa-fw fa-3x mb-3"></i>
+                <i class="@(Model.IconClass) text-@(Model.IconColor.ToString().ToLowerInvariant()) fa-fw fa-3x mb-3"></i>
             </div>
             <div class="modal-box-message">@Model.Message</div>
         </div>
     </modal-body>
     <modal-footer>
         <button type="button" 
-                class="btn btn-@(Model.ButtonStyle.ToString().ToLower()) btn-sm btn-accept" 
+                class="btn btn-@(Model.ButtonStyle.ToString().ToLowerInvariant()) btn-sm btn-accept" 
                 data-dismiss="modal" 
                 tabindex="2"
                 attr-class='(Model.ConfirmType == ConfirmActionType.Delete, "entity-commit-trigger")'

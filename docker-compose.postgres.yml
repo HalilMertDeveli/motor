@@ -1,27 +1,28 @@
-version: "3.4"
+# PostgreSQL database for MOTOR. Use together with docker-compose.yml.
+# In the installer: server "db", database/user/password from .env.
+
 services:
   web:
-    image: ghcr.io/smartstore/smartstore-linux
-    container_name: web
-    ports:
-      - "80:80"
-    restart: unless-stopped
     depends_on:
-      - db
-    volumes:
-      - "D:/mount/smtenants/postgres-db:/app/App_Data/Tenants"
-  db:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: super_admin
-      POSTGRES_PASSWORD: Smartstore2022!
-      PGDATA: /data/postgres
-    volumes:
-       - postgres-db:/data/postgres
-    ports:
-      - "5432:5432"
+      db:
+        condition: service_healthy
 
+  db:
+    image: postgres:${MOTOR_POSTGRES_TAG:-16-alpine}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${MOTOR_DB_NAME:-motor}
+      POSTGRES_USER: ${MOTOR_DB_USER:-motor}
+      POSTGRES_PASSWORD: ${MOTOR_DB_PASSWORD:?Set MOTOR_DB_PASSWORD in .env}
+    # No host port: only the web container reaches the database.
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
 volumes:
-  postgres-db:
-    driver: local
+  postgres-data:

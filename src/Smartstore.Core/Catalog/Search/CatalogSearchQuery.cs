@@ -523,7 +523,7 @@ public partial class CatalogSearchQuery : SearchQuery<CatalogSearchQuery>, IClon
             throw new ArgumentException("A currency code is required to filter by price.", nameof(currencyCode));
         }
 
-        var fieldName = "price_c-" + CurrencyCode.EmptyNull().ToLower();
+        var fieldName = "price_c-" + CurrencyCode.EmptyNull().ToLowerInvariant();
 
         if (fromPrice.HasValue && toPrice.HasValue && fromPrice == toPrice)
         {

@@ -187,10 +187,17 @@ public partial class DataSettings
                     var shouldSave = currentVersion > previousVersion;
 
                     // DbFactory
+                    EnsureProviderMatches(settings.Get("DataProvider"), EnvironmentDataProvider);
                     DbFactory = DbFactory.Load(settings.Get("DataProvider"), _appContext.TypeScanner);
 
                     // ConnectionString
-                    var connectionString = settings.Get("DataConnectionString");
+                    var connectionString = ResolveConnectionString(settings.Get("DataConnectionString"), EnvironmentConnectionString);
+                    if (UsesEnvironmentConnectionString && settings.Get("DataConnectionString") != EnvironmentPlaceholder)
+                    {
+                        // Replace a stored secret with the placeholder
+                        shouldSave = true;
+                    }
+
                     if (DbFactory.TryNormalizeConnectionString(connectionString, out var normalizedConnectionString))
                     {
                         connectionString = normalizedConnectionString;
@@ -335,7 +342,7 @@ public partial class DataSettings
         return string.Format("AppVersion: {0}{3}DataProvider: {1}{3}DataConnectionString: {2}{3}",
             AppVersion.ToString(),
             DbFactory.DbSystem,
-            ConnectionString,
+            GetPersistableConnectionString(ConnectionString, EnvironmentConnectionString),
             Environment.NewLine);
     }
 

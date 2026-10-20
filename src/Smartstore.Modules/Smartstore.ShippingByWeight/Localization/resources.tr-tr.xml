@@ -1,0 +1,113 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.Smartstore.ShippingByWeight" AppendRootKey="false">
+        <Value>Ağırlığa göre kargo</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Smartstore.ShippingByWeight" AppendRootKey="false">
+        <Value>Ağırlığa göre hesaplanan kargo yöntemleri sunar.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Shipping.ShippingByWeight" AppendRootKey="false">
+        <Value>Ağırlığa göre kargo</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.Country">
+        <Value>Ülke</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.Country.Hint">
+        <Value>Yıldız işareti (*) seçilirse bu kargo ücreti, ülkeden bağımsız olarak tüm müşterilere uygulanır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.Zip">
+        <Value>Posta kodu (aralığı)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.Zip.Hint">
+        <Value>Posta kodu (aralığı): tek tek değerler (virgülle ayrılmış) veya aralık deseni (ör. 4000-4999) olarak girilebilir. * veya ? gibi joker karakterler de kullanabilirsiniz. Posta kodu boş bırakılırsa bu kargo ücreti, posta kodundan bağımsız olarak seçilen ülke veya ildeki tüm müşterilere uygulanır. Birden fazla aralık da girebilirsiniz (virgülle ayrılmış).</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.ShippingMethod">
+        <Value>Kargo yöntemi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.ShippingMethod.Hint">
+        <Value>Kargo yöntemi.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.From">
+        <Value>Sipariş ağırlığı (başlangıç)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.From.Hint">
+        <Value>Sipariş ağırlığı aralığının başlangıç değeri.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.To">
+        <Value>Sipariş ağırlığı (bitiş)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.To.Hint">
+        <Value>Sipariş ağırlığı aralığının bitiş değeri.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.UsePercentage">
+        <Value>Yüzde kullan</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.UsePercentage.Hint">
+        <Value>'Ücret yüzdesi' değerini kullanmak için kutuyu işaretleyin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.ShippingChargePercentage">
+        <Value>Ücret yüzdesi (ara toplam üzerinden)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.ShippingChargePercentage.Hint">
+        <Value>Ücret yüzdesi (ara toplam üzerinden).</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.ShippingChargeAmount">
+        <Value>Ücret tutarı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.ShippingChargeAmount.Hint">
+        <Value>Ücret tutarı.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.LimitMethodsToCreated">
+        <Value>Kargo yöntemlerini yapılandırılanlarla sınırla</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.LimitMethodsToCreated.Hint">
+        <Value>Bu seçeneği işaretlerseniz müşterileriniz yalnızca burada yapılandırılan kargo seçeneklerini kullanabilir. Aksi takdirde, burada yapılandırılmamış olsalar bile mevcut tüm kargo seçeneklerini seçebilirler (bu durumda kargo ücreti sıfır olur).</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.CalculatePerWeightUnit">
+        <Value>Ağırlık birimi başına hesapla</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.CalculatePerWeightUnit.Hint">
+        <Value>Bu seçeneği işaretlerseniz ücretler ağırlık birimi (lb, kg vb.) başına çarpılır. Bu seçenek sabit ücretler (yüzde olmadan) için kullanılır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.IncludeWeightOfFreeShippingProducts">
+        <Value>Ücretsiz kargolu ürünlerin ağırlığını dahil et</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.IncludeWeightOfFreeShippingProducts.Hint">
+        <Value>Ücretsiz kargolu ürünlerin ağırlığının hesaplamaya dahil edilip edilmeyeceğini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.Store">
+        <Value>Mağaza</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.Store.Hint">
+        <Value>Yıldız işareti (*) seçilirse bu kargo ücreti tüm mağazalara uygulanır.</Value>
+    </LocaleResource>
+
+    <LocaleResource Name="Fields.SmallQuantitySurcharge">
+        <Value>Düşük tutarlı siparişler için ek ücret</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.SmallQuantitySurcharge.Hint">
+        <Value>Düşük tutarlı siparişlerde uygulanacak ek ücretin tutarını belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.SmallQuantityThreshold">
+        <Value>Düşük tutarlı siparişler için eşik</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.SmallQuantityThreshold.Hint">
+        <Value>"Düşük tutar ek ücreti"nin ekleneceği ara toplam üst sınırı. Kargo ücreti uygulanmıyorsa ek ücret dikkate alınmaz. Ücret alınmayacaksa "0" girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="SmallQuantitySurchargeNotReached">
+        <Value>
+            <![CDATA[<br>Sipariş toplamınız <b class=\"text-warning\">{1}</b> tutarına ulaşmadığı için <b class=\"text-success\">{0}</b> tutarında ek ücret uygulanmıştır.]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="AddNewRecordTitle">
+        <Value>Yeni kayıt ekle</Value>
+    </LocaleResource>
+    <LocaleResource Name="AddNewRecord.Success">
+        <Value>Yeni kayıt başarıyla eklendi.</Value>
+    </LocaleResource>
+    <LocaleResource Name="TabTitleSettings">
+        <Value>Seçenekler</Value>
+    </LocaleResource>
+    <LocaleResource Name="TabTitleGrid">
+        <Value>Kargo kayıtları</Value>
+    </LocaleResource>
+</Language>

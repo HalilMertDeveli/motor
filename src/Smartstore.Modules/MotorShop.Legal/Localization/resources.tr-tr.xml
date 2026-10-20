@@ -1,0 +1,14 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Legal" AppendRootKey="false"><Value>Mesafeli Satış ve Yasal Onay</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Legal" AppendRootKey="false"><Value>Sipariş onay adımında Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesini sipariş bilgileriyle gösterir, cayma hakkı ve KVKK aydınlatma metnine bağlantı verir, her sipariş için onay kaydı ve metin kopyası saklar.</Value></LocaleResource>
+    <LocaleResource Name="Heading"><Value>Sözleşmeler ve yasal bilgilendirme</Value></LocaleResource>
+    <LocaleResource Name="AcceptLabel"><Value>Ön Bilgilendirme Formu'nu ve Mesafeli Satış Sözleşmesi'ni okudum, onaylıyorum.</Value></LocaleResource>
+    <LocaleResource Name="PleaseAccept"><Value>Siparişi tamamlamak için Ön Bilgilendirme Formu'nu ve Mesafeli Satış Sözleşmesi'ni onaylamanız gerekir.</Value></LocaleResource>
+    <LocaleResource Name="WithdrawalLink"><Value>Cayma hakkı ve iade bilgileri</Value></LocaleResource>
+    <LocaleResource Name="PrivacyNoticeLink"><Value>KVKK Aydınlatma Metni</Value></LocaleResource>
+    <LocaleResource Name="OrderDocuments"><Value>Sipariş sözleşmeleri</Value></LocaleResource>
+    <LocaleResource Name="SnapshotOfOrder"><Value>{0} numaralı siparişte onaylanan metnin kopyası.</Value></LocaleResource>
+    <LocaleResource Name="BackToOrder"><Value>Siparişe dön</Value></LocaleResource>
+    <LocaleResource Name="OrderNote"><Value>Yasal onay kaydı. Onay kutusu işaretlendi: {0}. Zaman (UTC): {1}. Metinler (sürüm özeti): {2}. IP adresi siparişin müşteri IP alanındadır.</Value></LocaleResource>
+    <LocaleResource Name="PaymentObligationHint"><Value>"Siparişi onayla" düğmesine bastığınızda siparişiniz ödeme yükümlülüğü doğuracak şekilde onaylanır.</Value></LocaleResource>
+</Language>

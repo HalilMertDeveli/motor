@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MessageTemplate>
+	<To>{{ Customer.FullName }} &lt;{{ Customer.Email }}&gt;</To>
+	<Subject>{{ Store.Name }}. '{{ Product.Name | Truncate: 40 }}' ürünü yeniden stokta</Subject>
+	<ModelTypes>Product</ModelTypes>
+	<Body><![CDATA[{% extends 'master' %}
+
+{% block 'body' %}
+<h1>
+  Merhaba {{ Customer.FullName }},
+</h1>
+<p>
+  <b>{{ Product.Name }}</b> ürünü yeniden stoklarımızda.
+</p>
+<p class="mt-4">
+	<a href="{{ Product.Url }}" class="btn btn-primary">Ürün sayfasını görüntüle</a>
+</p>
+{% endblock %}]]></Body>
+</MessageTemplate>

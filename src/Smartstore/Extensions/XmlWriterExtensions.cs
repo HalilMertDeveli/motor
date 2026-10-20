@@ -45,7 +45,7 @@ public static class XmlWriterExtensions
 
                 if (cultureCode.HasValue())
                 {
-                    writer.WriteAttributeString("culture", cultureCode.ToLower());
+                    writer.WriteAttributeString("culture", cultureCode.ToLowerInvariant());
                 }
 
                 if (asCData)

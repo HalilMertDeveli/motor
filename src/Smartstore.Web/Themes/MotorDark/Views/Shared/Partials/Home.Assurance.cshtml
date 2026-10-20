@@ -8,10 +8,10 @@
 
     var items = new List<(string Icon, string Title, string Text, string Url, string LinkText)>
     {
-        ("mi-truck", "Kargo & İade", "Gönderim, teslimat ve iade koşullarını önceden öğren.", shippingUrl, "Koşulları incele"),
-        ("mi-shield", "Ödeme Seçenekleri", "Kullanılabilir ödeme yöntemlerini ve ödeme sürecini gör.", paymentUrl, "Ödeme bilgileri"),
-        ("mi-return", "Sipariş Takibi", "Siparişlerinin durumunu hesabından takip et.", ordersUrl, "Siparişlerim"),
-        ("mi-headset", "Parça Danışmanlığı", "Doğru parçadan emin değil misin? Bize yaz.", contactUrl, "İletişime geç")
+        ("mi-truck", T("Themes.MotorDark.Assurance.Shipping.Title").Value, T("Themes.MotorDark.Assurance.Shipping.Text").Value, shippingUrl, T("Themes.MotorDark.Assurance.Shipping.Link").Value),
+        ("mi-shield", T("Themes.MotorDark.Assurance.Payment.Title").Value, T("Themes.MotorDark.Assurance.Payment.Text").Value, paymentUrl, T("Themes.MotorDark.Assurance.Payment.Link").Value),
+        ("mi-return", T("Themes.MotorDark.Assurance.Orders.Title").Value, T("Themes.MotorDark.Assurance.Orders.Text").Value, ordersUrl, T("Themes.MotorDark.Assurance.Orders.Link").Value),
+        ("mi-headset", T("Themes.MotorDark.Assurance.Advice.Title").Value, T("Themes.MotorDark.Assurance.Advice.Text").Value, contactUrl, T("Themes.MotorDark.Assurance.Advice.Link").Value)
     };
 
     items = items.Where(x => x.Url.HasValue()).ToList();
@@ -19,7 +19,7 @@
 
 @if (items.Count > 0)
 {
-    <section lang="tr" class="motor-assurance" aria-label="Alışveriş güvencesi">
+    <section class="motor-assurance" aria-label="@T("Themes.MotorDark.Assurance.Label")">
         <ul class="motor-assurance-list" data-motor-stagger>
             @foreach (var item in items)
             {

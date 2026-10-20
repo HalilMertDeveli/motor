@@ -374,7 +374,7 @@ public static class PathUtility
         var toParts = toPath.Tokenize(PathSeparators, StringSplitOptions.RemoveEmptyEntries);
 
         var matchedParts = fromParts
-            .Zip(toParts, (x, y) => string.Compare(x, y, true) == 0)
+            .Zip(toParts, (x, y) => string.Equals(x, y, StringComparison.OrdinalIgnoreCase))
             .TakeWhile(x => x).Count();
 
         return string.Join(string.Empty, Enumerable.Range(0, fromParts.Count() - matchedParts)

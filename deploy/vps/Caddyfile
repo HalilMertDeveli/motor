@@ -1,0 +1,49 @@
+# MOTOR reverse proxy. Caddy obtains and renews the TLS certificate for
+# {$MOTOR_DOMAIN} automatically (ports 80 and 443 must reach the VPS, and the
+# domain's DNS A/AAAA records must point to it) and redirects HTTP to HTTPS.
+#
+# Security headers (HSTS, CSP, X-Frame-Options ...) are set by the application
+# (MotorShop.Security / Smartstore), not here, so they are not sent twice.
+
+{
+	email {$MOTOR_ACME_EMAIL}
+	# The admin API stays inside the container (used by the health check only).
+	admin 127.0.0.1:2019
+	# Empty in production. Tests set it to "local_certs" (Caddy's internal CA).
+	{$MOTOR_CADDY_LOCAL_CERTS}
+}
+
+{$MOTOR_DOMAIN} {
+	encode zstd gzip
+
+	request_body {
+		max_size {$MOTOR_MAX_UPLOAD_BYTES}
+	}
+
+	# Health endpoints are for the container health check, not for the internet.
+	@health path /healthz /healthz/*
+	respond @health 404
+
+	# The installer is only needed once; it is reachable from the server itself
+	# (ssh tunnel to the web container) but never from the internet.
+	@install path /install /install/*
+	respond @install 404
+
+	reverse_proxy web:8080 {
+		# Caddy sets X-Forwarded-For/-Proto/-Host; the app trusts them only
+		# from the edge network (Smartstore__ReverseProxy__KnownNetworks).
+		transport http {
+			dial_timeout 10s
+			response_header_timeout 120s
+		}
+	}
+
+	header {
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

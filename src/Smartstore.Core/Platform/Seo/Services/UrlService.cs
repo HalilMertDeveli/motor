@@ -532,7 +532,7 @@ public partial class UrlService : AsyncDbSaveHook<UrlRecord>, IUrlService
             if (ensureNotEmpty)
             {
                 // Use entity identifier as slug if empty
-                slug = entity.GetEntityName().ToLower() + entity.Id.ToStringInvariant();
+                slug = entity.GetEntityName().ToLowerInvariant() + entity.Id.ToStringInvariant();
             }
             else
             {
@@ -634,7 +634,7 @@ public partial class UrlService : AsyncDbSaveHook<UrlRecord>, IUrlService
         if (ensureNotEmpty && string.IsNullOrEmpty(lockKey))
         {
             // Use entity identifier as key if empty
-            lockKey = entity.GetEntityName().ToLower() + entity.Id.ToStringInvariant();
+            lockKey = entity.GetEntityName().ToLowerInvariant() + entity.Id.ToStringInvariant();
         }
 
         if (string.IsNullOrEmpty(lockKey))

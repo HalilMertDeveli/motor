@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+using System.Globalization;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -36,8 +37,10 @@ internal class SqliteSmartRelationalConnection : SqliteRelationalConnection
                 "NOCASE",
                 static (string left, string right) =>
                 {
-                    // Override equality check (Sqlite cannot compare non-ascii chars uncased)
-                    return string.Compare(left, right, ignoreCase: true);
+                    // Override equality check (Sqlite cannot compare non-ascii chars uncased).
+                    // MOTOR: invariant culture, so that keys like "...Id" still match "...id" when the
+                    // request culture is tr-TR (where "I" lowercases to dotless "ı").
+                    return string.Compare(left, right, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase);
                 });
 
             sqliteConnection.CreateFunction(
@@ -45,7 +48,7 @@ internal class SqliteSmartRelationalConnection : SqliteRelationalConnection
                 static (string input) =>
                 {
                     // Override lower function (Sqlite ignores non-ascii chars)
-                    return input?.ToLower();
+                    return input?.ToLowerInvariant();
                 },
                 isDeterministic: true);
 
@@ -54,7 +57,7 @@ internal class SqliteSmartRelationalConnection : SqliteRelationalConnection
                 static (string input) =>
                 {
                     // Override upper function (Sqlite ignores non-ascii chars)
-                    return input?.ToUpper();
+                    return input?.ToUpperInvariant();
                 },
                 isDeterministic: true);
 

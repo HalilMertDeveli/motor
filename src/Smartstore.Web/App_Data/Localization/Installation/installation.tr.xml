@@ -1,0 +1,215 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false" LanguageCulture="tr-TR" FlagImageFileName="tr.png">
+    <LocaleResource Name="AdminEmail">
+        <Value>Yönetici e-posta adresi</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminPassword">
+        <Value>Yönetici şifresi</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConfigureDirectoryPermissions">
+        <Value>'{0}' hesabına '{1}' dizini üzerinde değiştirme (Modify) izni verilmemiş. Lütfen bu izinleri yapılandırın.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConfigureFilePermissions">
+        <Value>'{0}' hesabına '{1}' dosyası üzerinde değiştirme (Modify) izni verilmemiş. Lütfen bu izinleri yapılandırın.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConfirmPassword">
+        <Value>Şifreyi onaylayın</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbRawConnectionString">
+        <Value>Bağlantı dizesi</Value>
+    </LocaleResource>
+    <LocaleResource Name="FindMoreInfo">
+        <Value><![CDATA[Daha fazla bilgiyi <a href="{0}" rel="nofollow" target="_blank">burada</a> bulabilirsiniz.]]></Value>
+    </LocaleResource>
+    <LocaleResource Name="ConnectionStringValues">
+        <Value>Bağlantı değerlerini girin</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConnectionStringWrongFormat">
+        <Value>Bağlantı dizesi biçimi hatalı</Value>
+    </LocaleResource>
+    <LocaleResource Name="CreateDatabaseIfDoesNotExist">
+        <Value>Veritabanı yoksa oluştur</Value>
+    </LocaleResource>
+    <LocaleResource Name="CreateSampleData">
+        <Value>Örnek veri oluştur</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomCollation">
+        <Value>Özel karşılaştırma düzeni (collation) kullan</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomCollation.Hint">
+        <Value><![CDATA[Veritabanının varsayılan karşılaştırma düzenini kullanmak için boş bırakın. Özel karşılaştırma düzenini dikkatle seçin, daha sonra değiştirilemez! Yalnızca büyük/küçük harf duyarsız (CI) karşılaştırma düzenlerinin seçilmesi önerilir. Daha fazla bilgiyi <a id="CollationInfoLink" href="#" rel="nofollow" target="_blank">burada</a> bulabilirsiniz.]]></Value>
+    </LocaleResource>
+    <LocaleResource Name="DatabaseCreationError">
+        <Value>Veritabanı oluşturulurken bir hata oluştu: {0}</Value>
+    </LocaleResource>
+    <LocaleResource Name="DatabaseInformation">
+        <Value>Veritabanı bilgileri</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbName">
+        <Value>Veritabanı adı</Value>
+    </LocaleResource>
+    <LocaleResource Name="DatabaseNotExists">
+        <Value>Veritabanı mevcut değil veya bu veritabanına bağlanma izniniz yok</Value>
+    </LocaleResource>
+    <LocaleResource Name="Example">
+        <Value>Örnek</Value>
+    </LocaleResource>
+    <LocaleResource Name="Install">
+        <Value>Kur</Value>
+    </LocaleResource>
+    <LocaleResource Name="Installing">
+        <Value>Smartstore kuruluyor...</Value>
+    </LocaleResource>
+    <LocaleResource Name="PasswordsDoNotMatch">
+        <Value>Şifreler eşleşmiyor</Value>
+    </LocaleResource>
+    <LocaleResource Name="RawConnectionString">
+        <Value>Ham bağlantı dizesini girin (gelişmiş)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Recommended">
+        <Value>(önerilir)</Value>
+    </LocaleResource>
+    <LocaleResource Name="RestartInstallation">
+        <Value>Kurulumu yeniden başlat</Value>
+    </LocaleResource>
+    <LocaleResource Name="RestartInstallationTooltip">
+        <Value>Kurulumu yeniden başlatmak için uygulamayı yeniden başlatır</Value>
+    </LocaleResource>
+    <LocaleResource Name="SetupFailed">
+        <Value>Kurulum başarısız oldu: {0}</Value>
+    </LocaleResource>
+    <LocaleResource Name="SqlAuthentication">
+        <Value>SQL Server kimlik doğrulaması</Value>
+    </LocaleResource>
+    <LocaleResource Name="WindowsAuthentication">
+        <Value>Windows kimlik doğrulaması</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbServer">
+        <Value>Sunucu adı</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbPassword">
+        <Value>Şifre</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbUserId">
+        <Value>Kullanıcı adı</Value>
+    </LocaleResource>
+    <LocaleResource Name="UseSqlServer">
+        <Value>Microsoft SQL Server (Express)</Value>
+    </LocaleResource>
+    <LocaleResource Name="UseMySql">
+        <Value>MySQL</Value>
+    </LocaleResource>
+    <LocaleResource Name="UsePostgreSql">
+        <Value>PostgreSQL</Value>
+    </LocaleResource>
+    <LocaleResource Name="UseSqlite">
+        <Value>SQLite (canlı ortamda kullanım için uygun değildir!)</Value>
+    </LocaleResource>
+    <LocaleResource Name="StoreInformation">
+        <Value>Mağaza bilgileri</Value>
+    </LocaleResource>
+    <LocaleResource Name="Title">
+        <Value>Kurulum</Value>
+    </LocaleResource>
+    <LocaleResource Name="Tooltip1">
+        <Value>Smartstore, her ölçekteki işletme için güçlü bir e-ticaret çözümüdür. Bu sihirbaz, Smartstore'u yapılandırma sürecinde size yol gösterecektir</Value>
+    </LocaleResource>
+    <LocaleResource Name="Tooltip2">
+        <Value>Bu sihirbazı tamamlamak için veritabanı sunucunuzla ilgili bazı bilgileri ("bağlantı dizesi") bilmeniz gerekir. Gerekirse lütfen servis sağlayıcınızla iletişime geçin. Yerel bir bilgisayara veya sunucuya kurulum yapıyorsanız sistem yöneticinizden bilgi almanız gerekebilir</Value>
+    </LocaleResource>
+    <LocaleResource Name="UseIntegratedAuthentication">
+        <Value>Tümleşik Windows kimlik doğrulamasını kullan</Value>
+    </LocaleResource>
+    <LocaleResource Name="PrimaryLanguage">
+        <Value>Birincil dil</Value>
+    </LocaleResource>
+    <LocaleResource Name="PrimaryLanguageRequired">
+        <Value>Birincil dil zorunludur</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConfirmInstall">
+        <Value>Smartstore'u şimdi kurmak istiyor musunuz?</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminEmailValue">
+        <Value>admin@mystore.com</Value>
+    </LocaleResource>
+    <LocaleResource Name="MediaStorage.Label">
+        <Value>Medya depolama</Value>
+    </LocaleResource>
+    <LocaleResource Name="MediaStorage.Hint">
+        <Value>'Dosya sistemi' mümkün olan en yüksek performansı ve kararlılığı sağlar; canlı ortam için idealdir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MediaStorage.DB">
+        <Value>Veritabanı</Value>
+    </LocaleResource>
+    <LocaleResource Name="MediaStorage.FS">
+        <Value>Dosya sistemi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Common.Notification">
+        <Value>Uyarı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Common.StartShop">
+        <Value>Harika! Kurulum başarıyla tamamlandı ;-) Mağazanız şimdi başlatılıyor...</Value>
+    </LocaleResource>
+    <LocaleResource Name="Progress.CheckingRequirements">
+        <Value>Gereksinimler kontrol ediliyor</Value>
+    </LocaleResource>
+    <LocaleResource Name="Progress.BuildingDatabase">
+        <Value>Veritabanı oluşturuluyor</Value>
+    </LocaleResource>
+    <LocaleResource Name="Progress.InstallingModules">
+        <Value>Modül kuruluyor ({0} / {1})</Value>
+    </LocaleResource>
+    <LocaleResource Name="Progress.ProcessingMedia">
+        <Value>Medya dosyaları işleniyor</Value>
+    </LocaleResource>
+    <LocaleResource Name="Progress.Finalizing">
+        <Value>Kurulum tamamlanıyor</Value>
+    </LocaleResource>
+    <LocaleResource Name="Progress.CreatingRequiredData">
+        <Value>Gerekli veriler oluşturuluyor</Value>
+    </LocaleResource>
+    <LocaleResource Name="Progress.CreatingSampleData">
+        <Value>Örnek veriler oluşturuluyor</Value>
+    </LocaleResource>
+    <LocaleResource Name="Progress.Redirect">
+        <Value><![CDATA[Mağazanın ana sayfasına otomatik olarak yönlendirilmezseniz lütfen <a href="{0}">buraya</a> tıklayın]]></Value>
+    </LocaleResource>
+    <LocaleResource Name="InstallOptions">
+        <Value>Seçenekler</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbSystem">
+        <Value>Veritabanı sistemi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Connection">
+        <Value>Bağlantı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Server">
+        <Value>Veri kaynağı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Authentication">
+        <Value>Kimlik doğrulama</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminEmailRequired">
+        <Value>'Yönetici e-posta adresi' zorunludur</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminPasswordRequired">
+        <Value>'Yönetici şifresi' zorunludur</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConfirmPasswordRequired">
+        <Value>'Şifre onayı' zorunludur</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbRawConnectionStringRequired">
+        <Value>'Bağlantı dizesi' zorunludur</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbServerRequired">
+        <Value>'Sunucu adı' zorunludur</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbNameRequired">
+        <Value>'Veritabanı adı' zorunludur</Value>
+    </LocaleResource>
+    <LocaleResource Name="DbUserIdRequired">
+        <Value>'Kullanıcı adı' zorunludur</Value>
+    </LocaleResource>
+    <LocaleResource Name="AreYouSure">
+        <Value>Emin misiniz?</Value>
+    </LocaleResource>
+</Language>

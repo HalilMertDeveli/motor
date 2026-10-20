@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FluentValidation;
+using Smartstore.Data;
 
 namespace Smartstore.Core.Installation;
 
@@ -70,25 +71,29 @@ public class InstallationModelValidator : AbstractValidator<InstallationModel>
         RuleFor(x => x.DataProvider).NotEmpty();
         RuleFor(x => x.PrimaryLanguage).NotEmpty();
 
-        RuleFor(x => x.DbRawConnectionString)
-            .NotEmpty()
-            .When(x => x.UseRawConnectionString)
-            .WithMessage(Res("DbRawConnectionStringRequired"));
+        // MOTOR: the installer ignores the database fields when the connection comes from the environment.
+        Unless(x => DataSettings.UsesEnvironmentConnectionString, () =>
+        {
+            RuleFor(x => x.DbRawConnectionString)
+                .NotEmpty()
+                .When(x => x.UseRawConnectionString)
+                .WithMessage(Res("DbRawConnectionStringRequired"));
 
-        RuleFor(x => x.DbServer)
-            .NotEmpty()
-            .Unless(x => x.UseRawConnectionString || x.DataProvider == "sqlite")
-            .WithMessage(Res("DbServerRequired"));
+            RuleFor(x => x.DbServer)
+                .NotEmpty()
+                .Unless(x => x.UseRawConnectionString || x.DataProvider == "sqlite")
+                .WithMessage(Res("DbServerRequired"));
 
-        RuleFor(x => x.DbName)
-            .NotEmpty()
-            .Unless(x => x.UseRawConnectionString)
-            .WithMessage(Res("DbNameRequired"));
+            RuleFor(x => x.DbName)
+                .NotEmpty()
+                .Unless(x => x.UseRawConnectionString)
+                .WithMessage(Res("DbNameRequired"));
 
-        RuleFor(x => x.DbUserId)
-            .NotEmpty()
-            .Unless(x => x.UseRawConnectionString || x.DataProvider == "sqlite" || (x.DataProvider == "sqlserver" && x.DbAuthType == "windows"))
-            .WithMessage(Res("DbUserIdRequired"));
+            RuleFor(x => x.DbUserId)
+                .NotEmpty()
+                .Unless(x => x.UseRawConnectionString || x.DataProvider == "sqlite" || (x.DataProvider == "sqlserver" && x.DbAuthType == "windows"))
+                .WithMessage(Res("DbUserIdRequired"));
+        });
 
         string Res(string key)
         {

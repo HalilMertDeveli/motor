@@ -1,0 +1,76 @@
+@model SourceEditModel
+@{
+    Layout = "_ConfigureModule";
+}
+
+<partial name="_Nav" />
+
+<div class="alert alert-warning">@T("Plugins.MotorShop.CatalogImport.Source.Hint")</div>
+
+<form asp-action="Source" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    <div class="card">
+        <div class="card-body row g-3">
+            <div class="col-md-4">
+                <label class="form-label" asp-for="Key">@T("Plugins.MotorShop.CatalogImport.Source.Key")</label>
+                <input class="form-control" asp-for="Key" required />
+            </div>
+            <div class="col-md-8">
+                <label class="form-label" asp-for="Name">@T("Admin.Common.Name")</label>
+                <input class="form-control" asp-for="Name" required />
+            </div>
+            <div class="col-md-8">
+                <label class="form-label" asp-for="Url">URL</label>
+                <input class="form-control" asp-for="Url" type="url" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" asp-for="SourceType">@T("Plugins.MotorShop.CatalogImport.Source.Type")</label>
+                <select class="form-control" asp-for="SourceType">
+                    @foreach (var type in new[] { "OFFICIAL_MANUFACTURER", "OFFICIAL_DISTRIBUTOR", "DATA_AGGREGATOR", "WHOLESALER", "RETAILER", "OTHER" })
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" asp-for="Organization">@T("Plugins.MotorShop.CatalogImport.Source.Organization")</label>
+                <input class="form-control" asp-for="Organization" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" asp-for="PermissionStatus">@T("Plugins.MotorShop.CatalogImport.Permission")</label>
+                <select class="form-control" asp-for="PermissionStatus">
+                    @foreach (var status in Enum.GetValues<SourcePermissionStatus>().Reverse())
+                    {
+                        <option value="@status">@T("Plugins.MotorShop.CatalogImport.Permission." + status)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label" asp-for="AgreementReference">@T("Plugins.MotorShop.CatalogImport.Source.Agreement")</label>
+                <input class="form-control" asp-for="AgreementReference" />
+                <div class="form-text text-muted small">@T("Plugins.MotorShop.CatalogImport.Source.Agreement.Hint")</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" asp-for="TermsUrl">@T("Plugins.MotorShop.CatalogImport.Source.TermsUrl")</label>
+                <input class="form-control" asp-for="TermsUrl" type="url" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" asp-for="ImageRights">@T("Plugins.MotorShop.CatalogImport.Source.ImageRights")</label>
+                <input class="form-control" asp-for="ImageRights" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" asp-for="TermsSummary">@T("Plugins.MotorShop.CatalogImport.Source.TermsSummary")</label>
+                <textarea class="form-control" asp-for="TermsSummary" rows="4"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" asp-for="Limitations">@T("Plugins.MotorShop.CatalogImport.Source.Limitations")</label>
+                <textarea class="form-control" asp-for="Limitations" rows="4"></textarea>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">@T("Admin.Common.Save")</button>
+            <a class="btn btn-light" asp-action="Index">@T("Admin.Common.Cancel")</a>
+        </div>
+    </div>
+</form>

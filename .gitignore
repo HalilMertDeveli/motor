@@ -13,6 +13,9 @@
 *.secrets
 *.csr
 *.pem
+.env
+.env.*
+!.env.example
 
 # Build results
 [Dd]ebug/
@@ -213,9 +216,9 @@ build/artifacts
 build/packages
 src/Smartstore.Web/Modules/*
 src/Smartstore.Web/App_Data/*
-!src/Smartstore.Web/App_Data/EmailTemplates/*
+!src/Smartstore.Web/App_Data/EmailTemplates/
 !src/Smartstore.Web/App_Data/Geo/*
-!src/Smartstore.Web/App_Data/Localization/*
+!src/Smartstore.Web/App_Data/Localization/
 !src/Smartstore.Web/App_Data/Samples/*
 !src/Smartstore.Web/App_Data/icons.json
 !src/Smartstore.Web/App_Data/widgetzones.json
@@ -238,6 +241,7 @@ src/Smartstore.Web/wwwroot/.well-known/*
 
 # User settings
 src/Smartstore.Web/Config/usersettings*
+src/Smartstore.Web/Config/connections*
 
 # Tools
 src/Tools/Smartstore.WebApi.Client/packages

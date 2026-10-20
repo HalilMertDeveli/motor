@@ -57,7 +57,7 @@ public partial class MediaTypeResolver : AsyncDbSaveHook<Setting>, IMediaTypeRes
         var map = GetExtensionMediaTypeMap();
 
         string mediaType = null;
-        if (extension.HasValue() && map.TryGetValue(extension.TrimStart('.').ToLower(), out mediaType))
+        if (extension.HasValue() && map.TryGetValue(extension.TrimStart('.').ToLowerInvariant(), out mediaType))
         {
             return (MediaType)mediaType;
         }
@@ -125,7 +125,7 @@ public partial class MediaTypeResolver : AsyncDbSaveHook<Setting>, IMediaTypeRes
             {
                 var arr = extensions.EmptyNull()
                     .Replace(Environment.NewLine, " ")
-                    .ToLower()
+                    .ToLowerInvariant()
                     .Split([' ', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
                 if (arr.Length == 0)

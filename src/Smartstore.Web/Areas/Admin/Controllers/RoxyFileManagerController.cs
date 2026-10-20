@@ -68,7 +68,7 @@ public class RoxyFileManagerController : AdminController
         string ext = null /* external */,
         string method = null)
     {
-        var action = (a.NullEmpty() ?? "DIRLIST").ToUpper();
+        var action = (a.NullEmpty() ?? "DIRLIST").ToUpperInvariant();
 
         try
         {
@@ -574,9 +574,9 @@ public class RoxyFileManagerController : AdminController
 
     private bool IsAllowedFileType(string extension)
     {
-        extension = extension.EmptyNull().ToLower().TrimEnd('.');
+        extension = extension.EmptyNull().ToLowerInvariant().TrimEnd('.');
 
-        var setting = GetSetting("FORBIDDEN_UPLOADS").EmptyNull().Trim().ToLower();
+        var setting = GetSetting("FORBIDDEN_UPLOADS").EmptyNull().Trim().ToLowerInvariant();
         if (setting.HasValue())
         {
             var tmp = Regex.Split(setting, "\\s+");
@@ -584,7 +584,7 @@ public class RoxyFileManagerController : AdminController
                 return false;
         }
 
-        setting = GetSetting("ALLOWED_UPLOADS").EmptyNull().Trim().ToLower();
+        setting = GetSetting("ALLOWED_UPLOADS").EmptyNull().Trim().ToLowerInvariant();
         if (setting.HasValue())
         {
             var tmp = Regex.Split(setting, "\\s+");

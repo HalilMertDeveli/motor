@@ -1,0 +1,113 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.SmartStore.Google.Analytics" AppendRootKey="false">
+        <Value>Google Analytics</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.SmartStore.Google.Analytics" AppendRootKey="false">
+        <Value>Mağazaya Google Analytics izleme betiklerini ekler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[
+                <p>Google Analytics, Google'ın ücretsiz web sitesi istatistik aracıdır. Web sitenizin ziyaretçileri ve e-ticaret dönüşümleriyle ilgili istatistikleri takip eder.</p>
+                <p>Google Analytics entegrasyonunu etkinleştirmek için aşağıdaki adımları izleyin:</p>
+                <ul>
+                    <li><a href="http://www.google.com/analytics/" target="_blank">Bir Google Analytics hesabı oluşturun</a> ve web sitenizi eklemek için sihirbazın adımlarını izleyin.</li>
+                    <li>Google Analytics ID'sini aşağıdaki ID alanına kopyalayın.</li>
+                    <li>Google Analytics'i mağazanıza entegre etmek için <b>CMS > Widget'lar</b> altında Google Analytics widget'ını etkinleştirin.</li>
+                </ul>
+                <p>
+                    Google Analytics, çerez kullanmadan da müşterilerinizin verilerini analiz edebilir.
+                    Bu amaçla anonim bir istemci kimliği kullanılır. Analytics betiği çerezleri yalnızca müşteri çerez yöneticisinde analiz çerezlerinin kullanımına onay verdiğinde kullanır.
+                    Etiket yöneticisinin de yalnızca müşteri analiz çerezlerine onay verdikten sonra etkinleşmesini istiyorsanız
+                    lütfen aşağıdaki <i>Yalnızca onay verildiğinde yükle</i> seçeneğini etkinleştirin.
+                </p>
+		        <p>
+			        İzlemeyi devre dışı bırakma (opt-out) çerezini gizlilik politikanıza eklemek için aşağıdaki kodu kullanın:
+		        </p>
+		        <pre>&lt;a href=&quot;javascript:gaOptout()&quot;&gt;Google Analytics'i devre dışı bırak&lt;/a&gt;</pre>
+              ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="ScriptUpdateInfo">
+        <Value>
+            <![CDATA[
+                Bu eklenti güncel olmayan bir betik kullanıyor. En son sürümü kullanmak için lütfen bu sayfanın alt kısmındaki <b>Betikleri geri yükle</b> düğmesine tıklayın.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="GoogleId">
+        <Value>ID</Value>
+    </LocaleResource>
+    <LocaleResource Name="GoogleId.Hint">
+        <Value>Google Analytics ID'sini girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RenderWithUserConsentOnly">
+        <Value>Yalnızca onay verildiğinde yükle</Value>
+    </LocaleResource>
+    <LocaleResource Name="RenderWithUserConsentOnly.Hint">
+        <Value>Analytics betiğinin yalnızca müşteri analiz çerezlerine onay verdikten sonra yüklenip yüklenmeyeceğini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="DisplayCookieInfosForAds">
+        <Value>Google Ads onayını göster</Value>
+    </LocaleResource>
+    <LocaleResource Name="DisplayCookieInfosForAds.Hint">
+        <Value>
+            Kişiselleştirme ve veri paylaşımı onayının çerez yöneticisinde gösterilip gösterilmeyeceğini belirler.
+            Bu seçeneği yalnızca Google Ads de kullanıyorsanız etkinleştirin.
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="TrackingScript">
+        <Value>{ECOMMERCE} satırını içeren izleme kodu</Value>
+    </LocaleResource>
+    <LocaleResource Name="TrackingScript.Hint">
+        <Value>Google Analytics tarafından oluşturulan izleme kodunu buraya yapıştırın. {GOOGLEID} ve {ECOMMERCE} dinamik olarak değiştirilir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="EcommerceScript">
+        <Value>{DETAILS} satırını içeren {ECOMMERCE} bölümü için izleme kodu</Value>
+    </LocaleResource>
+    <LocaleResource Name="EcommerceScript.Hint">
+        <Value>Google Analytics tarafından oluşturulan izleme kodunu buraya yapıştırın. {ORDERID}, {TOTAL}, {TAX}, {SHIP}, {CITY}, {STATEPROVINCE}, {COUNTRY}, {DETAILS} dinamik olarak değiştirilir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="EcommerceDetailScript">
+        <Value>{DETAILS} bölümü için izleme kodu</Value>
+    </LocaleResource>
+    <LocaleResource Name="EcommerceDetailScript.Hint">
+        <Value>Google Analytics tarafından oluşturulan izleme kodunu buraya yapıştırın. {ORDERID}, {PRODUCTSKU}, {PRODUCTNAME}, {CATEGORYNAME}, {UNITPRICE}, {QUANTITY} dinamik olarak değiştirilir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="OptOutNotification">
+        <Value>İzleme artık devre dışı</Value>
+    </LocaleResource>
+    <LocaleResource Name="CookieInfo">
+        <Value>Google Analytics, size mümkün olan en iyi kullanıcı deneyimini sunabilmemiz için web sitemizdeki kullanıcı davranışlarını analiz etmemize ve iyileştirmemize yardımcı olur.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsentAdUserData">
+        <Value>Reklamla ilgili kullanıcı verilerinin aktarılmasına onay vererek, müşteri hesabınıza bağlı benzersiz bir tanımlayıcıyı Google'a aktarmamıza izin vermiş olursunuz.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsentAdPersonalization">
+        <Value>Kişiselleştirilmiş reklamlara izin verirseniz, Google hizmetlerinden kişisel ilgi alanlarınıza göre uyarlanmış reklamlar görürsünüz.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RestoreScripts">
+        <Value>Betikleri geri yükle</Value>
+    </LocaleResource>
+    <LocaleResource Name="RestoreScripts.Hint">
+        <Value>Orijinal betikleri geri yükler. En güncel betiklerin kullanıldığından emin olmak için mağaza güncellemesinden sonra bu işlev kullanılmalıdır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RenderCatalogScripts">
+        <Value>Kataloğu izle</Value>
+    </LocaleResource>
+    <LocaleResource Name="RenderCatalogScripts.Hint">
+        <Value>Ürün kataloğundaki listeler için izleme betiklerinin oluşturulup oluşturulmayacağını belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RenderCheckoutScripts">
+        <Value>Ödeme sürecini izle</Value>
+    </LocaleResource>
+    <LocaleResource Name="RenderCheckoutScripts.Hint">
+        <Value>Ödeme sürecindeki olaylar için izleme betiklerinin oluşturulup oluşturulmayacağını belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MinifyScripts">
+        <Value>Betikleri küçült</Value>
+    </LocaleResource>
+    <LocaleResource Name="MinifyScripts.Hint">
+        <Value>Oluşturulan betiklerin küçültülüp küçültülmeyeceğini belirler (önerilir).</Value>
+    </LocaleResource>
+</Language>

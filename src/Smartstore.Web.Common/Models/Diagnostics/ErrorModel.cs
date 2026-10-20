@@ -27,7 +27,12 @@ public class ErrorModel
     public HttpStatusCode StatusCode { get; set; }
 
     [JsonPropertyName("message")]
-    public string ErrorMessage => Exception?.Message;
+    public string ErrorMessage
+    {
+        // A set value overrides the exception message, e.g. to hide internal details from clients.
+        get => field ?? Exception?.Message;
+        set;
+    }
 
     [JsonPropertyName("controller")]
     public string ControllerName => ActionDescriptor?.ControllerName;
