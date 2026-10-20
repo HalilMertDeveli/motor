@@ -5,7 +5,7 @@ VisualStudioVersion = 18.3.11310.294
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smartstore.Web", "src\Smartstore.Web\Smartstore.Web.csproj", "{25E0AA77-1B48-4F6E-B42F-9F428ED968D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.SupplierCatalog", "srcSmartstore.ModulesMotorShop.SupplierCatalogMotorShop.SupplierCatalog.csproj", "{7D3B9C21-4E8A-4F6B-9A2D-5C1E8B7F3A64}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.SupplierCatalog", "src\Smartstore.Modules\MotorShop.SupplierCatalog\MotorShop.SupplierCatalog.csproj", "{7D3B9C21-4E8A-4F6B-9A2D-5C1E8B7F3A64}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smartstore.Web.Common", "src\Smartstore.Web.Common\Smartstore.Web.Common.csproj", "{9B633587-C5DE-45EF-8F20-46B341EC5C6F}"
 EndProject
