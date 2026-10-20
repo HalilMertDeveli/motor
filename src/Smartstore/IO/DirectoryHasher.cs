@@ -93,7 +93,7 @@ public class DirectoryHasher
 
         if (_hasPattern)
         {
-            combiner = combiner.Add(_source.PhysicalPath.ToLower()).Add(_source.LastModified);
+            combiner = combiner.Add(_source.PhysicalPath.ToLowerInvariant()).Add(_source.LastModified);
 
             foreach (var entry in _source.EnumerateEntries(_searchPattern, _deep))
             {
@@ -123,7 +123,7 @@ public class DirectoryHasher
     {
         var key = PathUtility.MakeRelativePath(CommonHelper.ContentRoot.Root, _source.PhysicalPath, '_')
             .Replace(".", string.Empty)
-            .ToLower();
+            .ToLowerInvariant();
 
         if (_deep)
         {
@@ -132,7 +132,7 @@ public class DirectoryHasher
 
         if (_hasPattern)
         {
-            key += "_" + PathUtility.SanitizeFileName(_searchPattern.ToLower(), "x");
+            key += "_" + PathUtility.SanitizeFileName(_searchPattern.ToLowerInvariant(), "x");
         }
 
         return key.Trim(PathUtility.PathSeparators);

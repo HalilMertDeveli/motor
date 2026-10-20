@@ -44,6 +44,6 @@ internal class GridCommandStateStore : IGridCommandStateStore
 
     private static string BuildKey(string gridId)
     {
-        return KeyPattern.FormatCurrent(gridId).ToLower();
+        return KeyPattern.FormatCurrent(gridId).ToLowerInvariant();
     }
 }

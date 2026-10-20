@@ -316,7 +316,7 @@ public partial class PermissionService : AsyncDbSaveHook<CustomerRole>, IPermiss
 
         foreach (var systemName in systemNames)
         {
-            var safeSytemName = systemName.EmptyNull().ToLower();
+            var safeSytemName = systemName.EmptyNull().ToLowerInvariant();
             var tokens = safeSytemName.Split('.', StringSplitOptions.RemoveEmptyEntries);
 
             result[safeSytemName] = GetDisplayName(tokens, resourcesLookup);
@@ -327,7 +327,7 @@ public partial class PermissionService : AsyncDbSaveHook<CustomerRole>, IPermiss
 
     public virtual async Task<string> GetDisplayNameAsync(string permissionSystemName)
     {
-        var tokens = permissionSystemName.EmptyNull().ToLower().Split('.', StringSplitOptions.RemoveEmptyEntries);
+        var tokens = permissionSystemName.EmptyNull().ToLowerInvariant().Split('.', StringSplitOptions.RemoveEmptyEntries);
         if (tokens.Length > 0)
         {
             var resourcesLookup = await GetDisplayNameLookup(_workContext.Value.WorkingLanguage.Id);

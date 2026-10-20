@@ -129,7 +129,7 @@ public class DefaultThemeVariableService : IThemeVariableService
         Guard.NotNull(theme, nameof(theme));
         Guard.NotNull(variables, nameof(variables));
 
-        var themeName = theme.Name.ToLower();
+        var themeName = theme.Name.ToLowerInvariant();
         var route = $"/themes/{themeName}/theme.css";
         var bundle = _bundles.GetBundleFor(route);
         var result = new ThemeValidationResult();
@@ -197,7 +197,7 @@ public class DefaultThemeVariableService : IThemeVariableService
             var savedThemeVar = savedThemeVars.Get(v.Key);
             if (savedThemeVar != null)
             {
-                if (value.IsEmpty() || string.Equals(info.DefaultValue, value, StringComparison.CurrentCultureIgnoreCase))
+                if (value.IsEmpty() || string.Equals(info.DefaultValue, value, StringComparison.OrdinalIgnoreCase))
                 {
                     // it's either null or the default value, so delete
                     _db.ThemeVariables.Remove(savedThemeVar);
@@ -217,7 +217,7 @@ public class DefaultThemeVariableService : IThemeVariableService
             }
             else
             {
-                if (value.HasValue() && !string.Equals(info.DefaultValue, value, StringComparison.CurrentCultureIgnoreCase))
+                if (value.HasValue() && !string.Equals(info.DefaultValue, value, StringComparison.OrdinalIgnoreCase))
                 {
                     // Insert entity (only when not default value)
                     unsavedVars.Add(v.Key);

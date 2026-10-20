@@ -65,7 +65,7 @@ public class NotifyFilterAttribute : TypeFilterAttribute
             if (entry == null)
                 return;
 
-            response.Headers["X-Message-Type"] = entry.Type.ToString().ToLower();
+            response.Headers["X-Message-Type"] = entry.Type.ToString().ToLowerInvariant();
             response.Headers["X-Message"] = Convert.ToBase64String(entry.Message.GetBytes());
         }
 

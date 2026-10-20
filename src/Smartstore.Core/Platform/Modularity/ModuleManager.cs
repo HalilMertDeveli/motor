@@ -147,7 +147,7 @@ public partial class ModuleManager
     {
         if (groupName.HasValue())
         {
-            string path = "admin/images/icon-module-{0}.png".FormatInvariant(groupName.ToLower());
+            string path = "admin/images/icon-module-{0}.png".FormatInvariant(groupName.ToLowerInvariant());
             if (_appContext.WebRoot.FileExists(path))
             {
                 return "~/" + path;
@@ -282,7 +282,7 @@ public partial class ModuleManager
 
         if (descriptor != null)
         {
-            var systemName = metadata.SystemName.ToLower();
+            var systemName = metadata.SystemName.ToLowerInvariant();
             var cacheKey = $"ProviderBrandImage:{systemName}";
 
             return _cache.Get(cacheKey, o =>
