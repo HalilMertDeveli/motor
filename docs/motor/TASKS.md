@@ -72,6 +72,14 @@ of preview.
 | #27 | fix/legal-confirm-terms-text | Replaces the consent-style Smartstore terms text at the buy buttons with a payment-obligation notice | 8465abf71b |
 | #21 | feat/payment-iyzico | MotorShop.Iyzico: Checkout Form (order first, redirect), server-side retrieve + signature verification, webhook HMAC (V3), per-order lock, idempotency, refund/cancel, auto-cancel of unpaid orders; mocks only | ab2589cae1 |
 | #28 | fix/migration-version-collision | **Release blocker fix:** #21 and #26 both used migration version 2026-10-19 12:00:00, so every fresh install failed; iyzico moved to 12:30, plus a duplicate-version test | 456053c71b |
+| #29 | docs/motor-registry-2026-10-20 | Registry update | 5f042be3e1 |
+| #31 | fix/iyzico-hardening | Refund in-flight guard, TRY-only currency default, paidPrice equality/cap, Payments.Manual hidden and deactivated (filter + install + migration), admin nits; merged with a fix for a malformed tr-tr resource | a0fa3385e1 |
+| #32 | fix/tr-culture-safety | 57 identifier call sites invariant/ordinal under tr-TR (CSS classes, slugs, permission names, upload filter bypass for .PIF/.MSI/.CGI, media types) + 14 tr-TR tests | c472442887 |
+| #24 | feat/catalog-import-pipeline | MotorShop.CatalogImport with review fixes (stale approvals withdrawn, source permission errors, admin XSS, transactional publish, duplicate SKU/MPN/GTIN conflicts, relational rollback test), migration 2026-10-20 09:00 | a9476ca17e |
+| #25 | feat/motorcycle-reference-catalog | Sourced reference data; research datasets only with `-p:IncludeCatalogResearch=true`, per-vehicle sources | 9294a45c0c |
+| #33 | feat/motordark-ux-performance | Sticky mobile buy bar, responsive WebP hero, a11y and performance (home mobile perf 57→66, product CLS 0.187→0) | e0f49fff16 |
+| #30 + #34 | feat/motosev-catalog-import, fix/supplier-catalog-rules | MotorShop.SupplierCatalog (Motosev package importer) made to follow the rules: nothing published automatically, only own-supplier products updated, zip limits, HTML sanitized, KDV tax category | 84071a4643 |
+| #35 | feat/supplier-image-quality | Storefront picture sizes 512/1024 px, quality 90; `tools/supplier-images` rebuilds supplier pictures from the PDF originals (genuine pixels, per-page pairing) | 7804f02e4e |
 
 GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579). After #22 and #23: success. **Since 2026-10-20 GitHub Actions jobs do not start** (account billing: "recent account payments have failed or your spending limit needs to be increased"). #26, #27 and #21 had green PR checks before merge; #28 was merged on local evidence only.
 
@@ -90,12 +98,12 @@ GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579
 | B | "MOTOR repository Git protocol" (session ended) | VPS compose, Caddy/HTTPS, image/deploy workflows, backup/restore/monitoring, VPS docs | infra/motor-vps-docker, infra/motor-backup-monitoring, docs/motor-vps-operations | `deploy/vps/**`, `.github/workflows/motor-image.yml`, `motor-deploy.yml`, `docs/motor/vps-*.md` | #7, #11 | Merged; follow-ups unowned (see blockers) | #14, #16, #17 |
 | C | tr-localization (session hit its limit) | tr-TR default, TRY, KDV, Turkish e-mails, TR addresses, MotorDark texts, default theme | feat/tr-localization | Locale resources, MotorDark view text, language/currency/tax/theme settings and seeds | Phase 1 | Merged | #26 |
 | D | payment-iyzico | iyzico Checkout Form module | feat/payment-iyzico | `src/Smartstore.Modules/MotorShop.Iyzico/**`, its tests | Phase 1 | Merged; review items 3–5 and Payments.Manual moved to D2 | #21 |
-| D2 | iyzico-hardening | Refund in-flight guard, TRY-only currency default, paidPrice equality/cap, admin nits, Payments.Manual hidden and deactivated | fix/iyzico-hardening | MotorShop.Iyzico | #21, #28 | In progress | — |
-| C2 | tr-culture-audit | Turkish-I: culture-sensitive casing and comparison on identifiers and keys under tr-TR | fix/tr-culture-safety | Targeted core/module call sites + tests | #26 | In progress | — |
+| D2 | iyzico-hardening | iyzico review items 3-5, Payments.Manual off | fix/iyzico-hardening | MotorShop.Iyzico | #21, #28 | Merged | #31 |
+| C2 | tr-culture-audit | Turkish-I casing on identifiers under tr-TR | fix/tr-culture-safety | Targeted call sites + tests | #26 | Merged | #32 |
 | E | fitment-fixes | Pipe in vehicle cookie, invalid year ranges, missing ProductMotorVehicle FKs on PostgreSQL | fix/fitment-cookie-year-range, fix/fitment-postgres-fk | `src/Smartstore.Modules/MotorShop.Fitment/**`, `test/MotorShop.Fitment.Tests/**` | #6, #11 | Done | #13, #19 |
-| E-cat | "Motorcycle catalog research and integration" (session ended) | Staged catalog import; sourced motorcycle reference data | feat/catalog-import-pipeline, feat/motorcycle-reference-catalog | `src/Smartstore.Modules/MotorShop.CatalogImport/**`, its tests, `docs/motor/catalog-research/**` | Fitment PRs | Open, **blocked**: migration version collides with #26; review found 1 blocker (approved fitment outlives its evidence) and 5 should-fix; research data ships in production builds | #24, #25 |
+| E-cat | catalog sessions | Staged catalog import; sourced motorcycle reference data | feat/catalog-import-pipeline, feat/motorcycle-reference-catalog | `MotorShop.CatalogImport/**`, `docs/motor/catalog-research/**` | Fitment PRs | Merged after review fixes | #24, #25 |
 | F | legal-shipping-ops | Distance-sales acknowledgments, shipment tracking, order-ops audit, e-Arşiv boundary | feat/legal-checkout, feat/shipment-tracking, docs/order-ops-invoicing, fix/legal-confirm-terms-text | `MotorShop.Legal/**`, `MotorShop.Tracking/**`, `docs/motor/invoicing.md`, `docs/motor/order-operations.md` | Phase 1 | Done | #18, #22, #23, #27 |
-| G | motordark-ux | MotorDark UX, mobile, accessibility, performance (LCP/CLS/INP) | feat/motordark-ux-performance | MotorDark theme files only | #26 | In progress | — |
+| G | motordark-ux | MotorDark UX, mobile, accessibility, performance | feat/motordark-ux-performance | MotorDark theme files | #26 | Merged | #33 |
 | H | Orchestrator | End-to-end QA, release gates | — | — | D2, G, C2, E-cat | Partial: Turkish fresh-install smoke and cart KDV done; full journey with iyzico mock, shipment and mobile pending | — |
 
 ## Known blockers and open findings
@@ -108,9 +116,11 @@ GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579
 | MotorDark not default on fresh install | **Fixed** by #26 (verified on a fresh tr-TR install) | — |
 | GitHub Actions billing | Jobs do not start since 2026-10-20 | **Owner:** fix billing / spending limit in GitHub settings. Until then merges rely on local build + test evidence |
 | Migration version collisions | Fixed by #28 for iyzico; #24 has the same collision | `Smartstore.Core.Tests/Data/MigrationVersionTests` now fails on duplicates |
-| Smartstore "Credit card (manual)" (Payments.Manual) | Active by default; stores card numbers in the DB | Must be off in MOTOR: workstream D2 |
-| Turkish-I casing under tr-TR | One bug fixed in #26 (KDV read as 0 on SQLite); about 130 call sites unaudited | Workstream C2 |
-| Catalog research datasets in production builds (#25) | 194 fitment lines compiled from permission-required catalogues (EBC, Hiflo, NGK, JT) are embedded resources | **Owner (legal):** keep out of production builds unless permission is obtained |
+| Smartstore "Credit card (manual)" (Payments.Manual) | **Fixed** by #31 (hidden by filter, removed from active methods on install and by migration; verified on a fresh install) | — |
+| Turkish-I casing under tr-TR | **Fixed** by #32 for identifiers; display text intentionally culture-aware | Open notes: the SEO character map turns Ü into "ue" (German) |
+| Catalog research datasets (#25) | Excluded from every build unless `-p:IncludeCatalogResearch=true` | **Owner (legal):** may they ship; may Yamaha facts be used |
+| Motosev product pictures | The PDF catalog embeds 100-330 px photos; genuine-pixel cleanup done (#35) | **Owner:** ask Motosev for original photos or a print PDF |
+| **AI upscaling exception** | Owner decision 2026-10-20: Motosev 2026 catalog photos may be enlarged with Real-ESRGAN (no generated photos); pictures with text or strong change are listed for review before publishing | See `docs/motor/product-images.md` |
 | F2 SQLitePCLRaw 2.1.11 (CVE-2025-6965) | Open; SQLite provider only | Production uses PostgreSQL; never use SQLite in production. Move to 3.x with upstream |
 | F6 DataProtection keys unencrypted at rest | Partly mitigated (#14/#16: root-only volume, GPG-encrypted backups) | Key-ring encryption with a certificate is application work; unowned |
 | F8 Containers run as root, HTTP :80 | **Fixed** by #20 (verified: non-root install + runtime + volume upgrade path) | `Nano.Dockerfile` (Windows) unchanged |
@@ -126,7 +136,7 @@ GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579
 | --- | --- |
 | A Infrastructure | CI green on preview; local runtime smoke passed; non-root image verified locally (NoBuild); PostgreSQL install with FKs verified by workstream E on a disposable container; full source-build image and real Supabase/VPS not yet verified |
 | B Turkish storefront | Mostly met on local SQLite: Turkish storefront, TRY, KDV totals, Turkish e-mail templates present. Open: Turkish-I audit (C2), real SMTP delivery, PostgreSQL run |
-| C Payments | Not reached: module merged with mocks; hardening (D2) open; real sandbox blocked on credentials |
-| D Catalog & operations | Partial: Fitment constraints fixed, order operations audited, shipment tracking merged; catalog import (#24) blocked |
+| C Payments | Not reached: module and hardening merged with mocks; real sandbox blocked on credentials |
+| D Catalog & operations | Partial: Fitment constraints fixed, order operations audited, shipment tracking, catalog import and supplier import merged; Motosev catalog imported unpublished in QA; real prices/stock policy and publishing review pending |
 | E Preview release candidate | Not reached |
 | F Production | Requires explicit owner approval |
