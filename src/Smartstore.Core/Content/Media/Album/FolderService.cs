@@ -118,7 +118,7 @@ public partial class FolderService : AsyncDbSaveHook<MediaFolder>, IFolderServic
                     node.AlbumName = parent.AlbumName;
                     node.CanDetectTracks = parent.CanDetectTracks;
                     node.IncludePath = parent.IncludePath;
-                    node.Path = (parent.Path + "/" + (node.Slug.NullEmpty() ?? node.Name)).Trim('/').ToLower();
+                    node.Path = (parent.Path + "/" + (node.Slug.NullEmpty() ?? node.Name)).Trim('/').ToLowerInvariant();
                 }
 
                 // We gonna query nodes by path also, therefore we need 2 keys per node (FolderId and computed path)
@@ -195,6 +195,6 @@ public partial class FolderService : AsyncDbSaveHook<MediaFolder>, IFolderServic
             path = path.Trim('/');
         }
 
-        return forQuery ? path.ToLower() : path;
+        return forQuery ? path.ToLowerInvariant() : path;
     }
 }

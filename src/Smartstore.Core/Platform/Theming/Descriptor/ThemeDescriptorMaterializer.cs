@@ -137,7 +137,7 @@ internal class ThemeDescriptorMaterializer
         ThemeVariableType result = ThemeVariableType.String;
         selectRef = null;
 
-        if (type.ToLower().StartsWith("select", StringComparison.CurrentCultureIgnoreCase))
+        if (type.ToLowerInvariant().StartsWith("select", StringComparison.OrdinalIgnoreCase))
         {
             var arr = type.Split('#');
             if (arr.Length < 1 || arr[1].IsEmpty())

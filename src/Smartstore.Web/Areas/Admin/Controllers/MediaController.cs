@@ -84,7 +84,7 @@ public class MediaController : SmartController
             try
             {
                 // Check if media type or file extension is allowed.
-                var extension = Path.GetExtension(fileName).TrimStart('.').ToLower();
+                var extension = Path.GetExtension(fileName).TrimStart('.').ToLowerInvariant();
                 if (typeFilter != null && typeFilter.Length > 0)
                 {
                     var mediaTypeExtensions = _mediaTypeResolver.ParseTypeFilter(typeFilter);

@@ -688,7 +688,7 @@ public class IyzicoPaymentServiceTests : IyzicoTestBase
         Now = Now.AddDays(2);
         Api.OnRefund = r => r.PaymentTransactionId == "T2"
             ? new RefundResponse { Status = "failure", ErrorCode = "5085", ErrorMessage = "refund not allowed" }
-            : new RefundResponse { Status = "success", PaymentTransactionId = r.PaymentTransactionId };
+            : Api.RefundSuccess(r);
 
         Assert.ThrowsAsync<PaymentException>(() => NewService().RefundAsync(order, 150m, isPartial: true));
 

@@ -52,6 +52,22 @@ public enum IyzicoStartStatus
 public sealed record IyzicoStartResult(IyzicoStartStatus Status, string RedirectUrl = null, string ErrorCode = null);
 
 /// <summary>
+/// A refund or cancel sent to iyzico whose outcome is unknown. Blocks further refunds of the payment until resolved.
+/// </summary>
+public sealed class IyzicoPendingRefund
+{
+    public int TransactionId { get; init; }
+    public int OrderId { get; init; }
+    public string PaymentId { get; init; }
+    public string ConversationId { get; init; }
+    public bool IsCancel { get; init; }
+    public string PaymentTransactionIds { get; init; }
+    public decimal Amount { get; init; }
+    public string Currency { get; init; }
+    public DateTime? SinceUtc { get; init; }
+}
+
+/// <summary>
 /// Starts checkout form payments, verifies results server-side and applies them to orders.
 /// </summary>
 /// <remarks>
@@ -110,7 +126,8 @@ public class IyzicoPaymentService
                 : new(IyzicoStartStatus.NotPayable);
         }
 
-        if (!IyzicoRequestBuilder.SupportedCurrencies.Contains(order.CustomerCurrencyCode ?? string.Empty))
+        var settings = await _settingFactory.LoadSettingsAsync<IyzicoSettings>(order.StoreId);
+        if (!IyzicoRequestBuilder.IsCurrencyAllowed(settings, order.CustomerCurrencyCode))
         {
             return new(IyzicoStartStatus.UnsupportedCurrency);
         }
@@ -150,7 +167,6 @@ public class IyzicoPaymentService
             return new(IyzicoStartStatus.NotConfigured);
         }
 
-        var settings = await _settingFactory.LoadSettingsAsync<IyzicoSettings>(order.StoreId);
         var conversationId = Guid.NewGuid().ToString("N");
         var request = IyzicoRequestBuilder.Build(order, settings, conversationId, callbackUrl, locale);
 
@@ -171,7 +187,7 @@ public class IyzicoPaymentService
             return new(IyzicoStartStatus.Failed, ErrorCode: response.ErrorCode);
         }
 
-        if (settings.VerifyResponseSignature)
+        if (!_credentialProvider.SkipResponseSignatureVerification)
         {
             var expected = IyzicoSignature.ComputeInitializeSignature(credentials.SecretKey, response.ConversationId, response.Token);
             if (!IyzicoSignature.SignatureEquals(expected, response.Signature))
@@ -329,7 +345,7 @@ public class IyzicoPaymentService
             return Result(IyzicoOutcome.Error, order);
         }
 
-        var verdict = IyzicoVerifier.Evaluate(tx, result, credentials.SecretKey, settings.VerifyResponseSignature);
+        var verdict = IyzicoVerifier.Evaluate(tx, result, credentials.SecretKey, !_credentialProvider.SkipResponseSignatureVerification, settings.MaxInstallmentSurchargePercent);
 
         if (verdict.Status is IyzicoTransactionStatus.Paid or IyzicoTransactionStatus.FraudReview &&
             (IyzicoRequestBuilder.GetOrderAmount(order) != IyzicoRequestBuilder.Round(tx.Amount) ||
@@ -472,16 +488,39 @@ public class IyzicoPaymentService
     #region Refund and cancel
 
     /// <summary>
+    /// Marker of an unconfirmed refund in <see cref="IyzicoTransaction.ItemTransactionsJson"/>, used to find such transactions.
+    /// </summary>
+    internal const string PendingRefundJsonMarker = "\"PendingRefundConversationId\":\"";
+
+    /// <summary>
+    /// iyzico refundStatus treated as "processed" in the transaction report. Not documented by iyzico (checked 2026-10-20);
+    /// assumed to follow paymentStatus (1 = success). Any other value leaves the refund unconfirmed for an admin to resolve.
+    /// </summary>
+    internal const int ReportedRefundSuccess = 1;
+
+    private enum CancelOutcome
+    {
+        Cancelled,
+        Rejected,
+        Unknown
+    }
+
+    /// <summary>
     /// Refunds a paid order. Same-day full refunds first try the cancel service.
     /// Partial refunds are spread over the item transactions (refund v1 by paymentTransactionId),
     /// because iyzico advises against amount-based refund v2 for baskets with more than one item.
     /// </summary>
+    /// <remarks>
+    /// A refund or cancel without a verifiable answer (timeout, unreadable or unverifiable response) may still have been
+    /// processed by iyzico. It is stored as unconfirmed on the item and blocks every further refund of the payment until
+    /// the transaction report confirms it or an admin resolves it (<see cref="ResolvePendingRefundAsync"/>).
+    /// </remarks>
     /// <returns><c>true</c> if the whole paid amount is refunded.</returns>
     public async Task<bool> RefundAsync(Order order, decimal amountInPrimaryCurrency, bool isPartial, CancellationToken cancelToken = default)
     {
         ArgumentNullException.ThrowIfNull(order);
 
-        await using var refundLock = await _lockProvider.GetLock($"motorshop.iyzico.refund:{order.Id}").AcquireAsync(LockTimeout, cancelToken);
+        await using var refundLock = await AcquireRefundLockAsync(order.Id, cancelToken);
 
         var tx = await _db.IyzicoTransactions()
             .Where(x => x.OrderId == order.Id && x.Status == IyzicoTransactionStatus.Paid)
@@ -499,6 +538,21 @@ public class IyzicoPaymentService
 
         var settings = await _settingFactory.LoadSettingsAsync<IyzicoSettings>(tx.StoreId);
         var items = DeserializeItems(tx);
+
+        if (items.Any(x => x.HasPendingRefund))
+        {
+            // An earlier refund may have been processed by iyzico. Never send another one before it is settled.
+            await ConfirmFromReportAsync(tx, order, items, credentials, cancelToken);
+            if (items.Any(x => x.HasPendingRefund))
+            {
+                throw new PaymentException("An earlier iyzico refund of this order has an unknown outcome. Check it in the iyzico merchant panel and resolve it on the iyzico configuration page (unconfirmed refunds) before refunding again.");
+            }
+            if (tx.Status != IyzicoTransactionStatus.Paid)
+            {
+                throw new PaymentException("The iyzico payment was cancelled by an earlier, now confirmed operation.");
+            }
+        }
+
         var paid = tx.PaidPrice ?? tx.Amount;
         var remaining = paid - tx.RefundedAmount;
         var amount = isPartial
@@ -512,14 +566,36 @@ public class IyzicoPaymentService
 
         if (!isPartial && tx.RefundedAmount == 0m && settings.TryCancelOnSameDayFullRefund && IsSameTurkeyDay(tx.PaidOnUtc, UtcNow()))
         {
-            var cancelled = await TryCancelAsync(tx, order, credentials, cancelToken);
-            if (cancelled)
+            var cancelConversationId = Guid.NewGuid().ToString("N");
+            var cancel = await TryCancelAsync(tx, order, credentials, cancelConversationId, cancelToken);
+            if (cancel == CancelOutcome.Cancelled)
             {
                 items.Each(x => x.RefundedAmount = x.PaidPrice);
                 tx.ItemTransactionsJson = JsonSerializer.Serialize(items);
                 tx.RefundedAmount = paid;
                 await _db.SaveChangesAsync(cancelToken);
                 return true;
+            }
+
+            if (cancel == CancelOutcome.Unknown)
+            {
+                // iyzico may have cancelled the payment. Refunding the items now could pay the customer twice.
+                var now = UtcNow();
+                foreach (var item in items.Where(x => x.PaidPrice - x.RefundedAmount > 0m))
+                {
+                    item.PendingRefundConversationId = cancelConversationId;
+                    item.PendingRefundAmount = item.PaidPrice - item.RefundedAmount;
+                    item.PendingRefundIsCancel = true;
+                    item.PendingRefundSinceUtc = now;
+                }
+
+                tx.ItemTransactionsJson = JsonSerializer.Serialize(items);
+                tx.LastErrorCode = "CANCEL_UNKNOWN";
+                Touch(tx, null);
+                _db.OrderNotes.Add(order, $"iyzico: cancel of payment {tx.PaymentId} ({FormatAmount(paid, tx.Currency)}) has an unknown outcome. iyzico may have processed it. Further refunds are blocked until it is confirmed (transaction report) or resolved on the iyzico configuration page.");
+                await _db.SaveChangesAsync(cancelToken);
+
+                throw new PaymentException("The iyzico cancel request has an unknown outcome. It may have been processed, so further refunds of this order are blocked until it is confirmed.");
             }
         }
 
@@ -538,13 +614,14 @@ public class IyzicoPaymentService
             }
 
             var part = Math.Min(left, itemRemaining);
+            var conversationId = Guid.NewGuid().ToString("N");
             RefundResponse response;
             try
             {
                 response = await _api.RefundAsync(credentials, new RefundRequest
                 {
                     Locale = "en",
-                    ConversationId = Guid.NewGuid().ToString("N"),
+                    ConversationId = conversationId,
                     PaymentTransactionId = item.PaymentTransactionId,
                     Price = IyzicoSignature.FormatPriceForRequest(part),
                     Currency = tx.Currency,
@@ -553,14 +630,26 @@ public class IyzicoPaymentService
             }
             catch (IyzicoApiException ex)
             {
-                await SaveRefundProgressAsync(tx, order, items, amount, left, null, cancelToken);
-                throw new PaymentException($"iyzico refund could not be completed: {ex.Message}");
+                // Timeout or unreadable answer: iyzico may have processed the refund.
+                Logger.LogWarning(ex, "iyzico refund for transaction {TransactionId} has an unknown outcome.", tx.Id);
+                await SaveUnknownRefundAsync(tx, order, items, item, conversationId, part, amount, left, "REFUND_UNKNOWN", cancelToken);
+                throw new PaymentException("iyzico did not answer the refund request. It may have been processed, so further refunds of this order are blocked until it is confirmed.");
             }
 
-            if (!response.IsSuccess || !string.Equals(response.PaymentTransactionId, item.PaymentTransactionId, StringComparison.Ordinal))
+            if (!response.IsSuccess)
             {
+                // iyzico answered with an error: nothing was refunded for this item.
                 await SaveRefundProgressAsync(tx, order, items, amount, left, response.ErrorCode, cancelToken);
                 throw new PaymentException($"iyzico refund rejected ({response.ErrorCode}): {response.ErrorMessage}");
+            }
+
+            var mismatch = VerifyRefundResponse(response, tx, item, conversationId, part, credentials.SecretKey);
+            if (mismatch != null)
+            {
+                // A success claim that cannot be verified: the refund may or may not have happened.
+                Logger.LogWarning("iyzico refund answer for transaction {TransactionId} failed verification: {Mismatch}.", tx.Id, mismatch);
+                await SaveUnknownRefundAsync(tx, order, items, item, conversationId, part, amount, left, "REFUND_UNVERIFIED", cancelToken);
+                throw new PaymentException($"The iyzico refund answer could not be verified ({mismatch}). Further refunds of this order are blocked until it is confirmed.");
             }
 
             item.RefundedAmount += part;
@@ -595,7 +684,7 @@ public class IyzicoPaymentService
     {
         ArgumentNullException.ThrowIfNull(order);
 
-        await using var refundLock = await _lockProvider.GetLock($"motorshop.iyzico.refund:{order.Id}").AcquireAsync(LockTimeout, cancelToken);
+        await using var refundLock = await AcquireRefundLockAsync(order.Id, cancelToken);
 
         var tx = await _db.IyzicoTransactions()
             .Where(x => x.OrderId == order.Id && (x.Status == IyzicoTransactionStatus.FraudReview || x.Status == IyzicoTransactionStatus.Paid))
@@ -609,13 +698,16 @@ public class IyzicoPaymentService
             throw new PaymentException("iyzico is not configured.");
         }
 
-        if (!await TryCancelAsync(tx, order, credentials, cancelToken))
+        if (await TryCancelAsync(tx, order, credentials, Guid.NewGuid().ToString("N"), cancelToken) != CancelOutcome.Cancelled)
         {
+            // Keep the error for the admin. Retrying a void is harmless: iyzico rejects a second cancel.
+            Touch(tx, null);
+            await _db.SaveChangesAsync(cancelToken);
             throw new PaymentException($"iyzico cancel rejected ({tx.LastErrorCode}).");
         }
     }
 
-    private async Task<bool> TryCancelAsync(IyzicoTransaction tx, Order order, IyzicoCredentials credentials, CancellationToken cancelToken)
+    private async Task<CancelOutcome> TryCancelAsync(IyzicoTransaction tx, Order order, IyzicoCredentials credentials, string conversationId, CancellationToken cancelToken)
     {
         CancelResponse response;
         try
@@ -623,7 +715,7 @@ public class IyzicoPaymentService
             response = await _api.CancelAsync(credentials, new CancelRequest
             {
                 Locale = "en",
-                ConversationId = Guid.NewGuid().ToString("N"),
+                ConversationId = conversationId,
                 PaymentId = tx.PaymentId,
                 Ip = order.CustomerIp
             }, cancelToken);
@@ -632,15 +724,25 @@ public class IyzicoPaymentService
         {
             Logger.LogWarning(ex, "iyzico cancel failed for transaction {TransactionId}.", tx.Id);
             tx.LastErrorCode = "UNREACHABLE";
-            return false;
+            tx.LastErrorMessage = null;
+            return CancelOutcome.Unknown;
         }
 
-        if (!response.IsSuccess || !string.Equals(response.PaymentId, tx.PaymentId, StringComparison.Ordinal))
+        if (!response.IsSuccess)
         {
             Logger.LogWarning("iyzico cancel rejected for transaction {TransactionId}: {ErrorCode}.", tx.Id, response.ErrorCode);
             tx.LastErrorCode = response.ErrorCode.Truncate(50);
             tx.LastErrorMessage = response.ErrorMessage.Truncate(500);
-            return false;
+            return CancelOutcome.Rejected;
+        }
+
+        if (!string.Equals(response.PaymentId, tx.PaymentId, StringComparison.Ordinal))
+        {
+            // A success answer for another payment cannot be correlated. The cancel response has no documented signature.
+            Logger.LogWarning("iyzico cancel answer for transaction {TransactionId} does not match the payment.", tx.Id);
+            tx.LastErrorCode = "CANCEL_UNVERIFIED";
+            tx.LastErrorMessage = null;
+            return CancelOutcome.Unknown;
         }
 
         tx.Status = IyzicoTransactionStatus.Cancelled;
@@ -649,7 +751,60 @@ public class IyzicoPaymentService
         _db.OrderNotes.Add(order, $"iyzico: payment {tx.PaymentId} cancelled ({FormatAmount(tx.RefundedAmount, tx.Currency)}).");
         await _db.SaveChangesAsync(cancelToken);
 
-        return true;
+        return CancelOutcome.Cancelled;
+    }
+
+    /// <returns><c>null</c> if the refund answer is genuine and matches the request, otherwise the failed check.</returns>
+    private string VerifyRefundResponse(RefundResponse response, IyzicoTransaction tx, IyzicoItemTransaction item, string conversationId, decimal part, string secretKey)
+    {
+        if (!_credentialProvider.SkipResponseSignatureVerification &&
+            !IyzicoSignature.SignatureEquals(IyzicoSignature.ComputeRefundSignature(secretKey, response), response.Signature))
+        {
+            return "SIGNATURE";
+        }
+        if (!string.Equals(response.ConversationId, conversationId, StringComparison.Ordinal))
+        {
+            return "CONVERSATION";
+        }
+        if (!string.Equals(response.PaymentTransactionId, item.PaymentTransactionId, StringComparison.Ordinal))
+        {
+            return "TRANSACTION";
+        }
+        if (!string.Equals(response.PaymentId, tx.PaymentId, StringComparison.Ordinal))
+        {
+            return "PAYMENTID";
+        }
+        if (response.Price == null || IyzicoRequestBuilder.Round(response.Price.Value) != IyzicoRequestBuilder.Round(part))
+        {
+            return "AMOUNT";
+        }
+        if (!string.Equals(response.Currency, tx.Currency, StringComparison.OrdinalIgnoreCase))
+        {
+            return "CURRENCY";
+        }
+
+        return null;
+    }
+
+    private async Task SaveUnknownRefundAsync(
+        IyzicoTransaction tx,
+        Order order,
+        List<IyzicoItemTransaction> items,
+        IyzicoItemTransaction item,
+        string conversationId,
+        decimal part,
+        decimal requested,
+        decimal left,
+        string errorCode,
+        CancellationToken cancelToken)
+    {
+        item.PendingRefundConversationId = conversationId;
+        item.PendingRefundAmount = part;
+        item.PendingRefundIsCancel = false;
+        item.PendingRefundSinceUtc = UtcNow();
+
+        _db.OrderNotes.Add(order, $"iyzico: refund of {FormatAmount(part, tx.Currency)} (item transaction {item.PaymentTransactionId}) has an unknown outcome ({errorCode}). iyzico may have processed it. Further refunds are blocked until it is confirmed (transaction report) or resolved on the iyzico configuration page.");
+        await SaveRefundProgressAsync(tx, order, items, requested, left, errorCode, cancelToken);
     }
 
     private async Task SaveRefundProgressAsync(IyzicoTransaction tx, Order order, List<IyzicoItemTransaction> items, decimal requested, decimal left, string errorCode, CancellationToken cancelToken)
@@ -682,11 +837,263 @@ public class IyzicoPaymentService
 
     #endregion
 
+    #region Unconfirmed refunds
+
+    /// <summary>
+    /// Lists refunds and cancels with an unknown outcome, for the admin page.
+    /// </summary>
+    public async Task<List<IyzicoPendingRefund>> GetPendingRefundsAsync(int max = 50, CancellationToken cancelToken = default)
+    {
+        var txs = await _db.IyzicoTransactions()
+            .AsNoTracking()
+            .Where(x => x.ItemTransactionsJson.Contains(PendingRefundJsonMarker))
+            .OrderBy(x => x.Id)
+            .Take(max)
+            .ToListAsync(cancelToken);
+
+        return txs
+            .SelectMany(tx => DeserializeItems(tx)
+                .Where(x => x.HasPendingRefund)
+                .GroupBy(x => x.PendingRefundConversationId)
+                .Select(g => new IyzicoPendingRefund
+                {
+                    TransactionId = tx.Id,
+                    OrderId = tx.OrderId,
+                    PaymentId = tx.PaymentId,
+                    ConversationId = g.Key,
+                    IsCancel = g.First().PendingRefundIsCancel,
+                    PaymentTransactionIds = string.Join(", ", g.Select(x => x.PaymentTransactionId)),
+                    Amount = g.Sum(x => x.PendingRefundAmount ?? 0m),
+                    Currency = tx.Currency,
+                    SinceUtc = g.Min(x => x.PendingRefundSinceUtc)
+                }))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Asks the iyzico transaction report whether the unconfirmed refunds of a transaction were processed.
+    /// Only confirms processed refunds; "not processed" always needs an admin decision.
+    /// </summary>
+    /// <returns>Number of operations confirmed as processed.</returns>
+    public async Task<int> CheckPendingRefundsAsync(int transactionId, CancellationToken cancelToken = default)
+    {
+        var orderId = await _db.IyzicoTransactions().Where(x => x.Id == transactionId).Select(x => (int?)x.OrderId).FirstOrDefaultAsync(cancelToken);
+        if (orderId == null)
+        {
+            return 0;
+        }
+
+        await using var refundLock = await AcquireRefundLockAsync(orderId.Value, cancelToken);
+
+        var tx = await _db.IyzicoTransactions().FirstAsync(x => x.Id == transactionId, cancelToken);
+        await _db.Entry(tx).ReloadAsync(cancelToken);
+
+        var items = DeserializeItems(tx);
+        if (!items.Any(x => x.HasPendingRefund))
+        {
+            return 0;
+        }
+
+        var credentials = await _credentialProvider.GetCredentialsAsync(tx.StoreId);
+        if (!credentials.IsComplete)
+        {
+            return 0;
+        }
+
+        var order = await _db.Orders.FirstOrDefaultAsync(x => x.Id == tx.OrderId, cancelToken);
+        return await ConfirmFromReportAsync(tx, order, items, credentials, cancelToken);
+    }
+
+    /// <summary>
+    /// Admin decision on a refund or cancel with an unknown outcome, after checking the iyzico merchant panel.
+    /// </summary>
+    /// <param name="processed"><c>true</c>: iyzico processed it (counted as refunded). <c>false</c>: it was not processed (refundable again).</param>
+    /// <returns><c>false</c> if there is no such unconfirmed operation (already resolved).</returns>
+    public async Task<bool> ResolvePendingRefundAsync(int transactionId, string conversationId, bool processed, string resolvedBy, CancellationToken cancelToken = default)
+    {
+        if (conversationId.IsEmpty())
+        {
+            return false;
+        }
+
+        var orderId = await _db.IyzicoTransactions().Where(x => x.Id == transactionId).Select(x => (int?)x.OrderId).FirstOrDefaultAsync(cancelToken);
+        if (orderId == null)
+        {
+            return false;
+        }
+
+        await using var refundLock = await AcquireRefundLockAsync(orderId.Value, cancelToken);
+
+        var tx = await _db.IyzicoTransactions().FirstAsync(x => x.Id == transactionId, cancelToken);
+        await _db.Entry(tx).ReloadAsync(cancelToken);
+
+        var order = await _db.Orders.FirstOrDefaultAsync(x => x.Id == tx.OrderId, cancelToken);
+        var items = DeserializeItems(tx);
+        if (!ApplyResolvedRefund(tx, order, items, conversationId, processed, $"resolved by {resolvedBy}"))
+        {
+            return false;
+        }
+
+        await _db.SaveChangesAsync(cancelToken);
+        Logger.LogWarning("iyzico unconfirmed refund {ConversationId} of transaction {TransactionId} resolved as {Resolution} by {ResolvedBy}.",
+            conversationId, tx.Id, processed ? "processed" : "not processed", resolvedBy);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Re-checks unconfirmed refunds older than a few minutes. Called by the reconciliation task.
+    /// </summary>
+    /// <returns>Number of operations confirmed as processed.</returns>
+    public async Task<int> ReconcilePendingRefundsAsync(int maxTransactions = 20, CancellationToken cancelToken = default)
+    {
+        var minAge = UtcNow().AddMinutes(-2);
+        var ids = await _db.IyzicoTransactions()
+            .AsNoTracking()
+            .Where(x => x.ItemTransactionsJson.Contains(PendingRefundJsonMarker) && x.UpdatedOnUtc < minAge)
+            .OrderBy(x => x.UpdatedOnUtc)
+            .Take(maxTransactions)
+            .Select(x => x.Id)
+            .ToListAsync(cancelToken);
+
+        var confirmed = 0;
+        foreach (var id in ids)
+        {
+            cancelToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                confirmed += await CheckPendingRefundsAsync(id, cancelToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                Logger.LogError(ex, "iyzico: checking unconfirmed refunds of transaction {TransactionId} failed.", id);
+                DetachAll();
+            }
+        }
+
+        return confirmed;
+    }
+
+    private async Task<int> ConfirmFromReportAsync(IyzicoTransaction tx, Order order, List<IyzicoItemTransaction> items, IyzicoCredentials credentials, CancellationToken cancelToken)
+    {
+        var pending = items.Where(x => x.HasPendingRefund).ToList();
+        if (pending.Count == 0 || tx.PaymentId.IsEmpty())
+        {
+            return 0;
+        }
+
+        PaymentDetailsReportResponse report;
+        try
+        {
+            report = await _api.RetrievePaymentDetailsAsync(credentials, tx.PaymentId, cancelToken);
+        }
+        catch (IyzicoApiException ex)
+        {
+            Logger.LogWarning(ex, "iyzico transaction report failed for transaction {TransactionId}.", tx.Id);
+            return 0;
+        }
+
+        if (!report.IsSuccess)
+        {
+            Logger.LogWarning("iyzico transaction report rejected for transaction {TransactionId}: {ErrorCode}.", tx.Id, report.ErrorCode);
+            return 0;
+        }
+
+        var payment = report.Payments?.FirstOrDefault(x => string.Equals(x.PaymentId, tx.PaymentId, StringComparison.Ordinal));
+        if (payment == null)
+        {
+            return 0;
+        }
+
+        var confirmed = 0;
+        foreach (var group in pending.GroupBy(x => x.PendingRefundConversationId).ToList())
+        {
+            var first = group.First();
+            var total = group.Sum(x => x.PendingRefundAmount ?? 0m);
+
+            var processed = first.PendingRefundIsCancel
+                ? (payment.Cancels ?? []).Any(c =>
+                    string.Equals(c.CancelConversationId, group.Key, StringComparison.Ordinal) &&
+                    IsReportedAsProcessed(c.RefundStatus, c.RefundPrice, c.CurrencyCode, total, tx.Currency))
+                : (payment.ItemTransactions ?? [])
+                    .Where(x => string.Equals(x.PaymentTransactionId, first.PaymentTransactionId, StringComparison.Ordinal))
+                    .SelectMany(x => x.Refunds ?? [])
+                    .Any(r =>
+                        string.Equals(r.RefundConversationId, group.Key, StringComparison.Ordinal) &&
+                        IsReportedAsProcessed(r.RefundStatus, r.RefundPrice, r.CurrencyCode, total, tx.Currency));
+
+            if (processed && ApplyResolvedRefund(tx, order, items, group.Key, true, "confirmed by the iyzico transaction report"))
+            {
+                confirmed++;
+            }
+        }
+
+        if (confirmed > 0)
+        {
+            await _db.SaveChangesAsync(cancelToken);
+        }
+
+        return confirmed;
+    }
+
+    private static bool IsReportedAsProcessed(int? status, decimal? price, string currency, decimal expectedAmount, string expectedCurrency)
+        => status == ReportedRefundSuccess
+        && price.HasValue
+        && IyzicoRequestBuilder.Round(price.Value) == IyzicoRequestBuilder.Round(expectedAmount)
+        && (currency.IsEmpty() || string.Equals(currency, expectedCurrency, StringComparison.OrdinalIgnoreCase));
+
+    private bool ApplyResolvedRefund(IyzicoTransaction tx, Order order, List<IyzicoItemTransaction> items, string conversationId, bool processed, string reason)
+    {
+        var group = items.Where(x => string.Equals(x.PendingRefundConversationId, conversationId, StringComparison.Ordinal)).ToList();
+        if (group.Count == 0)
+        {
+            return false;
+        }
+
+        var isCancel = group[0].PendingRefundIsCancel;
+        var amount = group.Sum(x => x.PendingRefundAmount ?? 0m);
+        var paid = tx.PaidPrice ?? tx.Amount;
+        var kind = isCancel ? "cancel" : "refund";
+
+        if (processed)
+        {
+            foreach (var item in group)
+            {
+                item.RefundedAmount = Math.Min(item.PaidPrice, item.RefundedAmount + (item.PendingRefundAmount ?? 0m));
+            }
+
+            tx.RefundedAmount = Math.Min(paid, tx.RefundedAmount + amount);
+            if (isCancel)
+            {
+                tx.Status = IyzicoTransactionStatus.Cancelled;
+            }
+        }
+
+        group.Each(x => x.ClearPendingRefund());
+        tx.ItemTransactionsJson = JsonSerializer.Serialize(items);
+        if (!items.Any(x => x.HasPendingRefund))
+        {
+            tx.LastErrorCode = null;
+            tx.LastErrorMessage = null;
+        }
+        Touch(tx, null);
+
+        _db.OrderNotes.Add(order, processed
+            ? $"iyzico: the unconfirmed {kind} of {FormatAmount(amount, tx.Currency)} was processed by iyzico ({reason}). It is counted as refunded in the iyzico module; record it in Smartstore as an offline refund."
+            : $"iyzico: the unconfirmed {kind} of {FormatAmount(amount, tx.Currency)} was not processed by iyzico ({reason}). The amount can be refunded again.");
+
+        return true;
+    }
+
+    #endregion
+
     #region Reconciliation
 
     /// <summary>
     /// Re-checks open transactions, for when neither the callback nor a webhook arrived
-    /// (customer closed the browser, webhooks disabled). Expires stale unpaid attempts.
+    /// (customer closed the browser, webhooks disabled). Expires stale unpaid attempts, cancels stale unpaid orders
+    /// and asks the transaction report about refunds with an unknown outcome.
     /// </summary>
     public async Task<int> ReconcileAsync(int maxTransactions = 50, CancellationToken cancelToken = default)
     {
@@ -724,6 +1131,7 @@ public class IyzicoPaymentService
         }
 
         await CancelStaleUnpaidOrdersAsync(maxTransactions, cancelToken);
+        await ReconcilePendingRefundsAsync(20, cancelToken);
 
         return open.Count;
     }
@@ -820,6 +1228,12 @@ public class IyzicoPaymentService
 
     private Task<ILockHandle> AcquireOrderLockAsync(int orderId, CancellationToken cancelToken)
         => _lockProvider.GetLock($"motorshop.iyzico.order:{orderId}").AcquireAsync(LockTimeout, cancelToken);
+
+    /// <summary>
+    /// Serializes refunds, voids and the resolution of unconfirmed refunds of one order.
+    /// </summary>
+    private Task<ILockHandle> AcquireRefundLockAsync(int orderId, CancellationToken cancelToken)
+        => _lockProvider.GetLock($"motorshop.iyzico.refund:{orderId}").AcquireAsync(LockTimeout, cancelToken);
 
     private void Touch(IyzicoTransaction tx, IyzicoVerdict verdict)
     {

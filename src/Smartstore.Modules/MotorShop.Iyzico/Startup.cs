@@ -27,6 +27,7 @@ internal class Startup : StarterBase
     {
         builder.RegisterType<IyzicoCredentialProvider>().As<IIyzicoCredentialProvider>().InstancePerLifetimeScope();
         builder.RegisterType<IyzicoPaymentService>().AsSelf().InstancePerLifetimeScope();
+        builder.RegisterType<IyzicoReturnThrottle>().AsSelf().SingleInstance();
     }
 
     class SmartDbContextConfigurer : IDbContextConfigurationSource<SmartDbContext>

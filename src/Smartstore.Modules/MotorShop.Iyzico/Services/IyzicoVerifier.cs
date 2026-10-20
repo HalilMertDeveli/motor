@@ -1,3 +1,4 @@
+using System.Globalization;
 using MotorShop.Iyzico.Client;
 using MotorShop.Iyzico.Domain;
 
@@ -15,7 +16,37 @@ public static class IyzicoVerifier
     public const int FraudInReview = 0;
     public const int FraudRejected = -1;
 
-    public static IyzicoVerdict Evaluate(IyzicoTransaction tx, CheckoutFormResult result, string secretKey, bool verifySignature)
+    /// <summary>
+    /// Checks paidPrice against the expected amount. Single payment (installment 1 or missing): paidPrice must equal
+    /// the amount (2 decimals). Installments: paidPrice may exceed the amount by the commission passed on to the customer,
+    /// up to <paramref name="maxSurchargePercent"/>. Never below the amount.
+    /// </summary>
+    /// <returns><c>null</c> if paidPrice is acceptable, otherwise a <see cref="IyzicoTransactionStatus.VerificationFailed"/> verdict.</returns>
+    public static IyzicoVerdict CheckPaidPrice(decimal amount, decimal? paidPrice, int? installment, decimal maxSurchargePercent)
+    {
+        var expected = IyzicoRequestBuilder.Round(amount);
+        var paid = paidPrice.HasValue ? IyzicoRequestBuilder.Round(paidPrice.Value) : (decimal?)null;
+        var invariant = CultureInfo.InvariantCulture;
+
+        if (paid == null || paid < expected)
+        {
+            return new(IyzicoTransactionStatus.VerificationFailed, "PAIDPRICE", $"Paid price {paidPrice?.ToString(invariant)} is below {expected.ToString("0.00", invariant)}.");
+        }
+
+        if (installment is null or <= 1)
+        {
+            return paid == expected
+                ? null
+                : new(IyzicoTransactionStatus.VerificationFailed, "PAIDPRICE", $"Single payment paid price {paid.Value.ToString("0.00", invariant)} differs from {expected.ToString("0.00", invariant)}.");
+        }
+
+        var max = IyzicoRequestBuilder.Round(expected * (1m + Math.Max(0m, maxSurchargePercent) / 100m));
+        return paid <= max
+            ? null
+            : new(IyzicoTransactionStatus.VerificationFailed, "SURCHARGE", $"Installment surcharge too high: paid {paid.Value.ToString("0.00", invariant)}, maximum {max.ToString("0.00", invariant)} for {installment} installments.");
+    }
+
+    public static IyzicoVerdict Evaluate(IyzicoTransaction tx, CheckoutFormResult result, string secretKey, bool verifySignature, decimal maxInstallmentSurchargePercent)
     {
         ArgumentNullException.ThrowIfNull(tx);
 
@@ -74,10 +105,10 @@ public static class IyzicoVerifier
                 {
                     return new(IyzicoTransactionStatus.VerificationFailed, "AMOUNT", $"Price {result.Price} does not match {tx.Amount}.");
                 }
-                // paidPrice may exceed price by the installment commission passed on to the customer, never fall below it.
-                if (result.PaidPrice == null || IyzicoRequestBuilder.Round(result.PaidPrice.Value) < IyzicoRequestBuilder.Round(tx.Amount))
+                var paidPriceVerdict = CheckPaidPrice(tx.Amount, result.PaidPrice, result.Installment, maxInstallmentSurchargePercent);
+                if (paidPriceVerdict != null)
                 {
-                    return new(IyzicoTransactionStatus.VerificationFailed, "PAIDPRICE", $"Paid price {result.PaidPrice} is below {tx.Amount}.");
+                    return paidPriceVerdict;
                 }
 
                 return result.FraudStatus switch

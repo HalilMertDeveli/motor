@@ -31,17 +31,20 @@ public class IyzicoSettings : ISettings
     /// </summary>
     public string EnabledInstallments { get; set; } = "1,2,3,6,9";
 
-    /// <summary>
-    /// Rejects webhooks without a valid X-IYZ-SIGNATURE-V3 header. iyzico sends this header only after
-    /// the merchant asked iyzico to enable it. A webhook never marks an order as paid by itself: it only
-    /// triggers a server-side retrieve of the payment result.
-    /// </summary>
-    public bool RequireWebhookSignature { get; set; } = true;
+    // Signature checks are not admin settings. They can only be relaxed through configuration
+    // (MotorShop:Iyzico:AllowUnsignedWebhooks, MotorShop:Iyzico:SkipResponseSignatureVerification), see IIyzicoCredentialProvider.
 
     /// <summary>
-    /// Verifies the HMAC-SHA256 "signature" field of initialize, retrieve and refund responses.
+    /// Comma separated ISO currency codes the method is offered for, e.g. "TRY" or "TRY,EUR".
+    /// Only codes iyzico accepts (<see cref="Services.IyzicoRequestBuilder.SupportedCurrencies"/>) take effect.
     /// </summary>
-    public bool VerifyResponseSignature { get; set; } = true;
+    public string AllowedCurrencies { get; set; } = "TRY";
+
+    /// <summary>
+    /// Highest accepted installment commission passed on to the customer, in percent of the order amount.
+    /// A paidPrice above price * (1 + value / 100) is not marked as paid. Single payments must match exactly.
+    /// </summary>
+    public decimal MaxInstallmentSurchargePercent { get; set; } = 30m;
 
     /// <summary>
     /// Value sent as buyer.identityNumber, which iyzico marks as required. The store does not collect

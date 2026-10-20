@@ -462,7 +462,7 @@ public partial class CatalogController : PublicController
         var feed = new SmartSyndicationFeed(new Uri(recentProductsLink), title, T("RSS.InformationAboutProducts"));
 
         feed.AddNamespaces(true);
-        feed.Init(selfLink, Services.WorkContext.WorkingLanguage.LanguageCulture.EmptyNull().ToLower());
+        feed.Init(selfLink, Services.WorkContext.WorkingLanguage.LanguageCulture.EmptyNull().ToLowerInvariant());
 
         if (!_catalogSettings.RecentlyAddedProductsEnabled || _catalogSettings.RecentlyAddedProductsNumber <= 0)
         {

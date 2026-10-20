@@ -191,7 +191,7 @@ public class MediaMiddleware
                 return;
             }
 
-            if (string.Equals(responseFile.Extension, "." + pathData.Extension, StringComparison.CurrentCultureIgnoreCase))
+            if (string.Equals(responseFile.Extension, "." + pathData.Extension, StringComparison.OrdinalIgnoreCase))
             {
                 pathData.MimeType = MimeTypes.MapNameToMimeType(responseFile.Extension);
             }

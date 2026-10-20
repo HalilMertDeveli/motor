@@ -146,7 +146,7 @@ public static partial class HtmlUtility
 
         foreach (var el in doc.All)
         {
-            switch (el.TagName.ToLower())
+            switch (el.TagName.ToLowerInvariant())
             {
                 case "html":
                 case "head":

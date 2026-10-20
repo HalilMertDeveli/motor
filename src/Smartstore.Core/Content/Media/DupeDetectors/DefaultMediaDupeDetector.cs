@@ -77,7 +77,7 @@ internal class DefaultMediaDupeDetector : MediaDupeDetectorBase
                 var query = _searcher.PrepareQuery(new() { FolderId = _folderId }, MediaLoadFlags.AsNoTracking);
                 var fileNames = await query.Select(x => x.Name).ToListAsync(cancelToken);
 
-                _cachedFileNames = new(fileNames, StringComparer.CurrentCultureIgnoreCase);
+                _cachedFileNames = new(fileNames, StringComparer.OrdinalIgnoreCase);
             }
 
             destFileNames = _cachedFileNames;

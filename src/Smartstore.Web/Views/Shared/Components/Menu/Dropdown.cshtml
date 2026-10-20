@@ -18,7 +18,7 @@
     }
 
     var item = root.Value;
-    var menuName = Model.Name.HasValue() ? Model.Name.ToLower() : root.Id.ToString();
+    var menuName = Model.Name.HasValue() ? Model.Name.ToLowerInvariant() : root.Id.ToString();
 }
 
 <div class="cms-menu cms-menu-dropdown" data-menu-name="@menuName">

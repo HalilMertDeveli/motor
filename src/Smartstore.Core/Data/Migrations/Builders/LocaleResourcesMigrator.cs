@@ -28,7 +28,7 @@ internal class LocaleResourcesMigrator
         {
             var langMap = (await _languages
                 .ToListAsync())
-                .ToDictionarySafe(x => x.LanguageCulture.EmptyNull().ToLower());
+                .ToDictionarySafe(x => x.LanguageCulture.EmptyNull().ToLowerInvariant());
 
             var toDelete = new List<LocaleStringResource>();
             var toUpdate = new List<LocaleStringResource>();
@@ -39,7 +39,7 @@ internal class LocaleResourcesMigrator
                 if (entry.Lang == null)
                     return true;
 
-                var sourceLangCode = entry.Lang.ToLower();
+                var sourceLangCode = entry.Lang.ToLowerInvariant();
 
                 if (targetLang != null)
                 {

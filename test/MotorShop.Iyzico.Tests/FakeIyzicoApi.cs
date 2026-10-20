@@ -31,6 +31,9 @@ public class FakeIyzicoApi : IIyzicoApiClient
     public Func<CheckoutFormInitializeRequest, CheckoutFormInitializeResponse> OnInitialize { get; set; }
     public Func<RefundRequest, RefundResponse> OnRefund { get; set; }
     public Func<CancelRequest, CancelResponse> OnCancel { get; set; }
+    public Func<string, PaymentDetailsReportResponse> OnPaymentDetails { get; set; }
+    public int PaymentDetailsCalls => _paymentDetailsCalls;
+    private int _paymentDetailsCalls;
 
     public CheckoutFormInitializeRequest LastInitializeRequest { get; private set; }
     public ConcurrentQueue<RefundRequest> RefundRequests { get; } = new();
@@ -61,15 +64,38 @@ public class FakeIyzicoApi : IIyzicoApiClient
     {
         RefundRequests.Enqueue(request);
 
-        var response = OnRefund?.Invoke(request) ?? new RefundResponse
+        var response = OnRefund?.Invoke(request) ?? RefundSuccess(request);
+
+        return Task.FromResult(response);
+    }
+
+    /// <summary>
+    /// A correctly signed successful refund answer for <paramref name="request"/>.
+    /// </summary>
+    public RefundResponse RefundSuccess(RefundRequest request, string paymentId = "24681357")
+    {
+        return SignRefund(new RefundResponse
         {
             Status = "success",
             ConversationId = request.ConversationId,
+            PaymentId = paymentId,
             PaymentTransactionId = request.PaymentTransactionId,
             Price = decimal.Parse(request.Price, System.Globalization.CultureInfo.InvariantCulture),
             Currency = request.Currency
-        };
+        });
+    }
 
+    public RefundResponse SignRefund(RefundResponse response)
+    {
+        response.Signature = IyzicoSignature.ComputeRefundSignature(_secretKey, response);
+        return response;
+    }
+
+    public Task<PaymentDetailsReportResponse> RetrievePaymentDetailsAsync(IyzicoCredentials credentials, string paymentId, CancellationToken cancelToken = default)
+    {
+        Interlocked.Increment(ref _paymentDetailsCalls);
+
+        var response = OnPaymentDetails?.Invoke(paymentId) ?? new PaymentDetailsReportResponse { Status = "success", Payments = [] };
         return Task.FromResult(response);
     }
 
