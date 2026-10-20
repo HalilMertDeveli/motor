@@ -182,7 +182,11 @@ function render(flatFile, deblock, maxUpscale, target) {
     const img = rawRgb(flatFile);
     const box = productBox(img);
     const objMax = Math.max(box.w, box.h);
-    const scale = Math.min(MAX_OBJECT / objMax, maxUpscale);
+    // The product always fills FILL of the canvas, and the canvas is at least MIN_CANVAS: Smartstore does not
+    // enlarge small originals, so a small picture would sit tiny in the product card. Enlarging here with
+    // Lanczos and a light unsharp mask looks better than the browser stretching it.
+    const objectSize = Math.min(MAX_OBJECT, Math.max(objMax * maxUpscale, MIN_CANVAS * FILL));
+    const scale = objectSize / objMax;
     const ow = Math.max(1, Math.round(box.w * scale)), oh = Math.max(1, Math.round(box.h * scale));
     const canvas = Math.min(MAX_CANVAS, Math.max(MIN_CANVAS, Math.round(Math.max(ow, oh) / FILL)));
     const filters = [
