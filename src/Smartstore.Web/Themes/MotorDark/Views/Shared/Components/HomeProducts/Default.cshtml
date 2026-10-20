@@ -3,10 +3,10 @@
 @model ProductSummaryModel
 
 <div sm-if="Model.PagedList.TotalCount > 0" role="region" aria-labelledby="homepage-products-title" class="product-grid product-grid-home-page motor-product-rail block">
-    <div lang="tr" class="motor-section-head" data-motor-reveal>
+    <div class="motor-section-head" data-motor-reveal>
         <div>
-            <span class="motor-eyebrow">Öne çıkanlar</span>
-            <h2 id="homepage-products-title" class="motor-section-title">Popüler ürünler</h2>
+            <span class="motor-eyebrow">@T("Themes.MotorDark.Featured.Eyebrow")</span>
+            <h2 id="homepage-products-title" class="motor-section-title">@T("Themes.MotorDark.Featured.Title")</h2>
         </div>
     </div>
     <div class="block-body artlist-no-separators">

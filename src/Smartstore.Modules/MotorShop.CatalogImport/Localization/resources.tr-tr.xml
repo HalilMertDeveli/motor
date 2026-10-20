@@ -29,6 +29,7 @@
     <LocaleResource Name="Source.Agreement.Hint"><Value>YETKİLİ için zorunlu: sözleşme numarası veya yazılı iznin tarihi ve göndereni.</Value></LocaleResource>
     <LocaleResource Name="Source.AgreementRequired"><Value>YETKİLİ durumu için sözleşme referansı gerekir.</Value></LocaleResource>
     <LocaleResource Name="Source.KeyExists"><Value>Bu anahtar başka bir kaynakta kullanılıyor.</Value></LocaleResource>
+    <LocaleResource Name="Source.InvalidUrl"><Value>http:// veya https:// ile başlayan tam bir adres girin.</Value></LocaleResource>
     <LocaleResource Name="Source.TermsUrl"><Value>Kullanım koşulları URL</Value></LocaleResource>
     <LocaleResource Name="Source.TermsSummary"><Value>Koşulların özeti</Value></LocaleResource>
     <LocaleResource Name="Source.ImageRights"><Value>Görsel hakları</Value></LocaleResource>
@@ -130,6 +131,7 @@
     <LocaleResource Name="Part.Offer.Inactive"><Value>pasif</Value></LocaleResource>
     <LocaleResource Name="Part.Offer.None"><Value>Tedarikçi teklifi yok. YETKİLİ bir tedarikçi akışı olmadan parça satılamaz.</Value></LocaleResource>
     <LocaleResource Name="Part.Readiness"><Value>Yayın</Value></LocaleResource>
+    <LocaleResource Name="Part.ProductConflicts"><Value>Aynı SKU, MPN veya GTIN ile kayıtlı ürünler. Önce ürün yönetiminde çakışmayı giderin; hiçbir şey otomatik birleştirilmez:</Value></LocaleResource>
     <LocaleResource Name="Part.Readiness.Met"><Value>Tüm koşullar sağlandı.</Value></LocaleResource>
     <LocaleResource Name="Part.ApproveReference"><Value>Referans olarak onayla (B)</Value></LocaleResource>
     <LocaleResource Name="Part.ApproveSale"><Value>Satışa onayla (C)</Value></LocaleResource>
@@ -163,6 +165,7 @@
     <LocaleResource Name="Requirement.PartialMatch"><Value>Kısmi yıl çakışması onaylanamaz</Value></LocaleResource>
     <LocaleResource Name="Requirement.UnknownVehicle"><Value>Motosiklet artık mevcut değil</Value></LocaleResource>
     <LocaleResource Name="Requirement.UnknownPart"><Value>Bilinmeyen parça</Value></LocaleResource>
+    <LocaleResource Name="Requirement.NoProductConflict"><Value>Aynı SKU, MPN veya GTIN ile kayıtlı başka ürün yok</Value></LocaleResource>
     <LocaleResource Name="Approve"><Value>Onayla</Value></LocaleResource>
     <LocaleResource Name="Reject"><Value>Reddet</Value></LocaleResource>
     <LocaleResource Name="MatchKind.Exact"><Value>Kesin</Value></LocaleResource>

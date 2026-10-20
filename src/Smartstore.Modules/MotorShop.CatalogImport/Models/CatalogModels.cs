@@ -107,6 +107,16 @@ public class SourceEditModel
     public string ImageRights { get; set; }
 
     public string Limitations { get; set; }
+
+    /// <summary>
+    /// Url and TermsUrl are rendered as links in the admin. Anything but an absolute http(s) URL
+    /// (e.g. a javascript: URL) is refused, so a source can never carry script into an href.
+    /// </summary>
+    public IEnumerable<string> GetInvalidUrlFields()
+    {
+        if (Url.HasValue() && !CatalogValidator.IsHttpUrl(Url)) yield return nameof(Url);
+        if (TermsUrl.HasValue() && !CatalogValidator.IsHttpUrl(TermsUrl)) yield return nameof(TermsUrl);
+    }
 }
 
 public class BatchDetailModel
@@ -133,6 +143,7 @@ public class PartDetailModel
     public CatalogPart Part { get; set; }
     public CatalogSource Source { get; set; }
     public PartReadiness Readiness { get; set; }
+    public List<ProductConflict> ProductConflicts { get; set; } = [];
     public List<SourceRef> Sources { get; set; } = [];
     public Dictionary<string, string> Specs { get; set; } = [];
     public List<FitmentRow> Fitment { get; set; } = [];

@@ -5,6 +5,7 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,10 +31,21 @@ namespace MotorShop.CatalogImport.Tests;
 public abstract class CatalogTestBase
 {
     private SmartDbContext _dbContext;
+    private SqliteConnection _sqliteConnection;
     private IDisposable _lifetimeToken;
 
     protected SmartDbContext DbContext
         => _dbContext;
+
+    /// <summary>
+    /// True: the fixture runs on SQLite in memory (real transactions and constraints) instead of EF InMemory.
+    /// </summary>
+    protected virtual bool UseRelationalDatabase => false;
+
+    /// <summary>
+    /// Lets a test make one SaveChanges call fail.
+    /// </summary>
+    protected FailureInterceptor Failures { get; } = new();
 
     [OneTimeSetUp]
     public void SetUp()
@@ -65,6 +77,7 @@ public abstract class CatalogTestBase
     {
         _lifetimeToken.Dispose();
         _dbContext.Dispose();
+        _sqliteConnection?.Dispose();
 
         // INFO: required for IApplicationContext.TenantRoot to be not null after subsequent setups.
         DataSettings.Reload();
@@ -108,13 +121,21 @@ public abstract class CatalogTestBase
 
     private void InitDbContext()
     {
+        DbFactory dbFactory = new TestDbFactory();
+        if (UseRelationalDatabase)
+        {
+            _sqliteConnection = new SqliteConnection("Data Source=:memory:");
+            _sqliteConnection.Open();
+            dbFactory = new SqliteTestDbFactory(_sqliteConnection);
+        }
+
         var dataSettings = new DataSettings
         {
             AppVersion = SmartstoreVersion.Version,
-            ConnectionString = "Test",
+            ConnectionString = UseRelationalDatabase ? "Data Source=:memory:" : "Test",
             TenantName = "Default",
             TenantRoot = null,
-            DbFactory = new TestDbFactory()
+            DbFactory = dbFactory
         };
 
         DataSettings.Instance = dataSettings;
@@ -130,7 +151,8 @@ public abstract class CatalogTestBase
                     typeof(MotorVehicle).Assembly,
                     typeof(MotorShop.CatalogImport.Domain.CatalogPart).Assembly
                 });
-            });
+            })
+            .AddInterceptors(Failures);
 
         _dbContext = new SmartDbContext((DbContextOptions<SmartDbContext>)builder.Options);
         _dbContext.Database.EnsureCreated();

@@ -83,3 +83,14 @@ They are only rendered inside the checkout and in the order snapshot.
 
 - The payment confirmation path (`ConfirmPayment`, used by redirect payment methods such as 3-D Secure) is covered by the same filter and unit tests, but was not exercised end to end because no such payment method is configured locally.
 - Smartstore's `CookieConsentManager` with "depends on country" shows the manager for every resolved country (upstream logic returns `true` in both branches). That matches the wanted behaviour for Türkiye; it is noted here because the setting name suggests otherwise.
+
+## Smartstore's own confirm texts
+
+| Smartstore text / setting | MOTOR | Why |
+|---|---|---|
+| `Checkout.TermsOfService.IAccept` ("I agree with the terms of service … my data … can be stored electronically"), shown next to both buy buttons | **Replaced** by `Plugins.MotorShop.Legal.PaymentObligationHint` (`LegalCheckoutSettings.ReplaceCoreTermsText`, default on). 6.4 has no setting to switch it off | Acceptance is the MOTOR checkbox; bundling KVKK "consent" into the buy text is wrong. The payment-obligation notice next to the button stays (lawyer to confirm wording) |
+| `ShoppingCartSettings.ShowConfirmOrderLegalHint` | Keep **off** (default) | Would add a third hint box |
+| `ShoppingCartSettings.ShowSecondBuyButtonBelowCart` | Keep on | Second button also shows the payment-obligation notice |
+| `ShoppingCartSettings.ShowEsdRevocationWaiverBox` | Keep (default) | Only appears for downloadable (ESD) products; MOTOR sells physical parts, so nothing is shown |
+| `Aria.Label.BuyHint` ("By clicking on Buy, I accept the terms and conditions") | Screen-reader only. Turkish wording belongs to tr-localization: suggest the payment-obligation sentence | Not visible |
+| Newsletter / third-party e-mail checkboxes at confirm | If enabled, use "Deactivated" (unticked) only, never pre-ticked | Commercial e-mail consent must be a separate opt-in |

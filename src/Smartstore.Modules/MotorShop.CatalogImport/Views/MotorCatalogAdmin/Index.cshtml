@@ -113,7 +113,7 @@
                     <tr>
                         <td>
                             <div>@s.Name</div>
-                            @if (s.Url.HasValue())
+                            @if (CatalogValidator.IsHttpUrl(s.Url))
                             {
                                 <a class="small text-muted text-break" href="@s.Url" target="_blank" rel="noopener noreferrer">@s.Url</a>
                             }

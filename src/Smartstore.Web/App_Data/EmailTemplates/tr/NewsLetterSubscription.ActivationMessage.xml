@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MessageTemplate>
+	<To>{{ NewsletterSubscription.Email }}</To>
+	<Subject>{{ Store.Name }}. E-bülten aboneliği</Subject>
+	<ModelTypes>NewsletterSubscription</ModelTypes>
+	<Body><![CDATA[{% extends 'master' %}
+
+{% block 'body' %}
+<h1>
+  Merhaba {{ Customer.FullName }},
+</h1>
+
+<p>
+  E-bültenimize aboneliğinizi onaylamak için lütfen aşağıdaki bağlantıya tıklayın:
+</p>
+
+<p class="text-center mt-4 mb-4">
+  <a class="btn btn-success" href="{{ NewsletterSubscription.ActivationUrl }}">Aboneliği onayla</a>
+</p>
+
+<p>
+	Bağlantı açılmıyorsa lütfen aşağıdaki URL'yi kopyalayıp tarayıcınızın adres çubuğuna yapıştırın:
+</p>
+
+<p>
+	<a href="{{ NewsletterSubscription.ActivationUrl }}">{{ NewsletterSubscription.ActivationUrl }}</a> 
+</p>
+
+<p>
+	Bu e-postayı yanlışlıkla aldıysanız lütfen silmeniz yeterlidir.
+</p>
+{% endblock %}]]></Body>
+</MessageTemplate>

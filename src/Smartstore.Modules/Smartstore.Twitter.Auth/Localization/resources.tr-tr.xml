@@ -1,0 +1,42 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.Smartstore.Twitter.Auth" AppendRootKey="false">
+        <Value>X ile giriş</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Smartstore.Twitter.Auth" AppendRootKey="false">
+        <Value>Mağazaya X ile kimlik doğrulama ekler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[
+			<p>X ile kimlik doğrulamayı ayarlamak için: </p>
+			<ul>
+				<li><a href="https://developer.twitter.com/en/apps">X</a> üzerinde yeni bir uygulama oluşturun.</li>
+				<li>Erişim bilgilerini (App-ID &amp; App-Secret) aşağıdaki forma girin.</li>
+				<li>Aşağıda listelenen URL'yi <b>Apps &gt; App settings &gt; Authentication settings &gt; Callback URLs</b> alanına girin.</li>
+				<li><b>Request email address from users</b> seçeneğini etkinleştirin.</li>
+			</ul>
+			]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Login">
+        <Value>X ile giriş yap</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsumerKey">
+        <Value>API anahtarı</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsumerKey.Hint">
+        <Value>API anahtarınızı buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsumerSecret">
+        <Value>Gizli anahtar</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsumerSecret.Hint">
+        <Value>Gizli anahtarınızı (consumer secret) buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri">
+        <Value>OAuth yönlendirme URI'si</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri.Hint">
+        <Value>X'te girilmesi gereken OAuth yönlendirme URI'si.</Value>
+    </LocaleResource>
+</Language>

@@ -10,4 +10,5 @@
     <LocaleResource Name="SnapshotOfOrder"><Value>Copy of the text accepted with order {0}.</Value></LocaleResource>
     <LocaleResource Name="BackToOrder"><Value>Back to order</Value></LocaleResource>
     <LocaleResource Name="OrderNote"><Value>Legal acknowledgment record. Checkbox ticked: {0}. Time (UTC): {1}. Texts (version hash): {2}. The IP address is in the order's customer IP field.</Value></LocaleResource>
+    <LocaleResource Name="PaymentObligationHint"><Value>By clicking "Confirm" you place an order that obliges you to pay.</Value></LocaleResource>
 </Language>

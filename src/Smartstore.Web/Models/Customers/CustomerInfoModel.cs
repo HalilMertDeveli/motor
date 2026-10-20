@@ -175,6 +175,10 @@ public class CustomerInfoValidator : SmartValidator<CustomerInfoModel>
         {
             RuleFor(x => x.Phone).NotEmpty();
         }
+        if (customerSettings.PhoneEnabled)
+        {
+            RuleFor(x => x.Phone).PhoneNumber(T);
+        }
         if (customerSettings.FaxRequired && customerSettings.FaxEnabled)
         {
             RuleFor(x => x.Fax).NotEmpty();

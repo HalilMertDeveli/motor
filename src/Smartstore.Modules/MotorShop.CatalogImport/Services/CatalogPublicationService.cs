@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MotorShop.CatalogImport.Domain;
 using MotorShop.Fitment;
 using MotorShop.Fitment.Domain;
@@ -22,6 +24,8 @@ public record PartReadiness(IReadOnlyList<string> MissingForReference, IReadOnly
 }
 
 public class PublicationException(string message) : Exception(message);
+
+public record ProductConflict(int ProductId, string Name, string Sku, string Mpn, string Gtin);
 
 /// <summary>
 /// Turns reviewed parts into Smartstore products and keeps the product flags in line with the part's state:
@@ -47,6 +51,8 @@ public class CatalogPublicationService
 
     public Func<DateTime> UtcNow { get; set; } = () => DateTime.UtcNow;
 
+    public ILogger Logger { get; set; } = NullLogger.Instance;
+
     #region Readiness
 
     public async Task<PartReadiness> GetReadinessAsync(CatalogPart part, CancellationToken cancelToken = default)
@@ -62,6 +68,7 @@ public class CatalogPublicationService
         if (part.VerificationStatus != RecordVerificationStatus.Verified) reference.Add("VerifiedData");
         if (source == null || source.PermissionStatus < SourcePermissionStatus.PublicFactualReferenceOnly) reference.Add("SourcePermission");
         if (part.HasPendingChanges) reference.Add("NoPendingChanges");
+        if (part.ProductId == null && (await FindConflictingProductsAsync(part, cancelToken)).Count > 0) reference.Add("NoProductConflict");
 
         var now = UtcNow();
         var hasOffer = await _db.CatalogSupplierOffers()
@@ -213,7 +220,15 @@ public class CatalogPublicationService
 
             if (part.ProductId.HasValue || part.State >= PartPublicationState.VerifiedReference)
             {
-                await SyncProductAsync(part, cancelToken);
+                try
+                {
+                    await SyncProductAsync(part, cancelToken);
+                }
+                catch (PublicationException ex)
+                {
+                    // E.g. its product was deleted and another product now has the same SKU/MPN/GTIN: the admin decides.
+                    Logger.LogWarning("Catalog part {PartId} was not synchronized: {Reason}", part.Id, ex.Message);
+                }
             }
         }
 
@@ -224,10 +239,9 @@ public class CatalogPublicationService
 
     #region Fitment review
 
-    public async Task ApproveMatchAsync(int matchId, string reviewedBy, CancellationToken cancelToken = default)
+    public async Task ApproveMatchAsync(int partId, int matchId, string reviewedBy, CancellationToken cancelToken = default)
     {
-        var match = await _db.CatalogFitmentMatches().FirstOrDefaultAsync(x => x.Id == matchId, cancelToken)
-            ?? throw new PublicationException("UnknownMatch");
+        var match = await GetMatchAsync(partId, matchId, cancelToken);
 
         if (match.Kind != FitmentMatchKind.Exact)
         {
@@ -247,10 +261,9 @@ public class CatalogPublicationService
         await RefreshAsync([match.PartId], cancelToken);
     }
 
-    public async Task RejectMatchAsync(int matchId, string reviewedBy, CancellationToken cancelToken = default)
+    public async Task RejectMatchAsync(int partId, int matchId, string reviewedBy, CancellationToken cancelToken = default)
     {
-        var match = await _db.CatalogFitmentMatches().FirstOrDefaultAsync(x => x.Id == matchId, cancelToken)
-            ?? throw new PublicationException("UnknownMatch");
+        var match = await GetMatchAsync(partId, matchId, cancelToken);
 
         match.Status = FitmentMatchStatus.Rejected;
         match.ReviewedOnUtc = UtcNow();
@@ -259,6 +272,14 @@ public class CatalogPublicationService
 
         await RefreshAsync([match.PartId], cancelToken);
     }
+
+    /// <summary>
+    /// A match is only reviewed in the context of its own part: a forged or stale match id from another part's page
+    /// must not approve fitment for a different product.
+    /// </summary>
+    private async Task<CatalogFitmentMatch> GetMatchAsync(int partId, int matchId, CancellationToken cancelToken)
+        => await _db.CatalogFitmentMatches().FirstOrDefaultAsync(x => x.Id == matchId && x.PartId == partId, cancelToken)
+            ?? throw new PublicationException("UnknownMatch");
 
     /// <summary>
     /// Makes ProductMotorVehicle follow the approved matches. Mappings someone created by hand are never touched;
@@ -306,9 +327,76 @@ public class CatalogPublicationService
     #region Product
 
     /// <summary>
-    /// Creates or updates the Smartstore product of a part according to its state.
+    /// Products that already carry the SKU, MPN or GTIN a new product for this part would get. Creating another one
+    /// would put a twin in the shop; an admin has to decide (nothing is merged automatically).
+    /// Empty when the part already has its product.
     /// </summary>
+    public async Task<List<ProductConflict>> FindConflictingProductsAsync(CatalogPart part, CancellationToken cancelToken = default)
+    {
+        Guard.NotNull(part);
+
+        if (part.ProductId.HasValue)
+        {
+            return [];
+        }
+
+        var sku = ProductSku(part);
+        var mpn = part.Mpn.NullEmpty();
+        var gtin = part.Gtin.NullEmpty();
+
+        return await _db.Products.AsNoTracking()
+            .Where(x => x.Sku == sku || (mpn != null && x.ManufacturerPartNumber == mpn) || (gtin != null && x.Gtin == gtin))
+            .OrderBy(x => x.Id)
+            .Take(20)
+            .Select(x => new ProductConflict(x.Id, x.Name, x.Sku, x.ManufacturerPartNumber, x.Gtin))
+            .ToListAsync(cancelToken);
+    }
+
+    public static string ProductSku(CatalogPart part)
+        => $"{part.BrandKey}-{part.MpnKey}".ToUpperInvariant().Truncate(400);
+
+    /// <summary>
+    /// Creates or updates the Smartstore product of a part according to its state, in one database transaction:
+    /// a failure leaves neither a half-written product nor a product the part does not know about.
+    /// </summary>
+    /// <exception cref="PublicationException">NoProductConflict: another product has the same SKU, MPN or GTIN.</exception>
     public async Task SyncProductAsync(CatalogPart part, CancellationToken cancelToken = default)
+    {
+        Guard.NotNull(part);
+
+        if (part.ProductId == null && part.State >= PartPublicationState.VerifiedReference
+            && (await FindConflictingProductsAsync(part, cancelToken)).Count > 0)
+        {
+            throw new PublicationException("NoProductConflict");
+        }
+
+        if (!_db.Database.IsRelational() || _db.Database.CurrentTransaction != null)
+        {
+            await SyncProductCoreAsync(part, cancelToken);
+            return;
+        }
+
+        var tx = await _db.Database.BeginTransactionAsync(cancelToken);
+        try
+        {
+            await SyncProductCoreAsync(part, cancelToken);
+            await tx.CommitAsync(cancelToken);
+        }
+        catch
+        {
+            await tx.RollbackAsync(CancellationToken.None);
+
+            // Tracked entities still hold the rolled back values and keys (e.g. a product id that no longer exists).
+            _db.ChangeTracker.Clear();
+            throw;
+        }
+        finally
+        {
+            await tx.DisposeAsync();
+        }
+    }
+
+    private async Task SyncProductCoreAsync(CatalogPart part, CancellationToken cancelToken)
     {
         Product product = null;
         if (part.ProductId.HasValue)
@@ -327,9 +415,8 @@ public class CatalogPublicationService
         }
 
         var now = UtcNow();
-        var isNew = product == null;
 
-        if (isNew)
+        if (product == null)
         {
             product = new Product
             {
@@ -339,19 +426,23 @@ public class CatalogPublicationService
                 IsShippingEnabled = true,
                 OrderMinimumQuantity = 1,
                 OrderMaximumQuantity = 100,
-                CreatedOnUtc = now
+                CreatedOnUtc = now,
+                Published = false
             };
 
+            ApplyIdentity(product, part, now);
+            SetNotPurchasable(product);
             _db.Products.Add(product);
+            await _db.SaveChangesAsync(cancelToken);
+
+            // Link before anything is published: the part owns its product from the first moment, so a later
+            // failure can never leave a product the part does not know about (and a retry would not create a twin).
+            part.ProductId = product.Id;
+            await _db.SaveChangesAsync(cancelToken);
+            await SaveSlugAsync(product, product.Name);
         }
 
-        // Identity and technical facts.
-        product.Name = part.ProductName;
-        product.ManufacturerPartNumber = part.Mpn;
-        product.Gtin = part.Gtin;
-        product.Sku = $"{part.BrandKey}-{part.MpnKey}".ToUpperInvariant().Truncate(400);
-        product.Condition = ProductCondition.New;
-        product.UpdatedOnUtc = now;
+        ApplyIdentity(product, part, now);
 
         switch (part.State)
         {
@@ -386,16 +477,23 @@ public class CatalogPublicationService
 
         await _db.SaveChangesAsync(cancelToken);
 
-        if (isNew)
-        {
-            part.ProductId = product.Id;
-            await SaveSlugAsync(product, product.Name);
-        }
-
         await SyncManufacturerAsync(part, product, cancelToken);
         await SyncCategoryAsync(part, product, cancelToken);
         await SyncMappingsAsync(part, cancelToken);
         await _db.SaveChangesAsync(cancelToken);
+    }
+
+    /// <summary>
+    /// Identity and technical facts.
+    /// </summary>
+    private static void ApplyIdentity(Product product, CatalogPart part, DateTime now)
+    {
+        product.Name = part.ProductName;
+        product.ManufacturerPartNumber = part.Mpn;
+        product.Gtin = part.Gtin;
+        product.Sku = ProductSku(part);
+        product.Condition = ProductCondition.New;
+        product.UpdatedOnUtc = now;
     }
 
     /// <summary>

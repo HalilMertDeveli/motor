@@ -321,9 +321,45 @@ public class ValidationTests
     [TestCase("EU", true)]
     [TestCase("global", true)]
     [TestCase("IN", false)]
+    [TestCase(null, false)]
+    [TestCase(" ", false)]
     public void Only_selector_markets_are_publishable(string market, bool publishable)
     {
         var reference = new CatalogVehicleReference { Status = VehicleReferenceStatus.Verified, EngineCc = 199.5m, YearFrom = 2015, VerifiedYears = "2015,2025", Market = market };
         Assert.That(VehicleReferenceService.IsPublishable(reference), Is.EqualTo(publishable));
     }
+
+    [Test]
+    public void Duplicate_spec_keys_after_whitespace_collapse_reject_only_the_row()
+    {
+        var result = CatalogValidator.ValidatePart(
+            Part(x => x.Specs = new() { ["Thread  size"] = "M20x1.5", ["Thread size"] = "M16x1.5" }),
+            1,
+            SourcePermissionStatus.PublicFactualReferenceOnly,
+            Now);
+
+        Assert.That(result.IsValid, Is.False);
+        Assert.That(result.Issues.Any(x => x.Field == "specs" && x.Severity == IssueSeverity.Error), Is.True);
+    }
+
+    [TestCase("https://fixture.example.org/terms", true)]
+    [TestCase("http://fixture.example.org", true)]
+    [TestCase("javascript:alert(document.cookie)", false)]
+    [TestCase(" JavaScript:alert(1)", false)]
+    [TestCase("data:text/html,<script>alert(1)</script>", false)]
+    [TestCase("vbscript:msgbox(1)", false)]
+    [TestCase("//fixture.example.org/terms", false)]
+    [TestCase("/relative/path", false)]
+    [TestCase("ftp://fixture.example.org/file", false)]
+    public void Source_urls_must_be_absolute_http(string url, bool valid)
+    {
+        var model = new Models.SourceEditModel { Key = "k", Name = "n", Url = url, TermsUrl = url };
+        var invalid = model.GetInvalidUrlFields().ToList();
+
+        Assert.That(invalid, valid ? Is.Empty : Is.EquivalentTo(new[] { "Url", "TermsUrl" }));
+    }
+
+    [Test]
+    public void Empty_source_urls_are_allowed()
+        => Assert.That(new Models.SourceEditModel { Key = "k", Name = "n" }.GetInvalidUrlFields(), Is.Empty);
 }

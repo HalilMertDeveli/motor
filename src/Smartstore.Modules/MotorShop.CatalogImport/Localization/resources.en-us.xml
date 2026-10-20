@@ -29,6 +29,7 @@
     <LocaleResource Name="Source.Agreement.Hint"><Value>Required for AUTHORIZED: contract number or the date and sender of the written permission.</Value></LocaleResource>
     <LocaleResource Name="Source.AgreementRequired"><Value>AUTHORIZED requires an agreement reference.</Value></LocaleResource>
     <LocaleResource Name="Source.KeyExists"><Value>Another source already uses this key.</Value></LocaleResource>
+    <LocaleResource Name="Source.InvalidUrl"><Value>Enter an absolute http:// or https:// URL.</Value></LocaleResource>
     <LocaleResource Name="Source.TermsUrl"><Value>Terms of use URL</Value></LocaleResource>
     <LocaleResource Name="Source.TermsSummary"><Value>Terms summary</Value></LocaleResource>
     <LocaleResource Name="Source.ImageRights"><Value>Image rights</Value></LocaleResource>
@@ -130,6 +131,7 @@
     <LocaleResource Name="Part.Offer.Inactive"><Value>inactive</Value></LocaleResource>
     <LocaleResource Name="Part.Offer.None"><Value>No supplier offer. Without an AUTHORIZED supplier feed the part cannot be sold.</Value></LocaleResource>
     <LocaleResource Name="Part.Readiness"><Value>Publication</Value></LocaleResource>
+    <LocaleResource Name="Part.ProductConflicts"><Value>Existing products with the same SKU, MPN or GTIN. Resolve the duplicate in the product admin first; nothing is merged automatically:</Value></LocaleResource>
     <LocaleResource Name="Part.Readiness.Met"><Value>All requirements met.</Value></LocaleResource>
     <LocaleResource Name="Part.ApproveReference"><Value>Approve as reference (B)</Value></LocaleResource>
     <LocaleResource Name="Part.ApproveSale"><Value>Approve for sale (C)</Value></LocaleResource>
@@ -163,6 +165,7 @@
     <LocaleResource Name="Requirement.PartialMatch"><Value>A partial year overlap cannot be approved</Value></LocaleResource>
     <LocaleResource Name="Requirement.UnknownVehicle"><Value>The motorcycle no longer exists</Value></LocaleResource>
     <LocaleResource Name="Requirement.UnknownPart"><Value>Unknown part</Value></LocaleResource>
+    <LocaleResource Name="Requirement.NoProductConflict"><Value>No existing product with the same SKU, MPN or GTIN</Value></LocaleResource>
     <LocaleResource Name="Approve"><Value>Approve</Value></LocaleResource>
     <LocaleResource Name="Reject"><Value>Reject</Value></LocaleResource>
     <LocaleResource Name="MatchKind.Exact"><Value>Exact</Value></LocaleResource>

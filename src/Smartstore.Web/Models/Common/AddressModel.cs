@@ -205,6 +205,11 @@ public class AddressValidator : SmartValidator<AddressModel>
             RuleFor(x => x.PhoneNumber).NotEmpty();
         }
 
+        if (addressSettings.PhoneEnabled)
+        {
+            RuleFor(x => x.PhoneNumber).PhoneNumber(T);
+        }
+
         if (addressSettings.FaxRequired && addressSettings.FaxEnabled)
         {
             RuleFor(x => x.FaxNumber).NotEmpty();

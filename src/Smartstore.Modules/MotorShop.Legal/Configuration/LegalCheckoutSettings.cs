@@ -21,6 +21,12 @@ public class LegalCheckoutSettings : ISettings
     public bool RequireAcknowledgment { get; set; } = true;
 
     /// <summary>
+    /// Replaces Smartstore's "I agree with the terms of service ... data can be stored electronically" sentence next to the
+    /// buy buttons with the payment obligation notice (<c>Plugins.MotorShop.Legal.PaymentObligationHint</c>).
+    /// </summary>
+    public bool ReplaceCoreTermsText { get; set; } = true;
+
+    /// <summary>
     /// System name of the topic holding the pre-contractual information form (Ön Bilgilendirme Formu).
     /// Rendered with order data (Liquid).
     /// </summary>

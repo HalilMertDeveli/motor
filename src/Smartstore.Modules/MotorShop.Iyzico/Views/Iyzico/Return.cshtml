@@ -1,0 +1,52 @@
+@model IyzicoReturnModel
+
+@{
+    Layout = "_Layout";
+    Assets.AppendTitleParts(T("Plugins.MotorShop.Iyzico.Return.Title").ToString());
+}
+
+@if (Model.State == IyzicoReturnState.Processing)
+{
+    <meta http-equiv="refresh" content="5" />
+}
+
+<div class="page iyzico-return-page">
+    <div class="page-title">
+        <h1 class="h3">@T("Plugins.MotorShop.Iyzico.Return.Title")</h1>
+    </div>
+    <div class="page-body">
+        @switch (Model.State)
+        {
+            case IyzicoReturnState.Paid:
+                <div class="alert alert-success">@T("Plugins.MotorShop.Iyzico.Return.Paid")</div>
+                break;
+            case IyzicoReturnState.InReview:
+                <div class="alert alert-info">@T("Plugins.MotorShop.Iyzico.Return.InReview")</div>
+                break;
+            case IyzicoReturnState.Processing:
+                <div class="alert alert-info">@T("Plugins.MotorShop.Iyzico.Return.Processing")</div>
+                break;
+            default:
+                <div class="alert alert-warning">@T("Plugins.MotorShop.Iyzico.Return.Failed")</div>
+                break;
+        }
+
+        <div class="d-flex flex-wrap gap-2">
+            @if (Model.CanRetry)
+            {
+                <a class="btn btn-primary" href="@Url.Content($"~/iyzico/pay/{Model.OrderGuid}")">@T("Plugins.MotorShop.Iyzico.Return.Retry")</a>
+            }
+            @if (Model.IsOwner && Model.OrderId.HasValue)
+            {
+                <a class="btn btn-secondary" href="@Url.RouteUrl("OrderDetails", new { id = Model.OrderId })">
+                    @T("Plugins.MotorShop.Iyzico.Return.ViewOrder", Model.OrderNumber)
+                </a>
+            }
+            else if (!Model.IsOwner)
+            {
+                <p class="text-muted w-100">@T("Plugins.MotorShop.Iyzico.Return.SignIn")</p>
+            }
+            <a class="btn btn-secondary" href="@Url.RouteUrl("Homepage")">@T("Plugins.MotorShop.Iyzico.Return.ContinueShopping")</a>
+        </div>
+    </div>
+</div>
