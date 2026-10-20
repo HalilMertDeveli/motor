@@ -8,12 +8,7 @@ namespace MotorShop.Iyzico.Migrations;
 /// Creates the transaction table. Uses provider-neutral FluentMigrator calls only, so it runs on
 /// SQL Server, MySQL, PostgreSQL and SQLite.
 /// </summary>
-/// <remarks>
-/// Version was 2026-10-19 12:00:00, which collided with the core MotorTurkishLocalization migration
-/// (fresh installs failed on the unique version index; existing databases skipped this migration).
-/// Up() returns early when the table exists, so running it again under the new version is safe.
-/// </remarks>
-[MigrationVersion("2026-10-19 12:10:00", "MotorShop.Iyzico: Initial")]
+[MigrationVersion("2026-10-19 12:30:00", "MotorShop.Iyzico: Initial")]
 internal class Initial : Migration
 {
     const string TableName = "MotorShopIyzicoTransaction";
