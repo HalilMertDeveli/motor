@@ -49,11 +49,22 @@ public class ConfigurationModel : ModelBase
     [LocalizedDisplay("*EnabledInstallments")]
     public string EnabledInstallments { get; set; }
 
-    [LocalizedDisplay("*RequireWebhookSignature")]
-    public bool RequireWebhookSignature { get; set; }
+    /// <summary>
+    /// Read-only. Signature checks can only be relaxed through configuration.
+    /// </summary>
+    public bool SkipResponseSignatureVerification { get; set; }
 
-    [LocalizedDisplay("*VerifyResponseSignature")]
-    public bool VerifyResponseSignature { get; set; }
+    /// <summary>
+    /// Read-only. Signature checks can only be relaxed through configuration.
+    /// </summary>
+    public bool AllowUnsignedWebhooks { get; set; }
+
+    [LocalizedDisplay("*AllowedCurrencies")]
+    public string AllowedCurrencies { get; set; }
+
+    [LocalizedDisplay("*MaxInstallmentSurchargePercent")]
+    [Range(0, 100)]
+    public decimal MaxInstallmentSurchargePercent { get; set; }
 
     [LocalizedDisplay("*PlaceholderIdentityNumber")]
     public string PlaceholderIdentityNumber { get; set; }
@@ -83,6 +94,8 @@ public class ConfigurationModel : ModelBase
     public string WebhookUrl { get; set; }
 
     public List<IyzicoTransactionRow> RecentTransactions { get; set; } = [];
+
+    public List<MotorShop.Iyzico.Services.IyzicoPendingRefund> PendingRefunds { get; set; } = [];
 }
 
 public class IyzicoTransactionRow

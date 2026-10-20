@@ -15,6 +15,11 @@ public interface IIyzicoApiClient
     Task<RefundResponse> RefundAsync(IyzicoCredentials credentials, RefundRequest request, CancellationToken cancelToken = default);
 
     Task<CancelResponse> CancelAsync(IyzicoCredentials credentials, CancelRequest request, CancellationToken cancelToken = default);
+
+    /// <summary>
+    /// Transaction detail report of a payment, including its refunds and cancels.
+    /// </summary>
+    Task<PaymentDetailsReportResponse> RetrievePaymentDetailsAsync(IyzicoCredentials credentials, string paymentId, CancellationToken cancelToken = default);
 }
 
 /// <summary>
@@ -39,6 +44,7 @@ public class IyzicoApiClient : IIyzicoApiClient
     public const string RetrievePath = "/payment/iyzipos/checkoutform/auth/ecom/detail";
     public const string RefundPath = "/payment/refund";
     public const string CancelPath = "/payment/cancel";
+    public const string PaymentDetailsReportPath = "/v2/reporting/payment/details";
 
     internal static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -67,31 +73,55 @@ public class IyzicoApiClient : IIyzicoApiClient
     public Task<CancelResponse> CancelAsync(IyzicoCredentials credentials, CancelRequest request, CancellationToken cancelToken = default)
         => PostAsync<CancelRequest, CancelResponse>(credentials, CancelPath, request, cancelToken);
 
-    protected virtual async Task<TResponse> PostAsync<TRequest, TResponse>(
+    public Task<PaymentDetailsReportResponse> RetrievePaymentDetailsAsync(IyzicoCredentials credentials, string paymentId, CancellationToken cancelToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(paymentId);
+
+        var query = "?paymentId=" + Uri.EscapeDataString(paymentId) + "&locale=en";
+        return SendAsync<PaymentDetailsReportResponse>(credentials, HttpMethod.Get, PaymentDetailsReportPath, query, null, cancelToken);
+    }
+
+    protected virtual Task<TResponse> PostAsync<TRequest, TResponse>(
         IyzicoCredentials credentials,
         string path,
         TRequest request,
         CancellationToken cancelToken)
         where TResponse : IyzicoResponse
     {
-        ArgumentNullException.ThrowIfNull(credentials);
         ArgumentNullException.ThrowIfNull(request);
+
+        // The body is serialized once: exactly these bytes are signed and sent.
+        return SendAsync<TResponse>(credentials, HttpMethod.Post, path, null, JsonSerializer.Serialize(request, JsonOptions), cancelToken);
+    }
+
+    /// <param name="query">Query string including the leading "?". Not part of the signed uri path.</param>
+    /// <param name="body">JSON body, or <c>null</c> for a GET request.</param>
+    protected virtual async Task<TResponse> SendAsync<TResponse>(
+        IyzicoCredentials credentials,
+        HttpMethod method,
+        string path,
+        string query,
+        string body,
+        CancellationToken cancelToken)
+        where TResponse : IyzicoResponse
+    {
+        ArgumentNullException.ThrowIfNull(credentials);
 
         if (!credentials.IsComplete)
         {
             throw new InvalidOperationException("iyzico API credentials are not configured.");
         }
 
-        // The body is serialized once: exactly these bytes are signed and sent.
-        var body = JsonSerializer.Serialize(request, JsonOptions);
         var randomKey = IyzicoSignature.CreateRandomKey();
 
-        using var message = new HttpRequestMessage(HttpMethod.Post, credentials.BaseUrl + path)
+        using var message = new HttpRequestMessage(method, credentials.BaseUrl + path + query);
+        if (body != null)
         {
-            Content = new StringContent(body, Encoding.UTF8, "application/json")
-        };
+            message.Content = new StringContent(body, Encoding.UTF8, "application/json");
+        }
 
-        message.Headers.TryAddWithoutValidation("Authorization", IyzicoSignature.CreateAuthorization(credentials.ApiKey, credentials.SecretKey, randomKey, path, body));
+        // IYZWSv2 signs randomKey + uri path + body. The query string is not part of the path; a GET has no body.
+        message.Headers.TryAddWithoutValidation("Authorization", IyzicoSignature.CreateAuthorization(credentials.ApiKey, credentials.SecretKey, randomKey, path, body ?? string.Empty));
         message.Headers.TryAddWithoutValidation("x-iyzi-rnd", randomKey);
         message.Headers.TryAddWithoutValidation("x-iyzi-client-version", "motorshop-iyzico-1.0.0");
         message.Headers.TryAddWithoutValidation("Accept", "application/json");

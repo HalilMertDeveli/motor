@@ -70,7 +70,8 @@ public class IyzicoProvider : PaymentMethodBase, IConfigurable
     {
         // Nothing is charged here. The payment happens on the hosted form after the order was placed.
         var currencyCode = _workContext.WorkingCurrency?.CurrencyCode;
-        if (!IyzicoRequestBuilder.SupportedCurrencies.Contains(currencyCode ?? string.Empty))
+        var settings = await _settingFactory.LoadSettingsAsync<IyzicoSettings>(request.StoreId);
+        if (!IyzicoRequestBuilder.IsCurrencyAllowed(settings, currencyCode))
         {
             throw new PaymentException(T("Plugins.MotorShop.Iyzico.UnsupportedCurrency", currencyCode));
         }

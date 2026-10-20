@@ -69,6 +69,22 @@ public static class IyzicoSignature
             result.Token);
     }
 
+    /// <summary>
+    /// Signature of the refund response (/payment/refund): paymentId:price:currency:conversationId (price without trailing zeros).
+    /// The cancel response has no documented signature.
+    /// </summary>
+    public static string ComputeRefundSignature(string secretKey, RefundResponse response)
+    {
+        ArgumentNullException.ThrowIfNull(response);
+
+        return ComputeResponseSignature(
+            secretKey,
+            response.PaymentId,
+            FormatPriceForSignature(response.Price),
+            response.Currency,
+            response.ConversationId);
+    }
+
     public static string ComputeResponseSignature(string secretKey, params string[] values)
         => HmacSha256Hex(secretKey, string.Join(':', values.Select(x => x ?? string.Empty)));
 
