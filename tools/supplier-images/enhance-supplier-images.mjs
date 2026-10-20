@@ -24,9 +24,11 @@ const MATCH_WIDTH = 96;        // width of the grayscale thumbnails used for mat
 const MIN_SCORE = 0.86;        // normalized cross-correlation needed to trust a match on the product's page
 const MIN_SCORE_OTHER_PAGE = 0.93;
 const MAX_COLOR_DISTANCE = 40; // mean product colour (RGB) must agree, so colour variants are not mixed up
-const MIN_SCORE_RELAXED = 0.80; // accepted only with a tight colour match and a clear lead (see below)
-const MAX_COLOR_DISTANCE_RELAXED = 15;
-const MIN_LEAD = 0.04;
+const MIN_SCORE_COLOR = 0.75;  // lower shape scores need a matching colour (cut-off crops, catalog labels)
+const MAX_COLOR_DISTANCE_COLOR = 30;
+const MIN_SCORE_TIGHT_COLOR = 0.50;
+const MAX_COLOR_DISTANCE_TIGHT = 12;
+const MIN_LEAD = 0.04;         // two pictures within MIN_LEAD / 2 of each other for one original: neither gets it
 const MIN_CANDIDATE_SIDE = 120; // smaller embedded images are icons, logos, flags
 const MAX_UPSCALE = 2.5;       // never enlarge genuine pixels more than this
 const MAX_OBJECT = 880;        // longest side of the product on the canvas
@@ -272,47 +274,47 @@ for (const ref of refs) {
 }
 fs.writeFileSync(matchesFile, JSON.stringify(matches));
 
-// ---- 2. decision per picture
+// ---- 2. assignment: pictures and PDF originals of a page are paired, best similarity first, each original
+// used at most once. Package crops are often cut off or carry catalog labels ("KRAKEN", "SİYAH"), which lowers
+// the shape score of the right original, so a lower shape score is accepted together with a matching colour.
 
-function decide(ref) {
-    const scored = matches[ref.name] ?? [];
-    const accepted = scored
-        .filter(x => x.colorDistance <= MAX_COLOR_DISTANCE && x.score >= (x.page === ref.page ? MIN_SCORE : MIN_SCORE_OTHER_PAGE))
-        .sort((a, b) => b.score - a.score);
-    if (accepted.length) return { ...accepted[0], relaxed: false };
-
-    // Package crops often contain catalog labels ("SİYAH") or are cut off, which lowers the score of the
-    // right original. Accept a lower score only with a tight colour match and a clear lead over the runner-up.
-    const own = scored.filter(x => x.page === ref.page).sort((a, b) => b.score - a.score);
-    const [first, second] = own;
-    if (first && first.score >= MIN_SCORE_RELAXED && first.colorDistance <= MAX_COLOR_DISTANCE_RELAXED
-        && (!second || first.score - second.score >= MIN_LEAD)) {
-        return { ...first, relaxed: true };
+function eligible(ref, x) {
+    if (x.page !== ref.page) {
+        return x.score >= MIN_SCORE_OTHER_PAGE && x.colorDistance <= MAX_COLOR_DISTANCE;
     }
 
-    return null;
+    return (x.score >= MIN_SCORE && x.colorDistance <= MAX_COLOR_DISTANCE)
+        || (x.score >= MIN_SCORE_COLOR && x.colorDistance <= MAX_COLOR_DISTANCE_COLOR)
+        || (x.score >= MIN_SCORE_TIGHT_COLOR && x.colorDistance <= MAX_COLOR_DISTANCE_TIGHT);
 }
+
+const similarity = x => x.score - x.colorDistance / 200;
 
 const selected = refs.filter(ref => (!only || only.has(ref.name)) && fs.existsSync(path.join(args.images, ref.name)));
-const decisions = new Map(selected.map(ref => [ref.name, decide(ref)]));
+const pairs = selected.flatMap(ref => (matches[ref.name] ?? [])
+    .filter(x => eligible(ref, x))
+    .map(x => ({ ref, x, sim: similarity(x) })));
 
-// ---- 3. one original per picture: variants (mat black / mat grey helmet) often match the same photo.
-// Only a clear winner keeps it; the others use their own package picture.
-const claims = new Map();
-for (const [name, d] of decisions) {
-    if (d) claims.set(d.num, [...(claims.get(d.num) ?? []), { name, score: d.score }]);
+// An original that two pictures want almost equally (colour variants sharing one photo) goes to neither.
+const byOriginal = new Map();
+pairs.forEach(pr => byOriginal.set(pr.x.num, [...(byOriginal.get(pr.x.num) ?? []), pr]));
+const ambiguous = new Set();
+for (const [num, list] of byOriginal) {
+    list.sort((p1, p2) => p2.sim - p1.sim);
+    if (list.length > 1 && list[0].sim - list[1].sim < MIN_LEAD / 2) ambiguous.add(num);
 }
+
+const decisions = new Map(selected.map(ref => [ref.name, null]));
+const usedOriginals = new Set();
 let conflicts = 0;
-for (const list of claims.values()) {
-    if (list.length < 2) continue;
-    list.sort((a, b) => b.score - a.score);
-    const winnerKeeps = list[0].score - list[1].score >= MIN_LEAD;
-    list.forEach((x, i) => {
-        if (i > 0 || !winnerKeeps) {
-            decisions.set(x.name, null);
-            conflicts++;
-        }
-    });
+for (const pr of pairs.sort((p1, p2) => p2.sim - p1.sim)) {
+    if (decisions.get(pr.ref.name) || usedOriginals.has(pr.x.num)) continue;
+    if (ambiguous.has(pr.x.num)) {
+        conflicts++;
+        continue;
+    }
+    decisions.set(pr.ref.name, { ...pr.x, relaxed: pr.x.score < MIN_SCORE });
+    usedOriginals.add(pr.x.num);
 }
 
 // ---- 4. render

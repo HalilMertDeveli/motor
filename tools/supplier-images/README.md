@@ -7,16 +7,19 @@ Improves the product pictures of a supplier catalog package (`products.json` + `
 
 ## What it does
 
-1. Each package picture is matched to the original image embedded in the supplier's PDF catalog, on the
-   product's page (`pdfPage`). Matching uses multi-scale normalized cross-correlation on grayscale
-   thumbnails plus a mean-colour check, so colour variants (black / blue) are not mixed up. A neighbouring
-   page is only accepted with an almost perfect score.
-2. With a match, the PDF original is used: native resolution, complete (page crops often cut products
+1. Each package picture is scored against every image embedded in the supplier's PDF catalog on the
+   product's page (`pdfPage`) and its neighbours: multi-scale normalized cross-correlation on grayscale
+   thumbnails (shape) plus the mean colour of the product pixels. Scores are cached in `matches.json`.
+2. Pictures and originals of a page are then paired, best similarity first, and every original is used at
+   most once. A high shape score is enough; a lower one (package crops are often cut off or carry catalog
+   labels such as "KRAKEN") needs a matching colour as well. An original that two pictures want almost
+   equally (colour variants sharing one photo) goes to neither. Neighbouring pages need an almost perfect score.
+3. With a match, the PDF original is used: native resolution, complete (page crops often cut products
    off), its soft mask composited on white.
-3. Cleanup: product bounding box trimmed from the white background, light non-local-means denoising
+4. Cleanup: product bounding box trimmed from the white background, light non-local-means denoising
    against JPEG blocks, Lanczos resize (at most 2.5×, gentle unsharp mask), centred on a white square
-   canvas (600 to 1000 px) so every product fills the frame the same way. JPEG quality 90+, 4:4:4.
-4. Without a reliable match, the package picture gets the same cleanup but is not enlarged.
+   canvas (600 to 1000 px); the product always fills 88 % of it. JPEG quality 90+, 4:4:4.
+5. Without a reliable match, the package picture gets the same cleanup but is not enlarged.
 
 `image-report.json` in the output lists the source and match score of every picture.
 
@@ -31,6 +34,8 @@ node tools/supplier-images/enhance-supplier-images.mjs \
   --products=package/products.json --images=package/images \
   --pdf-images=work/pdfimg --pdf-list=work/pdf-list.txt --out=work/enhanced
 ```
+
+Add `--reuse-matches=1` to re-render from `matches.json` without matching again (minutes instead of about 40 minutes for 1000 pictures).
 
 Then zip `products.json` with `work/enhanced/images` as `images/` and import it in
 Admin → Plugins → Supplier catalog import. Pictures are only added to products that have none, so
