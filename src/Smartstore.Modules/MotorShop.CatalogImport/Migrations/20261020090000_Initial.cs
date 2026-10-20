@@ -15,7 +15,7 @@ namespace MotorShop.CatalogImport.Migrations;
 /// at a missing source, product, part or motorcycle. Deleting a product or motorcycle never deletes research data:
 /// the link is set to NULL (matches to a deleted motorcycle are removed, they mean nothing without it).
 /// </summary>
-[MigrationVersion("2026-10-19 12:00:00", "MotorShop.CatalogImport: Initial")]
+[MigrationVersion("2026-10-20 09:00:00", "MotorShop.CatalogImport: Initial")]
 internal class Initial : Migration, IDataSeeder<SmartDbContext>
 {
     const string SourceTable = "MotorCatalogSource";
