@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MessageTemplate>
+	<To>{{ Customer.FullName }} &lt;{{ Customer.Email }}&gt;</To>
+	<Subject>{{ Store.Name }}. Hesap aktivasyonu</Subject>
+	<ModelTypes>Customer</ModelTypes>
+	<Body><![CDATA[{% extends 'master' %}
+
+{% block 'body' %}
+<h1>
+  Merhaba {{ Customer.FullName }},
+</h1>
+<p>
+  Lütfen aşağıdaki bağlantıya tıklayarak hesabınızı etkinleştirin:
+</p>
+
+<p class="text-center mt-4 mb-4">
+  <a class="btn btn-primary" href="{{ Customer.AccountActivationURL }}">Hesabı etkinleştir</a>
+</p>
+
+<p>
+	Bağlantı açılmıyorsa lütfen aşağıdaki URL'yi kopyalayıp tarayıcınızın adres çubuğuna yapıştırın:
+</p>
+
+<a href="{{ Customer.AccountActivationURL }}">{{ Customer.AccountActivationURL }}</a>
+
+{% endblock %}]]></Body>
+</MessageTemplate>
