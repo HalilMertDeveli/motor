@@ -4,18 +4,19 @@
 // Reads the public product sitemaps and the English product pages (robots.txt allows both; no query strings).
 // The output is used by fetch-web-photos.mjs (--references=...) to pair SHAD products by their exact reference.
 //
-// Usage: node crawl-shad-references.mjs --out=work/shad-references.json [--delay=1000]
+// Usage: node crawl-shad-references.mjs --out=work/shad-references.json [--products=package/products.json] [--delay=1000] [--concurrency=2]
 
 import fs from 'node:fs';
 
 const args = Object.fromEntries(process.argv.slice(2).map(a => a.replace(/^--/, '').split(/=(.*)/s).slice(0, 2)));
 if (!args.out) {
-    console.error('Usage: node crawl-shad-references.mjs --out=shad-references.json [--delay=1000]');
+    console.error('Usage: node crawl-shad-references.mjs --out=shad-references.json [--products=products.json] [--delay=1000] [--concurrency=2]');
     process.exit(2);
 }
 
 const BASE = 'https://www.shad.es';
 const DELAY = +(args.delay ?? 1000);
+const CONCURRENCY = +(args.concurrency ?? 2); // the site is slow per page, not rate limited
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -50,23 +51,44 @@ for (const sitemap of sitemaps) {
     urls.push(...[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]).filter(u => u.startsWith(`${BASE}/en/`)));
     await sleep(DELAY);
 }
-const unique = [...new Set(urls)];
-console.log(`${unique.length} English product pages`);
+let pages = [...new Set(urls)];
+console.log(`${pages.length} English product pages`);
+
+// shad.es answers slowly (seconds per page): with --products, only pages whose address shares at least two words
+// (vehicle model, case model) with a SHAD product of the package are read.
+if (args.products) {
+    const fold = s => s.toLowerCase().replace(/ı/g, 'i').normalize('NFD').replace(/\p{M}/gu, '');
+    const tokens = s => fold(s).split(/[^a-z0-9]+/).filter(t => t.length > 1);
+    const generic = new Set(['shad', 'system', 'bag', 'baglanti', 'demiri', 'yan', 'canta', 'arka', 'depo', 'ustu', 'click', 'sistemi', 've', 'icin', 'kit', 'set']);
+    const slugs = pages.map(url => ({ url, words: new Set(tokens(url.split('/').slice(-2, -1)[0])) }));
+    const wanted = new Set();
+    for (const p of JSON.parse(fs.readFileSync(args.products, 'utf8')).filter(p => /^shad$/i.test(p.brand ?? ''))) {
+        const words = tokens(p.name).filter(t => !generic.has(t));
+        const scored = slugs.map(s => ({ url: s.url, n: words.filter(w => s.words.has(w)).length })).filter(s => s.n >= 2).sort((a, b) => b.n - a.n);
+        scored.filter(s => s.n === scored[0]?.n).slice(0, 4).forEach(s => wanted.add(s.url));
+    }
+    pages = pages.filter(u => wanted.has(u));
+    console.log(`${pages.length} pages match package products`);
+}
 
 const done = fs.existsSync(args.out) ? JSON.parse(fs.readFileSync(args.out, 'utf8')) : [];
 const seen = new Set(done.map(x => x.url));
-for (const [i, url] of unique.entries()) {
-    if (seen.has(url)) continue;
-    try {
-        done.push(parse(url, await get(url)));
-    } catch (e) {
-        console.log(`skip ${url}: ${e.message}`);
+const queue = pages.filter(u => !seen.has(u));
+let count = 0;
+async function worker() {
+    for (let url = queue.shift(); url; url = queue.shift()) {
+        try {
+            done.push(parse(url, await get(url)));
+        } catch (e) {
+            console.log(`skip ${url}: ${e.message}`);
+        }
+        if (++count % 25 === 0) {
+            fs.writeFileSync(args.out, JSON.stringify(done, null, 1));
+            console.log(`${count} / ${pages.length - seen.size}`);
+        }
+        await sleep(DELAY);
     }
-    if ((i + 1) % 50 === 0) {
-        fs.writeFileSync(args.out, JSON.stringify(done, null, 1));
-        console.log(`${i + 1} / ${unique.length}`);
-    }
-    await sleep(DELAY);
 }
+await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 fs.writeFileSync(args.out, JSON.stringify(done, null, 1));
 console.log(`saved ${done.length} pages, ${done.filter(x => x.refs.length).length} with a reference`);

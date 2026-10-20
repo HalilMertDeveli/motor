@@ -50,6 +50,35 @@ The result can only be as good as the source. The Motosev 2026 PDF embeds its ph
 high-resolution. For studio quality, ask the supplier for the original product photos (or a print PDF)
 and import those instead.
 
+## Supplier's own photos from the web (preferred)
+
+Better than any cleanup of PDF crops: the supplier's and manufacturers' own product photos. Motosev publishes its
+studio photos (up to 3500 × 3500 px) in its web shop (motosev.com, WooCommerce), SHAD on shad.es (800 × 600 px).
+
+```sh
+# optional: SHAD reference catalog (pages of shad.es that match the package's SHAD products; slow site, ~15 min)
+node tools/supplier-images/crawl-shad-references.mjs --out=work/shad-references.json --products=package/products.json --concurrency=3
+
+node tools/supplier-images/fetch-web-photos.mjs \
+  --products=enhanced/products.json --images=enhanced/images \
+  --store=https://www.motosev.com --references=work/shad-references.json --out=work/web
+```
+
+- `--images` should be the genuine-pixel package (above): its pictures are used for the visual check and for every
+  product without a web photo.
+- Pairing: model code (catalog code without the price code) and every variant word must occur in the shop product's
+  name. Then the shop photos are compared with the package picture (shape: normalized cross-correlation, colour:
+  mean product colour). Accepted are only pairs where the package picture was cut from the shop photo (same photo),
+  or the single exact name match that also looks alike. SHAD products are accepted on an exact reference
+  ("H0NG77IF") from the reference catalog.
+- Up to `--max-photos` (4) photos per product, the matched one first; trimmed and centred on a white square canvas
+  of at most `--canvas` (1200) px. Photos are never enlarged.
+- Output: `products.json` + `images/` (a complete package), `photo-report.json`, and `review.html`: package picture
+  next to the chosen web photo, with the decision. Unclear pairs are listed as `review` and keep the package picture.
+- Results are cached in `cache/` and `visual-cache.json`; reruns take minutes.
+- Requests are sequential with a pause (shop) or limited to `--concurrency` (SHAD); both sites allow the paths used
+  in robots.txt (Store API, sitemaps, product pages without query strings).
+
 ## AI upscaling (optional, owner-approved exception)
 
 Only use it where the owner approved it (see [docs/motor/product-images.md](../../docs/motor/product-images.md)).

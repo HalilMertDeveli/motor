@@ -5,6 +5,20 @@
 MOTOR uses genuine, authorized product photographs. Generating product photos with AI is not allowed: no
 pictures of products that were not photographed, no invented variants, colours or accessories.
 
+## Sources, best first
+
+1. **The supplier's own photos.** Motosev publishes the studio photos of its range in its web shop
+   (motosev.com, up to 3500 × 3500 px). The owner is authorized to use Motosev's catalog data (2026-10-20); these
+   are the same photos the PDF catalog was made from, at full resolution. `tools/supplier-images/fetch-web-photos.mjs`
+   pairs them with the package products and checks every pair visually.
+2. **Manufacturer photos** of the exact product, identified by its manufacturer reference (SHAD fitting kits and
+   cases from shad.es). Dealers commonly use them for the genuine product; confirm with Motosev (SHAD's
+   distributor) that their dealer terms allow it before the store goes live.
+3. **The genuine-pixel package** (PDF catalog photos, cleaned): for products without a web photo.
+4. **AI upscaling** (exception below): only where the owner chose it, and only for products without 1 or 2.
+
+Never: photos of other shops, look-alike products, other colours or variants.
+
 ## Exception: AI upscaling of the Motosev 2026 catalog photos
 
 **Decision:** the store owner, 2026-10-20, after comparing samples (genuine pixels next to AI upscaling).
