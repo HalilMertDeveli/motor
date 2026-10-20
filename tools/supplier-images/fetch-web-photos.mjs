@@ -16,7 +16,7 @@ import { ffmpeg, rawRgb, grayThumb, matchScore, productBox, colorSignature, colo
 const args = Object.fromEntries(process.argv.slice(2).map(a => a.replace(/^--/, '').split(/=(.*)/s).slice(0, 2)));
 for (const k of ['products', 'images', 'store', 'out']) {
     if (!args[k]) {
-        console.error('Usage: node fetch-web-photos.mjs --products=products.json --images=<package images dir> --store=https://shop.example --out=<output dir> [--fallback-images=<dir>] [--canvas=1200] [--max-photos=4] [--refresh=1]');
+        console.error('Usage: node fetch-web-photos.mjs --products=products.json --images=<package images dir> --store=https://shop.example --out=<output dir> [--fallback-images=<dir>] [--canvas=1200] [--max-photos=4] [--refresh=1] [--references=shad-references.json [--references-brand=SHAD]]');
         process.exit(2);
     }
 }
@@ -139,7 +139,17 @@ function flatten(src, target) {
     return target;
 }
 
-async function visual(pkgSig, candidate) {
+// Visual results per (package picture, shop photo), so reruns (other thresholds, extra sources) are fast.
+const visualCacheFile = path.join(out, 'visual-cache.json');
+const visualCache = fs.existsSync(visualCacheFile) ? JSON.parse(fs.readFileSync(visualCacheFile, 'utf8')) : {};
+
+async function visual(pkgPicture, pkgSig, candidate) {
+    const key = `${pkgPicture}|${candidate.shop.id}`;
+    if (!visualCache[key]) visualCache[key] = await compare(pkgSig, candidate);
+    return visualCache[key];
+}
+
+async function compare(pkgSig, candidate) {
     let best = { score: -1, color: 999 };
     for (const img of candidate.shop.images.slice(0, MAX_PHOTOS)) {
         const ext = path.extname(new URL(img.thumbnail || img.src).pathname) || '.jpg';
@@ -147,9 +157,11 @@ async function visual(pkgSig, candidate) {
         const flat = path.join(cache, 'thumbs', `${img.id}.png`);
         if (!fs.existsSync(flat)) flatten(raw, flat);
         const sig = signature(`shop-${img.id}`, flat);
-        const score = matchScore(pkgSig.thumb, sig.thumb);
         const color = colorDistance(pkgSig.color, sig.color);
-        if (score > best.score) best = { score: +score.toFixed(3), color: +color.toFixed(1), image: img.id };
+        // A different colour can never be accepted: skip the (slow) shape comparison.
+        const score = color <= LOOKS_ALIKE_COLOR ? matchScore(pkgSig.thumb, sig.thumb) : -1;
+        if (score > best.score || (best.score < 0 && score < 0 && color < best.color)) best = { score: +score.toFixed(3), color: +color.toFixed(1), image: img.id };
+        if (best.score >= 0.95) break;
     }
     return best;
 }
@@ -204,7 +216,7 @@ for (const [i, p] of products.entries()) {
     const entry = { sku: p.sku, name: p.name, category: p.category, picture: pkgPicture };
     if (cands.length && pkgPicture && fs.existsSync(path.join(args.images, pkgPicture))) {
         const pkgSig = signature(`pkg-${pkgPicture}`, path.join(args.images, pkgPicture));
-        for (const c of cands) c.visual = await visual(pkgSig, c);
+        for (const c of cands) c.visual = await visual(pkgPicture, pkgSig, c);
         Object.assign(entry, decide(cands));
     } else {
         Object.assign(entry, cands.length ? { decision: 'review', reason: 'no package picture to compare' } : decide(cands));
@@ -212,8 +224,12 @@ for (const [i, p] of products.entries()) {
     entry.candidates = cands.map(c => ({ id: c.shop.id, name: c.shop.name, url: c.shop.permalink, text: c.text, exact: c.exact, visual: c.visual }));
     if (entry.pick) entry.pick = { id: entry.pick.shop.id, name: entry.pick.shop.name, url: entry.pick.shop.permalink, visual: entry.pick.visual };
     report.push(entry);
-    if ((i + 1) % 50 === 0) console.log(`checked ${i + 1} / ${products.length}`);
+    if ((i + 1) % 50 === 0) {
+        fs.writeFileSync(visualCacheFile, JSON.stringify(visualCache));
+        console.log(`checked ${i + 1} / ${products.length}`);
+    }
 }
+fs.writeFileSync(visualCacheFile, JSON.stringify(visualCache));
 
 // One shop product for several package products (e.g. a model shared by two price lines) is kept only where its
 // photo is the package picture's source; the others go to review.
@@ -228,6 +244,28 @@ for (const group of byShop.values()) {
     }
 }
 
+// Exact manufacturer references (e.g. SHAD fitting kits "H0NG77IF") from a reference catalog
+// (crawl-shad-references.mjs): an exact reference identifies the product, no visual check needed.
+if (args.references) {
+    const refs = new Map();
+    for (const e of JSON.parse(fs.readFileSync(args.references, 'utf8'))) {
+        if (!e.images?.length) continue;
+        for (const ref of e.refs) if (!refs.has(ref)) refs.set(ref, e);
+    }
+    for (const r of report.filter(r => r.decision !== 'accepted')) {
+        const p = products.find(x => x.sku === r.sku);
+        if (alnum(p.brand) !== alnum(args['references-brand'] ?? 'SHAD')) continue;
+        const keys = [alnum(modelCode(p)), ...words(p.variant)];
+        const hit = keys.map(k => refs.get(k)).find(Boolean);
+        if (!hit) continue;
+        Object.assign(r, {
+            decision: 'accepted',
+            reason: 'exact manufacturer reference',
+            pick: { name: hit.title, url: hit.url, images: hit.images.map(src => ({ id: 'ref-' + path.basename(new URL(src).pathname).replace(/\.\w+$/, ''), src })) }
+        });
+    }
+}
+
 const shopById = new Map(shop.map(s => [s.id, s]));
 const result = [];
 let photos = 0;
@@ -235,12 +273,13 @@ for (const [i, p] of products.entries()) {
     const r = report.find(x => x.sku === p.sku);
     let images = [];
     if (r.decision === 'accepted') {
-        const s = shopById.get(r.pick.id);
+        const all = r.pick.images ?? shopById.get(r.pick.id).images;
         // The photo that matched comes first.
-        const ordered = [...s.images].sort((a, b) => (b.id === r.pick.visual.image) - (a.id === r.pick.visual.image)).slice(0, MAX_PHOTOS);
+        const ordered = [...all].sort((a, b) => (b.id === r.pick.visual?.image) - (a.id === r.pick.visual?.image)).slice(0, MAX_PHOTOS);
         for (const [n, img] of ordered.entries()) {
             const ext = path.extname(new URL(img.src).pathname) || '.jpg';
             const full = await download(img.src, path.join(cache, 'full', `${img.id}${ext}`));
+            if (n === 0) r.photoFile = full;
             const name = `${p.sku.replace(/[^A-Za-z0-9._-]+/g, '-')}-${n + 1}.jpg`;
             if (!fs.existsSync(path.join(outImages, name))) render(full, path.join(outImages, name));
             images.push(name);
@@ -278,9 +317,10 @@ function writeReview(rows) {
     const order = { review: 0, accepted: 1, none: 2 };
     const body = [...rows].sort((a, b) => order[a.decision] - order[b.decision]).map(r => {
         const pkg = thumb(r.picture && path.join(args.images, r.picture), `pkg-${r.sku}.jpg`);
-        const shopImg = r.pick?.visual?.image ? thumb(path.join(cache, 'thumbs', `${r.pick.visual.image}.png`), `shop-${r.pick.visual.image}.jpg`) : '';
+        const shopFile = r.photoFile ?? (r.pick?.visual?.image ? path.join(cache, 'thumbs', `${r.pick.visual.image}.png`) : null);
+        const shopImg = shopFile ? thumb(shopFile, `shop-${r.sku.replace(/[^A-Za-z0-9._-]+/g, '-')}.jpg`) : '';
         return `<tr class="${r.decision}"><td>${esc(r.decision)}<br><small>${esc(r.reason)}</small></td><td><b>${esc(r.sku)}</b><br>${esc(r.name)}</td>` +
-            `<td>${pkg}</td><td>${shopImg}</td><td>${r.pick ? `<a href="${esc(r.pick.url)}">${esc(r.pick.name)}</a><br><small>NCC ${r.pick.visual?.score} · colour ${r.pick.visual?.color}</small>` : ''}</td></tr>`;
+            `<td>${pkg}</td><td>${shopImg}</td><td>${r.pick ? `<a href="${esc(r.pick.url)}">${esc(r.pick.name)}</a><br><small>${r.pick.visual ? `NCC ${r.pick.visual.score} · colour ${r.pick.visual.color}` : esc(r.reason)}</small>` : ''}</td></tr>`;
     }).join('\n');
     fs.writeFileSync(path.join(out, 'review.html'), `<!doctype html><meta charset="utf-8"><title>Shop photo review</title>
 <style>body{font:14px system-ui;margin:16px}table{border-collapse:collapse}td{border-bottom:1px solid #ddd;padding:6px;vertical-align:top}
