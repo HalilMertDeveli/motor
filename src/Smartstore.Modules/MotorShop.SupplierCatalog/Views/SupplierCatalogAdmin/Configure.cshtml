@@ -1,0 +1,71 @@
+@model SupplierCatalogImportModel
+
+@{
+    Layout = "_ConfigureModule";
+    var result = Model.LastResult;
+}
+
+<div class="alert alert-info">
+    @T("Plugins.MotorShop.SupplierCatalog.AdminInstruction")
+</div>
+
+@if (result != null)
+{
+    <div class="card mb-4">
+        <div class="card-header"><strong>@T("Plugins.MotorShop.SupplierCatalog.LastResult")</strong></div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Products", result.ProductsCreated, result.ProductsUpdated)</li>
+                <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Unpublished", result.ProductsUnpublished)</li>
+                <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Conflicts", result.ProductsSkippedConflict)</li>
+                <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Categories", result.CategoriesCreated)</li>
+                <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Brands", result.BrandsCreated)</li>
+                <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Pictures", result.PicturesAdded)</li>
+                <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Duration", result.Duration.ToString(@"mm\:ss"))</li>
+            </ul>
+            @if (result.Warnings.Count > 0)
+            {
+                <details class="mt-3">
+                    <summary>@T("Plugins.MotorShop.SupplierCatalog.Result.Warnings", result.Warnings.Count)</summary>
+                    <ul class="small text-muted mt-2">
+                        @foreach (var warning in result.Warnings.Take(200))
+                        {
+                            <li>@warning</li>
+                        }
+                    </ul>
+                </details>
+            }
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header"><strong>@T("Plugins.MotorShop.SupplierCatalog.ImportPackage")</strong></div>
+    <div class="card-body">
+        <form asp-action="Import" asp-controller="SupplierCatalogAdmin" asp-area="Admin" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label" asp-for="SupplierName"></label>
+                <input asp-for="SupplierName" class="form-control" required />
+                <div class="form-text">@T("Plugins.MotorShop.SupplierCatalog.SupplierName.Hint")</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="TaxCategoryId"></label>
+                <select asp-for="TaxCategoryId" asp-items="Model.AvailableTaxCategories" class="form-control"></select>
+                <div class="form-text">@T("Plugins.MotorShop.SupplierCatalog.TaxCategory.Hint")</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="package">@T("Plugins.MotorShop.SupplierCatalog.Package")</label>
+                <input type="file" id="package" name="package" accept=".zip" class="form-control" required />
+                <div class="form-text">@T("Plugins.MotorShop.SupplierCatalog.Package.Hint")</div>
+            </div>
+            <div class="form-check mb-3">
+                <input asp-for="UpdateExistingProducts" class="form-check-input" />
+                <label asp-for="UpdateExistingProducts" class="form-check-label">@T("Plugins.MotorShop.SupplierCatalog.UpdateExistingProducts")</label>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-upload"></i>
+                <span>@T("Plugins.MotorShop.SupplierCatalog.StartImport")</span>
+            </button>
+        </form>
+    </div>
+</div>
