@@ -63,8 +63,16 @@ public class VehicleReferenceService
     public static bool IsSelectorMarket(CatalogVehicleReference r)
         => !string.IsNullOrWhiteSpace(r.Market) && SelectorMarkets.Contains(r.Market.Trim());
 
-    public static bool IsPublishable(CatalogVehicleReference r)
-        => r.Status == VehicleReferenceStatus.Verified && r.EngineCc.HasValue && SelectorYears(r).HasValue && IsSelectorMarket(r);
+    /// <summary>
+    /// The record's source must at least permit citing facts. A motorcycle researched only from a source that
+    /// requires permission stays reference data until the permission is granted (the admin then raises the source).
+    /// </summary>
+    public static bool HasFactualPermission(SourcePermissionStatus sourcePermission)
+        => sourcePermission >= SourcePermissionStatus.PublicFactualReferenceOnly;
+
+    public static bool IsPublishable(CatalogVehicleReference r, SourcePermissionStatus sourcePermission)
+        => r.Status == VehicleReferenceStatus.Verified && r.EngineCc.HasValue && SelectorYears(r).HasValue && IsSelectorMarket(r)
+        && HasFactualPermission(sourcePermission);
 
     /// <summary>
     /// Creates a MotorVehicle for each publishable reference that has none. An existing motorcycle with the same
@@ -81,11 +89,12 @@ public class VehicleReferenceService
 
         var references = await query.ToListAsync(cancelToken);
         var vehicles = await _db.MotorVehicles().ToListAsync(cancelToken);
+        var permissions = await GetSourcePermissionsAsync(cancelToken);
         int created = 0, linked = 0, skipped = 0;
 
         foreach (var r in references)
         {
-            if (!IsPublishable(r))
+            if (!IsPublishable(r, permissions.GetValueOrDefault(r.SourceId, SourcePermissionStatus.Rejected)))
             {
                 skipped++;
                 continue;
@@ -144,7 +153,13 @@ public class VehicleReferenceService
     public async Task<bool> ResyncAsync(int referenceId, CancellationToken cancelToken = default)
     {
         var r = await _db.CatalogVehicleReferences().FirstOrDefaultAsync(x => x.Id == referenceId, cancelToken);
-        if (r?.MotorVehicleId == null || !IsPublishable(r))
+        if (r?.MotorVehicleId == null)
+        {
+            return false;
+        }
+
+        var permissions = await GetSourcePermissionsAsync(cancelToken);
+        if (!IsPublishable(r, permissions.GetValueOrDefault(r.SourceId, SourcePermissionStatus.Rejected)))
         {
             return false;
         }
@@ -167,6 +182,9 @@ public class VehicleReferenceService
         await RematchAsync(cancelToken);
         return true;
     }
+
+    public async Task<Dictionary<int, SourcePermissionStatus>> GetSourcePermissionsAsync(CancellationToken cancelToken = default)
+        => await _db.CatalogSources().AsNoTracking().ToDictionaryAsync(x => x.Id, x => x.PermissionStatus, cancelToken);
 
     /// <summary>
     /// Re-matches every part against the selector and brings product mappings and readiness in line,

@@ -7,10 +7,24 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="MotorShop.CatalogImport.Tests" />
 	</ItemGroup>
+	<PropertyGroup>
+		<!--
+			The research datasets (Research/**) contain fitment compiled from part catalogues whose owners have not
+			given permission (PERMISSION_REQUIRED). Until the owner/legal decision is made they must not ship:
+			they are left out of every build unless explicitly requested, e.g. for local research work:
+			dotnet build -p:IncludeCatalogResearch=true
+		-->
+		<IncludeCatalogResearch Condition="'$(IncludeCatalogResearch)' == ''">false</IncludeCatalogResearch>
+	</PropertyGroup>
 	<ItemGroup>
-		<!-- Bundled research datasets, read by BundledResearchService. -->
+		<!-- Lets tests check that the assembly content matches the setting it was built with. -->
+		<AssemblyMetadata Include="IncludeCatalogResearch" Value="$(IncludeCatalogResearch)" />
+		<!-- Never copied to the output as content files, whatever the setting. -->
 		<Content Remove="Research\**" />
 		<None Remove="Research\**" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(IncludeCatalogResearch)' == 'true'">
+		<!-- Read by BundledResearchService. -->
 		<EmbeddedResource Include="Research\**\*.json" LogicalName="MotorShop.CatalogImport.Research.%(Filename)%(Extension)" />
 	</ItemGroup>
 	<ItemGroup>

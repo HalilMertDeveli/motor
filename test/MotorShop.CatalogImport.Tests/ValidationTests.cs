@@ -326,7 +326,31 @@ public class ValidationTests
     public void Only_selector_markets_are_publishable(string market, bool publishable)
     {
         var reference = new CatalogVehicleReference { Status = VehicleReferenceStatus.Verified, EngineCc = 199.5m, YearFrom = 2015, VerifiedYears = "2015,2025", Market = market };
-        Assert.That(VehicleReferenceService.IsPublishable(reference), Is.EqualTo(publishable));
+        Assert.That(VehicleReferenceService.IsPublishable(reference, SourcePermissionStatus.PublicFactualReferenceOnly), Is.EqualTo(publishable));
+    }
+
+    [TestCase(SourcePermissionStatus.Authorized, true)]
+    [TestCase(SourcePermissionStatus.PublicFactualReferenceOnly, true)]
+    [TestCase(SourcePermissionStatus.PermissionRequired, false)]
+    [TestCase(SourcePermissionStatus.Restricted, false)]
+    public void Selector_needs_a_source_that_permits_factual_use(SourcePermissionStatus permission, bool publishable)
+    {
+        var reference = new CatalogVehicleReference { Status = VehicleReferenceStatus.Verified, EngineCc = 249m, YearFrom = 2019, VerifiedYears = "2019,2021", Market = "TR" };
+        Assert.That(VehicleReferenceService.IsPublishable(reference, permission), Is.EqualTo(publishable));
+    }
+
+    [Test]
+    public void License_status_cannot_exceed_the_source_permission()
+    {
+        var result = CatalogValidator.ValidatePart(Part(x => x.LicenseStatus = "PUBLIC_FACTUAL_REFERENCE_ONLY"), 1, SourcePermissionStatus.PermissionRequired, Now);
+
+        Assert.That(result.IsValid, Is.True);
+        Assert.That(result.Record.LicenseStatus, Is.EqualTo("PERMISSION_REQUIRED"));
+        Assert.That(result.Issues.Any(x => x.Field == "licenseStatus" && x.Severity == IssueSeverity.Warning), Is.True);
+
+        result = CatalogValidator.ValidatePart(Part(x => x.LicenseStatus = "PERMISSION_REQUIRED"), 1, SourcePermissionStatus.PublicFactualReferenceOnly, Now);
+        Assert.That(result.Record.LicenseStatus, Is.EqualTo("PERMISSION_REQUIRED"));
+        Assert.That(result.Issues.Any(x => x.Field == "licenseStatus"), Is.False);
     }
 
     [Test]

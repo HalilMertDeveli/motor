@@ -248,6 +248,14 @@ public static partial class CatalogValidator
             .Select(x => (Key: CatalogNormalizer.CollapseWhitespace(x.Key), Value: CatalogNormalizer.CollapseWhitespace(x.Value)))
             .ToList();
 
+        var licenseStatus = r.LicenseStatus?.Trim();
+        if (ParsePermission(licenseStatus) is SourcePermissionStatus license && license > sourcePermission)
+        {
+            // A record cannot grant itself more than its source permits.
+            Warn("licenseStatus", $"License status {licenseStatus} claims more than the source permits; {PermissionCode(sourcePermission)} applies.");
+            licenseStatus = PermissionCode(sourcePermission);
+        }
+
         var duplicateSpecs = specs.GroupBy(x => x.Key, StringComparer.Ordinal).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
         if (duplicateSpecs.Count > 0)
         {
@@ -276,7 +284,7 @@ public static partial class CatalogValidator
             Fitment = fitment,
             Sources = sources,
             RetrievalMethod = r.RetrievalMethod?.Trim(),
-            LicenseStatus = r.LicenseStatus?.Trim(),
+            LicenseStatus = licenseStatus,
             ImageRights = r.ImageRights?.Trim(),
             Images = images,
             VerificationStatus = ParseVerification(r.VerificationStatus).ToString(),
@@ -341,6 +349,16 @@ public static partial class CatalogValidator
             "RESTRICTED" => SourcePermissionStatus.Restricted,
             "REJECTED" => SourcePermissionStatus.Rejected,
             _ => null
+        };
+
+    public static string PermissionCode(SourcePermissionStatus value)
+        => value switch
+        {
+            SourcePermissionStatus.Authorized => "AUTHORIZED",
+            SourcePermissionStatus.PublicFactualReferenceOnly => "PUBLIC_FACTUAL_REFERENCE_ONLY",
+            SourcePermissionStatus.PermissionRequired => "PERMISSION_REQUIRED",
+            SourcePermissionStatus.Restricted => "RESTRICTED",
+            _ => "REJECTED"
         };
 
     private static List<SourceRef> ValidateSources(List<SourceRef> sources, Action<string, string> warn)

@@ -17,7 +17,8 @@
     <LocaleResource Name="Stage.TooLarge"><Value>The file is larger than 5 MB.</Value></LocaleResource>
     <LocaleResource Name="Stage.AlreadyProcessed"><Value>This file was already processed in batch #{0}; nothing was changed.</Value></LocaleResource>
     <LocaleResource Name="Bundled.Title"><Value>Bundled research dataset 2026-10</Value></LocaleResource>
-    <LocaleResource Name="Bundled.Hint"><Value>Source register (43 sources), 92 motorcycle reference records and 78 spare-part research candidates with their sources. Loading only stages them; publishing still needs your review. Parts stay research candidates while their source is PERMISSION_REQUIRED.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Hint"><Value>Source register (43 sources), 92 motorcycle reference records and 78 spare-part research candidates. Every record names its own source and that source's permission governs it: the 3 motorcycles whose only source is RESTRICTED are not staged, motorcycles from PERMISSION_REQUIRED sources stay out of the selector, and all parts stay research candidates. Loading only stages data; publishing still needs your review.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.NotIncluded"><Value>Not part of this build. The datasets contain fitment compiled from part catalogues that require permission, so they are left out until the owner decides; developers can build with IncludeCatalogResearch=true.</Value></LocaleResource>
     <LocaleResource Name="Bundled.Load"><Value>Load dataset</Value></LocaleResource>
     <LocaleResource Name="Bundled.Loaded"><Value>{0} sources added. Motorcycles: batch #{1}, parts: batch #{2}.</Value></LocaleResource>
     <LocaleResource Name="Sources"><Value>Data sources and permissions</Value></LocaleResource>
@@ -191,6 +192,7 @@
     <LocaleResource Name="Vehicles.Publishable"><Value>Ready to publish</Value></LocaleResource>
     <LocaleResource Name="Vehicles.NotPublishable"><Value>Not publishable (unverified years or displacement)</Value></LocaleResource>
     <LocaleResource Name="Vehicles.OtherMarket"><Value>Other market (kept as reference, not shown in the Turkish selector)</Value></LocaleResource>
+    <LocaleResource Name="Vehicles.SourcePermission"><Value>Not publishable: its source does not permit factual use (PERMISSION_REQUIRED or lower)</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Resync"><Value>Apply changes</Value></LocaleResource>
     <LocaleResource Name="Vehicles.None"><Value>No reference records yet.</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Audit"><Value>Selector audit: {0} of {1} motorcycles have no verified source</Value></LocaleResource>
