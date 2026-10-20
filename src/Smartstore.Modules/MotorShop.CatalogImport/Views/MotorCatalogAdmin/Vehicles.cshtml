@@ -68,7 +68,11 @@
                             }
                             else
                             {
-                                <span class="text-muted small">@(VehicleReferenceService.IsPublishable(v) ? T(res + "Vehicles.Publishable") : !VehicleReferenceService.IsSelectorMarket(v) ? T(res + "Vehicles.OtherMarket") : T(res + "Vehicles.NotPublishable"))</span>
+                                var permission = Model.SourcePermissions.TryGetValue(v.SourceId, out var sp) ? sp : SourcePermissionStatus.Rejected;
+                                <span class="text-muted small">@(VehicleReferenceService.IsPublishable(v, permission) ? T(res + "Vehicles.Publishable")
+                                    : !VehicleReferenceService.IsSelectorMarket(v) ? T(res + "Vehicles.OtherMarket")
+                                    : !VehicleReferenceService.HasFactualPermission(permission) ? T(res + "Vehicles.SourcePermission")
+                                    : T(res + "Vehicles.NotPublishable"))</span>
                             }
                         </td>
                     </tr>

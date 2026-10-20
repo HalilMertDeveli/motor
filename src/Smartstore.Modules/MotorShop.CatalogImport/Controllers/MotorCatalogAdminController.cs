@@ -28,17 +28,20 @@ public class MotorCatalogAdminController : AdminController
     private readonly CatalogImportService _importService;
     private readonly CatalogPublicationService _publication;
     private readonly VehicleReferenceService _vehicles;
+    private readonly BundledResearchService _bundled;
 
     public MotorCatalogAdminController(
         SmartDbContext db,
         CatalogImportService importService,
         CatalogPublicationService publication,
-        VehicleReferenceService vehicles)
+        VehicleReferenceService vehicles,
+        BundledResearchService bundled)
     {
         _db = db;
         _importService = importService;
         _publication = publication;
         _vehicles = vehicles;
+        _bundled = bundled;
     }
 
     private string CurrentUser
@@ -77,7 +80,8 @@ public class MotorCatalogAdminController : AdminController
             VerifiedVehicleCount = await _db.CatalogVehicleReferences().CountAsync(x => x.Status == VehicleReferenceStatus.Verified),
             PublishedVehicleCount = await _db.CatalogVehicleReferences().CountAsync(x => x.MotorVehicleId != null),
             PendingChangesCount = await _db.CatalogParts().CountAsync(x => x.HasPendingChanges),
-            OpenMatchCount = await _db.CatalogFitmentMatches().CountAsync(x => x.Status == FitmentMatchStatus.Proposed && x.Kind == FitmentMatchKind.Exact)
+            OpenMatchCount = await _db.CatalogFitmentMatches().CountAsync(x => x.Status == FitmentMatchStatus.Proposed && x.Kind == FitmentMatchKind.Exact),
+            BundledResearchAvailable = _bundled.IsAvailable
         };
 
         return View(model);
@@ -112,6 +116,21 @@ public class MotorCatalogAdminController : AdminController
         }
 
         return RedirectToAction(nameof(Batch), new { id = result.Batch.Id });
+    }
+
+    [HttpPost]
+    [Permission(Permissions.Catalog.Product.Update)]
+    public async Task<IActionResult> LoadBundledResearch()
+    {
+        if (!_bundled.IsAvailable)
+        {
+            NotifyError(T(ResRoot + "Bundled.NotIncluded"));
+            return RedirectToAction(nameof(Index));
+        }
+
+        var result = await _bundled.LoadAsync();
+        NotifySuccess(T(ResRoot + "Bundled.Loaded", result.SourcesAdded, result.Vehicles.Batch.Id, result.Parts.Batch.Id));
+        return RedirectToAction(nameof(Index));
     }
 
     [Permission(Permissions.Catalog.Product.Read)]
@@ -402,7 +421,8 @@ public class MotorCatalogAdminController : AdminController
             References = await _db.CatalogVehicleReferences().AsNoTracking()
                 .OrderBy(x => x.Make).ThenBy(x => x.Model).ThenBy(x => x.YearFrom).ToListAsync(),
             Audit = await _vehicles.GetAuditAsync(),
-            SourceNames = await _db.CatalogSources().ToDictionaryAsync(x => x.Id, x => x.Name)
+            SourceNames = await _db.CatalogSources().ToDictionaryAsync(x => x.Id, x => x.Name),
+            SourcePermissions = await _vehicles.GetSourcePermissionsAsync()
         };
 
         return View(model);

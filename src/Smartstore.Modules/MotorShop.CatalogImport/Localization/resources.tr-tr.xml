@@ -16,6 +16,11 @@
     <LocaleResource Name="Stage.NoFile"><Value>Bir dosya seçin.</Value></LocaleResource>
     <LocaleResource Name="Stage.TooLarge"><Value>Dosya 5 MB sınırını aşıyor.</Value></LocaleResource>
     <LocaleResource Name="Stage.AlreadyProcessed"><Value>Bu dosya #{0} numaralı işlemde zaten işlendi; hiçbir şey değişmedi.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Title"><Value>Paketli araştırma veri seti 2026-10</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Hint"><Value>Kaynak kaydı (43 kaynak), 92 motosiklet referans kaydı ve 78 yedek parça araştırma adayı. Her kayıt kendi kaynağını belirtir ve o kaynağın izni geçerlidir: tek kaynağı RESTRICTED olan 3 motosiklet ara alana alınmaz, PERMISSION_REQUIRED kaynaklı motosikletler seçiciye eklenmez, tüm parçalar araştırma adayı olarak kalır. Yükleme yalnızca ara alana alır; yayın yine sizin incelemenizi gerektirir.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.NotIncluded"><Value>Bu sürümde yer almıyor. Veri setleri izin gerektiren parça kataloglarından derlenmiş uyumluluk bilgisi içerdiği için sahibin kararına kadar dışarıda bırakıldı; geliştiriciler IncludeCatalogResearch=true ile derleyebilir.</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Load"><Value>Veri setini yükle</Value></LocaleResource>
+    <LocaleResource Name="Bundled.Loaded"><Value>{0} kaynak eklendi. Motosikletler: işlem #{1}, parçalar: işlem #{2}.</Value></LocaleResource>
     <LocaleResource Name="Sources"><Value>Veri kaynakları ve izinler</Value></LocaleResource>
     <LocaleResource Name="Source"><Value>Kaynak</Value></LocaleResource>
     <LocaleResource Name="Source.Key"><Value>Anahtar</Value></LocaleResource>
@@ -187,6 +192,7 @@
     <LocaleResource Name="Vehicles.Publishable"><Value>Yayına hazır</Value></LocaleResource>
     <LocaleResource Name="Vehicles.NotPublishable"><Value>Yayınlanamaz (yıl veya motor hacmi doğrulanmadı)</Value></LocaleResource>
     <LocaleResource Name="Vehicles.OtherMarket"><Value>Başka pazar (referans olarak saklanır, Türkiye seçicisinde gösterilmez)</Value></LocaleResource>
+    <LocaleResource Name="Vehicles.SourcePermission"><Value>Yayınlanamaz: kaynağı olgusal kullanıma izin vermiyor (PERMISSION_REQUIRED veya daha düşük)</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Resync"><Value>Değişiklikleri uygula</Value></LocaleResource>
     <LocaleResource Name="Vehicles.None"><Value>Henüz referans kaydı yok.</Value></LocaleResource>
     <LocaleResource Name="Vehicles.Audit"><Value>Seçici denetimi: {1} motosikletten {0} tanesinin doğrulanmış kaynağı yok</Value></LocaleResource>

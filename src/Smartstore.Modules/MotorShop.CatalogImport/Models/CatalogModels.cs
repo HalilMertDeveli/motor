@@ -72,6 +72,7 @@ public class CatalogDashboardModel
     public int PublishedVehicleCount { get; set; }
     public int PendingChangesCount { get; set; }
     public int OpenMatchCount { get; set; }
+    public bool BundledResearchAvailable { get; set; }
 }
 
 public class SourceEditModel
@@ -171,4 +172,5 @@ public class VehiclesModel
     public List<CatalogVehicleReference> References { get; set; } = [];
     public List<VehicleAuditRow> Audit { get; set; } = [];
     public Dictionary<int, string> SourceNames { get; set; } = [];
+    public Dictionary<int, SourcePermissionStatus> SourcePermissions { get; set; } = [];
 }
