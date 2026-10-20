@@ -80,6 +80,8 @@ of preview.
 | #33 | feat/motordark-ux-performance | Sticky mobile buy bar, responsive WebP hero, a11y and performance (home mobile perf 57→66, product CLS 0.187→0) | e0f49fff16 |
 | #30 + #34 | feat/motosev-catalog-import, fix/supplier-catalog-rules | MotorShop.SupplierCatalog (Motosev package importer) made to follow the rules: nothing published automatically, only own-supplier products updated, zip limits, HTML sanitized, KDV tax category | 84071a4643 |
 | #35 | feat/supplier-image-quality | Storefront picture sizes 512/1024 px, quality 90; `tools/supplier-images` rebuilds supplier pictures from the PDF originals (genuine pixels, per-page pairing) | 7804f02e4e |
+| #36 | feat/supplier-images-ai | Optional AI upscaling of supplier pictures with a review list (owner-approved exception) | 9b1c08add1 |
+| #38 | feat/helmet-type-tiles | Categories without a picture show their first product's photo; helmet types as five photo tiles; merged on local evidence (1320 tests) | edfba6ddf7 |
 
 GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579). After #22 and #23: success. **Since 2026-10-20 GitHub Actions jobs do not start** (account billing: "recent account payments have failed or your spending limit needs to be increased"). #26, #27 and #21 had green PR checks before merge; #28 was merged on local evidence only.
 
@@ -119,7 +121,7 @@ GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579
 | Smartstore "Credit card (manual)" (Payments.Manual) | **Fixed** by #31 (hidden by filter, removed from active methods on install and by migration; verified on a fresh install) | — |
 | Turkish-I casing under tr-TR | **Fixed** by #32 for identifiers; display text intentionally culture-aware | Open notes: the SEO character map turns Ü into "ue" (German) |
 | Catalog research datasets (#25) | Excluded from every build unless `-p:IncludeCatalogResearch=true` | **Owner (legal):** may they ship; may Yamaha facts be used |
-| Motosev product pictures | The PDF catalog embeds 100-330 px photos; genuine-pixel cleanup done (#35) | **Owner:** ask Motosev for original photos or a print PDF |
+| Motosev product pictures | Web photos from motosev.com / shad.es: 625 of 1148 products (#39, open). A second package from the same sources is built by the session "Original manufacturer photos" (`feat/official-product-images`) with a merge table | **Owner:** pick the final package; confirm with Motosev that SHAD manufacturer photos may be used |
 | **AI upscaling exception** | Owner decision 2026-10-20: Motosev 2026 catalog photos may be enlarged with Real-ESRGAN (no generated photos); pictures with text or strong change are listed for review before publishing | See `docs/motor/product-images.md` |
 | F2 SQLitePCLRaw 2.1.11 (CVE-2025-6965) | Open; SQLite provider only | Production uses PostgreSQL; never use SQLite in production. Move to 3.x with upstream |
 | F6 DataProtection keys unencrypted at rest | Partly mitigated (#14/#16: root-only volume, GPG-encrypted backups) | Key-ring encryption with a certificate is application work; unowned |
