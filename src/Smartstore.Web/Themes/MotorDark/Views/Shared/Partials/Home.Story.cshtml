@@ -2,7 +2,12 @@
 
 <section class="motor-story" aria-labelledby="motor-story-title">
     <div class="motor-story-bg" aria-hidden="true">
-        <img class="motor-story-photo" src="~/themes/motordark/images/story.jpg" alt="" width="2000" height="2667" loading="lazy" decoding="async" data-motor-parallax="0.08" />
+        <picture>
+            <source type="image/webp"
+                    srcset="@Url.Content("~/themes/motordark/images/story-800.webp") 800w, @Url.Content("~/themes/motordark/images/story-1200.webp") 1200w, @Url.Content("~/themes/motordark/images/story-1600.webp") 1600w"
+                    sizes="(min-width: 992px) 62vw, 100vw" />
+            <img class="motor-story-photo" src="~/themes/motordark/images/story.jpg" alt="" width="2000" height="2667" loading="lazy" decoding="async" data-motor-parallax="0.08" />
+        </picture>
         <div class="motor-story-shade"></div>
     </div>
 

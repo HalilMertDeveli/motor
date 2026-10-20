@@ -1,6 +1,8 @@
 //
 // Barlow Semi Condensed (SIL Open Font License 1.1, see fonts/BarlowSemiCondensed-OFL.txt)
 // Self-hosted: no third-party font requests.
+// Only the weights the theme uses are declared: 600 (labels), 700 and 700 italic (display).
+// Text asking for a lighter weight resolves to the 600 face instead of a fourth download.
 // --------------------------------------------------
 
 @mixin motor-font-face($weight, $style, $file) {
@@ -13,8 +15,6 @@
     }
 }
 
-@include motor-font-face(400, normal, 'BarlowSemiCondensed-400-normal');
-@include motor-font-face(500, normal, 'BarlowSemiCondensed-500-normal');
 @include motor-font-face(600, normal, 'BarlowSemiCondensed-600-normal');
 @include motor-font-face(700, normal, 'BarlowSemiCondensed-700-normal');
 @include motor-font-face(700, italic, 'BarlowSemiCondensed-700-italic');

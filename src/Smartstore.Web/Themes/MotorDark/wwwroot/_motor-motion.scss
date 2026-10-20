@@ -1,8 +1,9 @@
 //
 // MotorDark: motion system
-// Transform/opacity only. Every effect is opt-in through the "motor-js" class
-// (set by motor.js), so the page is fully visible without JavaScript, and
-// everything is switched off for users who prefer reduced motion.
+// Transform/opacity only. Scroll reveals are opt-in through the "motor-js" class
+// (set by motor.js), so the page is fully visible without JavaScript. Above-the-fold
+// content (hero, product lists, checkout) is never hidden by an entrance effect.
+// Everything is switched off for users who prefer reduced motion.
 // --------------------------------------------------
 
 :root {
@@ -11,7 +12,7 @@
     --motor-dur-slow: .9s;
 }
 
-// Scroll reveal
+// Scroll reveal (below-the-fold homepage sections only)
 // --------------------------------------------------
 
 .motor-js {
@@ -32,9 +33,9 @@
     }
 }
 
-// Product grids: one subtle, fast fade for the whole list (dense grids stay calm)
-.motor-js .motor-product-rail .artlist-grid,
-.motor-js #main-product-list .artlist-grid {
+// Homepage product rails: one subtle, fast fade for the whole list (dense grids stay calm).
+// The main category/search list is deliberately not animated: it holds the LCP image.
+.motor-js .motor-product-rail .artlist-grid {
     animation: motor-fade-up .6s var(--motor-ease-out) both;
 }
 
@@ -50,65 +51,22 @@
     }
 }
 
-// Hero entrance: the photo "develops" out of black with a slow camera settle,
-// the headline is revealed behind a mask, then a single light pass crosses the bike.
+// Hero: photo and headline are visible from the first paint (they are LCP candidates).
+// Motion is transform-only: a slow camera settle on the photo, then a single light pass
+// across the bike once motor.js marks the hero as ready.
 // --------------------------------------------------
 
-.motor-js .motor-hero {
-    .motor-hero-media picture {
-        opacity: 0;
-        transform: scale(1.1);
-        filter: brightness(0.55);
-        transition:
-            opacity 1.6s var(--motor-ease-out),
-            transform 3.2s var(--motor-ease-out),
-            filter 2.4s var(--motor-ease-out);
-    }
+.motor-hero .motor-hero-media picture {
+    animation: motor-hero-settle 2.4s var(--motor-ease-out) both;
+}
 
-    .motor-hero-line > span {
-        transform: translate3d(0, 105%, 0);
-        transition: transform 1.2s var(--motor-ease-out) .35s;
-    }
+@keyframes motor-hero-settle {
+    from { transform: scale(1.06); }
+    to { transform: none; }
+}
 
-    .motor-hero-line:nth-child(2) > span {
-        transition-delay: .48s;
-    }
-
-    .motor-hero-eyebrow,
-    .motor-hero-subtitle,
-    .motor-hero-actions,
-    .motor-hero-scroll {
-        opacity: 0;
-        transition: opacity 1s var(--motor-ease-out), transform 1s var(--motor-ease-out);
-    }
-
-    .motor-hero-eyebrow { transition-delay: .25s; }
-    .motor-hero-subtitle { transition-delay: .75s; }
-    .motor-hero-actions { transition-delay: .9s; }
-    .motor-hero-scroll { transition-delay: 1.6s; }
-
-    &.is-ready {
-        .motor-hero-media picture {
-            opacity: 1;
-            transform: none;
-            filter: none;
-        }
-
-        .motor-hero-line > span {
-            transform: none;
-        }
-
-        .motor-hero-eyebrow,
-        .motor-hero-subtitle,
-        .motor-hero-actions,
-        .motor-hero-scroll {
-            opacity: 1;
-        }
-
-        .motor-hero-sweep {
-            animation: motor-sweep 2.8s var(--motor-ease-in-out) 1.6s 1 both;
-        }
-    }
+.motor-hero.is-ready .motor-hero-sweep {
+    animation: motor-sweep 2.8s var(--motor-ease-in-out) .8s 1 both;
 }
 
 @keyframes motor-sweep {
@@ -186,25 +144,25 @@
 // --------------------------------------------------
 
 @media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto !important;
+    }
+
     .motor-js [data-motor-reveal],
-    .motor-js [data-motor-stagger] > *,
-    .motor-js .motor-hero .motor-hero-media picture,
-    .motor-js .motor-hero .motor-hero-line > span,
-    .motor-js .motor-hero .motor-hero-eyebrow,
-    .motor-js .motor-hero .motor-hero-subtitle,
-    .motor-js .motor-hero .motor-hero-actions,
-    .motor-js .motor-hero .motor-hero-scroll {
+    .motor-js [data-motor-stagger] > * {
         opacity: 1 !important;
         transform: none !important;
-        filter: none !important;
         transition: none !important;
     }
 
+    .motor-hero .motor-hero-media picture,
     .motor-hero-sweep,
     .motor-hero-scroll-line:after,
     .motor-js .motor-product-rail .artlist-grid,
-    .motor-js #main-product-list .artlist-grid,
-    .offcanvas-cart-body:empty {
+    .offcanvas-cart-body:empty,
+    .motor-badge-bump,
+    .art.motor-added,
+    .btn.motor-btn-done:after {
         animation: none !important;
     }
 
@@ -218,7 +176,9 @@
 
     .art:hover .art-picture img,
     .motor-cat-link:hover,
-    .motor-cat-link:hover .motor-cat-icon {
+    .motor-cat-link:hover .motor-cat-icon,
+    .motor-buybar {
         transform: none !important;
+        transition: none !important;
     }
 }

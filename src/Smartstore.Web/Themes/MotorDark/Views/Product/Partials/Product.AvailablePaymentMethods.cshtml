@@ -1,0 +1,52 @@
+@*
+    MotorDark copy of Views/Product/Partials/Product.AvailablePaymentMethods.cshtml.
+    Adds compact shopping-assurance links under the buy box (same texts and policy pages as the
+    homepage assurance strip; an item is hidden when its page does not exist).
+*@
+
+@{
+    var shippingUrl = await Url.TopicAsync("ShippingInfo");
+    var paymentUrl = await Url.TopicAsync("PaymentInfo");
+    var contactUrl = Url.RouteUrl("ContactUs");
+
+    var assurance = new List<(string Icon, string Title, string Url)>
+    {
+        ("mi-truck", T("Themes.MotorDark.Assurance.Shipping.Title").Value, shippingUrl),
+        ("mi-shield", T("Themes.MotorDark.Assurance.Payment.Title").Value, paymentUrl),
+        ("mi-headset", T("Themes.MotorDark.Assurance.Advice.Title").Value, contactUrl)
+    }
+    .Where(x => x.Url.HasValue())
+    .ToList();
+
+    var paymentMethods = ViewBag.AvailablePaymentMethods;
+    var hasPaymentMethods = paymentMethods != null && paymentMethods.Count > 0;
+}
+
+<ul sm-if="assurance.Count > 0" class="motor-pd-assurance list-unstyled" aria-label="@T("Themes.MotorDark.Assurance.Label")">
+    @foreach (var item in assurance)
+    {
+        <li>
+            <a href="@item.Url" class="motor-pd-assurance-link">
+                <svg aria-hidden="true"><use href="#@item.Icon" /></svg>
+                <span>@item.Title</span>
+            </a>
+        </li>
+    }
+</ul>
+
+@if (hasPaymentMethods)
+{
+    <div class="mt-4">
+        <h2 class="pd-payment-icons-heading fs-h6 pb-2">@T("Products.PaymentOptions.Heading")</h2>
+        <p class="pd-payment-icons-intro fs-sm text-muted">@T("Products.PaymentOptions.Intro")</p>
+    </div>
+
+    <div class="pd-available-payment-methods">
+        @foreach (var brand in paymentMethods)
+        {
+            <div class="payment-brand">
+                <img class="img-fluid" src="@Url.Content(brand.Item2)" title="@brand.Item1" alt="@brand.Item1" />
+            </div>
+        }
+    </div>
+}
