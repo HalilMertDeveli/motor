@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MessageTemplate>
+	<To>{{ Customer.FullName }} &lt;{{ Customer.Email }}&gt;</To>
+	<Subject>{{ Store.Name }}. Gönderiniz kargoya verildi.</Subject>
+	<ModelTypes>Shipment, Shipment.Order, Shipment.Customer</ModelTypes>
+	<Body>
+    <![CDATA[{% extends 'master' %}
+
+{% block 'body' %}
+<h1>
+  Merhaba {{ Customer.FullName }},
+</h1>
+
+<p>
+  <b>{{ Shipment.Id }}</b> numaralı gönderiniz kargoya verildi.
+  {% if Shipment.Carrier %}
+  Gönderiniz {{ Shipment.Carrier }} tarafından taşınmaktadır.
+  {% endif %}  
+</p>
+
+{% if Shipment.TrackingUrl %}
+<p class="mb-4 text-center">
+  <a class="btn btn-primary" href="{{ Shipment.TrackingUrl }}">Gönderiyi takip et</a>
+</p>
+{% endif %}
+
+<table class="w-100 mb-3">
+  <thead>
+  	<tr>
+      <th class="text-muted text-sm">Sipariş tarihi</th>
+      <th class="text-muted text-sm">Sipariş numarası</th>
+      <th class="text-muted text-sm">Takip numarası</th>
+      <th class="text-muted text-sm">Kargoya verilme tarihi</th>
+    </tr>
+  </thead>
+  <tbody class="mb-3">
+  	<tr>
+      <td class="text-sm">{{ Order.CreatedOn | Date:'d' }}</td>
+      <td class="text-sm">{{ Order.OrderNumber }}</td>
+      <td class="text-sm">{{ Shipment.TrackingNumber }}</td>
+      <td class="text-sm">{{ Shipment.ShippedOn }}</td>
+    </tr>
+  </tbody>
+</table>
+
+{% if Order.Url %}
+<p class="mt-4 mb-4 text-center">
+  <a class="btn btn-primary" href="{{ Order.Url }}">Detayları görüntüle</a>
+</p>
+{% endif %}
+
+<table class="w-100 brd">
+  <tbody>
+  	<tr>
+    	<td class="p-2">
+        
+        <table class="order-details w-100">
+          <tbody>
+            <tr>
+              <td width="50%">
+                <h3>Fatura adresi</h3>
+              	{% include 'address' with Order.Billing %}
+                {% if Order.PaymentMethod %}
+                	<h3 class="mt-2">Ödeme yöntemi</h3>
+                	<div class="text-sm">{{ Order.PaymentMethod }}</div>
+                {% endif %}
+              </td>
+              <td width="50%">
+                <h3>Teslimat adresi</h3>
+                {% if Order.Shipping %}
+					{% include 'address' with Order.Shipping %}
+                {% else %}
+                	<p class="text-muted text-sm">Fatura adresiyle aynı</p>
+                {% endif %} 
+                {% if Order.ShippingMethod %}
+                	<h3 class="mt-2">Kargo yöntemi</h3>
+                	<div class="text-sm">{{ Order.ShippingMethod }} </div>    	
+                {% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>&nbsp;</p>
+
+{% include 'shipment' %}
+
+{% endblock %}]]></Body>
+</MessageTemplate>

@@ -24,8 +24,8 @@
                     <span class="motor-cat-index" aria-hidden="true">@((i + 1).ToString("00"))</span>
                     <partial name="Motor.CategoryIcon" model="item.Name.Value" />
                     <span class="motor-cat-name" sm-language-attributes-for="item.Name">@item.Name</span>
-                    <span lang="tr" class="motor-cat-cta" aria-hidden="true">
-                        <span>İncele</span>
+                    <span class="motor-cat-cta" aria-hidden="true">
+                        <span>@T("Themes.MotorDark.Categories.Explore")</span>
                         <svg><use href="#mi-arrow" /></svg>
                     </span>
                 </a>

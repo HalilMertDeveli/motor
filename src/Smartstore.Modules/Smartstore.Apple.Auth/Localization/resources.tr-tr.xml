@@ -1,0 +1,70 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.Smartstore.Apple.Auth" AppendRootKey="false">
+        <Value>Apple ile giriş</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Smartstore.Apple.Auth" AppendRootKey="false">
+        <Value>Mağazaya Apple ile kimlik doğrulama ekler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminInstruction">
+        <Value><![CDATA[
+                <p>Apple ile kimlik doğrulamayı ayarlamak için: </p>
+                <ul>
+                    <li><a href="https://developer.apple.com/account/">Apple Developer Portal</a> üzerinde yeni bir Services ID ve özel anahtar oluşturun.</li>
+                    <li>Oluşturulan Team ID, Key ID, Client ID ve özel anahtarı aşağıya girin.</li>
+                    <li>Aşağıda listelenen URL, Apple yapılandırmasında dönüş URL'si (return URL) olarak kaydedilmelidir.</li>
+                </ul>
+            ]]></Value>
+    </LocaleResource>
+    <LocaleResource Name="IISUserProfileWarning">
+        <Value>
+            <![CDATA[
+                <strong>Not: IIS seçeneği <i>Load User Profile</i> devre dışı.</strong>
+                <p>
+                    Kullanıcı profili yüklenmeden, uygulama havuzu geri dönüştürüldükten (app pool recycle) sonra girişler başarısız olabilir.
+                    Lütfen IIS'te bu seçeneği etkinleştirin:
+                </p>
+                <ul>
+                  <li>IIS Manager'ı açın → <i>Application Pools</i> → uygulama havuzunuzu seçin</li>
+                  <li><i>Advanced Settings</i> penceresini açın.</li>
+                  <li><i>Load User Profile</i> değerini <strong>True</strong> olarak ayarlayın ve uygulama havuzunu yeniden başlatın.</li>
+                </ul>
+                <p>
+                    IIS'e erişiminiz yoksa veya emin değilseniz lütfen barındırma sağlayıcınızla/yöneticinizle iletişime geçin.
+                </p>
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Login">
+        <Value>Apple ile giriş yap</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientId">
+        <Value>Client ID</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientId.Hint">
+        <Value>Services ID değerinizi buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="TeamId">
+        <Value>Team ID</Value>
+    </LocaleResource>
+    <LocaleResource Name="TeamId.Hint">
+        <Value>Apple Developer Team ID değeriniz.</Value>
+    </LocaleResource>
+    <LocaleResource Name="KeyId">
+        <Value>Key ID</Value>
+    </LocaleResource>
+    <LocaleResource Name="KeyId.Hint">
+        <Value>Özel anahtarın kimliği.</Value>
+    </LocaleResource>
+    <LocaleResource Name="PrivateKey">
+        <Value>Özel anahtar</Value>
+    </LocaleResource>
+    <LocaleResource Name="PrivateKey.Hint">
+        <Value>Özel anahtarınızın içeriği (PEM biçiminde).</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri">
+        <Value>OAuth yönlendirme URI'si</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri.Hint">
+        <Value>Apple'da girilmesi gereken OAuth yönlendirme URI'si.</Value>
+    </LocaleResource>
+</Language>

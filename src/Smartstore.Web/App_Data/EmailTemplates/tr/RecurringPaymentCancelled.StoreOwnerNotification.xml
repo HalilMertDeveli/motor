@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MessageTemplate>
+	<To>{{ Email.DisplayName }} &lt;{{ Email.Email }}&gt;</To>
+	<Subject>{{ Store.Name }}. Tekrarlayan ödeme iptal edildi</Subject>
+	<ModelTypes>RecurringPayment, RecurringPayment.InitialOrder, RecurringPayment.InitialOrder.Customer</ModelTypes>
+	<Body><![CDATA[{% extends 'master' %}
+
+{% block 'body' %}
+<h1>
+   Tekrarlayan ödeme iptal edildi,
+</h1>
+
+<p>
+  <b>{{ Customer.FullName }}</b> bir tekrarlayan ödemeyi iptal etti.
+</p>
+
+<p class="mt-4 mb-4 text-center">
+  <a class="btn btn-primary" href="{{ RecurringPayment.Url }}">Ödemeyi görüntüle</a>
+</p>
+
+<p>
+  <b>ID / Müşteri:</b><br />
+  <span>{{ RecurringPayment.Id }}</span> /
+  {% if Customer.EditUrl %}
+  	<a href="{{ Customer.EditUrl }}">{{ Customer.FullName }}</a>
+  {% else %}
+  	<span>{{ Customer.FullName }}</span>
+  {% endif %}
+</p>
+
+<p>
+  <b>Başlangıç tarihi:</b><br />
+  <span>{{ RecurringPayment.StartedOn }}</span>
+</p>
+
+<p>
+  <b>Sonraki ödeme tarihi:</b><br />
+  <span>{{ RecurringPayment.NextOn }}</span>
+</p>
+
+<p>
+  <b>Ödeme periyodu:</b><br />
+  <span>{{ RecurringPayment.CyclePeriod }}</span>
+</p>
+
+<p>
+  <b>Kalan ödeme sayısı:</b><br />
+  <span>{{ RecurringPayment.CyclesRemaining }}</span>
+</p>
+
+
+
+{% endblock %}]]></Body>
+</MessageTemplate>

@@ -25,6 +25,11 @@ internal class Startup : StarterBase
             o.Filters.AddEndpointFilter<LegalConfirmFilter, CheckoutController>()
                 .ForAction(x => x.ConfirmOrder())
                 .ForAction(x => x.ConfirmPayment());
+
+            // Confirm view (GET, and POST when it re-renders with warnings).
+            o.Filters.AddEndpointFilter<LegalTermsTextFilter, CheckoutController>()
+                .ForAction(x => x.Confirm())
+                .ForAction(x => x.ConfirmOrder());
         });
     }
 

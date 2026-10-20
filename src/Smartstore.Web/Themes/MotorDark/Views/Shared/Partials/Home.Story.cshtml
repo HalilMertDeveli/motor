@@ -1,6 +1,6 @@
 @* MotorDark homepage storytelling band. Copy describes the assortment only; no commercial claims. *@
 
-<section lang="tr" class="motor-story" aria-labelledby="motor-story-title">
+<section class="motor-story" aria-labelledby="motor-story-title">
     <div class="motor-story-bg" aria-hidden="true">
         <img class="motor-story-photo" src="~/themes/motordark/images/story.jpg" alt="" width="2000" height="2667" loading="lazy" decoding="async" data-motor-parallax="0.08" />
         <div class="motor-story-shade"></div>
@@ -8,20 +8,19 @@
 
     <div class="container motor-story-inner">
         <div class="motor-story-head" data-motor-reveal>
-            <span class="motor-eyebrow">Garajdan yola</span>
+            <span class="motor-eyebrow">@T("Themes.MotorDark.Story.Eyebrow")</span>
             <h2 id="motor-story-title" class="motor-story-title">
-                Her parça, bir sonraki <em>virajın</em> parçası.
+                @T("Themes.MotorDark.Story.TitleStart") <em>@T("Themes.MotorDark.Story.TitleAccent")</em> @T("Themes.MotorDark.Story.TitleEnd")
             </h2>
             <p class="motor-story-lead">
-                İyi bir sürüş, doğru parçayla başlar. Bakım rutininden performans yükseltmesine,
-                sürücü güvenliğinden yol aksesuarlarına kadar ihtiyacını kategorilere ayırdık.
+                @T("Themes.MotorDark.Story.Lead")
             </p>
             <div class="motor-story-actions">
                 <a href="#motor-categories" class="btn btn-primary btn-motor">
-                    <span>Kategorileri Keşfet</span>
+                    <span>@T("Themes.MotorDark.Story.ExploreCategories")</span>
                     <svg class="motor-btn-arrow" aria-hidden="true"><use href="#mi-arrow" /></svg>
                 </a>
-                <a asp-route="ContactUs" class="btn btn-motor btn-motor-ghost">Parça Danış</a>
+                <a asp-route="ContactUs" class="btn btn-motor btn-motor-ghost">@T("Themes.MotorDark.Story.AskForPart")</a>
             </div>
         </div>
 
@@ -29,20 +28,20 @@
             <li class="motor-story-step">
                 <span class="motor-story-num">01</span>
                 <svg class="motor-story-icon" aria-hidden="true"><use href="#mi-oil" /></svg>
-                <h3>Bakım</h3>
-                <p>Yağ, filtre, buji ve balata gibi periyodik bakım parçaları.</p>
+                <h3>@T("Themes.MotorDark.Story.Maintenance.Title")</h3>
+                <p>@T("Themes.MotorDark.Story.Maintenance.Text")</p>
             </li>
             <li class="motor-story-step">
                 <span class="motor-story-num">02</span>
                 <svg class="motor-story-icon" aria-hidden="true"><use href="#mi-exhaust" /></svg>
-                <h3>Performans</h3>
-                <p>Egzoz, hava ve yakıt sistemleri, aktarma ve süspansiyon parçaları.</p>
+                <h3>@T("Themes.MotorDark.Story.Performance.Title")</h3>
+                <p>@T("Themes.MotorDark.Story.Performance.Text")</p>
             </li>
             <li class="motor-story-step">
                 <span class="motor-story-num">03</span>
                 <svg class="motor-story-icon" aria-hidden="true"><use href="#mi-helmet" /></svg>
-                <h3>Sürücü</h3>
-                <p>Kask, mont, eldiven ve bot ile yolda görünür ve korunaklı kal.</p>
+                <h3>@T("Themes.MotorDark.Story.Rider.Title")</h3>
+                <p>@T("Themes.MotorDark.Story.Rider.Text")</p>
             </li>
         </ol>
     </div>

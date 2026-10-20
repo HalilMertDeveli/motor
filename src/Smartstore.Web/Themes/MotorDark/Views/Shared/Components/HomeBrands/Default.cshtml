@@ -3,10 +3,10 @@
 @model BrandNavigationModel
 
 <div role="region" aria-labelledby="top-brands-title" class="motor-brands block">
-    <div lang="tr" class="motor-section-head" data-motor-reveal>
+    <div class="motor-section-head" data-motor-reveal>
         <div>
-            <span class="motor-eyebrow">Markalar</span>
-            <h2 id="top-brands-title" class="motor-section-title">Markana göre alışveriş</h2>
+            <span class="motor-eyebrow">@T("Themes.MotorDark.Brands.Eyebrow")</span>
+            <h2 id="top-brands-title" class="motor-section-title">@T("Themes.MotorDark.Brands.Title")</h2>
         </div>
         <a sm-if="Model.DisplayAllBrandsLink" asp-route="ManufacturerList" class="motor-section-link">
             @T("Homepage.Brands.ShowAll") <svg aria-hidden="true"><use href="#mi-arrow" /></svg>

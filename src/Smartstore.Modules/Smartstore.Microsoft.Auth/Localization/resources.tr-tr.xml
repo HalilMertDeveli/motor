@@ -1,0 +1,43 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.Smartstore.Microsoft.Auth" AppendRootKey="false">
+        <Value>Microsoft ile giriş</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Smartstore.Microsoft.Auth" AppendRootKey="false">
+        <Value>Mağazaya Microsoft ile kimlik doğrulama ekler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[
+			<p>Microsoft ile kimlik doğrulamayı ayarlamak için:</p>
+				<ul>
+					<li><a href="https://go.microsoft.com/fwlink/?linkid=2083908">Microsoft</a> üzerinde yeni bir uygulama oluşturun.</li>
+					<li>Aşağıda listelenen URL'yi <b>Redirect URI</b> olarak belirtin.</li>
+					<li>Sol taraftaki menüden <b>Certificates & Secrets</b> öğesini seçin.</li>
+					<li><b>Client Secrets</b> sekmesindeki <b>New client secret</b> düğmesine tıklayın.</li>
+					<li>Anahtarın değerini aşağıdaki forma istemci gizli anahtarı olarak girin ve <b>Application ID</b> değerini girin.</li>
+				</ul>
+			]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Login">
+        <Value>Microsoft ile giriş yap</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientKeyIdentifier">
+        <Value>Uygulama kimliği (Application ID)</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientKeyIdentifier.Hint">
+        <Value>Uygulama kimliğinizi (Application ID) buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientSecret">
+        <Value>İstemci gizli anahtarı (Client Secret)</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientSecret.Hint">
+        <Value>İstemci gizli anahtarınızın değerini buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri">
+        <Value>Yönlendirme URI'si</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri.Hint">
+        <Value>Microsoft'ta girilmesi gereken yönlendirme URI'si.</Value>
+    </LocaleResource>
+</Language>

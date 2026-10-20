@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MessageTemplate>
+	<To>{{ Email.DisplayName }} &lt;{{ Email.Email }}&gt;</To>
+	<ReplyTo>{{ Customer.FullName }} &lt;{{ Customer.Email }}&gt;</ReplyTo>
+	<Subject>'{{ Customer.FullName }}' tarafından yeni bir sipariş verildi</Subject>
+	<ModelTypes>Order, Order.Customer</ModelTypes>
+	<Body>
+				  <![CDATA[{% extends 'master' %}
+
+{% block 'body' %}
+<h1>
+  Yeni bir sipariş verildi,
+</h1>
+
+<table class="w-100 mb-3">
+  <thead>
+  	<tr>
+      <th class="text-muted text-sm">Sipariş tarihi</th>
+      <th class="text-muted text-sm">Sipariş numarası</th>
+      <th class="text-muted text-sm">Durum</th>
+      <th class="text-muted text-sm">Toplam</th>
+    </tr>
+  </thead>
+  <tbody class="mb-3">
+  	<tr>
+    	<td class="text-sm">{{ Order.CreatedOn | Date:'d' }}</td>
+      <td class="text-sm">{{ Order.OrderNumber }}</td>
+      <td class="text-sm">{{ Order.Status }}</td>
+      <td class="text-sm text-success">{{ Order.Totals.Total }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="w-100 brd">
+  <tbody>
+  	<tr>
+    	<td class="p-2">
+        
+        <table class="order-details w-100">
+          <tbody>
+            <tr>
+              <td width="50%">
+                <h3>Fatura adresi</h3>
+              	{% include 'address' with Order.Billing %}
+                {% if Order.PaymentMethod %}
+                	<h3 class="mt-2">Ödeme yöntemi</h3>
+                	<div class="text-sm">{{ Order.PaymentMethod }}</div>
+                {% endif %}
+              </td>
+              <td width="50%">
+                <h3>Teslimat adresi</h3>
+                {% if Order.Shipping %}
+					{% include 'address' with Order.Shipping %}
+                {% else %}
+                	<p class="text-muted text-sm">Fatura adresiyle aynı</p>
+                {% endif %} 
+                {% if Order.ShippingMethod %}
+                	<h3 class="mt-2">Kargo yöntemi</h3>
+                	<div class="text-sm">{{ Order.ShippingMethod }} </div>  
+                {% endif %}
+              </td>
+            </tr>
+			{% if Order.CustomerComment %}
+				<tr>
+					<td colspan="2">
+					  <h3 class="mt-2">Müşteri notu</h3>
+                	  <div class="text-sm">
+						{{ Order.CustomerComment }}
+					  </div>  
+					</td>
+            	</tr>
+            {% endif %}
+          </tbody>
+        </table>
+        
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>&nbsp;</p>
+
+{% include 'order' %}
+
+{% endblock %}]]></Body>
+</MessageTemplate>
