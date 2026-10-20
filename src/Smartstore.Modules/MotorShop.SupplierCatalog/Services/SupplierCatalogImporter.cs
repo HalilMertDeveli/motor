@@ -5,24 +5,34 @@ using Smartstore.Core.Catalog.Attributes;
 using Smartstore.Core.Catalog.Brands;
 using Smartstore.Core.Catalog.Categories;
 using Smartstore.Core.Catalog.Products;
+using Smartstore.Core.Checkout.Tax;
+using Smartstore.Core.Common;
 using Smartstore.Core.Content.Media;
 using Smartstore.Core.Content.Media.Storage;
 using Smartstore.Core.Data;
 using Smartstore.Core.DataExchange.Import;
 using Smartstore.Core.Seo;
 using Smartstore.IO;
+using Smartstore.Utilities.Html;
 
 namespace MotorShop.SupplierCatalog.Services;
 
 public class SupplierCatalogImportOptions
 {
     /// <summary>
-    /// Publish products that have no price. When <c>false</c> they are imported unpublished.
+    /// Name of the supplier the package comes from (e.g. "Motosev"). Products created by an import are marked
+    /// with it, and later imports only update products of the same supplier.
     /// </summary>
-    public bool PublishUnpricedProducts { get; set; }
+    public string SupplierName { get; set; }
 
     /// <summary>
-    /// Overwrite name, descriptions and price of products that already exist (matched by SKU).
+    /// Tax category assigned to new products. <c>null</c> or 0 leaves them without a tax category.
+    /// </summary>
+    public int? TaxCategoryId { get; set; }
+
+    /// <summary>
+    /// Overwrite name, descriptions and (when given) price of products this supplier's imports created before.
+    /// The published state is never changed.
     /// </summary>
     public bool UpdateExistingProducts { get; set; } = true;
 }
@@ -33,7 +43,18 @@ public class SupplierCatalogImportResult
     public int BrandsCreated { get; set; }
     public int ProductsCreated { get; set; }
     public int ProductsUpdated { get; set; }
+
+    /// <summary>
+    /// Products of this import that are not published (all new products, plus existing ones an admin keeps offline).
+    /// </summary>
     public int ProductsUnpublished { get; set; }
+
+    /// <summary>
+    /// Records whose SKU belongs to a product this supplier's imports did not create (hand-made, another supplier,
+    /// or MotorShop.CatalogImport). They are left unchanged.
+    /// </summary>
+    public int ProductsSkippedConflict { get; set; }
+
     public int PicturesAdded { get; set; }
     public List<string> Warnings { get; set; } = [];
     public TimeSpan Duration { get; set; }
@@ -43,8 +64,16 @@ public class SupplierCatalogImportResult
 /// Imports a supplier catalog package: category tree, brands, products (matched by SKU),
 /// a size attribute and product pictures. Running it again updates instead of duplicating.
 /// </summary>
+/// <remarks>
+/// MOTOR rules: nothing is published automatically. New products, categories and brands are created unpublished
+/// and an admin publishes them after review; updates never touch the published state. Only products this
+/// supplier's imports created are updated (marked with a generic attribute), so hand-made products and products
+/// managed by MotorShop.CatalogImport are never overwritten.
+/// </remarks>
 public class SupplierCatalogImporter
 {
+    public const string SupplierAttributeKey = "MotorShop.SupplierCatalog.Supplier";
+
     const string CategorySeparator = " > ";
     const string SizeAttributeName = "Beden";
     const int BatchSize = 100;
@@ -52,12 +81,14 @@ public class SupplierCatalogImporter
     private readonly SmartDbContext _db;
     private readonly IUrlService _urlService;
     private readonly IMediaImporter _mediaImporter;
+    private readonly TaxSettings _taxSettings;
 
-    public SupplierCatalogImporter(SmartDbContext db, IUrlService urlService, IMediaImporter mediaImporter)
+    public SupplierCatalogImporter(SmartDbContext db, IUrlService urlService, IMediaImporter mediaImporter, TaxSettings taxSettings)
     {
         _db = db;
         _urlService = urlService;
         _mediaImporter = mediaImporter;
+        _taxSettings = taxSettings;
     }
 
     public async Task<SupplierCatalogImportResult> ImportAsync(
@@ -67,9 +98,18 @@ public class SupplierCatalogImporter
     {
         Guard.NotNull(package);
         Guard.NotNull(options);
+        Guard.NotEmpty(options.SupplierName);
 
+        var supplier = options.SupplierName.Trim();
         var watch = Stopwatch.StartNew();
         var result = new SupplierCatalogImportResult();
+        result.Warnings.AddRange(package.Warnings);
+
+        if (!_taxSettings.PricesIncludeTax)
+        {
+            result.Warnings.Add("The store enters prices net of tax, but catalog retail prices include KDV. Check the prices before publishing.");
+        }
+
         var items = package.Products
             .Where(x => x.Sku.HasValue() && x.Name.HasValue())
             .DistinctBy(x => x.Sku.Trim(), StringComparer.OrdinalIgnoreCase)
@@ -103,12 +143,29 @@ public class SupplierCatalogImporter
                 .ToListAsync(cancelToken))
                 .ToDictionarySafe(x => x.Sku, StringComparer.OrdinalIgnoreCase);
 
+            var existingIds = existing.Values.Select(x => x.Id).ToArray();
+            var ownedIds = (await _db.GenericAttributes
+                .AsNoTracking()
+                .Where(x => x.KeyGroup == nameof(Product) && x.Key == SupplierAttributeKey && existingIds.Contains(x.EntityId))
+                .Select(x => new { x.EntityId, x.Value })
+                .ToListAsync(cancelToken))
+                .Where(x => x.Value.EqualsNoCase(supplier))
+                .Select(x => x.EntityId)
+                .ToHashSet();
+
             var pairs = new List<(CatalogPackageProduct Item, Product Product, bool IsNew)>();
 
             foreach (var item in batch)
             {
                 var sku = item.Sku.Trim();
                 var isNew = !existing.TryGetValue(sku, out var product);
+
+                if (!isNew && !ownedIds.Contains(product.Id))
+                {
+                    result.ProductsSkippedConflict++;
+                    result.Warnings.Add($"{sku}: a product with this SKU exists but was not created by the '{supplier}' import. Left unchanged.");
+                    continue;
+                }
 
                 if (isNew)
                 {
@@ -123,6 +180,7 @@ public class SupplierCatalogImporter
                         OrderMinimumQuantity = 1,
                         OrderMaximumQuantity = 100,
                         IsShippingEnabled = true,
+                        TaxCategoryId = options.TaxCategoryId ?? 0,
                         CreatedOnUtc = DateTime.UtcNow
                     };
 
@@ -131,7 +189,7 @@ public class SupplierCatalogImporter
 
                 if (isNew || options.UpdateExistingProducts)
                 {
-                    ApplyValues(item, product, options);
+                    ApplyValues(item, product, isNew);
                 }
 
                 AddMappings(item, product, categoryIds, brandIds);
@@ -152,6 +210,16 @@ public class SupplierCatalogImporter
                 if (isNew)
                 {
                     result.ProductsCreated++;
+
+                    _db.GenericAttributes.Add(new GenericAttribute
+                    {
+                        KeyGroup = nameof(Product),
+                        Key = SupplierAttributeKey,
+                        EntityId = product.Id,
+                        Value = supplier,
+                        StoreId = 0
+                    });
+
                     // Catalog names contain year ranges like "2023/25"; a slash would split the URL.
                     var slug = await _urlService.ValidateSlugAsync(product, product.Name.Replace('/', ' '), product.Name, true);
                     await _urlService.ApplySlugAsync(slug);
@@ -179,17 +247,39 @@ public class SupplierCatalogImporter
         return result;
     }
 
-    private static void ApplyValues(CatalogPackageProduct item, Product product, SupplierCatalogImportOptions options)
+    /// <summary>
+    /// Copies catalog values to a product. New products stay unpublished; the published state of existing products
+    /// is never changed. A missing price never overwrites an existing one.
+    /// </summary>
+    internal static void ApplyValues(CatalogPackageProduct item, Product product, bool isNew)
     {
         product.Name = item.Name.Trim().Truncate(400);
-        product.ShortDescription = item.ShortDescription.NullEmpty();
-        product.FullDescription = item.DescriptionHtml.NullEmpty();
-        product.ManufacturerPartNumber = item.CatalogCode.NullEmpty()?.Truncate(400);
-        product.Price = item.Price ?? 0;
-        product.Published = item.Price.HasValue || options.PublishUnpricedProducts;
+        product.ShortDescription = item.ShortDescription.NullEmpty()?.Trim();
+        product.FullDescription = SanitizeDescription(item.DescriptionHtml);
+        product.ManufacturerPartNumber = item.CatalogCode.NullEmpty()?.Trim().Truncate(400);
         product.DisplayOrder = item.DisplayOrder;
         product.UpdatedOnUtc = DateTime.UtcNow;
+
+        if (item.Price.HasValue)
+        {
+            product.Price = item.Price.Value;
+        }
+        else if (isNew)
+        {
+            product.Price = 0;
+        }
+
+        if (isNew)
+        {
+            product.Published = false;
+        }
     }
+
+    /// <summary>
+    /// Package HTML is shown on the storefront without encoding, so scripts, event handlers and similar are removed.
+    /// </summary>
+    internal static string SanitizeDescription(string html)
+        => html.HasValue() ? HtmlUtility.SanitizeHtml(html, isFragment: true).NullEmpty() : null;
 
     private static void AddMappings(
         CatalogPackageProduct item,
@@ -276,7 +366,17 @@ public class SupplierCatalogImporter
         {
             foreach (var fileName in item.Images)
             {
-                var stream = await package.OpenImageAsync(fileName);
+                Stream stream;
+                try
+                {
+                    stream = await package.OpenImageAsync(fileName, cancelToken);
+                }
+                catch (InvalidDataException ex)
+                {
+                    result.Warnings.Add($"{item.Sku}: {ex.Message}");
+                    continue;
+                }
+
                 if (stream == null)
                 {
                     result.Warnings.Add($"{item.Sku}: image '{fileName}' not found in package.");
@@ -296,7 +396,7 @@ public class SupplierCatalogImporter
 
             return await _mediaImporter.ImportProductImagesAsync(product, sources, DuplicateFileHandling.Rename, cancelToken);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             result.Warnings.Add($"{item.Sku}: pictures not imported ({ex.Message}).");
             return 0;
@@ -351,7 +451,8 @@ public class SupplierCatalogImporter
                         Name = name,
                         ParentId = parentId,
                         CategoryTemplateId = templateId,
-                        Published = true,
+                        // Published by an admin after review, like the products.
+                        Published = false,
                         DisplayOrder = all.Count(x => (x.ParentId ?? 0) == (parentId ?? 0)) + 1,
                         CreatedOnUtc = DateTime.UtcNow,
                         UpdatedOnUtc = DateTime.UtcNow
@@ -410,7 +511,8 @@ public class SupplierCatalogImporter
                 {
                     Name = name,
                     ManufacturerTemplateId = templateId,
-                    Published = true,
+                    // Published by an admin after review, like the products.
+                    Published = false,
                     DisplayOrder = all.Count + 1,
                     CreatedOnUtc = DateTime.UtcNow,
                     UpdatedOnUtc = DateTime.UtcNow
@@ -461,7 +563,7 @@ public class SupplierCatalogImporter
         return attribute.Id;
     }
 
-    private static string NormalizeCategoryPath(string path)
+    internal static string NormalizeCategoryPath(string path)
         => string.Join(CategorySeparator, path
             .Split('>', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
 }

@@ -11,4 +11,7 @@
 			<CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
 		</ProjectReference>
 	</ItemGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="MotorShop.SupplierCatalog.Tests" />
+	</ItemGroup>
 </Project>

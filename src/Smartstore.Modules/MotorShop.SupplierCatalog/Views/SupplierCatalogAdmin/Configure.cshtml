@@ -17,6 +17,7 @@
             <ul class="mb-0">
                 <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Products", result.ProductsCreated, result.ProductsUpdated)</li>
                 <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Unpublished", result.ProductsUnpublished)</li>
+                <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Conflicts", result.ProductsSkippedConflict)</li>
                 <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Categories", result.CategoriesCreated)</li>
                 <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Brands", result.BrandsCreated)</li>
                 <li>@T("Plugins.MotorShop.SupplierCatalog.Result.Pictures", result.PicturesAdded)</li>
@@ -43,17 +44,23 @@
     <div class="card-body">
         <form asp-action="Import" asp-controller="SupplierCatalogAdmin" asp-area="Admin" method="post" enctype="multipart/form-data">
             <div class="mb-3">
+                <label class="form-label" asp-for="SupplierName"></label>
+                <input asp-for="SupplierName" class="form-control" required />
+                <div class="form-text">@T("Plugins.MotorShop.SupplierCatalog.SupplierName.Hint")</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="TaxCategoryId"></label>
+                <select asp-for="TaxCategoryId" asp-items="Model.AvailableTaxCategories" class="form-control"></select>
+                <div class="form-text">@T("Plugins.MotorShop.SupplierCatalog.TaxCategory.Hint")</div>
+            </div>
+            <div class="mb-3">
                 <label class="form-label" for="package">@T("Plugins.MotorShop.SupplierCatalog.Package")</label>
                 <input type="file" id="package" name="package" accept=".zip" class="form-control" required />
                 <div class="form-text">@T("Plugins.MotorShop.SupplierCatalog.Package.Hint")</div>
             </div>
-            <div class="form-check mb-2">
+            <div class="form-check mb-3">
                 <input asp-for="UpdateExistingProducts" class="form-check-input" />
                 <label asp-for="UpdateExistingProducts" class="form-check-label">@T("Plugins.MotorShop.SupplierCatalog.UpdateExistingProducts")</label>
-            </div>
-            <div class="form-check mb-3">
-                <input asp-for="PublishUnpricedProducts" class="form-check-input" />
-                <label asp-for="PublishUnpricedProducts" class="form-check-label">@T("Plugins.MotorShop.SupplierCatalog.PublishUnpricedProducts")</label>
             </div>
             <button type="submit" class="btn btn-primary">
                 <i class="fa fa-upload"></i>

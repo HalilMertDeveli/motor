@@ -42,7 +42,7 @@ jobs:
       run: |
         projects=$(dotnet sln Smartstore.sln list)
         missing=0
-        for p in Smartstore.Core Smartstore.Web MotorShop.Fitment MotorShop.CatalogImport Smartstore.Tests Smartstore.Core.Tests Smartstore.Web.Tests; do
+        for p in Smartstore.Core Smartstore.Web MotorShop.Fitment MotorShop.CatalogImport MotorShop.SupplierCatalog Smartstore.Tests Smartstore.Core.Tests Smartstore.Web.Tests; do
           if ! grep -q "[/\\]$p\.csproj$" <<<"$projects"; then
             echo "::error file=Smartstore.sln::$p.csproj is missing from Smartstore.sln"
             missing=1
@@ -71,7 +71,7 @@ jobs:
 
     - name: Check MOTOR module output
       run: |
-        for dll in src/Smartstore.Web/Modules/MotorShop.Fitment/MotorShop.Fitment.dll src/Smartstore.Web/Modules/MotorShop.CatalogImport/MotorShop.CatalogImport.dll; do
+        for dll in src/Smartstore.Web/Modules/MotorShop.Fitment/MotorShop.Fitment.dll src/Smartstore.Web/Modules/MotorShop.CatalogImport/MotorShop.CatalogImport.dll src/Smartstore.Web/Modules/MotorShop.SupplierCatalog/MotorShop.SupplierCatalog.dll; do
           if [ ! -f "$dll" ]; then
             echo "::error::$dll was not produced by the build"
             exit 1
