@@ -3,7 +3,9 @@
 Improves the product pictures of a supplier catalog package (`products.json` + `images/`, the format
 `MotorShop.SupplierCatalog` imports) before it is uploaded.
 
-**Only genuine pixels are used.** Nothing is generated or invented (no AI upscaling, no generated photos).
+**By default only genuine pixels are used.** Nothing is generated or invented. The optional AI mode
+(below) enlarges the genuine photos with an AI upscaler; it is an owner-approved exception, see
+[docs/motor/product-images.md](../../docs/motor/product-images.md).
 
 ## What it does
 
@@ -47,3 +49,30 @@ The result can only be as good as the source. The Motosev 2026 PDF embeds its ph
 (often around 300 × 300 px, strongly compressed), so the pictures are clean and complete but not
 high-resolution. For studio quality, ask the supplier for the original product photos (or a print PDF)
 and import those instead.
+
+## AI upscaling (optional, owner-approved exception)
+
+Only use it where the owner approved it (see [docs/motor/product-images.md](../../docs/motor/product-images.md)).
+It needs the portable Real-ESRGAN build (`realesrgan-ncnn-vulkan`, BSD-3-Clause, GitHub
+xinntao/Real-ESRGAN, release v0.2.5.0, `realesrgan-ncnn-vulkan-20220424-windows.zip`, 45,474,481 bytes) and a
+Vulkan GPU. The binary is not part of the repository.
+
+```sh
+node tools/supplier-images/enhance-supplier-images.mjs \
+  --products=package/products.json --images=package/images \
+  --pdf-images=work/pdfimg --pdf-list=work/pdf-list.txt \
+  --matches=work/enhanced/matches.json --reuse-matches=1 \
+  --ai-upscaler=path/to/realesrgan-ncnn-vulkan.exe --out=work/enhanced-ai
+```
+
+- Same assignment as the genuine run (reuse its `matches.json`); write to a separate `--out`.
+- Input per picture: the PDF original at native size, or the package picture shrunk back by
+  `FALLBACK_NATIVE_DIVISOR` (2). The upscaler (4×, `realesrgan-x4plus`) also removes JPEG artefacts; the result
+  then gets the same white square canvas.
+- Review: `review.html` and `review.csv` list pictures in three tiers: (1) text found by Windows OCR
+  (`detect-text.ps1`: brand names, model codes, catalog labels), (2) PDF original changed strongly, (3) package
+  picture changed strongly (`--review-change`, default 15). `review-src/` holds the genuine native pictures for
+  comparison. The list is a pre-selection: check at least these before publishing. `--review-only=1` rebuilds it
+  from `image-report.json` without running the upscaler again.
+- `--only` limits rendering; the assignment always considers all pictures, so variants are not mixed up.
+

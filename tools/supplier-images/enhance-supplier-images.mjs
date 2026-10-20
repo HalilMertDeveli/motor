@@ -15,7 +15,7 @@ import path from 'node:path';
 const args = Object.fromEntries(process.argv.slice(2).map(a => a.replace(/^--/, '').split(/=(.*)/s).slice(0, 2)));
 for (const k of ['products', 'images', 'pdf-images', 'pdf-list', 'out']) {
     if (!args[k]) {
-        console.error(`Usage: node enhance-supplier-images.mjs --products=products.json --images=<package images dir> --pdf-images=<pdfimages -all -p output dir> --pdf-list=<pdfimages -list output> --out=<output dir> [--only=name1,name2] [--reuse-matches=1]`);
+        console.error(`Usage: node enhance-supplier-images.mjs --products=products.json --images=<package images dir> --pdf-images=<pdfimages -all -p output dir> --pdf-list=<pdfimages -list output> --out=<output dir> [--only=name1,name2] [--reuse-matches=1] [--matches=matches.json] [--ai-upscaler=realesrgan-ncnn-vulkan.exe [--ai-model=realesrgan-x4plus] [--review-change=15] [--review-only=1]]`);
         process.exit(2);
     }
 }
@@ -35,6 +35,8 @@ const MAX_OBJECT = 880;        // longest side of the product on the canvas
 const FILL = 0.88;             // share of the canvas the product fills
 const MIN_CANVAS = 600, MAX_CANVAS = 1000;
 const WHITE = 238;             // a pixel darker than this in any channel belongs to the product
+const FALLBACK_NATIVE_DIVISOR = 2; // AI mode: package pictures are shrunk back towards the PDF's resolution first
+const REVIEW_CHANGE = 15;      // AI mode: local change (p95, grey levels) from which a picture is listed for review
 
 const outImages = path.join(args.out, 'images');
 const tmp = path.join(args.out, '.tmp');
@@ -209,7 +211,7 @@ const products = JSON.parse(fs.readFileSync(args.products, 'utf8'));
 const only = args.only ? new Set(args.only.split(',')) : null;
 const refs = [];
 for (const p of products) {
-    (p.images ?? []).forEach(name => refs.push({ name, page: p.pdfPage, sku: p.sku }));
+    (p.images ?? []).forEach(name => refs.push({ name, page: p.pdfPage, sku: p.sku, product: p.name }));
 }
 
 const thumbCache = new Map();
@@ -247,7 +249,7 @@ const flatOf = num => {
 
 // ---- 1. matching: score every candidate on the product's page and its neighbours (slow, cached in matches.json)
 
-const matchesFile = path.join(args.out, 'matches.json');
+const matchesFile = args.matches ?? path.join(args.out, 'matches.json');
 const matches = args['reuse-matches'] && fs.existsSync(matchesFile) ? JSON.parse(fs.readFileSync(matchesFile, 'utf8')) : {};
 let done = 0;
 for (const ref of refs) {
@@ -290,7 +292,8 @@ function eligible(ref, x) {
 
 const similarity = x => x.score - x.colorDistance / 200;
 
-const selected = refs.filter(ref => (!only || only.has(ref.name)) && fs.existsSync(path.join(args.images, ref.name)));
+// Always all pictures: --only limits rendering, not the assignment (variants compete for originals).
+const selected = refs.filter(ref => fs.existsSync(path.join(args.images, ref.name)));
 const pairs = selected.flatMap(ref => (matches[ref.name] ?? [])
     .filter(x => eligible(ref, x))
     .map(x => ({ ref, x, sim: similarity(x) })));
@@ -317,38 +320,185 @@ for (const pr of pairs.sort((p1, p2) => p2.sim - p1.sim)) {
     usedOriginals.add(pr.x.num);
 }
 
-// ---- 4. render
+// ---- 4. render, optionally through an AI upscaler (see README, "AI upscaling")
 
-const report = [];
+const ai = args['ai-upscaler'] ? {
+    exe: args['ai-upscaler'],
+    model: args['ai-model'] ?? 'realesrgan-x4plus',
+    models: args['ai-models'] ?? path.join(path.dirname(args['ai-upscaler']), 'models')
+} : null;
+const reviewChange = args['review-change'] ? +args['review-change'] : REVIEW_CHANGE;
+
+// How much the upscaler changed local structure: its output, scaled back to the native size, compared with the
+// native input in small windows (95th percentile of the mean grey difference). Faithful enlargement stays low;
+// re-drawn text, logos or invented texture show up as high local change.
+function aiChange(native, upscaled) {
+    const [w, h] = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', native])
+        .toString().trim().split(',').map(Number);
+    const gray = file => ffmpeg(['-i', file, '-vf', `scale=${w}:${h}:flags=area,format=gray`, '-f', 'rawvideo', '-']);
+    const a = gray(native), b = gray(upscaled);
+    const win = 6, diffs = [];
+    for (let y = 0; y + win <= h; y += 3) {
+        for (let x = 0; x + win <= w; x += 3) {
+            let d = 0, nonWhite = 0;
+            for (let yy = y; yy < y + win; yy++) {
+                for (let xx = x; xx < x + win; xx++) {
+                    const i = yy * w + xx;
+                    d += Math.abs(a[i] - b[i]);
+                    if (a[i] < WHITE) nonWhite++;
+                }
+            }
+            if (nonWhite > win * win * 0.3) diffs.push(d / (win * win));
+        }
+    }
+    diffs.sort((p1, p2) => p1 - p2);
+    return diffs.length ? +diffs[Math.floor(diffs.length * 0.95)].toFixed(1) : 0;
+}
+
+// Review list for AI pictures: text found by Windows OCR (detect-text.ps1) and strong local change by the upscaler.
+// Tier 1: text (logos, model codes, catalog labels); tier 2: PDF original changed strongly; tier 3: package
+// picture (blurry source) changed strongly. Can be rebuilt from image-report.json with --review-only=1.
+function writeReview(report, runOcr) {
+    const ocrFile = path.join(args.out, 'ocr.jsonl');
+    if (runOcr) {
+        if (process.platform === 'win32') {
+            const script = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, '$1')), 'detect-text.ps1');
+            execFileSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, '-ImageDir', outImages, '-Out', ocrFile], { stdio: 'ignore' });
+        } else {
+            console.warn('OCR is only available on Windows; the review list uses the change metric only.');
+        }
+    }
+
+    const ocr = new Map();
+    if (fs.existsSync(ocrFile)) {
+        fs.readFileSync(ocrFile, 'utf8').split(/\r?\n/).filter(Boolean).map(l => JSON.parse(l)).forEach(x => ocr.set(x.file, x));
+    }
+
+    for (const x of report.filter(r => r.ai)) {
+        const found = ocr.get(x.name);
+        x.ocrText = found?.text ?? '';
+        x.reviewReasons = [
+            ...(found?.words ? ['text'] : []),
+            ...(x.aiChange >= reviewChange ? ['strong-change'] : [])
+        ];
+        x.reviewTier = !x.reviewReasons.length ? null : x.reviewReasons.includes('text') ? 1 : x.status === 'pdf-original' ? 2 : 3;
+    }
+    fs.writeFileSync(path.join(args.out, 'image-report.json'), JSON.stringify(report, null, 1));
+
+    const flagged = report.filter(x => x.reviewTier).sort((a, b) => a.reviewTier - b.reviewTier || b.aiChange - a.aiChange);
+    const esc = v => String(v ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+    const csvCell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const reason = x => x.reviewReasons.map(r => r === 'text' ? `yazı: ${x.ocrText}` : `güçlü değişim ${x.aiChange}`).join(' · ');
+
+    fs.writeFileSync(path.join(args.out, 'review.csv'), '﻿tier;image;sku;product;reasons;ocr_text;ai_change;source\n' +
+        flagged.map(x => [x.reviewTier, x.name, x.sku, csvCell(x.product), x.reviewReasons.join('+'), csvCell(x.ocrText), x.aiChange, x.status].join(';')).join('\n'));
+
+    const card = x => `<figure><div class="pair"><div><img loading="lazy" src="review-src/${esc(x.name.replace(/\.\w+$/, '.png'))}"><span>gerçek piksel</span></div><div><img loading="lazy" src="images/${esc(x.name)}"><span>yapay zekâ</span></div></div>
+<figcaption><b>${esc(x.product)}</b><br><code>${esc(x.name)}</code> · ${esc(x.sku)}<br>${esc(reason(x))}</figcaption></figure>`;
+    const tiers = [
+        [1, 'Öncelik 1: içinde yazı olan görseller', 'Marka adı, model kodu veya katalog etiketi (ör. "MAT BLACK S-M-L-XL-2XL") var. Yapay zekâ küçük yazıları yanlış çizebilir; katalog etiketleri ürün fotoğrafında olmamalı.'],
+        [2, 'Öncelik 2: PDF orijinali belirgin değişmiş', 'Kaynak temiz ama yapay zekâ yerel olarak belirgin değişiklik yapmış (doku, ince ayrıntı).'],
+        [3, 'Öncelik 3: bulanık paket görselinden büyütülmüş, belirgin değişmiş', 'PDF\'te temiz orijinali bulunamayan görseller. Kaynak bulanık olduğu için yapay zekâ daha çok ayrıntı uydurur; şüphede gerçek piksel paketini kullanın.']
+    ];
+    const sections = tiers.map(([t, title, text]) => {
+        const items = flagged.filter(x => x.reviewTier === t);
+        return items.length ? `<h2 id="t${t}">${esc(title)} (${items.length})</h2><p>${esc(text)}</p><div class="grid">${items.map(card).join('\n')}</div>` : '';
+    }).join('\n');
+
+    fs.writeFileSync(path.join(args.out, 'review.html'), `<!doctype html><html lang="tr"><meta charset="utf-8"><title>AI review</title>
+<style>body{font-family:system-ui,sans-serif;margin:16px;background:#f4f4f2}h1{font-size:20px}h2{font-size:17px;margin-top:28px}p{max-width:900px}
+nav a{margin-right:16px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px}
+figure{margin:0;background:#fff;border:1px solid #ddd;border-radius:8px;padding:8px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}.pair img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border:1px solid #eee}
+.pair span{font-size:11px;color:#666;text-align:center;display:block}figcaption{font-size:13px;margin-top:6px}code{font-size:12px}</style>
+<h1>Yapay zekâ ile büyütülen görseller: kontrol listesi (${flagged.length} / ${report.length})</h1>
+<p>Sol: gerçek piksel (PDF'teki boyutunda). Sağ: yapay zekâ ile büyütülmüş hali. Sorunlu bir görsel için gerçek piksel paketindeki aynı adlı
+dosyayı kullanın. Bu liste otomatik bir ön elemedir (Windows OCR + değişim ölçümü); listede olmayan görsellerde de küçük farklar olabilir.</p>
+<nav>${tiers.map(([t, title]) => `<a href="#t${t}">${esc(title.split(':')[0])} (${flagged.filter(x => x.reviewTier === t).length})</a>`).join('')}</nav>
+${sections}</html>`);
+    console.log(`review: ${flagged.length} pictures (tier 1 text ${flagged.filter(x => x.reviewTier === 1).length}, tier 2 ${flagged.filter(x => x.reviewTier === 2).length}, tier 3 ${flagged.filter(x => x.reviewTier === 3).length}) -> review.html, review.csv`);
+}
+
+if (args['review-only']) {
+    const existing = JSON.parse(fs.readFileSync(path.join(args.out, 'image-report.json'), 'utf8'));
+    writeReview(existing, !fs.existsSync(path.join(args.out, 'ocr.jsonl')));
+    process.exit(0);
+}
+
+const jobs = [];
 for (const ref of refs) {
     if (only && !only.has(ref.name)) continue;
     const pkgFile = path.join(args.images, ref.name);
     if (!fs.existsSync(pkgFile)) {
-        report.push({ ...ref, status: 'missing' });
+        jobs.push({ ref, missing: true });
         continue;
     }
 
-    const target = path.join(outImages, ref.name.replace(/.w+$/, '.jpg'));
+    const base = ref.name.replace(/\.\w+$/, '');
     const d = decisions.get(ref.name);
-    let entry;
     if (d) {
         const c = candidateByNum.get(d.num);
-        const r = render(flatOf(d.num), c.enc === 'jpeg', MAX_UPSCALE, target);
-        entry = { ...ref, status: 'pdf-original', score: d.score, relaxed: d.relaxed, source: `${c.w}x${c.h} p${c.page}#${c.num}${c.mask ? '+mask' : ''}`, ...r };
+        jobs.push({
+            ref, base, native: flatOf(d.num), deblock: c.enc === 'jpeg', maxUpscale: MAX_UPSCALE,
+            entry: { status: 'pdf-original', score: d.score, relaxed: d.relaxed, source: `${c.w}x${c.h} p${c.page}#${c.num}${c.mask ? '+mask' : ''}` }
+        });
     } else {
         // The package picture is already enlarged from the PDF; clean it but do not enlarge it further.
-        const flat = flatten(pkgFile, null, 0, 0, path.join(tmp, `pkg-${report.length}.png`));
-        const r = render(flat, true, 1, target);
+        let native = flatten(pkgFile, null, 0, 0, path.join(tmp, `pkg-${jobs.length}.png`));
+        if (ai) {
+            // Back to about the PDF's resolution, so the upscaler sees real detail instead of interpolation blur.
+            const small = path.join(tmp, `pkg-${jobs.length}-native.png`);
+            ffmpeg(['-y', '-i', native, '-vf', `scale=iw/${FALLBACK_NATIVE_DIVISOR}:-1:flags=lanczos`, '-frames:v', '1', small]);
+            native = small;
+        }
         const closest = (matches[ref.name] ?? []).filter(x => x.page === ref.page).sort((a, b) => b.score - a.score)[0] ?? null;
-        entry = { ...ref, status: 'package-fallback', closest, ...r };
+        jobs.push({ ref, base, native, deblock: true, maxUpscale: 1, entry: { status: 'package-fallback', closest } });
+    }
+}
+
+let aiOut = null;
+if (ai) {
+    const aiIn = path.join(tmp, 'ai-in');
+    aiOut = path.join(tmp, 'ai-out');
+    fs.mkdirSync(aiIn, { recursive: true });
+    fs.mkdirSync(aiOut, { recursive: true });
+    jobs.filter(j => !j.missing).forEach(j => fs.copyFileSync(j.native, path.join(aiIn, `${j.base}.png`)));
+    console.log(`AI upscaling ${jobs.filter(j => !j.missing).length} pictures with ${ai.model}...`);
+    execFileSync(ai.exe, ['-i', aiIn, '-o', aiOut, '-n', ai.model, '-s', '4', '-f', 'png', '-m', ai.models], { stdio: 'ignore' });
+    fs.mkdirSync(path.join(args.out, 'review-src'), { recursive: true });
+}
+
+const report = [];
+for (const job of jobs) {
+    if (job.missing) {
+        report.push({ ...job.ref, status: 'missing' });
+        continue;
     }
 
-    report.push(entry);
+    const target = path.join(outImages, `${job.base}.jpg`);
+    let r, extra = {};
+    if (ai) {
+        const upscaled = path.join(aiOut, `${job.base}.png`);
+        if (!fs.existsSync(upscaled)) throw new Error(`AI upscaler produced no output for ${job.base}`);
+        // The upscaler removes JPEG artefacts itself; no further enlargement beyond filling the canvas.
+        r = render(upscaled, false, 1, target);
+        const change = aiChange(job.native, upscaled);
+        fs.copyFileSync(job.native, path.join(args.out, 'review-src', `${job.base}.png`));
+        extra = { ai: ai.model, aiChange: change };
+    } else {
+        r = render(job.native, job.deblock, job.maxUpscale, target);
+    }
+
+    report.push({ ...job.ref, ...job.entry, ...extra, ...r });
     if (report.length % 100 === 0) console.log(`rendered ${report.length}`);
 }
 
 fs.writeFileSync(path.join(args.out, 'image-report.json'), JSON.stringify(report, null, 1));
 fs.rmSync(tmp, { recursive: true, force: true });
 
+if (ai) {
+    writeReview(report, true);
+}
+
 const by = st => report.filter(x => x.status === st).length;
-console.log(`done: ${report.length} pictures, ${by('pdf-original')} from PDF originals, ${by('package-fallback')} fallback (${conflicts} after shared-original conflicts), ${by('missing')} missing`);
+console.log(`done: ${report.length} pictures, ${by('pdf-original')} from PDF originals, ${by('package-fallback')} fallback (${conflicts} after shared-original conflicts), ${by('missing')} missing${ai ? `, AI upscaled with ${ai.model}` : ''}`);
