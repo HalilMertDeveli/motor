@@ -16,11 +16,11 @@ using Smartstore.Core.Checkout.Tax;
 namespace MotorShop.CatalogImport.Tests;
 
 /// <summary>
-/// End-to-end pipeline on the in-memory database: stage → match → review → product.
+/// End-to-end pipeline: stage → match → review → product. Runs once on EF InMemory (<see cref="InMemoryPipelineTests"/>)
+/// and once on SQLite (<see cref="RelationalPipelineTests"/>).
 /// Every record here is a fixture (fictitious brand "Fixturebrand", make "Fixturemoto", example.org URLs).
 /// </summary>
-[TestFixture]
-public class PipelineTests : CatalogTestBase
+public abstract class PipelineTests : CatalogTestBase
 {
     protected static readonly DateTime Now = new(2026, 10, 19, 12, 0, 0, DateTimeKind.Utc);
 
@@ -787,4 +787,12 @@ public class PipelineTests : CatalogTestBase
     }
 
     #endregion
+}
+
+/// <summary>
+/// The pipeline suite on EF InMemory.
+/// </summary>
+[TestFixture]
+public class InMemoryPipelineTests : PipelineTests
+{
 }
