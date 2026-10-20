@@ -55,11 +55,36 @@ public static class IyzicoRequestBuilder
     public static string GetLocale(string languageCulture)
         => languageCulture.HasValue() && languageCulture.StartsWith("tr", StringComparison.OrdinalIgnoreCase) ? "tr" : "en";
 
-    public static List<int> GetInstallments(IyzicoSettings settings)
+    /// <summary>
+    /// Whether the order minimums of <paramref name="settings"/> apply to a customer with the given role system names.
+    /// </summary>
+    public static bool OrderMinimumsApply(IyzicoSettings settings, IEnumerable<string> customerRoleSystemNames)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var roles = settings.OrderMinimumsCustomerRoles.EmptyNull()
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        return roles.Length == 0 || (customerRoleSystemNames ?? []).Any(x => roles.Any(r => r.EqualsNoCase(x)));
+    }
+
+    /// <summary>
+    /// Whether a card payment of <paramref name="orderTotal"/> is below <see cref="IyzicoSettings.MinOrderTotal"/> for this customer.
+    /// </summary>
+    public static bool IsBelowMinOrderTotal(IyzicoSettings settings, decimal orderTotal, IEnumerable<string> customerRoleSystemNames)
+        => settings.MinOrderTotal > 0m && orderTotal < settings.MinOrderTotal && OrderMinimumsApply(settings, customerRoleSystemNames);
+
+    /// <summary>
+    /// Whether installments may be offered for <paramref name="orderTotal"/> and this customer (see <see cref="IyzicoSettings.MinInstallmentOrderTotal"/>).
+    /// </summary>
+    public static bool AreInstallmentsAllowed(IyzicoSettings settings, decimal orderTotal, IEnumerable<string> customerRoleSystemNames)
+        => !(settings.MinInstallmentOrderTotal > 0m && orderTotal < settings.MinInstallmentOrderTotal && OrderMinimumsApply(settings, customerRoleSystemNames));
+
+    public static List<int> GetInstallments(IyzicoSettings settings, bool singlePaymentOnly = false)
     {
         var result = new List<int>();
 
-        if (settings.EnableInstallments && settings.EnabledInstallments.HasValue())
+        if (!singlePaymentOnly && settings.EnableInstallments && settings.EnabledInstallments.HasValue())
         {
             foreach (var part in settings.EnabledInstallments.Split(',', ';', ' '))
             {
@@ -84,7 +109,8 @@ public static class IyzicoRequestBuilder
         IyzicoSettings settings,
         string conversationId,
         string callbackUrl,
-        string locale)
+        string locale,
+        bool singlePaymentOnly = false)
     {
         ArgumentNullException.ThrowIfNull(order);
         ArgumentNullException.ThrowIfNull(settings);
@@ -107,7 +133,7 @@ public static class IyzicoRequestBuilder
             BasketId = order.OrderGuid.ToString(),
             PaymentGroup = "PRODUCT",
             CallbackUrl = callbackUrl,
-            EnabledInstallments = GetInstallments(settings),
+            EnabledInstallments = GetInstallments(settings, singlePaymentOnly),
             Buyer = new IyzicoBuyer
             {
                 Id = order.CustomerId.ToString(CultureInfo.InvariantCulture),
