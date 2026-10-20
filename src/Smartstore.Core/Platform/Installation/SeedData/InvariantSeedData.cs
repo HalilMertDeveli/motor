@@ -241,6 +241,12 @@ public abstract partial class InvariantSeedData
     protected virtual string TaxNameTaxFree => "Tax free";
     public virtual decimal[] FixedTaxRates => new decimal[] { 0, 0, 0, 0, 0 };
 
+    /// <summary>
+    /// MOTOR: seeds the store's own catalog structure (independent of sample data). Nothing by default.
+    /// </summary>
+    public virtual Task SeedStoreCatalogAsync()
+        => Task.CompletedTask;
+
     public IList<TaxCategory> TaxCategories()
     {
         var entities = new List<TaxCategory>
