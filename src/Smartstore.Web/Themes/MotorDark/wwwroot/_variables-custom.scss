@@ -14,9 +14,12 @@ $motor-line:                rgba(#fff, 0.08);
 $motor-line-strong:         rgba(#fff, 0.14);
 $motor-text:                #f4f4f2;
 $motor-text-muted:          #9a9ca3;
-$motor-accent:              #ff5a1f;
-$motor-accent-hover:        #ff7440;
-$motor-on-accent:           #08090b;
+// Prosev catalog red. Text on the dark background uses the lighter $motor-accent-text (AA 4.5:1);
+// white on $motor-accent is 4.6:1, on the darker hover red 5.7:1.
+$motor-accent:              #e3262f;
+$motor-accent-hover:        #c81f27;
+$motor-accent-text:         #ff5059;
+$motor-on-accent:           #ffffff;
 
 $component-active-color:    $motor-on-accent;
 $component-active-bg:       $motor-accent;
