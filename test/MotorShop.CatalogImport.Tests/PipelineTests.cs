@@ -22,22 +22,36 @@ namespace MotorShop.CatalogImport.Tests;
 [TestFixture]
 public class PipelineTests : CatalogTestBase
 {
-    static readonly DateTime Now = new(2026, 10, 19, 12, 0, 0, DateTimeKind.Utc);
+    protected static readonly DateTime Now = new(2026, 10, 19, 12, 0, 0, DateTimeKind.Utc);
 
     /// <summary>
     /// Slugs need the URL service; not under test here.
     /// </summary>
-    private class TestPublicationService(Smartstore.Core.Data.SmartDbContext db) : CatalogPublicationService(db, null)
+    protected class TestPublicationService(Smartstore.Core.Data.SmartDbContext db) : CatalogPublicationService(db, null)
     {
-        protected override Task SaveSlugAsync<T>(T entity, string name) => Task.CompletedTask;
+        /// <summary>
+        /// Makes the next slug save fail: the last step of creating a product, after the product and its link were saved.
+        /// </summary>
+        public bool FailOnNextSlug { get; set; }
+
+        protected override Task SaveSlugAsync<T>(T entity, string name)
+        {
+            if (FailOnNextSlug)
+            {
+                FailOnNextSlug = false;
+                throw new InvalidOperationException("Injected slug failure.");
+            }
+
+            return Task.CompletedTask;
+        }
     }
 
-    private CatalogPublicationService _publication;
-    private FitmentMatcher _matcher;
-    private CatalogImportService _import;
-    private VehicleReferenceService _vehicles;
-    private CatalogSource _research;
-    private CatalogSource _supplier;
+    protected TestPublicationService _publication;
+    protected FitmentMatcher _matcher;
+    protected CatalogImportService _import;
+    protected VehicleReferenceService _vehicles;
+    protected CatalogSource _research;
+    protected CatalogSource _supplier;
 
     [SetUp]
     public async Task ResetAsync()
@@ -54,6 +68,7 @@ public class PipelineTests : CatalogTestBase
         db.RemoveRange(await db.ProductMotorVehicles().ToListAsync());
         db.RemoveRange(await db.MotorVehicles().ToListAsync());
         db.RemoveRange(await db.ProductMediaFiles.ToListAsync());
+        db.RemoveRange(await db.MediaFiles.ToListAsync());
         db.RemoveRange(await db.ProductManufacturers.ToListAsync());
         db.RemoveRange(await db.Products.ToListAsync());
         db.RemoveRange(await db.Manufacturers.ToListAsync());
@@ -69,12 +84,12 @@ public class PipelineTests : CatalogTestBase
         _publication = new TestPublicationService(db) { UtcNow = () => Now };
         _matcher = new FitmentMatcher(db);
         _import = new CatalogImportService(db, _matcher, _publication) { UtcNow = () => Now };
-        _vehicles = new VehicleReferenceService(db, _matcher);
+        _vehicles = new VehicleReferenceService(db, _matcher, _publication);
     }
 
     #region Fixtures
 
-    static object VehicleJson(string model, int? yearFrom, int[] years, decimal? cc = 249, string variant = null, string confidence = "HIGH")
+    protected static object VehicleJson(string model, int? yearFrom, int[] years, decimal? cc = 249, string variant = null, string confidence = "HIGH")
         => new
         {
             make = "Fixturemoto",
@@ -89,7 +104,7 @@ public class PipelineTests : CatalogTestBase
             sources = new[] { new { url = "https://fixture.example.org/" + model, organization = "Fixture OEM", type = "OFFICIAL_MANUFACTURER", accessed = "2026-10-19" } }
         };
 
-    static object PartJson(string mpn, string name = null, params (string Model, int From, int? To)[] fitment)
+    protected static object PartJson(string mpn, string name = null, params (string Model, int From, int? To)[] fitment)
         => new
         {
             brand = "Fixturebrand",
@@ -103,9 +118,9 @@ public class PipelineTests : CatalogTestBase
             fitment = fitment.Select(f => new { make = "Fixturemoto", model = f.Model, yearFrom = f.From, yearTo = f.To, sourceUrl = "https://fixture.example.org/fit/" + mpn }).ToArray()
         };
 
-    static string Json(params object[] records) => JsonSerializer.Serialize(records);
+    protected static string Json(params object[] records) => JsonSerializer.Serialize(records);
 
-    private async Task<int> StageVehiclesAndPublishAsync(params object[] vehicles)
+    protected async Task<int> StageVehiclesAndPublishAsync(params object[] vehicles)
     {
         var result = await _import.StageAsync(_research.Id, CatalogImportKind.Vehicles, "vehicles.json", Json(vehicles));
         Assert.That(result.Batch.Status, Is.EqualTo(CatalogBatchStatus.Completed), result.Batch.IssuesJson);
@@ -113,7 +128,7 @@ public class PipelineTests : CatalogTestBase
         return published.Created;
     }
 
-    private async Task<CatalogPart> StagePartAsync(object part)
+    protected async Task<CatalogPart> StagePartAsync(object part)
     {
         var result = await _import.StageAsync(_research.Id, CatalogImportKind.Parts, "parts.json", Json(part));
         Assert.That(result.Batch.Status, Is.Not.EqualTo(CatalogBatchStatus.Failed), result.Batch.FailureReason);
@@ -121,7 +136,7 @@ public class PipelineTests : CatalogTestBase
         return await DbContext.CatalogParts().SingleAsync();
     }
 
-    private async Task MakeSellableAsync(CatalogPart part, int stock = 5)
+    protected async Task MakeSellableAsync(CatalogPart part, int stock = 5)
     {
         var tax = new TaxCategory { Name = "Fixture tax" };
         DbContext.TaxCategories.Add(tax);
@@ -133,7 +148,12 @@ public class PipelineTests : CatalogTestBase
 
         await _publication.UpdateCommerceAsync(part.Id, 249.90m, tax.Id, null, true, "Fixture: written permission");
 
-        DbContext.ProductMediaFiles.Add(new ProductMediaFile { ProductId = part.ProductId.Value, MediaFileId = 1 });
+        // A real media row: the relational fixture enforces the foreign key.
+        var picture = new Smartstore.Core.Content.Media.MediaFile { Name = "fixture.jpg", Extension = "jpg", MimeType = "image/jpeg", MediaType = "image", CreatedOnUtc = Now, UpdatedOnUtc = Now };
+        DbContext.MediaFiles.Add(picture);
+        await DbContext.SaveChangesAsync();
+
+        DbContext.ProductMediaFiles.Add(new ProductMediaFile { ProductId = part.ProductId.Value, MediaFileId = picture.Id });
         await DbContext.SaveChangesAsync();
     }
 
@@ -416,7 +436,7 @@ public class PipelineTests : CatalogTestBase
 
         var match = await DbContext.CatalogFitmentMatches().SingleAsync();
         Assert.That(match.Kind, Is.EqualTo(FitmentMatchKind.Partial));
-        Assert.ThrowsAsync<PublicationException>(() => _publication.ApproveMatchAsync(match.Id, "fixture-admin"));
+        Assert.ThrowsAsync<PublicationException>(() => _publication.ApproveMatchAsync(part.Id, match.Id, "fixture-admin"));
     }
 
     [Test]
@@ -540,17 +560,17 @@ public class PipelineTests : CatalogTestBase
         Assert.That(matches, Has.Count.EqualTo(2));
 
         // Approving before the part is a product creates no mapping yet.
-        await _publication.ApproveMatchAsync(matches[0].Id, "fixture-admin");
+        await _publication.ApproveMatchAsync(part.Id, matches[0].Id, "fixture-admin");
         Assert.That(await DbContext.ProductMotorVehicles().CountAsync(), Is.Zero);
 
-        await _publication.ApproveMatchAsync(matches[1].Id, "fixture-admin");
+        await _publication.ApproveMatchAsync(part.Id, matches[1].Id, "fixture-admin");
         await _publication.ApproveReferenceAsync(part.Id, "fixture-admin");
 
         var product = await DbContext.Products.SingleAsync();
         var mapped = await DbContext.ProductMotorVehicles().Where(x => x.ProductId == product.Id).Select(x => x.MotorVehicleId).ToListAsync();
         Assert.That(mapped, Is.EquivalentTo(matches.Select(x => x.MotorVehicleId)), "One product fits several motorcycles.");
 
-        await _publication.RejectMatchAsync(matches[0].Id, "fixture-admin");
+        await _publication.RejectMatchAsync(part.Id, matches[0].Id, "fixture-admin");
         mapped = await DbContext.ProductMotorVehicles().Select(x => x.MotorVehicleId).ToListAsync();
         Assert.That(mapped, Is.EquivalentTo(new[] { matches[1].MotorVehicleId }));
     }
@@ -568,7 +588,7 @@ public class PipelineTests : CatalogTestBase
         await DbContext.SaveChangesAsync();
 
         var match = await DbContext.CatalogFitmentMatches().SingleAsync();
-        await _publication.RejectMatchAsync(match.Id, "fixture-admin");
+        await _publication.RejectMatchAsync(part.Id, match.Id, "fixture-admin");
 
         Assert.That(await DbContext.ProductMotorVehicles().CountAsync(), Is.EqualTo(1));
     }
@@ -593,6 +613,177 @@ public class PipelineTests : CatalogTestBase
         var part = await StagePartAsync(PartJson("FX-100"));
         var ex = Assert.ThrowsAsync<PublicationException>(() => _publication.UpdateCommerceAsync(part.Id, 10m, null, null, true, " "));
         Assert.That(ex.Message, Is.EqualTo("ImageRightsNote"));
+    }
+
+    #endregion
+
+    #region Review fixes
+
+    static System.Text.Json.Nodes.JsonObject Node(object record) => JsonSerializer.SerializeToNode(record)!.AsObject();
+
+    /// <summary>
+    /// FX 250 (2014-2016) in the selector, part FX-100 stating 2014-2016, match approved, part published as reference.
+    /// </summary>
+    private async Task<(CatalogPart Part, Product Product)> ApprovedFitmentAsync()
+    {
+        await StageVehiclesAndPublishAsync(VehicleJson("FX 250", 2014, [2014, 2016]));
+        var part = await StagePartAsync(PartJson("FX-100", null, ("FX 250", 2014, 2016)));
+        var match = await DbContext.CatalogFitmentMatches().SingleAsync();
+        Assert.That(match.Kind, Is.EqualTo(FitmentMatchKind.Exact));
+
+        await _publication.ApproveMatchAsync(part.Id, match.Id, "fixture-admin");
+        await _publication.ApproveReferenceAsync(part.Id, "fixture-admin");
+        DbContext.ChangeTracker.Clear();
+
+        var product = await DbContext.Products.SingleAsync();
+        Assert.That(await DbContext.ProductMotorVehicles().CountAsync(x => x.ProductId == product.Id), Is.EqualTo(1));
+        return (part, product);
+    }
+
+    [Test]
+    public async Task Resync_to_wider_years_withdraws_the_approval_and_its_mapping()
+    {
+        await ApprovedFitmentAsync();
+
+        // The official source now lists the motorcycle for 2014-2017; the part maker still states 2014-2016.
+        var staged = await _import.StageAsync(_research.Id, CatalogImportKind.Vehicles, "vehicles-v2.json", Json(VehicleJson("FX 250", 2014, [2014, 2017])));
+        Assert.That(staged.Batch.Status, Is.EqualTo(CatalogBatchStatus.Completed), staged.Batch.IssuesJson);
+        var reference = await DbContext.CatalogVehicleReferences().SingleAsync();
+        Assert.That(reference.HasPendingChanges, Is.True);
+
+        Assert.That(await _vehicles.ResyncAsync(reference.Id), Is.True);
+
+        DbContext.ChangeTracker.Clear();
+        var vehicle = await DbContext.MotorVehicles().SingleAsync();
+        Assert.That((vehicle.YearFrom, vehicle.YearTo), Is.EqualTo((2014, 2017)));
+        Assert.That(await DbContext.ProductMotorVehicles().CountAsync(), Is.Zero, "A 2014-2016 statement must not make the product claim the 2017 model.");
+
+        var match = await DbContext.CatalogFitmentMatches().SingleAsync();
+        Assert.That(match.Kind, Is.EqualTo(FitmentMatchKind.Partial));
+        Assert.That(match.Status, Is.EqualTo(FitmentMatchStatus.Proposed), "The match needs a new review.");
+        Assert.That(match.ReviewedBy, Is.Null);
+        Assert.That(match.CreatedMapping, Is.False);
+    }
+
+    [Test]
+    public async Task Motorcycle_losing_verification_voids_approved_match_and_mapping()
+    {
+        await ApprovedFitmentAsync();
+
+        // Only a low-confidence record is left for the motorcycle: it is no longer a verified candidate.
+        var staged = await _import.StageAsync(_research.Id, CatalogImportKind.Vehicles, "vehicles-v2.json", Json(VehicleJson("FX 250", 2014, [2014, 2016], confidence: "LOW")));
+        Assert.That(staged.Batch.Status, Is.Not.EqualTo(CatalogBatchStatus.Failed), staged.Batch.FailureReason);
+
+        DbContext.ChangeTracker.Clear();
+        Assert.That((await DbContext.CatalogVehicleReferences().SingleAsync()).Status, Is.EqualTo(VehicleReferenceStatus.Candidate));
+        Assert.That(await DbContext.CatalogFitmentMatches().CountAsync(), Is.Zero);
+        Assert.That(await DbContext.ProductMotorVehicles().CountAsync(), Is.Zero);
+    }
+
+    [Test]
+    public async Task Admin_rematch_refreshes_product_mappings()
+    {
+        var (part, product) = await ApprovedFitmentAsync();
+
+        // The motorcycle's verified reference is withdrawn outside the import (e.g. rejected by an admin).
+        var reference = await DbContext.CatalogVehicleReferences().SingleAsync();
+        reference.Status = VehicleReferenceStatus.Rejected;
+        await DbContext.SaveChangesAsync();
+
+        var result = await _vehicles.RematchAsync();
+
+        Assert.That(result.AffectedPartIds, Is.EquivalentTo(new[] { part.Id }));
+        DbContext.ChangeTracker.Clear();
+        Assert.That(await DbContext.ProductMotorVehicles().CountAsync(x => x.ProductId == product.Id), Is.Zero);
+    }
+
+    [Test]
+    public async Task Match_can_only_be_reviewed_on_its_own_part()
+    {
+        await StageVehiclesAndPublishAsync(VehicleJson("FX 250", 2019, [2019, 2021]));
+        await _import.StageAsync(_research.Id, CatalogImportKind.Parts, "parts.json", Json(PartJson("FX-100", null, ("FX 250", 2019, 2022)), PartJson("FX-200")));
+        var other = await DbContext.CatalogParts().SingleAsync(x => x.Mpn == "FX-200");
+        var match = await DbContext.CatalogFitmentMatches().SingleAsync();
+
+        var ex = Assert.ThrowsAsync<PublicationException>(() => _publication.ApproveMatchAsync(other.Id, match.Id, "fixture-admin"));
+        Assert.That(ex.Message, Is.EqualTo("UnknownMatch"));
+        ex = Assert.ThrowsAsync<PublicationException>(() => _publication.RejectMatchAsync(other.Id, match.Id, "fixture-admin"));
+        Assert.That(ex.Message, Is.EqualTo("UnknownMatch"));
+
+        DbContext.ChangeTracker.Clear();
+        Assert.That((await DbContext.CatalogFitmentMatches().SingleAsync()).Status, Is.EqualTo(FitmentMatchStatus.Proposed));
+    }
+
+    [Test]
+    public async Task Unknown_source_key_rejects_the_record()
+    {
+        var part = Node(PartJson("FX-100"));
+        part["sourceKey"] = "fixture-unregistered";
+        var result = await _import.StageAsync(_research.Id, CatalogImportKind.Parts, "parts.json", $"[{part.ToJsonString()}]");
+
+        Assert.That(result.Batch.Status, Is.EqualTo(CatalogBatchStatus.CompletedWithErrors));
+        Assert.That(result.Batch.InvalidCount, Is.EqualTo(1));
+        Assert.That(result.Batch.IssuesJson, Does.Contain("fixture-unregistered"));
+        Assert.That(await DbContext.CatalogParts().CountAsync(), Is.Zero, "The record must not inherit the feed source's permission.");
+    }
+
+    [Test]
+    public async Task Gtin_belongs_to_one_part_only()
+    {
+        const string gtin = "4006381333931";
+        var first = Node(PartJson("FX-100"));
+        first["gtin"] = gtin;
+        var twin = Node(PartJson("FX-200"));
+        twin["gtin"] = gtin;
+
+        var result = await _import.StageAsync(_research.Id, CatalogImportKind.Parts, "parts.json", $"[{first.ToJsonString()},{twin.ToJsonString()}]");
+        Assert.That(result.Batch.Status, Is.EqualTo(CatalogBatchStatus.CompletedWithErrors));
+        Assert.That(result.Batch.InvalidCount, Is.EqualTo(1));
+        Assert.That(await DbContext.CatalogParts().Select(x => x.Mpn).ToListAsync(), Is.EqualTo(new[] { "FX-100" }));
+
+        // A later file cannot give the GTIN to another part either; the owner itself may repeat it.
+        var later = Node(PartJson("FX-300"));
+        later["gtin"] = gtin;
+        result = await _import.StageAsync(_research.Id, CatalogImportKind.Parts, "parts-2.json", $"[{first.ToJsonString()},{later.ToJsonString()}]");
+        Assert.That(result.Batch.InvalidCount, Is.EqualTo(1));
+        Assert.That(result.Batch.UnchangedCount, Is.EqualTo(1));
+        Assert.That(await DbContext.CatalogParts().CountAsync(), Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task Existing_product_with_same_mpn_is_a_conflict_not_a_twin()
+    {
+        DbContext.Products.Add(new Product { Name = "Shop product FX-100", Sku = "SHOP-1", ManufacturerPartNumber = "FX-100", CreatedOnUtc = Now, UpdatedOnUtc = Now });
+        await DbContext.SaveChangesAsync();
+        var part = await StagePartAsync(PartJson("FX-100"));
+
+        var ex = Assert.ThrowsAsync<PublicationException>(() => _publication.ApproveReferenceAsync(part.Id, "fixture-admin"));
+        Assert.That(ex.Message, Does.Contain("NoProductConflict"));
+
+        DbContext.ChangeTracker.Clear();
+        part = await DbContext.CatalogParts().SingleAsync();
+        Assert.That(await DbContext.Products.CountAsync(), Is.EqualTo(1));
+        Assert.That(part.ProductId, Is.Null);
+        Assert.That(part.State, Is.EqualTo(PartPublicationState.ResearchCandidate));
+        Assert.That((await _publication.FindConflictingProductsAsync(part)).Select(x => x.Sku), Is.EqualTo(new[] { "SHOP-1" }));
+    }
+
+    [Test]
+    public async Task Failed_product_creation_never_leads_to_a_twin()
+    {
+        var part = await StagePartAsync(PartJson("FX-100"));
+
+        _publication.FailOnNextSlug = true;
+        Assert.ThrowsAsync<InvalidOperationException>(() => _publication.ApproveReferenceAsync(part.Id, "fixture-admin"));
+
+        DbContext.ChangeTracker.Clear();
+        await _publication.ApproveReferenceAsync(part.Id, "fixture-admin");
+
+        DbContext.ChangeTracker.Clear();
+        var product = await DbContext.Products.SingleAsync();
+        part = await DbContext.CatalogParts().SingleAsync();
+        Assert.That(part.ProductId, Is.EqualTo(product.Id));
+        Assert.That(product.Published, Is.True);
     }
 
     #endregion

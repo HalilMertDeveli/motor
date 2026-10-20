@@ -179,12 +179,17 @@ public partial class CatalogImportService
         if (affectedPartIds.Count > 0)
         {
             // MATCH and VERIFY run on committed data; they never decide approval.
-            await _matcher.MatchPartsAsync(affectedPartIds, cancelToken);
-            await _publication.RefreshAsync(affectedPartIds, cancelToken);
+            var matched = await _matcher.MatchPartsAsync(affectedPartIds, cancelToken);
+            await _publication.RefreshAsync(affectedPartIds.Union(matched.AffectedPartIds), cancelToken);
         }
         else if (kind == CatalogImportKind.Vehicles && failure == null)
         {
-            await _matcher.MatchPartsAsync(null, cancelToken);
+            // A motorcycle that lost its verification or changed years can void approved matches.
+            var matched = await _matcher.MatchPartsAsync(null, cancelToken);
+            if (matched.AffectedPartIds.Count > 0)
+            {
+                await _publication.RefreshAsync(matched.AffectedPartIds, cancelToken);
+            }
         }
 
         return new StageResult(batch, false);
@@ -224,8 +229,8 @@ public partial class CatalogImportService
         part.HasPendingChanges = false;
         await _db.SaveChangesAsync(cancelToken);
 
-        await _matcher.MatchPartsAsync([partId], cancelToken);
-        await _publication.RefreshAsync([partId], cancelToken);
+        var matched = await _matcher.MatchPartsAsync([partId], cancelToken);
+        await _publication.RefreshAsync(matched.AffectedPartIds.Append(partId), cancelToken);
         return true;
     }
 
@@ -244,8 +249,9 @@ public partial class CatalogImportService
     }
 
     /// <summary>
-    /// Resolves the source a record names. Unknown keys fall back to the feed source with a warning;
-    /// a source that does not allow staging rejects the record.
+    /// Resolves the source a record names. A record without a key belongs to the feed source. An unknown key
+    /// rejects the record: falling back to the feed source would give it a permission it may not have.
+    /// A source that does not allow staging rejects the record too.
     /// </summary>
     private static CatalogSource ResolveSource(string sourceKey, CatalogSource feedSource, Dictionary<string, CatalogSource> sources, int row, string label, List<ImportIssue> issues)
     {
@@ -256,8 +262,8 @@ public partial class CatalogImportService
 
         if (!sources.TryGetValue(sourceKey.Trim(), out var source))
         {
-            issues.Add(new(row, label, "sourceKey", $"Unknown source {sourceKey}; the record is attributed to {feedSource.Key}.", IssueSeverity.Warning));
-            return feedSource;
+            issues.Add(new(row, label, "sourceKey", $"Unknown source {sourceKey}; register the source first. The record was not staged.", IssueSeverity.Error));
+            return null;
         }
 
         if (!source.AllowsStaging)
@@ -448,6 +454,8 @@ public partial class CatalogImportService
             valid[key] = (row, record, recordSource);
         }
 
+        await RejectDuplicateGtinsAsync(batch, valid, issues, cancelToken);
+
         var brandKeys = valid.Values.Select(x => CatalogNormalizer.Key(x.Record.Brand)).Distinct().ToList();
         var mpnKeys = valid.Values.Select(x => CatalogNormalizer.MpnKey(x.Record.Mpn)).Distinct().ToList();
         var existing = (await _db.CatalogParts()
@@ -525,6 +533,54 @@ public partial class CatalogImportService
 
         affectedPartIds.UnionWith(existing.Values.Select(x => x.Id));
         affectedPartIds.UnionWith(created.Select(x => x.Part.Id));
+    }
+
+    /// <summary>
+    /// A GTIN identifies exactly one trade item. Two parts (different brand or part number) with the same GTIN are a
+    /// data error: the record is rejected rather than guessing which of the two is right.
+    /// </summary>
+    private async Task RejectDuplicateGtinsAsync(
+        CatalogImportBatch batch,
+        Dictionary<string, (int Row, PartRecord Record, CatalogSource Source)> valid,
+        List<ImportIssue> issues,
+        CancellationToken cancelToken)
+    {
+        var owners = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var (key, (row, record, _)) in valid.Where(x => x.Value.Record.Gtin != null).OrderBy(x => x.Value.Row).ToList())
+        {
+            if (!owners.TryAdd(record.Gtin, key))
+            {
+                Reject(key, row, record, $"GTIN {record.Gtin} is already used by row {valid[owners[record.Gtin]].Row} in this file.");
+            }
+        }
+
+        if (owners.Count == 0)
+        {
+            return;
+        }
+
+        var gtins = owners.Keys.ToList();
+        var taken = await _db.CatalogParts()
+            .AsNoTracking()
+            .Where(x => x.Gtin != null && gtins.Contains(x.Gtin))
+            .Select(x => new { x.Gtin, x.Brand, x.Mpn, x.BrandKey, x.MpnKey })
+            .ToListAsync(cancelToken);
+
+        foreach (var t in taken)
+        {
+            if (owners.TryGetValue(t.Gtin, out var key) && key != $"{t.BrandKey}|{t.MpnKey}" && valid.TryGetValue(key, out var v))
+            {
+                Reject(key, v.Row, v.Record, $"GTIN {t.Gtin} already belongs to catalog part {t.Brand} {t.Mpn}.");
+            }
+        }
+
+        void Reject(string key, int row, PartRecord record, string message)
+        {
+            issues.Add(new(row, $"{record.Brand} {record.Mpn}", "gtin", message + " The record was not staged.", IssueSeverity.Error));
+            valid.Remove(key);
+            batch.InvalidCount++;
+        }
     }
 
     private async Task ApplyPartAsync(CatalogPart part, PartRecord record, int sourceId, int? batchId, CancellationToken cancelToken)
@@ -812,16 +868,17 @@ public partial class CatalogImportService
 
     #endregion
 
+    /// <summary>
+    /// After a rollback every tracked entity may hold values the database no longer has, including entities saved
+    /// (and given keys) inside the rolled back transaction. Forget all of them; only the batch row, which was committed
+    /// before the transaction, is attached again so its outcome can be saved.
+    /// </summary>
     private void DiscardPendingChanges(CatalogImportBatch batch)
     {
-        foreach (var entry in _db.ChangeTracker.Entries().ToList())
-        {
-            if (!ReferenceEquals(entry.Entity, batch) && entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
-            {
-                entry.State = EntityState.Detached;
-            }
-        }
+        _db.ChangeTracker.Clear();
 
         batch.CreatedCount = batch.UpdatedCount = batch.UnchangedCount = batch.MissingCount = 0;
+        _db.CatalogImportBatches().Attach(batch);
+        _db.Entry(batch).State = EntityState.Modified;
     }
 }

@@ -243,6 +243,18 @@ public static partial class CatalogValidator
             }
         }
 
+        var specs = (r.Specs ?? [])
+            .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !string.IsNullOrWhiteSpace(x.Value))
+            .Select(x => (Key: CatalogNormalizer.CollapseWhitespace(x.Key), Value: CatalogNormalizer.CollapseWhitespace(x.Value)))
+            .ToList();
+
+        var duplicateSpecs = specs.GroupBy(x => x.Key, StringComparer.Ordinal).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+        if (duplicateSpecs.Count > 0)
+        {
+            // Two values for one key: neither can be trusted.
+            Error("specs", $"Spec keys {string.Join(", ", duplicateSpecs.Select(x => $"'{x}'"))} appear more than once after whitespace normalization.");
+        }
+
         if (issues.Any(x => x.Severity == IssueSeverity.Error))
         {
             return new(default, issues);
@@ -259,9 +271,7 @@ public static partial class CatalogValidator
             Gtin = gtin,
             Classification = classification.ToString(),
             Condition = r.Condition?.Trim().ToLowerInvariant().NullEmpty(),
-            Specs = (r.Specs ?? [])
-                .Where(x => !string.IsNullOrWhiteSpace(x.Key) && !string.IsNullOrWhiteSpace(x.Value))
-                .ToDictionary(x => CatalogNormalizer.CollapseWhitespace(x.Key), x => CatalogNormalizer.CollapseWhitespace(x.Value)),
+            Specs = specs.ToDictionary(x => x.Key, x => x.Value, StringComparer.Ordinal),
             PackageQuantity = r.PackageQuantity > 0 ? r.PackageQuantity : null,
             Fitment = fitment,
             Sources = sources,

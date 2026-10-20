@@ -71,7 +71,7 @@
                 <ul class="small mb-0 ps-3 pl-3">
                     @foreach (var s in Model.Sources)
                     {
-                        <li><a href="@s.Url" target="_blank" rel="noopener noreferrer" class="text-break">@s.Url</a> · @s.Organization · @s.Type · @s.Accessed · @string.Join(", ", s.Supports)</li>
+                        <li>@if (CatalogValidator.IsHttpUrl(s.Url)) { <a href="@s.Url" target="_blank" rel="noopener noreferrer" class="text-break">@s.Url</a> } else { <span class="text-break">@s.Url</span> } ·@s.Organization · @s.Type · @s.Accessed · @string.Join(", ", s.Supports)</li>
                     }
                 </ul>
             </div>
@@ -121,7 +121,10 @@
                             <tr>
                                 <td>
                                     <div>@f.Make @f.Model @f.Variant <span class="text-nowrap">@f.YearFrom–@(f.YearTo?.ToString() ?? "…")</span> @f.Position</div>
-                                    <a class="small text-break" href="@f.SourceUrl" target="_blank" rel="noopener noreferrer">@f.SourceUrl</a>
+                                    @if (CatalogValidator.IsHttpUrl(f.SourceUrl))
+                                    {
+                                        <a class="small text-break" href="@f.SourceUrl" target="_blank" rel="noopener noreferrer">@f.SourceUrl</a>
+                                    }
                                     @if (f.IsMissingFromSource) { <span class="badge badge-danger bg-danger">@T(res + "Part.MissingFromSource")</span> }
                                 </td>
                                 <td>
@@ -201,6 +204,16 @@
                 else
                 {
                     <ul class="small text-danger">@foreach (var m in r.MissingForReference) { <li>@T(res + "Requirement." + m)</li> }</ul>
+                }
+                @if (Model.ProductConflicts.Count > 0)
+                {
+                    <p class="small mb-1">@T(res + "Part.ProductConflicts")</p>
+                    <ul class="small">
+                        @foreach (var c in Model.ProductConflicts)
+                        {
+                            <li><a href="@Url.Action("Edit", "Product", new { id = c.ProductId, area = "Admin" })">#@c.ProductId @c.Name</a> · SKU @(c.Sku ?? "-") · MPN @(c.Mpn ?? "-") · GTIN @(c.Gtin ?? "-")</li>
+                        }
+                    </ul>
                 }
                 <h6>@T(res + "State.ReadyForSale")</h6>
                 @if (r.MissingForSale.Count == 0)

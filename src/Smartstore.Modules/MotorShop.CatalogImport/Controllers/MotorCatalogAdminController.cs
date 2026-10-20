@@ -28,20 +28,17 @@ public class MotorCatalogAdminController : AdminController
     private readonly CatalogImportService _importService;
     private readonly CatalogPublicationService _publication;
     private readonly VehicleReferenceService _vehicles;
-    private readonly FitmentMatcher _matcher;
 
     public MotorCatalogAdminController(
         SmartDbContext db,
         CatalogImportService importService,
         CatalogPublicationService publication,
-        VehicleReferenceService vehicles,
-        FitmentMatcher matcher)
+        VehicleReferenceService vehicles)
     {
         _db = db;
         _importService = importService;
         _publication = publication;
         _vehicles = vehicles;
-        _matcher = matcher;
     }
 
     private string CurrentUser
@@ -186,6 +183,11 @@ public class MotorCatalogAdminController : AdminController
             ModelState.AddModelError(nameof(model.AgreementReference), T(ResRoot + "Source.AgreementRequired"));
         }
 
+        foreach (var field in model.GetInvalidUrlFields())
+        {
+            ModelState.AddModelError(field, T(ResRoot + "Source.InvalidUrl"));
+        }
+
         if (await _db.CatalogSources().AnyAsync(x => x.Key == model.Key && x.Id != model.Id))
         {
             ModelState.AddModelError(nameof(model.Key), T(ResRoot + "Source.KeyExists"));
@@ -277,6 +279,7 @@ public class MotorCatalogAdminController : AdminController
             Part = part,
             Source = sources.Get(part.SourceId),
             Readiness = await _publication.GetReadinessAsync(part),
+            ProductConflicts = await _publication.FindConflictingProductsAsync(part),
             Sources = part.SourcesJson.HasValue() ? JsonSerializer.Deserialize<List<SourceRef>>(part.SourcesJson, CatalogImportService.JsonOptions) : [],
             Specs = part.SpecsJson.HasValue() ? JsonSerializer.Deserialize<Dictionary<string, string>>(part.SpecsJson, CatalogImportService.JsonOptions) : [],
             PendingChanges = part.PendingChangesJson.HasValue() ? JsonSerializer.Deserialize<PartRecord>(part.PendingChangesJson, CatalogImportService.JsonOptions) : null,
@@ -336,12 +339,12 @@ public class MotorCatalogAdminController : AdminController
     [HttpPost]
     [Permission(Permissions.Catalog.Product.Update)]
     public async Task<IActionResult> ApproveMatch(int id, int matchId)
-        => await RunPartActionAsync(id, () => _publication.ApproveMatchAsync(matchId, CurrentUser));
+        => await RunPartActionAsync(id, () => _publication.ApproveMatchAsync(id, matchId, CurrentUser));
 
     [HttpPost]
     [Permission(Permissions.Catalog.Product.Update)]
     public async Task<IActionResult> RejectMatch(int id, int matchId)
-        => await RunPartActionAsync(id, () => _publication.RejectMatchAsync(matchId, CurrentUser));
+        => await RunPartActionAsync(id, () => _publication.RejectMatchAsync(id, matchId, CurrentUser));
 
     [HttpPost]
     [Permission(Permissions.Catalog.Product.Update)]
@@ -356,7 +359,7 @@ public class MotorCatalogAdminController : AdminController
         {
             foreach (var matchId in matchIds)
             {
-                await _publication.ApproveMatchAsync(matchId, CurrentUser);
+                await _publication.ApproveMatchAsync(id, matchId, CurrentUser);
             }
         });
     }
@@ -365,8 +368,8 @@ public class MotorCatalogAdminController : AdminController
     [Permission(Permissions.Catalog.Product.Update)]
     public async Task<IActionResult> Rematch()
     {
-        var added = await _matcher.MatchPartsAsync(null);
-        NotifySuccess(T(ResRoot + "Rematch.Done", added));
+        var result = await _vehicles.RematchAsync();
+        NotifySuccess(T(ResRoot + "Rematch.Done", result.Added));
         return RedirectToAction(nameof(Index));
     }
 

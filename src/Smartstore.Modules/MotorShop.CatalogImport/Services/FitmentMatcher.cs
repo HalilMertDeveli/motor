@@ -68,11 +68,15 @@ public class FitmentMatcher
     }
 
     /// <summary>
-    /// Adds missing proposals and removes proposals that no longer hold. Reviewed matches (approved or rejected) are kept.
+    /// Adds missing proposals and withdraws matches the evidence no longer supports:
+    /// an approved match whose motorcycle is now only partly covered goes back to <see cref="FitmentMatchStatus.Proposed"/>,
+    /// and a proposed or approved match whose motorcycle no longer overlaps (or is no longer verified) is removed together
+    /// with the product mapping it created. Rejected matches are kept as the admin's decision.
+    /// Callers must pass <see cref="FitmentMatchResult.AffectedPartIds"/> to <see cref="CatalogPublicationService.RefreshAsync"/>,
+    /// which brings product mappings and sale readiness in line with the new matches.
     /// </summary>
     /// <param name="partIds">Parts to match, or null for all.</param>
-    /// <returns>Number of new proposals.</returns>
-    public async Task<int> MatchPartsAsync(IEnumerable<int> partIds, CancellationToken cancelToken = default)
+    public async Task<FitmentMatchResult> MatchPartsAsync(IEnumerable<int> partIds, CancellationToken cancelToken = default)
     {
         var ids = partIds?.ToList();
         var vehicles = await GetVerifiedVehiclesAsync(cancelToken);
@@ -87,15 +91,15 @@ public class FitmentMatcher
         var fitments = await fitmentQuery.AsNoTracking().ToListAsync(cancelToken);
         if (fitments.Count == 0)
         {
-            return 0;
+            return new(0, []);
         }
 
         var fitmentPartIds = fitments.Select(x => x.PartId).Distinct().ToList();
-        var sourceYears = await _db.CatalogParts()
+        var parts = await _db.CatalogParts()
             .AsNoTracking()
             .Where(x => fitmentPartIds.Contains(x.Id))
-            .Select(x => new { x.Id, x.AccessedOn, x.FirstSeenOnUtc })
-            .ToDictionaryAsync(x => x.Id, x => (x.AccessedOn ?? x.FirstSeenOnUtc).Year, cancelToken);
+            .Select(x => new { x.Id, x.AccessedOn, x.FirstSeenOnUtc, x.ProductId })
+            .ToDictionaryAsync(x => x.Id, cancelToken);
 
         var fitmentIds = fitments.Select(x => x.Id).ToList();
         var matches = (await _db.CatalogFitmentMatches()
@@ -104,10 +108,13 @@ public class FitmentMatcher
             .ToLookup(x => x.FitmentId);
 
         var added = 0;
+        var affected = new HashSet<int>();
+        var withdrawnMappings = new List<(int ProductId, int VehicleId)>();
 
         foreach (var f in fitments)
         {
-            var sourceYear = sourceYears.TryGetValue(f.PartId, out var y) ? y : DateTime.UtcNow.Year;
+            var part = parts.GetValueOrDefault(f.PartId);
+            var sourceYear = part != null ? (part.AccessedOn ?? part.FirstSeenOnUtc).Year : DateTime.UtcNow.Year;
             var candidates = byMakeModel[(CatalogNormalizer.MakeKey(f.Make), FitmentModelKey(f.Model, f.Variant))]
                 .Select(v => (Vehicle: v, Kind: Classify(f.YearFrom, f.YearTo, v.FirstYear, v.LastYear, sourceYear)))
                 .Where(x => x.Kind.HasValue)
@@ -125,8 +132,11 @@ public class FitmentMatcher
                         if (kind != FitmentMatchKind.Exact && match.Status == FitmentMatchStatus.Approved)
                         {
                             // The vehicle's years changed so the statement no longer covers it; needs a new review.
-                            match.Status = FitmentMatchStatus.Proposed;
+                            // RefreshAsync removes the mapping the approval created.
+                            Unapprove(match);
                         }
+
+                        affected.Add(f.PartId);
                     }
                 }
                 else
@@ -140,16 +150,44 @@ public class FitmentMatcher
                         Status = FitmentMatchStatus.Proposed
                     });
                     added++;
+                    affected.Add(f.PartId);
                 }
             }
 
-            foreach (var stale in existing.Values.Where(x => !candidates.ContainsKey(x.MotorVehicleId) && x.Status == FitmentMatchStatus.Proposed))
+            // The motorcycle no longer overlaps the statement or lost its verified reference. An approval of it is void.
+            var stale = existing.Values.Where(x => !candidates.ContainsKey(x.MotorVehicleId) && x.Status != FitmentMatchStatus.Rejected);
+            foreach (var match in stale)
             {
-                _db.CatalogFitmentMatches().Remove(stale);
+                if (match.CreatedMapping && part?.ProductId is int productId)
+                {
+                    // The match row goes away, so RefreshAsync could no longer tell this mapping was ours.
+                    withdrawnMappings.Add((productId, match.MotorVehicleId));
+                }
+
+                _db.CatalogFitmentMatches().Remove(match);
+                affected.Add(f.PartId);
             }
         }
 
+        if (withdrawnMappings.Count > 0)
+        {
+            var productIds = withdrawnMappings.Select(x => x.ProductId).Distinct().ToList();
+            var mappings = await _db.ProductMotorVehicles().Where(x => productIds.Contains(x.ProductId)).ToListAsync(cancelToken);
+            _db.ProductMotorVehicles().RemoveRange(mappings.Where(m => withdrawnMappings.Contains((m.ProductId, m.MotorVehicleId))));
+        }
+
         await _db.SaveChangesAsync(cancelToken);
-        return added;
+        return new(added, affected);
+    }
+
+    private static void Unapprove(CatalogFitmentMatch match)
+    {
+        match.Status = FitmentMatchStatus.Proposed;
+        match.ReviewedOnUtc = null;
+        match.ReviewedBy = null;
     }
 }
+
+/// <param name="Added">Number of new proposals.</param>
+/// <param name="AffectedPartIds">Parts whose matches were added, changed or withdrawn.</param>
+public record FitmentMatchResult(int Added, IReadOnlyCollection<int> AffectedPartIds);

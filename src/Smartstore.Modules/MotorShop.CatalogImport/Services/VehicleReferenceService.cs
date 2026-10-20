@@ -19,11 +19,13 @@ public class VehicleReferenceService
 {
     private readonly SmartDbContext _db;
     private readonly FitmentMatcher _matcher;
+    private readonly CatalogPublicationService _publication;
 
-    public VehicleReferenceService(SmartDbContext db, FitmentMatcher matcher)
+    public VehicleReferenceService(SmartDbContext db, FitmentMatcher matcher, CatalogPublicationService publication)
     {
         _db = db;
         _matcher = matcher;
+        _publication = publication;
     }
 
     /// <summary>
@@ -53,12 +55,13 @@ public class VehicleReferenceService
 
     /// <summary>
     /// Markets whose motorcycles belong in a Turkish selector. Records for other markets (e.g. India-only models
-    /// or engine versions) stay reference data; their parts often do not interchange.
+    /// or engine versions) stay reference data; their parts often do not interchange. A record without a market
+    /// is not known to be sold here, so it stays out too.
     /// </summary>
     public static readonly IReadOnlySet<string> SelectorMarkets = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "TR", "EU", "GLOBAL" };
 
     public static bool IsSelectorMarket(CatalogVehicleReference r)
-        => string.IsNullOrWhiteSpace(r.Market) || SelectorMarkets.Contains(r.Market);
+        => !string.IsNullOrWhiteSpace(r.Market) && SelectorMarkets.Contains(r.Market.Trim());
 
     public static bool IsPublishable(CatalogVehicleReference r)
         => r.Status == VehicleReferenceStatus.Verified && r.EngineCc.HasValue && SelectorYears(r).HasValue && IsSelectorMarket(r);
@@ -128,7 +131,7 @@ public class VehicleReferenceService
 
         if (created + linked > 0)
         {
-            await _matcher.MatchPartsAsync(null, cancelToken);
+            await RematchAsync(cancelToken);
         }
 
         return new VehiclePublishResult(created, linked, skipped);
@@ -161,8 +164,23 @@ public class VehicleReferenceService
         r.HasPendingChanges = false;
 
         await _db.SaveChangesAsync(cancelToken);
-        await _matcher.MatchPartsAsync(null, cancelToken);
+        await RematchAsync(cancelToken);
         return true;
+    }
+
+    /// <summary>
+    /// Re-matches every part against the selector and brings product mappings and readiness in line,
+    /// so a mapping never outlives the match that justified it.
+    /// </summary>
+    public async Task<FitmentMatchResult> RematchAsync(CancellationToken cancelToken = default)
+    {
+        var result = await _matcher.MatchPartsAsync(null, cancelToken);
+        if (result.AffectedPartIds.Count > 0)
+        {
+            await _publication.RefreshAsync(result.AffectedPartIds, cancelToken);
+        }
+
+        return result;
     }
 
     /// <summary>
