@@ -181,3 +181,25 @@ public class LegalCheckoutTests
         Assert.That(html, Does.Contain("[sipariş onayında atanır]"));
     }
 }
+
+[TestFixture]
+public class LegalTermsTextFilterTests
+{
+    [Test]
+    public void Replaces_core_terms_text_on_confirm_view_only()
+    {
+        var model = new Smartstore.Web.Models.Checkout.CheckoutConfirmModel { TermsOfService = "I agree ... stored electronically" };
+        var view = new Microsoft.AspNetCore.Mvc.ViewResult { ViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(), new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary()) { Model = model } };
+
+        Assert.That(LegalTermsTextFilter.ApplyTermsText(view, "payment hint"), Is.True);
+        Assert.That(model.TermsOfService, Is.EqualTo("payment hint"));
+
+        // Terminal checkout: no core text, nothing added.
+        var terminal = new Smartstore.Web.Models.Checkout.CheckoutConfirmModel();
+        view.ViewData.Model = terminal;
+        Assert.That(LegalTermsTextFilter.ApplyTermsText(view, "payment hint"), Is.False);
+        Assert.That(terminal.TermsOfService, Is.Null);
+
+        Assert.That(LegalTermsTextFilter.ApplyTermsText(new Microsoft.AspNetCore.Mvc.RedirectResult("/x"), "payment hint"), Is.False);
+    }
+}
