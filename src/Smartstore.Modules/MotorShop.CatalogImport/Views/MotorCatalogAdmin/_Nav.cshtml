@@ -1,0 +1,9 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    string Active(params string[] actions) => actions.Contains(action) ? "active" : null;
+}
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item"><a class="nav-link @Active("Index", "Batch", "Source")" asp-action="Index">@T("Plugins.MotorShop.CatalogImport.Nav.Dashboard")</a></li>
+    <li class="nav-item"><a class="nav-link @Active("Parts", "Part")" asp-action="Parts">@T("Plugins.MotorShop.CatalogImport.Nav.Parts")</a></li>
+    <li class="nav-item"><a class="nav-link @Active("Vehicles")" asp-action="Vehicles">@T("Plugins.MotorShop.CatalogImport.Nav.Vehicles")</a></li>
+</ul>

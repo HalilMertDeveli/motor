@@ -1,0 +1,158 @@
+@model CatalogDashboardModel
+@{
+    Layout = "_ConfigureModule";
+}
+
+<partial name="_Nav" />
+
+<div class="alert alert-info">@T("Plugins.MotorShop.CatalogImport.Dashboard.Intro")</div>
+
+<div class="row g-3 mb-4">
+    @foreach (var state in new[] { PartPublicationState.ResearchCandidate, PartPublicationState.VerifiedReference, PartPublicationState.ReadyForSale, PartPublicationState.Rejected })
+    {
+        <div class="col-6 col-lg-3">
+            <a class="card h-100 text-decoration-none" asp-action="Parts" asp-route-state="@state">
+                <div class="card-body">
+                    <div class="h3 mb-1">@(Model.PartCounts.TryGetValue(state, out var count) ? count : 0)</div>
+                    <partial name="_StateBadge" model="state" />
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <a class="card card-body h-100" asp-action="Vehicles">@T("Plugins.MotorShop.CatalogImport.Dashboard.VehicleRefs", Model.VehicleReferenceCount, Model.VerifiedVehicleCount, Model.PublishedVehicleCount)</a>
+    </div>
+    <div class="col-md-4">
+        <a class="card card-body h-100" asp-action="Parts" asp-route-pendingOnly="true">@T("Plugins.MotorShop.CatalogImport.Dashboard.PendingChanges", Model.PendingChangesCount)</a>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-body h-100">@T("Plugins.MotorShop.CatalogImport.Dashboard.OpenMatches", Model.OpenMatchCount)</div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><strong>@T("Plugins.MotorShop.CatalogImport.Stage.Title")</strong></div>
+    <div class="card-body">
+        <form asp-action="Stage" method="post" enctype="multipart/form-data">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="sourceId">@T("Plugins.MotorShop.CatalogImport.Source")</label>
+                    <select class="form-control" id="sourceId" name="sourceId" required>
+                        @foreach (var s in Model.Sources.Where(x => x.AllowsStaging))
+                        {
+                            <option value="@s.Id">@s.Name (@T("Plugins.MotorShop.CatalogImport.Permission." + s.PermissionStatus))</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="kind">@T("Plugins.MotorShop.CatalogImport.Kind")</label>
+                    <select class="form-control" id="kind" name="kind">
+                        @foreach (var kind in Enum.GetValues<CatalogImportKind>())
+                        {
+                            <option value="@kind">@T("Plugins.MotorShop.CatalogImport.Kind." + kind)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="file">@T("Plugins.MotorShop.CatalogImport.Stage.File")</label>
+                    <input class="form-control" type="file" id="file" name="file" accept=".json,.csv" required />
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="isFullSnapshot" name="isFullSnapshot" value="true" />
+                        <label class="form-check-label" for="isFullSnapshot">@T("Plugins.MotorShop.CatalogImport.Stage.FullSnapshot")</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-upload"></i>
+                        <span>@T("Plugins.MotorShop.CatalogImport.Stage.Submit")</span>
+                    </button>
+                </div>
+            </div>
+            <p class="text-muted small mt-2 mb-0">@T("Plugins.MotorShop.CatalogImport.Stage.Hint")</p>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>@T("Plugins.MotorShop.CatalogImport.Sources")</strong>
+        <a class="btn btn-sm btn-secondary" asp-action="Source" asp-route-id="0">
+            <i class="fa fa-plus"></i>
+            <span>@T("Admin.Common.AddNew")</span>
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Source")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Permission")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Source.ImageRights")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Source.Verified")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model.Sources)
+                {
+                    <tr>
+                        <td>
+                            <div>@s.Name</div>
+                            @if (CatalogValidator.IsHttpUrl(s.Url))
+                            {
+                                <a class="small text-muted text-break" href="@s.Url" target="_blank" rel="noopener noreferrer">@s.Url</a>
+                            }
+                        </td>
+                        <td><partial name="_PermissionBadge" model="s.PermissionStatus" /></td>
+                        <td class="small">@s.ImageRights</td>
+                        <td class="small text-nowrap">@(s.VerifiedOnUtc?.ToString("yyyy-MM-dd") ?? "-")</td>
+                        <td class="text-right"><a class="btn btn-sm btn-light" asp-action="Source" asp-route-id="@s.Id">@T("Admin.Common.Edit")</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>@T("Plugins.MotorShop.CatalogImport.Batches")</strong>
+        <form asp-action="Rematch" method="post">
+            <button class="btn btn-sm btn-secondary" type="submit">@T("Plugins.MotorShop.CatalogImport.Rematch")</button>
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Kind")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Batch.File")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Batch.Status")</th>
+                    <th class="text-nowrap">@T("Plugins.MotorShop.CatalogImport.Batch.Counts")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Batch.Started")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Batches.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-muted">@T("Plugins.MotorShop.CatalogImport.Batch.None")</td></tr>
+                }
+                @foreach (var b in Model.Batches)
+                {
+                    <tr>
+                        <td><a asp-action="Batch" asp-route-id="@b.Id">@b.Id</a></td>
+                        <td>@T("Plugins.MotorShop.CatalogImport.Kind." + b.Kind)</td>
+                        <td class="small text-break">@b.FileName</td>
+                        <td>@T("Plugins.MotorShop.CatalogImport.BatchStatus." + b.Status)</td>
+                        <td class="small text-nowrap">@b.TotalCount · +@b.CreatedCount · ~@b.UpdatedCount · =@b.UnchangedCount · ✗@b.InvalidCount · ⧉@b.DuplicateCount</td>
+                        <td class="small text-nowrap">@b.StartedOnUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

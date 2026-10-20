@@ -1,0 +1,93 @@
+@model PartListModel
+@{
+    Layout = "_ConfigureModule";
+}
+
+<partial name="_Nav" />
+
+<form asp-action="Parts" method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-3">
+        <label class="form-label" for="query">@T("Plugins.MotorShop.CatalogImport.Parts.Search")</label>
+        <input class="form-control" id="query" name="query" value="@Model.Query" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label" for="state">@T("Plugins.MotorShop.CatalogImport.State")</label>
+        <select class="form-control" id="state" name="state">
+            <option value="">-</option>
+            @foreach (var s in Enum.GetValues<PartPublicationState>())
+            {
+                <option value="@s" selected="@(Model.State == s)">@T("Plugins.MotorShop.CatalogImport.State." + s)</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label" for="brand">@T("Plugins.MotorShop.CatalogImport.Brand")</label>
+        <select class="form-control" id="brand" name="brand">
+            <option value="">-</option>
+            @foreach (var b in Model.Brands)
+            {
+                <option value="@b" selected="@(Model.Brand == b)">@b</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label" for="productType">@T("Plugins.MotorShop.CatalogImport.ProductType")</label>
+        <select class="form-control" id="productType" name="productType">
+            <option value="">-</option>
+            @foreach (var t in CatalogNormalizer.ProductTypes)
+            {
+                <option value="@t" selected="@(Model.ProductType == t)">@T("Plugins.MotorShop.CatalogImport.Type." + t)</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="pendingOnly" name="pendingOnly" value="true" checked="@Model.PendingOnly" />
+            <label class="form-check-label" for="pendingOnly">@T("Plugins.MotorShop.CatalogImport.Parts.PendingOnly")</label>
+        </div>
+    </div>
+    <div class="col-md-1">
+        <button class="btn btn-secondary w-100" type="submit"><i class="fa fa-search"></i></button>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Brand")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Mpn")</th>
+                    <th>@T("Admin.Common.Name")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.ProductType")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.State")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Source")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Parts.Warnings")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Parts.Count == 0)
+                {
+                    <tr><td colspan="7" class="text-muted">@T("Plugins.MotorShop.CatalogImport.Parts.None")</td></tr>
+                }
+                @foreach (var p in Model.Parts)
+                {
+                    <tr>
+                        <td>@p.Brand</td>
+                        <td class="font-monospace"><a asp-action="Part" asp-route-id="@p.Id">@p.Mpn</a></td>
+                        <td>@p.ProductName</td>
+                        <td>@T("Plugins.MotorShop.CatalogImport.Type." + p.ProductType)</td>
+                        <td><partial name="_StateBadge" model="p.State" /></td>
+                        <td class="small">@(Model.SourceNames.TryGetValue(p.SourceId, out var sn) ? sn : "-")</td>
+                        <td class="small">
+                            @if (p.HasPendingChanges) { <span class="badge badge-warning bg-warning">@T("Plugins.MotorShop.CatalogImport.Part.PendingChanges")</span> }
+                            @if (p.IsMissingFromSource) { <span class="badge badge-danger bg-danger">@T("Plugins.MotorShop.CatalogImport.Part.MissingFromSource")</span> }
+                            @if (p.VerificationStatus != RecordVerificationStatus.Verified) { <span class="badge badge-secondary bg-secondary">@T("Plugins.MotorShop.CatalogImport.Verification." + p.VerificationStatus)</span> }
+                            @if (p.MissingData.HasValue()) { <span class="text-muted">@p.MissingData</span> }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

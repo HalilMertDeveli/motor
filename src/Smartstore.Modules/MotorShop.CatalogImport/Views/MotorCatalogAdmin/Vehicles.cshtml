@@ -1,0 +1,124 @@
+@using MotorShop.CatalogImport.Services
+@model VehiclesModel
+@{
+    Layout = "_ConfigureModule";
+    var res = "Plugins.MotorShop.CatalogImport.";
+    var unverified = Model.Audit.Where(x => x.Reference == null).ToList();
+}
+
+<partial name="_Nav" />
+
+<div class="alert alert-info">@T(res + "Vehicles.Intro")</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>@T(res + "Vehicles.References", Model.References.Count)</strong>
+        <form asp-action="PublishVehicles" method="post">
+            <button class="btn btn-sm btn-primary" type="submit">@T(res + "Vehicles.Publish")</button>
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>@T(res + "Vehicle")</th>
+                    <th>@T(res + "Vehicles.Years")</th>
+                    <th>cc</th>
+                    <th>@T(res + "Vehicles.Category")</th>
+                    <th>@T(res + "Vehicles.Status")</th>
+                    <th>@T(res + "Source")</th>
+                    <th>@T(res + "Vehicles.Selector")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.References.Count == 0)
+                {
+                    <tr><td colspan="7" class="text-muted">@T(res + "Vehicles.None")</td></tr>
+                }
+                @foreach (var v in Model.References)
+                {
+                    var years = VehicleReferenceService.SelectorYears(v);
+                    <tr>
+                        <td>
+                            <div>@v.Make @v.Model @v.Variant</div>
+                            <div class="small text-muted">@v.ModelCode @v.Generation @v.Market</div>
+                            @if (v.SeedAudit.HasValue()) { <div class="small text-warning">@v.SeedAudit</div> }
+                        </td>
+                        <td class="small">
+                            <div>@(v.YearFrom?.ToString() ?? "?")–@(v.YearTo?.ToString() ?? "?")</div>
+                            @if (v.VerifiedYears.HasValue()) { <div class="text-muted">@T(res + "Vehicles.VerifiedYears"): @v.VerifiedYears</div> }
+                            <div class="text-muted">@T(res + "Vehicles.SelectorYears"): @(years.HasValue ? $"{years.Value.From}–{years.Value.To}" : "-")</div>
+                        </td>
+                        <td>@(v.EngineCc?.ToString("0.#", CultureInfo.InvariantCulture) ?? "-")</td>
+                        <td>@v.Category</td>
+                        <td>
+                            <span class="badge badge-@(v.Status == VehicleReferenceStatus.Verified ? "success" : "secondary") bg-@(v.Status == VehicleReferenceStatus.Verified ? "success" : "secondary")">@T(res + "VehicleStatus." + v.Status)</span>
+                            <div class="small text-muted">@T(res + "Confidence." + v.Confidence)</div>
+                            @if (v.UnknownFields.HasValue()) { <div class="small text-muted">@T(res + "Vehicles.Unknown"): @v.UnknownFields</div> }
+                        </td>
+                        <td class="small">@(Model.SourceNames.TryGetValue(v.SourceId, out var sn) ? sn : "-")</td>
+                        <td>
+                            @if (v.MotorVehicleId.HasValue)
+                            {
+                                <span class="badge badge-info bg-info">#@v.MotorVehicleId</span>
+                                @if (v.HasPendingChanges)
+                                {
+                                    <form asp-action="ResyncVehicle" asp-route-id="@v.Id" method="post" class="d-inline"><button class="btn btn-sm py-0 btn-warning" type="submit">@T(res + "Vehicles.Resync")</button></form>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted small">@(VehicleReferenceService.IsPublishable(v) ? T(res + "Vehicles.Publishable") : !VehicleReferenceService.IsSelectorMarket(v) ? T(res + "Vehicles.OtherMarket") : T(res + "Vehicles.NotPublishable"))</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>@T(res + "Vehicles.Audit", unverified.Count, Model.Audit.Count)</strong>
+        <form asp-action="RetireUnverified" method="post" onsubmit="return confirm('@T(res + "Vehicles.Retire.Confirm")');">
+            <button class="btn btn-sm btn-danger" type="submit" disabled="@(!unverified.Any(x => x.ProductCount == 0))">@T(res + "Vehicles.Retire")</button>
+        </form>
+    </div>
+    <div class="card-body small text-muted pb-0">@T(res + "Vehicles.Audit.Hint")</div>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>@T(res + "Vehicle")</th>
+                    <th>@T(res + "Vehicles.Years")</th>
+                    <th>cc</th>
+                    <th>@T(res + "Vehicles.Products")</th>
+                    <th>@T(res + "Vehicles.Status")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.Audit)
+                {
+                    <tr class="@(row.Reference == null ? "table-warning" : null)">
+                        <td>@row.Vehicle.Make @row.Vehicle.Model</td>
+                        <td>@row.Vehicle.YearFrom–@row.Vehicle.YearTo</td>
+                        <td>@(row.Vehicle.EngineCc?.ToString() ?? "-")</td>
+                        <td>@row.ProductCount</td>
+                        <td>
+                            @if (row.Reference != null)
+                            {
+                                <span class="badge badge-success bg-success">@T(res + "VehicleStatus.Verified")</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning bg-warning">@T(res + "Vehicles.Unverified")</span>
+                                @if (row.ProductCount > 0) { <span class="text-muted">@T(res + "Vehicles.KeptMapped")</span> }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

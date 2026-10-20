@@ -1,0 +1,69 @@
+@model BatchDetailModel
+@{
+    Layout = "_ConfigureModule";
+    var b = Model.Batch;
+}
+
+<partial name="_Nav" />
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>@T("Plugins.MotorShop.CatalogImport.Batch") #@b.Id</strong>
+        @if (b.RawContent != null)
+        {
+            <form asp-action="Retry" asp-route-id="@b.Id" method="post">
+                <button class="btn btn-sm btn-warning" type="submit">@T("Plugins.MotorShop.CatalogImport.Batch.Retry")</button>
+            </form>
+        }
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">@T("Plugins.MotorShop.CatalogImport.Source")</dt>
+            <dd class="col-sm-9">@Model.Source?.Name <partial name="_PermissionBadge" model="Model.Source?.PermissionStatus ?? SourcePermissionStatus.Rejected" /></dd>
+            <dt class="col-sm-3">@T("Plugins.MotorShop.CatalogImport.Kind")</dt>
+            <dd class="col-sm-9">@T("Plugins.MotorShop.CatalogImport.Kind." + b.Kind)@(b.IsFullSnapshot ? " · " + T("Plugins.MotorShop.CatalogImport.Stage.FullSnapshot") : "")</dd>
+            <dt class="col-sm-3">@T("Plugins.MotorShop.CatalogImport.Batch.File")</dt>
+            <dd class="col-sm-9 text-break">@b.FileName <span class="text-muted small">SHA-256 @b.ContentHash</span></dd>
+            <dt class="col-sm-3">@T("Plugins.MotorShop.CatalogImport.Batch.Status")</dt>
+            <dd class="col-sm-9">@T("Plugins.MotorShop.CatalogImport.BatchStatus." + b.Status) @(b.RetryOfBatchId.HasValue ? $"(retry of #{b.RetryOfBatchId})" : "")</dd>
+            @if (b.FailureReason.HasValue())
+            {
+                <dt class="col-sm-3">@T("Plugins.MotorShop.CatalogImport.Batch.Failure")</dt>
+                <dd class="col-sm-9 text-danger">@b.FailureReason</dd>
+            }
+            <dt class="col-sm-3">@T("Plugins.MotorShop.CatalogImport.Batch.Counts")</dt>
+            <dd class="col-sm-9">
+                @T("Plugins.MotorShop.CatalogImport.Batch.CountsDetail", b.TotalCount, b.CreatedCount, b.UpdatedCount, b.UnchangedCount, b.InvalidCount, b.DuplicateCount, b.MissingCount)
+            </dd>
+            <dt class="col-sm-3">@T("Plugins.MotorShop.CatalogImport.Batch.Started")</dt>
+            <dd class="col-sm-9">@b.StartedOnUtc.ToString("u") → @(b.CompletedOnUtc?.ToString("u") ?? "-")</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><strong>@T("Plugins.MotorShop.CatalogImport.Batch.Issues", Model.Issues.Count)</strong></div>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Batch.Row")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Batch.Record")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Batch.Field")</th>
+                    <th>@T("Plugins.MotorShop.CatalogImport.Batch.Message")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var issue in Model.Issues)
+                {
+                    <tr class="@(issue.Severity == IssueSeverity.Error ? "table-danger" : "table-warning")">
+                        <td>@(issue.Row > 0 ? issue.Row : "-")</td>
+                        <td class="text-break">@issue.Key</td>
+                        <td>@issue.Field</td>
+                        <td>@issue.Message</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -77,6 +77,9 @@
             <_Parameter1>MotorShop.Fitment.Tests</_Parameter1>
         </AssemblyAttribute>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>MotorShop.CatalogImport.Tests</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>MotorShop.Iyzico.Tests</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
