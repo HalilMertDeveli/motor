@@ -15,7 +15,7 @@ import path from 'node:path';
 const args = Object.fromEntries(process.argv.slice(2).map(a => a.replace(/^--/, '').split(/=(.*)/s).slice(0, 2)));
 for (const k of ['products', 'images', 'pdf-images', 'pdf-list', 'out']) {
     if (!args[k]) {
-        console.error(`Usage: node enhance-supplier-images.mjs --products=products.json --images=<package images dir> --pdf-images=<pdfimages -all -p output dir> --pdf-list=<pdfimages -list output> --out=<output dir> [--only=name1,name2]`);
+        console.error(`Usage: node enhance-supplier-images.mjs --products=products.json --images=<package images dir> --pdf-images=<pdfimages -all -p output dir> --pdf-list=<pdfimages -list output> --out=<output dir> [--only=name1,name2] [--reuse-matches=1]`);
         process.exit(2);
     }
 }
@@ -24,6 +24,9 @@ const MATCH_WIDTH = 96;        // width of the grayscale thumbnails used for mat
 const MIN_SCORE = 0.86;        // normalized cross-correlation needed to trust a match on the product's page
 const MIN_SCORE_OTHER_PAGE = 0.93;
 const MAX_COLOR_DISTANCE = 40; // mean product colour (RGB) must agree, so colour variants are not mixed up
+const MIN_SCORE_RELAXED = 0.80; // accepted only with a tight colour match and a clear lead (see below)
+const MAX_COLOR_DISTANCE_RELAXED = 15;
+const MIN_LEAD = 0.04;
 const MIN_CANDIDATE_SIDE = 120; // smaller embedded images are icons, logos, flags
 const MAX_UPSCALE = 2.5;       // never enlarge genuine pixels more than this
 const MAX_OBJECT = 880;        // longest side of the product on the canvas
@@ -103,8 +106,8 @@ function resample(img, w, h) {
     return { w, h, data: out };
 }
 
-// Best NCC of `tpl` placed anywhere inside `img` (tpl must fit).
-function bestPlacement(img, tpl) {
+// Best NCC of `tpl` placed anywhere inside `img` (tpl must fit), sampling every `step` pixels.
+function bestPlacement(img, tpl, step = 2) {
     const n = tpl.w * tpl.h;
     let tMean = 0;
     for (const v of tpl.data) tMean += v;
@@ -114,8 +117,8 @@ function bestPlacement(img, tpl) {
     if (tVar < 1e-6) return -1;
 
     let best = -1;
-    for (let oy = 0; oy + tpl.h <= img.h; oy += 2) {
-        for (let ox = 0; ox + tpl.w <= img.w; ox += 2) {
+    for (let oy = 0; oy + tpl.h <= img.h; oy += step) {
+        for (let ox = 0; ox + tpl.w <= img.w; ox += step) {
             let s = 0, s2 = 0, st = 0;
             for (let y = 0; y < tpl.h; y++) {
                 const row = (oy + y) * img.w + ox, trow = y * tpl.w;
@@ -133,17 +136,29 @@ function bestPlacement(img, tpl) {
     return best;
 }
 
+function placementAt(img, tpl, scale, step) {
+    const tw = Math.round(img.w * scale), th = Math.round(tw * tpl.h / tpl.w);
+    if (tw < 16 || th < 16 || tw > img.w || th > img.h) return -1;
+    return bestPlacement(img, resample(tpl, tw, th), step);
+}
+
 function matchScore(a, b) {
     // a is the package picture, b the embedded original; either may be a crop of the other.
-    let best = -1;
+    // Coarse search over scales, then a fine search (1 % scale, 1 px) around the best coarse result.
+    let best = { score: -1 };
     for (let s = 1.0; s >= 0.35; s -= 0.05) {
-        for (const [img, tpl] of [[b, a], [a, b]]) {
-            const tw = Math.round(img.w * s), th = Math.round(tw * tpl.h / tpl.w);
-            if (tw < 16 || th < 16 || th > img.h) continue;
-            best = Math.max(best, bestPlacement(img, resample(tpl, tw, th)));
+        for (const pair of [[b, a], [a, b]]) {
+            const score = placementAt(pair[0], pair[1], s, 2);
+            if (score > best.score) best = { score, s, pair };
         }
     }
-    return best;
+    if (best.score < 0.5) return best.score;
+
+    let fine = best.score;
+    for (let s = best.s - 0.05; s <= best.s + 0.05; s += 0.01) {
+        fine = Math.max(fine, placementAt(best.pair[0], best.pair[1], s, 1));
+    }
+    return fine;
 }
 
 // ---------------------------------------------------------------- cleanup and canvas
@@ -217,8 +232,88 @@ const colorOf = (key, file) => {
 
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
-const report = [];
+const candidateByNum = new Map([...candidatesByPage.values()].flat().map(c => [c.num, c]));
+const flatOf = num => {
+    const c = candidateByNum.get(num);
+    const flat = path.join(tmp, `pdf-${num}.png`);
+    return fs.existsSync(flat) ? flat : flatten(c.file, c.mask, c.w, c.h, flat);
+};
+
+// ---- 1. matching: score every candidate on the product's page and its neighbours (slow, cached in matches.json)
+
+const matchesFile = path.join(args.out, 'matches.json');
+const matches = args['reuse-matches'] && fs.existsSync(matchesFile) ? JSON.parse(fs.readFileSync(matchesFile, 'utf8')) : {};
 let done = 0;
+for (const ref of refs) {
+    if (only && !only.has(ref.name)) continue;
+    const pkgFile = path.join(args.images, ref.name);
+    if (matches[ref.name] || !fs.existsSync(pkgFile)) continue;
+
+    const pkgThumb = grayThumb(pkgFile);
+    const pkgColor = colorSignature(pkgFile);
+    const scored = [];
+    for (const page of [ref.page, ref.page - 1, ref.page + 1]) {
+        for (const c of candidatesByPage.get(page) ?? []) {
+            const flat = flatOf(c.num);
+            const score = matchScore(pkgThumb, thumbOf(c.num, () => flat));
+            // Colour variants (black/blue jacket) look alike in grayscale.
+            scored.push({ num: c.num, page, score: +score.toFixed(4), colorDistance: +distance(pkgColor, colorOf(c.num, flat)).toFixed(1) });
+        }
+    }
+    matches[ref.name] = scored;
+    if (++done % 50 === 0) {
+        console.log(`matched ${done}`);
+        fs.writeFileSync(matchesFile, JSON.stringify(matches));
+    }
+}
+fs.writeFileSync(matchesFile, JSON.stringify(matches));
+
+// ---- 2. decision per picture
+
+function decide(ref) {
+    const scored = matches[ref.name] ?? [];
+    const accepted = scored
+        .filter(x => x.colorDistance <= MAX_COLOR_DISTANCE && x.score >= (x.page === ref.page ? MIN_SCORE : MIN_SCORE_OTHER_PAGE))
+        .sort((a, b) => b.score - a.score);
+    if (accepted.length) return { ...accepted[0], relaxed: false };
+
+    // Package crops often contain catalog labels ("SİYAH") or are cut off, which lowers the score of the
+    // right original. Accept a lower score only with a tight colour match and a clear lead over the runner-up.
+    const own = scored.filter(x => x.page === ref.page).sort((a, b) => b.score - a.score);
+    const [first, second] = own;
+    if (first && first.score >= MIN_SCORE_RELAXED && first.colorDistance <= MAX_COLOR_DISTANCE_RELAXED
+        && (!second || first.score - second.score >= MIN_LEAD)) {
+        return { ...first, relaxed: true };
+    }
+
+    return null;
+}
+
+const selected = refs.filter(ref => (!only || only.has(ref.name)) && fs.existsSync(path.join(args.images, ref.name)));
+const decisions = new Map(selected.map(ref => [ref.name, decide(ref)]));
+
+// ---- 3. one original per picture: variants (mat black / mat grey helmet) often match the same photo.
+// Only a clear winner keeps it; the others use their own package picture.
+const claims = new Map();
+for (const [name, d] of decisions) {
+    if (d) claims.set(d.num, [...(claims.get(d.num) ?? []), { name, score: d.score }]);
+}
+let conflicts = 0;
+for (const list of claims.values()) {
+    if (list.length < 2) continue;
+    list.sort((a, b) => b.score - a.score);
+    const winnerKeeps = list[0].score - list[1].score >= MIN_LEAD;
+    list.forEach((x, i) => {
+        if (i > 0 || !winnerKeeps) {
+            decisions.set(x.name, null);
+            conflicts++;
+        }
+    });
+}
+
+// ---- 4. render
+
+const report = [];
 for (const ref of refs) {
     if (only && !only.has(ref.name)) continue;
     const pkgFile = path.join(args.images, ref.name);
@@ -227,43 +322,27 @@ for (const ref of refs) {
         continue;
     }
 
-    const pkgThumb = grayThumb(pkgFile);
-    const pkgColor = colorSignature(pkgFile);
-    let best = null;
-    for (const page of [ref.page, ref.page - 1, ref.page + 1]) {
-        // The product's own page is the normal case; a neighbouring page must match almost perfectly.
-        const required = page === ref.page ? MIN_SCORE : MIN_SCORE_OTHER_PAGE;
-        for (const c of candidatesByPage.get(page) ?? []) {
-            const flat = path.join(tmp, `pdf-${c.num}.png`);
-            const t = thumbOf(c.num, () => fs.existsSync(flat) ? flat : flatten(c.file, c.mask, c.w, c.h, flat));
-            const score = matchScore(pkgThumb, t);
-            if (score < required) continue;
-            // Colour variants (black/blue jacket) look alike in grayscale.
-            const colorDistance = distance(pkgColor, colorOf(c.num, flat));
-            if (colorDistance > MAX_COLOR_DISTANCE) continue;
-            if (!best || score > best.score) best = { c, score, flat, colorDistance };
-        }
-        if (best && best.score >= 0.95) break;
-    }
-
-    const target = path.join(outImages, ref.name.replace(/\.\w+$/, '.jpg'));
+    const target = path.join(outImages, ref.name.replace(/.w+$/, '.jpg'));
+    const d = decisions.get(ref.name);
     let entry;
-    if (best) {
-        const r = render(best.flat, best.c.enc === 'jpeg', MAX_UPSCALE, target);
-        entry = { ...ref, status: 'pdf-original', score: +best.score.toFixed(3), source: `${best.c.w}x${best.c.h} p${best.c.page}#${best.c.num}${best.c.mask ? '+mask' : ''}`, ...r };
+    if (d) {
+        const c = candidateByNum.get(d.num);
+        const r = render(flatOf(d.num), c.enc === 'jpeg', MAX_UPSCALE, target);
+        entry = { ...ref, status: 'pdf-original', score: d.score, relaxed: d.relaxed, source: `${c.w}x${c.h} p${c.page}#${c.num}${c.mask ? '+mask' : ''}`, ...r };
     } else {
         // The package picture is already enlarged from the PDF; clean it but do not enlarge it further.
-        const flat = flatten(pkgFile, null, 0, 0, path.join(tmp, `pkg-${done}.png`));
+        const flat = flatten(pkgFile, null, 0, 0, path.join(tmp, `pkg-${report.length}.png`));
         const r = render(flat, true, 1, target);
-        entry = { ...ref, status: 'package-fallback', score: best ? +best.score.toFixed(3) : null, ...r };
+        const closest = (matches[ref.name] ?? []).filter(x => x.page === ref.page).sort((a, b) => b.score - a.score)[0] ?? null;
+        entry = { ...ref, status: 'package-fallback', closest, ...r };
     }
 
     report.push(entry);
-    if (++done % 50 === 0) console.log(`${done}/${refs.length}`);
+    if (report.length % 100 === 0) console.log(`rendered ${report.length}`);
 }
 
 fs.writeFileSync(path.join(args.out, 'image-report.json'), JSON.stringify(report, null, 1));
 fs.rmSync(tmp, { recursive: true, force: true });
 
-const by = s => report.filter(x => x.status === s).length;
-console.log(`done: ${report.length} pictures, ${by('pdf-original')} from PDF originals, ${by('package-fallback')} fallback, ${by('missing')} missing`);
+const by = st => report.filter(x => x.status === st).length;
+console.log(`done: ${report.length} pictures, ${by('pdf-original')} from PDF originals, ${by('package-fallback')} fallback (${conflicts} after shared-original conflicts), ${by('missing')} missing`);
