@@ -698,7 +698,7 @@ public class ProductImporter : EntityImporterBase
 
         foreach (var row in rows)
         {
-            var fileNameLookup = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+            var fileNameLookup = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             var urls = context.ExtraData.NumberOfPictures.HasValue
                 ? row.Urls.Take(context.ExtraData.NumberOfPictures.Value)

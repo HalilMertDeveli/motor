@@ -295,7 +295,7 @@ public partial class MediaService : IMediaService
         // Reduce by file extension in memory
         var fileNames = new HashSet<string>(
             result.Where(x => x.EndsWithNoCase('.' + pathData.Extension)),
-            StringComparer.CurrentCultureIgnoreCase);
+            StringComparer.OrdinalIgnoreCase);
 
         return CheckUniqueFileName(pathData, fileNames);
     }

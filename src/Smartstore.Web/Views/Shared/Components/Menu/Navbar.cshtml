@@ -45,7 +45,7 @@
     }
 }
 
-<div class="cms-menu cms-menu-navbar" data-menu-name="@(Model.Name?.ToLower())">
+<div class="cms-menu cms-menu-navbar" data-menu-name="@(Model.Name?.ToLowerInvariant())">
     <div class="megamenu-nav megamenu-nav--prev @(rtl ? "omega" : "alpha")">
         <a href="#" class="megamenu-nav-btn btn btn-clear-dark btn-icon btn-sm" tabindex="-1" aria-hidden="true">
             <i class="far fa-chevron-left megamenu-nav-btn-icon"></i>
@@ -120,7 +120,7 @@
                 </a>
                 @if (item.BadgeText.HasValue())
                 {
-                    <span class="badge badge-@(((BadgeStyle)item.BadgeStyle).ToString().ToLower())" attrs="item.BadgeHtmlAttributes" style="--badge-content-shift: 0px">
+                    <span class="badge badge-@(((BadgeStyle)item.BadgeStyle).ToString().ToLowerInvariant())" attrs="item.BadgeHtmlAttributes" style="--badge-content-shift: 0px">
                         @item.BadgeText
                     </span>
                 }

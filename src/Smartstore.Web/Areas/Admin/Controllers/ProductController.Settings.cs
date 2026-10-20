@@ -120,7 +120,7 @@ public partial class ProductController : AdminController
 
         static List<SelectListItem> AddBadgeStyles(string selectedValue)
         {
-            return [.. Enum.GetNames<BadgeStyle>().Select(x => new SelectListItem { Text = x, Value = x.ToLower(), Selected = selectedValue.EqualsNoCase(x) })];
+            return [.. Enum.GetNames<BadgeStyle>().Select(x => new SelectListItem { Text = x, Value = x.ToLowerInvariant(), Selected = selectedValue.EqualsNoCase(x) })];
         }
     }
 

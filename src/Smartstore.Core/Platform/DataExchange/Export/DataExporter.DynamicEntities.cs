@@ -203,7 +203,7 @@ public partial class DataExporter
             .Select(x => CreateDynamic(x))
             .ToList();
 
-        dynObject._HasNewsletterSubscription = ctx.NewsletterSubscriptions.Contains(customer.Email, StringComparer.CurrentCultureIgnoreCase);
+        dynObject._HasNewsletterSubscription = ctx.NewsletterSubscriptions.Contains(customer.Email, StringComparer.OrdinalIgnoreCase);
         dynObject._FullName = customer.GetFullName();
         dynObject._AvatarPictureUrl = null;
 

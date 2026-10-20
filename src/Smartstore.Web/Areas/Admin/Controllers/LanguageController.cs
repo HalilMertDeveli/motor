@@ -679,7 +679,7 @@ public class LanguageController : AdminController
             .ToListAsync();
 
         var allCountryNames = allCountries.ToDictionarySafe(x =>
-            x.TwoLetterIsoCode.EmptyNull().ToLower(),
+            x.TwoLetterIsoCode.EmptyNull().ToLowerInvariant(),
             x => x.GetLocalized(y => y.Name, Services.WorkContext.WorkingLanguage, true, false));
 
         var allCulturesMap = allCultures.ToDictionarySafe(x => x.TwoLetterISOLanguageName);
@@ -688,7 +688,7 @@ public class LanguageController : AdminController
 
         await foreach (var flag in flags)
         {
-            var name = flag.NameWithoutExtension.EmptyNull().ToLower();
+            var name = flag.NameWithoutExtension.EmptyNull().ToLowerInvariant();
             string countryDescription = null;
 
             if (allCountryNames.TryGetValue(name, out var countryName))
