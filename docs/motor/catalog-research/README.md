@@ -1,9 +1,14 @@
 # MOTOR katalog araştırması — 2026-10
 
-Bu klasör, MOTOR için yapılan motosiklet ve yedek parça kataloğu araştırmasının kaynak raporudur. Veriler
-`MotorShop.CatalogImport` modülüne paketlenmiştir (`src/Smartstore.Modules/MotorShop.CatalogImport/Research/2026-10/`) ve
-admin panelinden **Motor Catalog Import → Paketli araştırma veri seti → Veri setini yükle** ile ara alana alınır.
+Bu klasör, MOTOR için yapılan motosiklet ve yedek parça kataloğu araştırmasının kaynak raporudur. Veriler depoda
+`src/Smartstore.Modules/MotorShop.CatalogImport/Research/2026-10/` altındadır ve admin panelinden
+**Motor Catalog Import → Paketli araştırma veri seti → Veri setini yükle** ile ara alana alınır.
 Yükleme hiçbir motosikleti seçiciye eklemez ve hiçbir ürün oluşturmaz; her adım yönetici incelemesinden geçer.
+
+> **Sürüme dahil değil (sahip/hukuk kararı bekleniyor).** Parça verisindeki 194 uyumluluk satırı izin gerektiren
+> (PERMISSION_REQUIRED) EBC, Hiflofiltro, NGK ve JT kataloglarından derlendi. Bu nedenle veri setleri varsayılan olarak
+> hiçbir derlemeye (Release, Docker) gömülmez; admin sayfasında "Veri setini yükle" devre dışıdır ve nedeni yazılıdır.
+> Yerel araştırma için: `dotnet build -p:IncludeCatalogResearch=true`. Karar verildiğinde bu varsayılan değiştirilebilir.
 
 | Dosya | İçerik |
 |---|---|
@@ -27,9 +32,13 @@ Yükleme hiçbir motosikleti seçiciye eklemez ve hiçbir ürün oluşturmaz; he
 
 ## Sonuçlar
 
-**Motosikletler:** 92 kayıt (56 HIGH, 31 MEDIUM, 5 LOW), 14 marka. 71 kayıt seçiciye eklenebilir; kalanlar ya doğrulanmış
-yılı olmayan aday kayıtlardır (çoğu Türkiye marka sayfalarında model yılı yazmayan CFMOTO, Kymco, Mondial, RKS, Benelli)
-ya da başka pazara aittir (Hindistan'a özel modeller ve motor sürümleri).
+**Motosikletler:** 92 kayıt (56 HIGH, 31 MEDIUM, 5 LOW), 14 marka. Her kayıt kendi kaynağına bağlıdır (`sourceKey`,
+aşağıdaki "Kaynak ataması"). Tek kaynağı RESTRICTED olan 3 kayıt (KTM 125 Duke ×2, KTM RC 390 2022) ara alana alınmaz;
+89 kayıt alınır. 49 kayıt seçiciye eklenebilir; kalanlar ya doğrulanmış yılı olmayan aday kayıtlardır (çoğu Türkiye
+marka sayfalarında model yılı yazmayan CFMOTO, Kymco, Mondial, RKS, Benelli), ya başka pazara aittir (Hindistan'a özel
+modeller ve motor sürümleri), ya da kaynağı olgusal kullanıma izin vermez: 20 Yamaha kaydı yalnızca Yamaha sitelerine dayanır: yamaha-motor.eu
+(PERMISSION_REQUIRED), bazıları ayrıca global.yamaha-motor.com (RESTRICTED). Yamaha'dan izin alınır ya da yönetici bu kaynağı PUBLIC_FACTUAL_REFERENCE_ONLY'ye yükseltirse
+(model adı, yıl ve motor hacmi olgu olarak) bu kayıtlar da seçiciye eklenebilir.
 
 MotorShop.Fitment'in başlangıç listesindeki 35 motosikletten 7'si doğrulandı, 27'si düzeltme gerektirdi, 1'i
 doğrulanamadı. En sık hatalar: birden çok neslin tek kayıtta birleştirilmesi (ör. MT-07 2014/2018/2021/2025), yanlış
@@ -42,13 +51,25 @@ vermiyor, Yuasa bot koruması nedeniyle okunamadı). Hiçbir kayıtta GTIN yok; 
 
 **İzinler:** 43 kaynağın hiçbiri AUTHORIZED değil; MOTOR'un bilinen yazılı bir anlaşması yok.
 PUBLIC_FACTUAL_REFERENCE_ONLY 11, PERMISSION_REQUIRED 22, RESTRICTED 4, REJECTED 6. Parçaların bağlı olduğu dört kaynak
-(Hiflofiltro, EBC, NGK, JT) PERMISSION_REQUIRED olduğu için parçalar araştırma adayı olarak kalır.
+(Hiflofiltro, EBC, NGK, JT) PERMISSION_REQUIRED olduğu için parçalar araştırma adayı olarak kalır; parçaların
+`licenseStatus` alanı da buna göre PERMISSION_REQUIRED'dır. Doğrulayıcı, bir kaydın lisans durumunun kaynağının
+izninden yüksek olmasına izin vermez.
+
+### Kaynak ataması
+
+Her kayıt, alıntıladığı kaynaklardan en geniş izinli olanına bağlanır; o kaynağın izni kaydı yönetir. Bir URL, alan adı
+kaynak kaydındaki bir sitenin alan adıyla aynıysa veya onun alt alan adıysa (ör. `cdn2.yamaha-motor.eu` →
+`yamaha-motor.eu`) o kaynağa sayılır. Kaynak kaydında olmayan resmî sayfalar (ör. hondanews.eu, globalsuzuki.com) elle
+doğrulanmış olgu kaynağı `motor-research-2026-10` (PUBLIC_FACTUAL_REFERENCE_ONLY) altında sayılır. Böylece
+23 kayıt RESTRICTED bir siteye atıf yapar, ancak bunların 20'si başka bir kaynakla da desteklenir; yalnızca RESTRICTED
+kaynağa dayanan 3 kayıt ara alana alınmaz. Seçiciye ekleme, kaynağın en az PUBLIC_FACTUAL_REFERENCE_ONLY olmasını ister.
 
 ## Modülde nasıl kullanılır
 
-1. **Veri setini yükle**: kaynak kaydı eklenir (mevcut kaynakların izin durumu değiştirilmez), motosikletler ve parçalar
-   ara alana alınır. Aynı veri seti ikinci kez yüklenirse hiçbir şey değişmez.
-2. **Motosikletler → Doğrulanmış kayıtları seçiciye ekle**: 71 motosiklet seçiciye eklenir. Aynı marka, model ve yıllara
+1. **Veri setini yükle** (yalnızca `IncludeCatalogResearch=true` ile derlenmiş sürümde): kaynak kaydı eklenir (mevcut
+   kaynakların izin durumu değiştirilmez), motosikletler ve parçalar ara alana alınır. Aynı veri seti ikinci kez
+   yüklenirse hiçbir şey değişmez.
+2. **Motosikletler → Doğrulanmış kayıtları seçiciye ekle**: 49 motosiklet seçiciye eklenir. Aynı marka, model ve yıllara
    sahip mevcut bir kayıt varsa yenisi oluşturulmaz, mevcut kayda bağlanır.
 3. **Denetim**: seçicideki doğrulanmamış motosikletler (ör. başlangıç listesi) listelenir. Ürün eşleşmesi olmayanlar
    kaldırılabilir; eşleşmesi olanlar korunur.
@@ -67,6 +88,8 @@ PUBLIC_FACTUAL_REFERENCE_ONLY 11, PERMISSION_REQUIRED 22, RESTRICTED 4, REJECTED
 - **Yayın onayı:** her parça için referans (B) ve satış (C) onayı admin panelinden verilir.
 - **Hukuki kontrol:** Honda Türkiye ve KTM koşulları içeriğin ticari kopyalanmasını kısıtlıyor. Seçici için yalnızca
   model adı, yıl ve motor hacmi kullanılıyor; yine de bir hukuk kontrolü önerilir.
+- **Veri setinin sürüme girmesi:** izin gerektiren kataloglardan derlenmiş araştırma verisinin üretim sürümüne gömülüp
+  gömülmeyeceği (şu an gömülmüyor).
 
 ## Bilinen kısıtlar
 

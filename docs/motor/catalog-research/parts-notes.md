@@ -20,7 +20,8 @@ No price, stock, supplier, image or marketing text was collected.
 | battery | none | 0 (Yuasa blocked, see below) |
 
 Status: 60 VERIFIED, 18 PARTIAL, 0 UNVERIFIED.
-`licenseStatus` is `PUBLIC_FACTUAL_REFERENCE_ONLY` for all records. No source grants a reuse licence for its catalogue data.
+`licenseStatus` is `PERMISSION_REQUIRED` for all records, the status of their sources. No source grants a reuse licence for its catalogue data.
+(Corrected 2026-10-20: the records first said `PUBLIC_FACTUAL_REFERENCE_ONLY`, which claimed more than the sources allow.)
 
 ## Sources
 

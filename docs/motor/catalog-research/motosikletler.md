@@ -4,7 +4,14 @@ Kaynak dosya: `src/Smartstore.Modules/MotorShop.CatalogImport/Research/2026-10/v
 Her kayıt, alanlarını destekleyen resmî kaynak URL'lerini (`sources[].supports`) taşır. Ayrıntılı araştırma günlüğü: [vehicles-notes.md](vehicles-notes.md).
 
 "Seçici yılları", modülün seçiciye yazacağı aralıktır: resmî kaynakta belirtilen başlangıç yılı ile doğrulanmış en son model yılı
-arası. Üretim sonu resmî olarak belirtilmediyse tahmin edilmez. 71 kayıt seçiciye eklenebilir; diğerleri referans olarak kalır.
+arası. Üretim sonu resmî olarak belirtilmediyse tahmin edilmez. Olgular açısından 71 kayıt seçiciye uygundur; diğerleri
+referans olarak kalır.
+
+**İzin düzeltmesi (2026-10-20):** her kayıt artık kendi kaynağına bağlıdır (`sourceKey`) ve o kaynağın izni geçerlidir.
+Tek kaynağı RESTRICTED ktm.com olan 3 kayıt (KTM 125 Duke ×2, KTM RC 390 2022) ara alana alınmaz. Yalnızca Yamaha
+sitelerine dayanan 20 Yamaha kaydı (yamaha-motor.eu PERMISSION_REQUIRED, bazıları ayrıca RESTRICTED global.yamaha-motor.com) izin verilene kadar seçiciye eklenmez. Bu nedenle şu an
+seçiciye eklenebilen kayıt sayısı 49'dur. Aşağıdaki tablodaki "Seçiciye eklenebilir" sütunu yalnızca olgulara bakar.
+Kural: [README.md](README.md#kaynak-ataması).
 
 ## Marka özeti
 
