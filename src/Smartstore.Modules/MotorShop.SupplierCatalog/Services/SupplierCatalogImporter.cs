@@ -35,7 +35,7 @@ public class SupplierCatalogImportResult
     public int ProductsUpdated { get; set; }
     public int ProductsUnpublished { get; set; }
     public int PicturesAdded { get; set; }
-    public List<string> Warnings { get; } = [];
+    public List<string> Warnings { get; set; } = [];
     public TimeSpan Duration { get; set; }
 }
 
@@ -152,7 +152,8 @@ public class SupplierCatalogImporter
                 if (isNew)
                 {
                     result.ProductsCreated++;
-                    var slug = await _urlService.ValidateSlugAsync(product, null, product.Name, true);
+                    // Catalog names contain year ranges like "2023/25"; a slash would split the URL.
+                    var slug = await _urlService.ValidateSlugAsync(product, product.Name.Replace('/', ' '), product.Name, true);
                     await _urlService.ApplySlugAsync(slug);
                 }
                 else
@@ -329,7 +330,7 @@ public class SupplierCatalogImporter
 
         foreach (var path in paths)
         {
-            var parentId = 0;
+            int? parentId = null;
             var current = string.Empty;
             var levels = path.Split(CategorySeparator);
 
@@ -342,7 +343,7 @@ public class SupplierCatalogImporter
                     continue;
                 }
 
-                var category = all.FirstOrDefault(x => x.ParentId == parentId && x.Name.EqualsNoCase(name));
+                var category = all.FirstOrDefault(x => (x.ParentId ?? 0) == (parentId ?? 0) && x.Name.EqualsNoCase(name));
                 if (category == null)
                 {
                     category = new Category
@@ -351,7 +352,7 @@ public class SupplierCatalogImporter
                         ParentId = parentId,
                         CategoryTemplateId = templateId,
                         Published = true,
-                        DisplayOrder = all.Count(x => x.ParentId == parentId) + 1,
+                        DisplayOrder = all.Count(x => (x.ParentId ?? 0) == (parentId ?? 0)) + 1,
                         CreatedOnUtc = DateTime.UtcNow,
                         UpdatedOnUtc = DateTime.UtcNow
                     };
