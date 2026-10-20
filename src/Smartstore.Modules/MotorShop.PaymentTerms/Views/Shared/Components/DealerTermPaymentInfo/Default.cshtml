@@ -1,0 +1,17 @@
+@model DealerTermPaymentInfoModel
+
+<div class="opt-form prosev-dealer-terms">
+    <fieldset class="form-group">
+        <legend class="col-form-label required pt-0">@T("Plugins.MotorShop.PaymentTerms.ChooseTerm")</legend>
+        @foreach (var term in Model.Terms)
+        {
+            var id = "dealer-term-" + term.Value;
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="@Model.FormKey" id="@id" value="@term.Value" checked="@term.Selected" />
+                <label class="form-check-label" for="@id">@term.Label</label>
+            </div>
+        }
+        <span class="field-validation-valid" data-valmsg-for="@Model.FormKey" data-valmsg-replace="true"></span>
+    </fieldset>
+    <p class="form-text text-muted mb-0">@T("Plugins.MotorShop.PaymentTerms.TermHint", Model.LateFeeMonthlyPercent.ToString("0.##"))</p>
+</div>

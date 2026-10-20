@@ -1,0 +1,23 @@
+<Language Name="English" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.PaymentTerms" AppendRootKey="false"><Value>Prosev payment terms (dealer term payment)</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.PaymentTerms" AppendRootKey="false"><Value>Payment terms of the Prosev 2026 catalog: dealer customer role, dealer term payment (cash within 10 days or 30/60/90 days), installment and dealer terms box in checkout, bank transfer and cash on delivery descriptions.</Value></LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.DealerTerm" AppendRootKey="false"><Value>Term payment (dealers)</Value></LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.DealerTerm" AppendRootKey="false"><Value>Your order is placed with the payment plan you choose. Payment is collected through your dealer account when due.</Value></LocaleResource>
+
+    <LocaleResource Name="ChooseTerm"><Value>Payment plan</Value></LocaleResource>
+    <LocaleResource Name="TermRequired"><Value>Please choose a payment plan.</Value></LocaleResource>
+    <LocaleResource Name="Term.Cash"><Value>Cash (payment within {0} days)</Value></LocaleResource>
+    <LocaleResource Name="Term.Deferred"><Value>{0} days</Value></LocaleResource>
+    <LocaleResource Name="TermHint"><Value>Invoices not paid when due are charged a late fee of {0}% per month. Please keep to the payment plan.</Value></LocaleResource>
+    <LocaleResource Name="OrderNote"><Value>Payment plan: {0} (dealer term payment). Invoices not paid when due are charged a late fee of {1}% per month.</Value></LocaleResource>
+
+    <LocaleResource Name="Installments.Title"><Value>3 installments on all credit cards</Value></LocaleResource>
+    <LocaleResource Name="Installments.Text"><Value>Card payments: single payment or 3 installments without surcharge, offered on iyzico's secure payment page.</Value></LocaleResource>
+    <LocaleResource Name="Installments.Programs"><Value>Sağlam Kart · Bankkart Combo · Paraf · Advantage · CardFinans · Bonus · Axess · World · Maximum</Value></LocaleResource>
+
+    <LocaleResource Name="Dealer.Title"><Value>Dealer payment terms</Value></LocaleResource>
+    <LocaleResource Name="Dealer.Terms"><Value>Our sales are on {0} day terms; the cash payment term is {1} days.</Value></LocaleResource>
+    <LocaleResource Name="Dealer.LateFee"><Value>Invoices not paid when due are charged a late fee of {0}% per month.</Value></LocaleResource>
+    <LocaleResource Name="Dealer.CardMinimums"><Value>Card charges: at least {0} with installments, at least {1} for single payments.</Value></LocaleResource>
+    <LocaleResource Name="AllTerms"><Value>All payment terms</Value></LocaleResource>
+</Language>

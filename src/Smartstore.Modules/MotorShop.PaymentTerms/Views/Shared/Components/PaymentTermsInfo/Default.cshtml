@@ -1,0 +1,32 @@
+@model PaymentTermsInfoModel
+
+<div class="prosev-payment-terms mb-4">
+    @if (Model.ShowInstallments)
+    {
+        <div class="prosev-installments">
+            <div class="prosev-installments-badge" aria-hidden="true">3</div>
+            <div class="prosev-installments-body">
+                <p class="prosev-installments-title">@T("Plugins.MotorShop.PaymentTerms.Installments.Title")</p>
+                <p class="prosev-installments-text">@T("Plugins.MotorShop.PaymentTerms.Installments.Text")</p>
+                <p class="prosev-installments-programs">@T("Plugins.MotorShop.PaymentTerms.Installments.Programs")</p>
+            </div>
+        </div>
+    }
+
+    @if (Model.IsDealer)
+    {
+        <div class="prosev-dealer-box">
+            <p class="prosev-dealer-title">@T("Plugins.MotorShop.PaymentTerms.Dealer.Title")</p>
+            <ul class="prosev-dealer-list">
+                <li>@T("Plugins.MotorShop.PaymentTerms.Dealer.Terms", Model.DeferredTerms, Model.CashTermDays)</li>
+                <li>@T("Plugins.MotorShop.PaymentTerms.Dealer.LateFee", Model.LateFeeMonthlyPercent.ToString("0.##"))</li>
+                @if (Model.MinCardTotal.HasValue() || Model.MinInstallmentTotal.HasValue())
+                {
+                    <li>@T("Plugins.MotorShop.PaymentTerms.Dealer.CardMinimums", Model.MinInstallmentTotal.NaIfEmpty(), Model.MinCardTotal.NaIfEmpty())</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <a sm-if="Model.PaymentInfoUrl.HasValue()" href="@Model.PaymentInfoUrl" class="prosev-payment-terms-link" target="_blank" rel="noopener">@T("Plugins.MotorShop.PaymentTerms.AllTerms")</a>
+</div>
