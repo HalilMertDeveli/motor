@@ -8,7 +8,7 @@ namespace MotorShop.Iyzico.Migrations;
 /// Creates the transaction table. Uses provider-neutral FluentMigrator calls only, so it runs on
 /// SQL Server, MySQL, PostgreSQL and SQLite.
 /// </summary>
-[MigrationVersion("2026-10-19 12:00:00", "MotorShop.Iyzico: Initial")]
+[MigrationVersion("2026-10-19 12:30:00", "MotorShop.Iyzico: Initial")]
 internal class Initial : Migration
 {
     const string TableName = "MotorShopIyzicoTransaction";
