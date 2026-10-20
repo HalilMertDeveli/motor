@@ -161,7 +161,6 @@
     img {
         mix-blend-mode: multiply;
         transition: transform .6s var(--motor-ease-out);
-        will-change: transform;
     }
 
     // Generic "no image" placeholder: keep it quiet so it doesn't read as a product photo
@@ -179,12 +178,15 @@
     }
 }
 
-.art:hover .art-picture img {
-    transform: scale(1.045);
-}
+// Hover zoom only on devices that can hover (avoids sticky zoom after a tap)
+@media (hover: hover) {
+    .art:hover .art-picture img {
+        transform: scale(1.045);
+    }
 
-.art:hover .art-picture.no-picture img {
-    transform: scale(0.62);
+    .art:hover .art-picture.no-picture img {
+        transform: scale(0.62);
+    }
 }
 
 // Category / subcategory tiles reuse .art-picture but without the product plate
