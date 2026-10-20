@@ -1,0 +1,63 @@
+# MOTOR (Prosev) on Fly.io. Runbook: docs/motor/fly.md
+#
+#   app    one always-on machine in Frankfurt (close to Supabase eu-central-1)
+#   disk   one volume for App_Data/Tenants (Settings.txt placeholder, media,
+#          data protection keys, installed modules)
+#   db     Supabase PostgreSQL, connection string only in the Fly secret
+#          MOTOR_DB_CONNECTION_STRING (never in this file)
+#
+# The image is built locally (GitHub Actions is not required) and deployed with
+#   fly deploy -c deploy/fly/fly.toml --image registry.fly.io/<app>:<sha>
+
+app = "prosev"
+primary_region = "fra"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Production"
+  TZ = "Europe/Istanbul"
+  MOTOR_DB_PROVIDER = "postgresql"
+  # Host filtering: only the store's domains are answered (";"-separated).
+  AllowedHosts = "prosev.fly.dev"
+  # Fly's edge proxy terminates TLS and sets X-Forwarded-*. It reaches the
+  # machine from Fly's private network only, so trust forwarded headers from there.
+  Smartstore__ReverseProxy__Enabled = "true"
+  Smartstore__ReverseProxy__KnownNetworks__0 = "172.16.0.0/12"
+  Smartstore__ReverseProxy__KnownNetworks__1 = "fdaa::/16"
+  Smartstore__ReverseProxy__ForwardPrefixHeader = "false"
+  # Request body limit in the app (Smartstore's default is 2 GB). 64 MiB.
+  Smartstore__MaxRequestBodySize = "67108864"
+
+[[mounts]]
+  source = "motor_tenants"
+  destination = "/app/App_Data/Tenants"
+  initial_size = "3gb"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # The task scheduler needs a process that keeps running: never stop the machine.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 100
+    hard_limit = 200
+
+  # /healthz/ready (MotorShop.Security) checks the database and the task scheduler.
+  # The Host header must match AllowedHosts, otherwise host filtering answers 400.
+  [[http_service.checks]]
+    grace_period = "60s"
+    interval = "30s"
+    timeout = "15s"
+    method = "GET"
+    path = "/healthz/ready"
+    [http_service.checks.headers]
+      Host = "prosev.fly.dev"
+
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "2gb"
