@@ -672,6 +672,13 @@ public abstract partial class InvariantSeedData
             themeSettings.AllowCustomerToSelectTheme = false;
         }
 
+        // MOTOR: larger, sharper product pictures (see MotorMediaDefaults).
+        var mediaSettings = settings.OfType<MediaSettings>().FirstOrDefault();
+        if (mediaSettings != null)
+        {
+            MotorMediaDefaults.Apply(mediaSettings);
+        }
+
         var priceSettings = settings.OfType<PriceSettings>().FirstOrDefault();
         if (priceSettings != null)
         {
