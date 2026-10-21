@@ -673,3 +673,49 @@
 .btn-newsfeed {
     padding: 1.25rem 1.5rem;
 }
+
+//
+// MOTOR: dashboard without the news feed column. Reports that end
+// at column 11 (left of the news feed) span the full width instead.
+// --------------------------------------------------
+
+@include media-breakpoint-up(lg) {
+    .no-news-feed {
+        .report-incomplete-orders,
+        .report-orders,
+        .report-top-customers,
+        .report-customer-registrations,
+        .report-latest-orders,
+        .report-store-statistics {
+            grid-column-end: -1;
+        }
+    }
+}
+
+@media screen and (min-width: 1600px) {
+    .no-news-feed {
+        .report-orders {
+            grid-column: 1 / 9;
+        }
+
+        .report-bestsellers {
+            grid-column: 9 / -1;
+        }
+
+        .report-top-customers {
+            grid-column: 1 / 5;
+        }
+
+        .report-customer-registrations {
+            grid-column: 5 / -1;
+        }
+
+        .report-latest-orders {
+            grid-column: 1 / 8;
+        }
+
+        .report-store-statistics {
+            grid-column: 8 / -1;
+        }
+    }
+}

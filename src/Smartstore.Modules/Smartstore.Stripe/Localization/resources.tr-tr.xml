@@ -1,0 +1,102 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+	<LocaleResource Name="Plugins.FriendlyName.Smartstore.Stripe" AppendRootKey="false">
+		<Value>Stripe</Value>
+	</LocaleResource>
+	<LocaleResource Name="Plugins.Description.Smartstore.Stripe" AppendRootKey="false">
+		<Value>Mağazaya Stripe ile ödeme özelliğini ekler.</Value>
+	</LocaleResource>
+
+	<LocaleResource Name="Plugins.FriendlyName.Payments.StripeElements" AppendRootKey="false">
+		<Value>Stripe ile hemen öde</Value>
+	</LocaleResource>
+	<LocaleResource Name="Plugins.PaymentInfo.Payments.StripeElements" AppendRootKey="false">
+		<Value>Ödemenin doğrudan Stripe üzerinden yapıldığı güvenli bir ödeme penceresi açar.</Value>
+	</LocaleResource>
+
+	<LocaleResource Name="Plugins.Smartstore.Stripe" AppendRootKey="false">
+		<Children>
+			<LocaleResource Name="AdminInstruction">
+				<Value>
+					<![CDATA[
+						<p><b>Stripe</b> kurulumu için:</p>
+                        <ul>
+                            <li>Stripe'ta bir hesap oluşturun veya mevcut hesabınızla giriş yapın.</li>
+                            <li><b>Developer / API Key</b> bölümüne gidin.</li>
+                            <li><b>Publishable Key</b> ve <b>Secret Key</b> değerlerini aşağıdaki ilgili alanlara kopyalayın.</li>
+                            <li>Ardından Webhook oluştur düğmesine tıklayarak yeni bir uç nokta (endpoint) ekleyin.</li>
+                        </ul>
+					]]>
+				</Value>
+			</LocaleResource>
+            <LocaleResource Name="CookieInfo">
+                <Value>Stripe, ödeme işlemini görüntülemek ve gerçekleştirmek için çerezleri kullanır.</Value>
+            </LocaleResource>
+            <LocaleResource Name="CaptureMethod">
+                <Value>Tahsilat yöntemi</Value>
+            </LocaleResource>
+            <LocaleResource Name="CaptureMethod.Hint">
+                <Value>Tutarın müşterinin hesabından ne zaman tahsil edileceğini belirler.</Value>
+            </LocaleResource>
+            <LocaleResource Name="CaptureMethod.Automatic">
+                <Value>Otomatik</Value>
+            </LocaleResource>
+            <LocaleResource Name="CaptureMethod.Manual">
+                <Value>Manuel</Value>
+            </LocaleResource>
+            <LocaleResource Name="PublicApiKey">
+                <Value>Public API Key</Value>
+            </LocaleResource>
+            <LocaleResource Name="PublicApiKey.Hint">
+                <Value>Stripe panelinde görüntüleyebileceğiniz Public API Key'i buraya girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="SecrectApiKey">
+                <Value>Secret API Key</Value>
+            </LocaleResource>
+            <LocaleResource Name="SecrectApiKey.Hint">
+                <Value>Stripe panelinde görüntüleyebileceğiniz Secret API Key'i buraya girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebhookSecret">
+                <Value>Webhook Secret Key</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebhookSecret.Hint">
+                <Value>Webhook için Secret Key değerini buraya girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebhookUrl">
+                <Value>Uç nokta URL'si</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebhookUrl.Hint">
+                <Value>Bu URL'yi Stripe hesabınızda webhook için uç nokta (endpoint) URL'si olarak kaydedin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="CreateWebhook">
+                <Value>Webhook oluştur</Value>
+            </LocaleResource>
+			<LocaleResource Name="AdditionalFee">
+				<Value>Ek ücret</Value>
+			</LocaleResource>
+			<LocaleResource Name="AdditionalFee.Hint">
+				<Value>Müşterilerinizden alınacak ek ücreti girin.</Value>
+			</LocaleResource>
+			<LocaleResource Name="AdditionalFeePercentage">
+				<Value>Ek ücret: Yüzde kullan</Value>
+			</LocaleResource>
+			<LocaleResource Name="AdditionalFeePercentage.Hint">
+				<Value>Sipariş toplamına yüzdesel bir ek ücret uygulanıp uygulanmayacağını belirler. Etkin değilse sabit bir tutar kullanılır.</Value>
+			</LocaleResource>
+            <LocaleResource Name="ShowButtonInMiniShoppingCart">
+                <Value>Düğmeyi mini sepette göster</Value>
+            </LocaleResource>
+            <LocaleResource Name="ShowButtonInMiniShoppingCart.Hint">
+                <Value>Ödeme düğmesinin mini sepette gösterilip gösterilmeyeceğini belirler.</Value>
+            </LocaleResource>
+            <LocaleResource Name="PaymentInfo">
+                <Value>
+                    Siparişi tamamladıktan sonra gerekirse harici bir ödeme sağlayıcısına yönlendirilirsiniz;
+                    siparişinizin ödemesini orada yapabilirsiniz.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="OrderNotFound">
+                <Value>PaymentIntent-Id değeri {0} olan sipariş bulunamadı.</Value>
+            </LocaleResource>
+		</Children>
+	</LocaleResource>
+</Language>

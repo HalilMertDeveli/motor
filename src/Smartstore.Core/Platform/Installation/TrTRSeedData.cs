@@ -1,4 +1,7 @@
+using Smartstore.Core.Catalog.Brands;
+using Smartstore.Core.Catalog.Categories;
 using Smartstore.Core.Catalog.Pricing;
+using Smartstore.Core.Catalog.Products;
 using Smartstore.Core.Checkout.Orders;
 using Smartstore.Core.Checkout.Shipping;
 using Smartstore.Core.Checkout.Tax;
@@ -10,9 +13,11 @@ using Smartstore.Core.Content.Menus;
 using Smartstore.Core.Content.Topics;
 using Smartstore.Core.Identity;
 using Smartstore.Core.Localization;
+using Smartstore.Core.Logging;
 using Smartstore.Core.Messaging;
 using Smartstore.Core.Seo;
 using Smartstore.Core.Stores;
+using Smartstore.Scheduling;
 
 namespace Smartstore.Core.Installation;
 
@@ -72,6 +77,11 @@ public class TrTRSeedData : InvariantSeedData
         {
             currency.Published = false;
             currency.Rate = Math.Round(currency.Rate / liraRate, 6);
+
+            if (TurkishSystemNames.Currencies.TryGetValue(currency.CurrencyCode, out var name))
+            {
+                currency.Name = name.Tr;
+            }
         }
 
         lira.Name = TurkishStoreDefaults.CurrencyName;
@@ -107,6 +117,15 @@ public class TrTRSeedData : InvariantSeedData
 
         // Domestic shop: only Turkey is published. Further countries can be published in the admin.
         entities.Each(x => x.Published = false);
+
+        // Turkish country names, so admin lists and address forms show no English names.
+        entities.Each(x =>
+        {
+            if (x.TwoLetterIsoCode != null && TurkishCountryNames.ByTwoLetterIsoCode.TryGetValue(x.TwoLetterIsoCode, out var name))
+            {
+                x.Name = name;
+            }
+        });
 
         entities.WithKey(x => x.NumericIsoCode)
             .Alter(792, x =>
@@ -244,6 +263,50 @@ public class TrTRSeedData : InvariantSeedData
            .Alter("Registered", x => x.Name = "Kayıtlı")
            .Alter("Guests", x => x.Name = "Misafirler")
            .Alter("Inactive new customers", x => x.Name = "Aktif olmayan yeni müşteriler");
+    }
+
+    protected override void Alter(IList<ActivityLogType> entities)
+    {
+        base.Alter(entities);
+
+        foreach (var x in entities)
+        {
+            if (TurkishSystemNames.ActivityLogTypes.TryGetValue(x.SystemKeyword, out var name))
+            {
+                x.Name = name.Tr;
+            }
+        }
+    }
+
+    protected override void Alter(IList<TaskDescriptor> entities)
+    {
+        base.Alter(entities);
+
+        foreach (var x in entities)
+        {
+            if (TurkishSystemNames.ScheduleTasks.TryGetValue(x.Type, out var name))
+            {
+                x.Name = name.Tr;
+            }
+        }
+    }
+
+    protected override void Alter(IList<ProductTemplate> entities)
+    {
+        base.Alter(entities);
+        entities.Each(x => x.Name = TurkishSystemNames.Templates.TryGetValue(x.ViewPath, out var name) ? name.Tr : x.Name);
+    }
+
+    protected override void Alter(IList<CategoryTemplate> entities)
+    {
+        base.Alter(entities);
+        entities.Each(x => x.Name = TurkishSystemNames.Templates.TryGetValue(x.ViewPath, out var name) ? name.Tr : x.Name);
+    }
+
+    protected override void Alter(IList<ManufacturerTemplate> entities)
+    {
+        base.Alter(entities);
+        entities.Each(x => x.Name = TurkishSystemNames.Templates.TryGetValue(x.ViewPath, out var name) ? name.Tr : x.Name);
     }
 
     protected override void Alter(IList<EmailAccount> entities)

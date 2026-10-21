@@ -1,0 +1,254 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.SmartStore.Google.MerchantCenter" AppendRootKey="false">
+        <Value>Google Merchant Center ürün akışı (feed)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.SmartStore.Google.MerchantCenter" AppendRootKey="false">
+        <Value>Ürün verilerini Google Merchant Center (GMC) ürün akışı (feed) biçiminde dışa aktarmanızı sağlar.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Feeds.GoogleMerchantCenterProductXml" AppendRootKey="false">
+        <Value>Google Merchant Center XML ürün akışı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Feeds.GoogleMerchantCenterProductXml" AppendRootKey="false">
+        <Value>Ürün verilerini Google Merchant Center (GMC) XML ürün akışı biçiminde dışa aktarmanızı sağlar.</Value>
+    </LocaleResource>
+
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[<ul class="mb-0">
+			<li>Ürünün tanımlanması için GTIN (UPC, EAN vb.) ya da üretici ile üretici parça numarası (MPN) zorunludur. Google bu üç bilginin tamamının belirtilmesini önerir.</li>
+			<li>Varsayılan vergi ve kargo değerlerini Google Merchant Center hesap ayarlarınızda belirtin.</li>
+			<li>Zorunlu alanlar hakkında daha fazla bilgi için <a class="alert-link" href="https://support.google.com/merchants/answer/7052112?hl=en" target="_blank">Ürün verisi spesifikasyonu</a> makalesine bakın.</li>
+			<li>Tüm Google kategorilerinin listesini <a class="alert-link" href="https://support.google.com/merchants/answer/6324436?hl=en" target="_blank">burada</a> bulabilirsiniz.</li>
+			</ul>]]>
+        </Value>
+    </LocaleResource>
+
+    <LocaleResource Name="TabTitleGrid">
+        <Value>Ürün verileri</Value>
+    </LocaleResource>
+    <LocaleResource Name="TabTitleProfiles">
+        <Value>Dışa aktarma profilleri</Value>
+    </LocaleResource>
+    <LocaleResource Name="DeleteGmcData">
+        <Value>Ürüne atanmış Google verilerini siler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="GeneralSettings">
+        <Value>Genel ayarlar</Value>
+    </LocaleResource>
+    <LocaleResource Name="DefaultValueSettings">
+        <Value>Varsayılan değerler</Value>
+    </LocaleResource>
+    <LocaleResource Name="DefaultValueSettingsNote">
+        <Value>
+            <![CDATA[Bir ürün için bilgi mevcut değilse veya kullanılamıyorsa varsayılan değerler dışa aktarılır. Belirli bir ürün için
+bu değerler eklenti yapılandırmasında ve ürün düzenleme sayfasında düzenlenebilir. <strong>{1}</strong> ürünün <strong>{0}</strong> tanesi için Google verisi tanımlanmış.]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="ExportAllProducts">
+        <Value>Tüm ürünleri dışa aktar</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExportAllProducts.Hint">
+        <Value>Tüm ürünlerin dışa aktarılıp aktarılmayacağını belirtir (varsayılan). Devre dışıysa yalnızca Google verisi tanımlanmış ürünler dışa aktarılır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MissingDefaultCategory">
+        <Value>Varsayılan Google kategorisi ayarlanmamış</Value>
+    </LocaleResource>
+    <LocaleResource Name="DefaultGoogleCategory">
+        <Value>Varsayılan Google kategorisi</Value>
+    </LocaleResource>
+    <LocaleResource Name="DefaultGoogleCategory.Hint">
+        <Value>Ürün düzeyinde kategori belirtilmemişse kullanılır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Products.ProductName">
+        <Value>Ürün</Value>
+    </LocaleResource>
+    <LocaleResource Name="Products.GoogleCategory">
+        <Value>Google kategorisi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Products.GoogleCategory.Hint">
+        <Value>Ürüne karşılık gelen Google kategorisini belirtir. Zorunludur.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdditionalImages">
+        <Value>Ek görseller</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdditionalImages.Hint">
+        <Value>Birden fazla görsel dışa aktarmak istiyorsanız kutuyu işaretleyin. En fazla 10 görsel dışa aktarılabilir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Availability">
+        <Value>Stok durumu</Value>
+    </LocaleResource>
+    <LocaleResource Name="Availability.Hint">
+        <Value>Ürünün stok durumu.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AvailabilityInStock">
+        <Value>Stokta var</Value>
+    </LocaleResource>
+    <LocaleResource Name="AvailabilityOutOfStock">
+        <Value>Stokta yok</Value>
+    </LocaleResource>
+    <LocaleResource Name="AvailabilityPreorder">
+        <Value>Ön sipariş</Value>
+    </LocaleResource>
+    <LocaleResource Name="SpecialPrice">
+        <Value>İndirimli fiyatı dışa aktar</Value>
+    </LocaleResource>
+    <LocaleResource Name="SpecialPrice.Hint">
+        <Value>İlgili ürün için indirimli fiyat varsa, bu fiyatın indirim süresiyle birlikte dışa aktarılıp aktarılmayacağını belirtir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Gender">
+        <Value>Cinsiyet</Value>
+    </LocaleResource>
+    <LocaleResource Name="Gender.Hint">
+        <Value>Giyim gibi belirli ürünler için zorunludur.</Value>
+    </LocaleResource>
+    <LocaleResource Name="GenderMale">
+        <Value>Erkek</Value>
+    </LocaleResource>
+    <LocaleResource Name="GenderFemale">
+        <Value>Kadın</Value>
+    </LocaleResource>
+    <LocaleResource Name="GenderUnisex">
+        <Value>Unisex</Value>
+    </LocaleResource>
+    <LocaleResource Name="AgeGroup">
+        <Value>Yaş grubu</Value>
+    </LocaleResource>
+    <LocaleResource Name="AgeGroup.Hint">
+        <Value>Giyim gibi belirli ürünler için zorunludur.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AgeGroupAdult">
+        <Value>Yetişkin</Value>
+    </LocaleResource>
+    <LocaleResource Name="AgeGroupKids">
+        <Value>Çocuk</Value>
+    </LocaleResource>
+    <LocaleResource Name="Color">
+        <Value>Renk</Value>
+    </LocaleResource>
+    <LocaleResource Name="Color.Hint">
+        <Value>Giyim gibi belirli ürünler için zorunludur.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Size">
+        <Value>Beden</Value>
+    </LocaleResource>
+    <LocaleResource Name="Size.Hint">
+        <Value>Giyim gibi belirli ürünler için zorunludur.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Material">
+        <Value>Malzeme</Value>
+    </LocaleResource>
+    <LocaleResource Name="Material.Hint">
+        <Value>Ürünün yapıldığı malzeme veya kumaş. Örneğin giyim ürünleri için kullanışlıdır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Pattern">
+        <Value>Desen</Value>
+    </LocaleResource>
+    <LocaleResource Name="Pattern.Hint">
+        <Value>Ürün üzerindeki desen veya grafik baskı. Örneğin giyim ürünleri için kullanışlıdır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="EmptyGridCell">
+        <Value>Boş</Value>
+    </LocaleResource>
+    <LocaleResource Name="SearchProductName">
+        <Value>Ürün adı</Value>
+    </LocaleResource>
+    <LocaleResource Name="SearchProductName.Hint">
+        <Value>Ürün adlarında arama yapın.</Value>
+    </LocaleResource>
+    <LocaleResource Name="SearchProductSku">
+        <Value>SKU</Value>
+    </LocaleResource>
+    <LocaleResource Name="SearchIsTouched">
+        <Value>Google verisi olanlar</Value>
+    </LocaleResource>
+    <LocaleResource Name="SearchIsTouched.Hint">
+        <Value>Google verisi kayıtlı ürünleri filtreler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExpirationDays">
+        <Value>Geçerlilik süresi</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExpirationDays.Hint">
+        <Value>Ürünlerin kaç gün sonra sona ereceğini veya artık gösterilmeyeceğini belirtir. 0 değeri girilirse son geçerlilik tarihi dışa aktarılmaz.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExportShipping">
+        <Value>Kargo verilerini dışa aktar</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExportShipping.Hint">
+        <Value>Ürünün ağırlık, uzunluk, genişlik ve yükseklik gibi isteğe bağlı kargo verilerini dışa aktarmak istiyorsanız bu seçeneği etkinleştirin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExportShippingTime">
+        <Value>Teslimat süresini dışa aktar</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExportShippingTime.Hint">
+        <Value>Ürünün teslimat süresini dışa aktarmak istiyorsanız bu seçeneği etkinleştirin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExportBasePrice">
+        <Value>Taban fiyatı dışa aktar</Value>
+    </LocaleResource>
+    <LocaleResource Name="ExportBasePrice.Hint">
+        <Value>Ürünün taban fiyatını (birim fiyat) dışa aktarmak istiyorsanız bu seçeneği etkinleştirin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Multipack">
+        <Value>Çoklu paket</Value>
+    </LocaleResource>
+    <LocaleResource Name="Multipack.Hint">
+        <Value>Satıcı tarafından tanımlanan çoklu paketteki aynı ürünlerin sayısı. 1'den büyük olmalıdır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="IsBundle">
+        <Value>Paket (bundle)</Value>
+    </LocaleResource>
+    <LocaleResource Name="IsBundle.Hint">
+        <Value>Satıcı tarafından tanımlanan, bir ana ürün ile birkaç aksesuar veya eklentiden oluşan ürün paketi.</Value>
+    </LocaleResource>
+    <LocaleResource Name="IsAdult">
+        <Value>Yetişkinlere yönelik</Value>
+    </LocaleResource>
+    <LocaleResource Name="IsAdult.Hint">
+        <Value>Yalnızca yetişkin kullanıcılara yönelik ürün.</Value>
+    </LocaleResource>
+    <LocaleResource Name="EnergyEfficiencyClass">
+        <Value>Enerji verimliliği</Value>
+    </LocaleResource>
+    <LocaleResource Name="EnergyEfficiencyClass.Hint">
+        <Value>Ürünün AB etiketleme yönetmeliğine göre enerji verimliliği sınıfı. Olası değerler: A, B, C, D, E, F, G.</Value>
+    </LocaleResource>
+    <LocaleResource Name="EnergyEfficiencyClasses">
+        <Value>A,B,C,D,E,F,G</Value>
+    </LocaleResource>
+    <LocaleResource Name="AssignableFiles">
+        <Value>Görseller</Value>
+    </LocaleResource>
+    <LocaleResource Name="AssignableFiles.Hint">
+        <Value>Dışa aktarılacak görselleri belirtir. Google en fazla on görselin dışa aktarılmasını destekler. Burada başka bir seçim yapılmadıkça, "Ek görseller" dışa aktarma profili ayarına bağlı olarak ya ilk görsel ya da en fazla on görsel dışa aktarılır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel0">
+        <Value>Etiket 0</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel0.Hint">
+        <Value>Özel etiket 0, ürünleri kendi ihtiyacınıza göre gruplandırmanıza yarar.</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel1">
+        <Value>Etiket 1</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel1.Hint">
+        <Value>Özel etiket 1, ürünleri kendi ihtiyacınıza göre gruplandırmanıza yarar.</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel2">
+        <Value>Etiket 2</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel2.Hint">
+        <Value>Özel etiket 2, ürünleri kendi ihtiyacınıza göre gruplandırmanıza yarar.</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel3">
+        <Value>Etiket 3</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel3.Hint">
+        <Value>Özel etiket 3, ürünleri kendi ihtiyacınıza göre gruplandırmanıza yarar.</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel4">
+        <Value>Etiket 4</Value>
+    </LocaleResource>
+    <LocaleResource Name="CustomLabel4.Hint">
+        <Value>Özel etiket 4, ürünleri kendi ihtiyacınıza göre gruplandırmanıza yarar.</Value>
+    </LocaleResource>
+</Language>
