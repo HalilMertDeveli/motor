@@ -1,0 +1,87 @@
+@model List<CouponRowModel>
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Coupons").Value;
+    ViewData["PanelTab"] = "coupons";
+    var loc = CommonServices.Localization;
+    var canCreate = ViewBag.CanCreate == true;
+    var canUpdate = ViewBag.CanUpdate == true;
+    var canDelete = ViewBag.CanDelete == true;
+    string StateBadge(CouponState s) => s switch
+    {
+        CouponState.Active => "mp-badge--green",
+        CouponState.Scheduled => "mp-badge--blue",
+        _ => "mp-badge--gray"
+    };
+}
+
+<section class="mp-panel" aria-labelledby="mp-coupon-title">
+    <div class="mp-panel__head">
+        <div>
+            <h1 id="mp-coupon-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Tab.Coupons")</h1>
+            <p class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Coupon.Hint")</p>
+        </div>
+        @if (canCreate)
+        {
+            <button type="button" class="mp-btn mp-btn--accent" data-open-editor="@Url.Action("Editor", "MotorPanelCoupon", new { area = "Admin" })">+ @T("Plugins.MotorShop.AdminPanel.Coupon.New")</button>
+        }
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <p class="mp-empty">@T("Plugins.MotorShop.AdminPanel.Coupon.None")</p>
+    }
+    else
+    {
+        <div class="mp-table-wrap">
+            <table class="mp-table">
+                <thead>
+                    <tr>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Coupon.Name")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Coupon.Code")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Coupon.AppliesTo")</th>
+                        <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Coupon.Value")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Coupon.Validity")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Coupon.Usage")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Status")</th>
+                        <th scope="col" class="mp-col-actions"><span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Col.Actions")</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td><button type="button" class="mp-link mp-link--plain mp-link-btn" data-open-editor="@Url.Action("Editor", "MotorPanelCoupon", new { area = "Admin", id = c.Id })">@c.Name</button></td>
+                            <td class="mp-mono">@(c.RequiresCouponCode ? c.CouponCode : T("Plugins.MotorShop.AdminPanel.Coupon.Automatic").Value)</td>
+                            <td>@loc.GetLocalizedEnum(c.Type)</td>
+                            <td class="mp-num mp-nowrap">@c.Value</td>
+                            <td class="mp-nowrap mp-small">@(c.Start?.ToString("d") ?? "…") – @(c.End?.ToString("d") ?? "…")</td>
+                            <td class="mp-small">@c.Used · @c.Limit</td>
+                            <td><span class="mp-badge @StateBadge(c.State)">@T("Plugins.MotorShop.AdminPanel.Coupon.State." + c.State)</span></td>
+                            <td class="mp-col-actions">
+                                @if (canUpdate)
+                                {
+                                    var active = c.State is CouponState.Active or CouponState.Scheduled;
+                                    <form method="post" class="mp-inline-form" action="@Url.Action("Active", "MotorPanelCoupon", new { area = "Admin", id = c.Id })" data-page-action
+                                          data-confirm="@(active ? T("Plugins.MotorShop.AdminPanel.Coupon.EndConfirm", c.Name) : T("Plugins.MotorShop.AdminPanel.Coupon.StartConfirm", c.Name))">
+                                        <input type="hidden" name="active" value="@(active ? "false" : "true")" />
+                                        <button type="submit" class="mp-btn mp-btn--outline mp-btn--sm">@(active ? T("Plugins.MotorShop.AdminPanel.Coupon.End") : T("Plugins.MotorShop.AdminPanel.Coupon.Start"))</button>
+                                    </form>
+                                }
+                                @if (canDelete)
+                                {
+                                    <form method="post" class="mp-inline-form" action="@Url.Action("Delete", "MotorPanelCoupon", new { area = "Admin", id = c.Id })" data-page-action
+                                          data-confirm="@T("Plugins.MotorShop.AdminPanel.Coupon.DeleteConfirm", c.Name)">
+                                        <button type="submit" class="mp-icon-btn mp-icon-btn--danger" title="@T("Plugins.MotorShop.AdminPanel.Action.Delete")">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3" /></svg>
+                                            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.Delete"): @c.Name</span>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

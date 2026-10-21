@@ -40,7 +40,7 @@ public class PanelContractTests
     }
 
     // Save checks Create or Update itself, depending on whether the category is new.
-    static readonly string[] PermissionCheckedInBody = ["MotorPanelCategoryController.Save"];
+    static readonly string[] PermissionCheckedInBody = ["MotorPanelCategoryController.Save", "MotorPanelCouponController.Save"];
 
     [Test]
     public void Every_write_requires_a_permission_and_keeps_antiforgery()

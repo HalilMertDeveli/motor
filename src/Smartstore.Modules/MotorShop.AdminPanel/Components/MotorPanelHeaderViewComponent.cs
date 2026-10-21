@@ -51,10 +51,10 @@ public partial class MotorPanelHeaderViewComponent : SmartViewComponent
 
         await AddTabAsync(model, "orders", "Tab.Orders", Permissions.Order.Read, "Index", "MotorPanelOrder");
         await AddTabAsync(model, "customers", "Tab.Customers", Permissions.Customer.Read, "Index", "MotorPanelCustomer");
-        await AddTabAsync(model, "reports", "Tab.Reports", Permissions.Order.Read, "BestsellersReport", "Order", classic: true);
-        await AddTabAsync(model, "content", "Tab.Content", Permissions.Cms.Topic.Read, "List", "Topic", classic: true);
-        await AddTabAsync(model, "settings", "Tab.Settings", Permissions.Configuration.Setting.Read, "GeneralCommon", "Setting", classic: true);
-        await AddTabAsync(model, "coupons", "Tab.Coupons", Permissions.Promotion.Discount.Read, "List", "Discount", classic: true);
+        await AddTabAsync(model, "reports", "Tab.Reports", Permissions.Order.Read, "Index", "MotorPanelReport");
+        await AddTabAsync(model, "content", "Tab.Content", Permissions.Cms.Topic.Read, "Index", "MotorPanelContent");
+        await AddTabAsync(model, "settings", "Tab.Settings", Permissions.Configuration.Setting.Read, "Index", "MotorPanelSettings");
+        await AddTabAsync(model, "coupons", "Tab.Coupons", Permissions.Promotion.Discount.Read, "Index", "MotorPanelCoupon");
         await AddTabAsync(model, "categories", "Tab.Categories", Permissions.Catalog.Category.Read, "Index", "MotorPanelCategory");
         await AddTabAsync(model, "invoices", "Tab.Invoices", Permissions.Order.Read, "Index", "MotorPanelInvoice");
         await AddTabAsync(model, "shipments", "Tab.Shipments", Permissions.Order.Read, "Index", "MotorPanelShipment");

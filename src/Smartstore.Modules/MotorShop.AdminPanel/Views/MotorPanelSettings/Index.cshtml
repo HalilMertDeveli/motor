@@ -1,0 +1,168 @@
+@model SettingsPageModel
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Settings").Value;
+    ViewData["PanelTab"] = "settings";
+    var c = Model.Company;
+}
+
+<div class="mp-settings-head">
+    <h1 class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Tab.Settings")</h1>
+    <a class="mp-btn mp-btn--ghost" href="@Url.Action("GeneralCommon", "Setting", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Settings.AllSettings")</a>
+</div>
+
+@if (Model.HasStoreOverrides)
+{
+    <p class="mp-note">@T("Plugins.MotorShop.AdminPanel.Settings.StoreOverrides")</p>
+}
+
+<div class="mp-settings-grid">
+    <form class="mp-panel mp-settings-card" method="post" action="@Url.Action("Company", "MotorPanelSettings", new { area = "Admin" })" data-settings-form data-reload novalidate>
+        <h2 class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Settings.Company")</h2>
+        <div class="mp-form-error" data-form-error role="alert" hidden></div>
+        <fieldset class="mp-fieldset mp-fieldset--plain" disabled="@(!Model.CanUpdate)">
+            <div class="mp-form-grid">
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.StoreName") *</span>
+                    <input name="StoreName" value="@c.StoreName" maxlength="400" required readonly="@(!Model.CanUpdateStore)" />
+                    <small class="mp-field-error" data-error-for="StoreName"></small>
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.CompanyName")</span>
+                    <input name="CompanyName" value="@c.CompanyName" maxlength="400" />
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.Street")</span>
+                    <input name="Street" value="@c.Street" maxlength="400" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.ZipCode")</span>
+                    <input name="ZipCode" value="@c.ZipCode" maxlength="20" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.City")</span>
+                    <input name="City" value="@c.City" maxlength="100" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.TaxNumber")</span>
+                    <input name="TaxNumber" value="@c.TaxNumber" maxlength="50" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.CommercialRegister")</span>
+                    <input name="CommercialRegister" value="@c.CommercialRegister" maxlength="100" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.Phone")</span>
+                    <input name="Phone" value="@c.Phone" maxlength="50" inputmode="tel" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.CompanyEmail")</span>
+                    <input type="email" name="CompanyEmail" value="@c.CompanyEmail" maxlength="255" />
+                    <small class="mp-field-error" data-error-for="CompanyEmail"></small>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.ContactEmail")</span>
+                    <input type="email" name="ContactEmail" value="@c.ContactEmail" maxlength="255" />
+                    <small class="mp-field-error" data-error-for="ContactEmail"></small>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.SupportEmail")</span>
+                    <input type="email" name="SupportEmail" value="@c.SupportEmail" maxlength="255" />
+                    <small class="mp-field-error" data-error-for="SupportEmail"></small>
+                </label>
+            </div>
+            <p class="mp-small mp-muted">@T("Plugins.MotorShop.AdminPanel.Settings.CompanyHint")</p>
+        </fieldset>
+        @if (Model.CanUpdate)
+        {
+            <div class="mp-settings-actions"><button type="submit" class="mp-btn mp-btn--accent">@T("Plugins.MotorShop.AdminPanel.Save")</button></div>
+        }
+    </form>
+
+    <div class="mp-settings-col">
+        <form class="mp-panel mp-settings-card" method="post" action="@Url.Action("Shipping", "MotorPanelSettings", new { area = "Admin" })" data-settings-form novalidate>
+            <h2 class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Settings.Shipping")</h2>
+            <div class="mp-form-error" data-form-error role="alert" hidden></div>
+            <fieldset class="mp-fieldset mp-fieldset--plain" disabled="@(!Model.CanUpdate)">
+                <label class="mp-check-field">
+                    <input type="checkbox" name="FreeShippingOverXEnabled" value="true" checked="@Model.Shipping.FreeShippingOverXEnabled" />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.FreeShipping")</span>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.FreeShippingOver", Model.PrimaryCurrency)</span>
+                    <input name="FreeShippingOverXValue" value="@Model.Shipping.FreeShippingOverXValue" inputmode="decimal" />
+                    <small class="mp-field-error" data-error-for="FreeShippingOverXValue"></small>
+                </label>
+                <label class="mp-check-field">
+                    <input type="checkbox" name="FreeShippingOverXIncludingTax" value="true" checked="@Model.Shipping.FreeShippingOverXIncludingTax" />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.FreeShippingInclTax")</span>
+                </label>
+            </fieldset>
+            <a class="mp-link mp-small" href="@Url.Action("Providers", "Shipping", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Settings.ShippingMethods")</a>
+            @if (Model.CanUpdate)
+            {
+                <div class="mp-settings-actions"><button type="submit" class="mp-btn mp-btn--accent">@T("Plugins.MotorShop.AdminPanel.Save")</button></div>
+            }
+        </form>
+
+        <form class="mp-panel mp-settings-card" method="post" action="@Url.Action("Panel", "MotorPanelSettings", new { area = "Admin" })" data-settings-form data-reload novalidate>
+            <h2 class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Settings.Panel")</h2>
+            <div class="mp-form-error" data-form-error role="alert" hidden></div>
+            <fieldset class="mp-fieldset mp-fieldset--plain" disabled="@(!Model.CanUpdate)">
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.PanelTitle")</span>
+                    <input name="PanelTitle" value="@Model.Panel.PanelTitle" maxlength="100" placeholder="@Model.StoreName" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Settings.Accent")</span>
+                    <input name="AccentColor" value="@Model.Panel.AccentColor" maxlength="7" placeholder="#ff5a1f" pattern="#[0-9a-fA-F]{6}" />
+                    <small class="mp-field-error" data-error-for="AccentColor"></small>
+                </label>
+            </fieldset>
+            @if (Model.CanUpdate)
+            {
+                <div class="mp-settings-actions"><button type="submit" class="mp-btn mp-btn--accent">@T("Plugins.MotorShop.AdminPanel.Save")</button></div>
+            }
+        </form>
+    </div>
+
+    <section class="mp-panel mp-settings-card">
+        <h2 class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Settings.Commerce")</h2>
+        <dl class="mp-facts-list">
+            <dt>@T("Plugins.MotorShop.AdminPanel.Card.HideAllPrices")</dt>
+            <dd>
+                <span class="mp-badge @(Model.HideAllPrices ? "mp-badge--red" : "mp-badge--green")">@(Model.HideAllPrices ? T("Plugins.MotorShop.AdminPanel.PriceLock.StateOn") : T("Plugins.MotorShop.AdminPanel.PriceLock.StateOff"))</span>
+                <a class="mp-link mp-small" href="@Url.Action("Index", "MotorPanel", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Settings.ChangeOnDashboard")</a>
+            </dd>
+            <dt>@T("Plugins.MotorShop.AdminPanel.Currency")</dt>
+            <dd>
+                @Model.PrimaryCurrency
+                @if (Model.OtherCurrencies.Count > 0)
+                {
+                    <span class="mp-muted"> (+ @string.Join(", ", Model.OtherCurrencies))</span>
+                }
+                <a class="mp-link mp-small" href="@Url.Action("List", "Currency", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Editor.OpenClassic")</a>
+            </dd>
+            <dt>@T("Plugins.MotorShop.AdminPanel.Settings.Tax")</dt>
+            <dd>
+                @(Model.PricesIncludeTax ? T("Plugins.MotorShop.AdminPanel.Settings.PricesInclTax") : T("Plugins.MotorShop.AdminPanel.Settings.PricesExclTax")) · @Model.TaxDisplay
+                <a class="mp-link mp-small" href="@Url.Action("FinanceSettings", "Tax", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Editor.OpenClassic")</a>
+            </dd>
+            <dt>@T("Plugins.MotorShop.AdminPanel.Settings.Payments")</dt>
+            <dd>
+                <ul class="mp-plainlist">
+                    @foreach (var (name, active) in Model.PaymentMethods)
+                    {
+                        <li><span class="mp-badge @(active ? "mp-badge--green" : "mp-badge--gray")">@(active ? T("Plugins.MotorShop.AdminPanel.Customer.Active") : T("Plugins.MotorShop.AdminPanel.Customer.Inactive"))</span> @name</li>
+                    }
+                </ul>
+                <a class="mp-link mp-small" href="@Url.Action("Providers", "Payment", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Settings.PaymentsClassic")</a>
+            </dd>
+            <dt>@T("Plugins.MotorShop.AdminPanel.Settings.Email")</dt>
+            <dd>
+                @(Model.DefaultEmailAccount.NullEmpty() ?? "-")
+                <a class="mp-link mp-small" href="@Url.Action("List", "EmailAccount", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Editor.OpenClassic")</a>
+            </dd>
+        </dl>
+        <p class="mp-small mp-muted">@T("Plugins.MotorShop.AdminPanel.Settings.ReadOnlyHint")</p>
+    </section>
+</div>

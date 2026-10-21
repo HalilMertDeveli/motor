@@ -16,6 +16,10 @@ internal class Startup : StarterBase
         builder.RegisterType<CategoryEditService>().AsSelf().InstancePerLifetimeScope();
         builder.RegisterType<PriceLockService>().AsSelf().InstancePerLifetimeScope();
         builder.RegisterType<OrderPanelService>().AsSelf().InstancePerLifetimeScope();
+        builder.RegisterType<PanelReportService>().AsSelf().InstancePerLifetimeScope();
+        builder.RegisterType<ContentPanelService>().AsSelf().InstancePerLifetimeScope();
+        builder.RegisterType<CouponPanelService>().AsSelf().InstancePerLifetimeScope();
+        builder.RegisterType<SettingsPanelService>().AsSelf().InstancePerLifetimeScope();
 
         if (appContext.IsInstalled)
         {

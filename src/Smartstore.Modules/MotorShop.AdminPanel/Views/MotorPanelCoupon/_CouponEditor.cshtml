@@ -1,0 +1,145 @@
+@using Smartstore.Core.Catalog.Discounts
+@using MotorShop.AdminPanel.Services
+@model CouponEditorModel
+@{
+    var canSave = ViewBag.CanSave == true;
+    var loc = CommonServices.Localization;
+    string Date(DateTime? d) => d?.ToString("yyyy-MM-dd");
+}
+
+<form class="mp-editor" method="post" action="@Url.Action("Save", "MotorPanelCoupon", new { area = "Admin" })" novalidate data-editor data-reload data-coupon>
+    <header class="mp-drawer__head">
+        <div>
+            <h2 id="mp-drawer-title" class="mp-drawer__title">@(Model.Id == 0 ? T("Plugins.MotorShop.AdminPanel.Coupon.New") : Model.Name)</h2>
+            @if (Model.Id > 0)
+            {
+                <p class="mp-muted mp-drawer__sub">#@Model.Id · @T("Plugins.MotorShop.AdminPanel.Coupon.UsedTimes", Model.Used)</p>
+            }
+        </div>
+        <button type="button" class="mp-icon-btn" data-close title="@T("Plugins.MotorShop.AdminPanel.Js.Close")">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Js.Close")</span>
+        </button>
+    </header>
+
+    <div class="mp-drawer__body">
+        <div class="mp-form-error" data-form-error role="alert" hidden></div>
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)">
+            <div class="mp-form-grid">
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.Name") *</span>
+                    <input name="Name" value="@Model.Name" required maxlength="200" />
+                    <small class="mp-field-error" data-error-for="Name"></small>
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.AppliesTo")</span>
+                    <select name="DiscountType" data-coupon-type>
+                        @foreach (var type in CouponPanelService.SupportedTypes)
+                        {
+                            <option value="@type" selected="@(Model.DiscountType == type)">@loc.GetLocalizedEnum(type)</option>
+                        }
+                    </select>
+                    <small class="mp-field-error" data-error-for="DiscountType"></small>
+                </label>
+                <label class="mp-check-field mp-form-field--wide">
+                    <input type="checkbox" name="UsePercentage" value="true" checked="@Model.UsePercentage" data-coupon-percent />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.UsePercentage")</span>
+                </label>
+                <label class="mp-form-field" data-show-percent>
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.Percentage")</span>
+                    <input name="Percentage" value="@Model.Percentage" inputmode="decimal" />
+                    <small class="mp-field-error" data-error-for="Percentage"></small>
+                </label>
+                <label class="mp-form-field" data-show-amount>
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.Amount")</span>
+                    <input name="Amount" value="@Model.Amount" inputmode="decimal" />
+                    <small class="mp-field-error" data-error-for="Amount"></small>
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)">
+            <legend>@T("Plugins.MotorShop.AdminPanel.Coupon.Code")</legend>
+            <div class="mp-form-grid">
+                <label class="mp-check-field mp-form-field--wide">
+                    <input type="checkbox" name="RequiresCouponCode" value="true" checked="@Model.RequiresCouponCode" />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.RequiresCode")</span>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.Code")</span>
+                    <input name="CouponCode" value="@Model.CouponCode" maxlength="100" autocomplete="off" class="mp-mono" />
+                    <small class="mp-field-error" data-error-for="CouponCode"></small>
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)">
+            <legend>@T("Plugins.MotorShop.AdminPanel.Coupon.Validity")</legend>
+            <div class="mp-form-grid">
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Order.From")</span>
+                    <input type="date" name="Start" value="@Date(Model.Start)" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Order.To")</span>
+                    <input type="date" name="End" value="@Date(Model.End)" />
+                    <small class="mp-field-error" data-error-for="End"></small>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.Usage")</span>
+                    <select name="Limitation">
+                        @foreach (var l in Enum.GetValues<DiscountLimitationType>())
+                        {
+                            <option value="@l" selected="@(Model.Limitation == l)">@loc.GetLocalizedEnum(l)</option>
+                        }
+                    </select>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Coupon.Times")</span>
+                    <input type="number" name="LimitationTimes" value="@Model.LimitationTimes" min="1" step="1" />
+                    <small class="mp-field-error" data-error-for="LimitationTimes"></small>
+                </label>
+            </div>
+            <p class="mp-small mp-muted">@T("Plugins.MotorShop.AdminPanel.Coupon.DateHint")</p>
+        </fieldset>
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)" data-show-categories>
+            <legend>@T("Plugins.MotorShop.AdminPanel.Editor.Categories")</legend>
+            <input type="search" class="mp-input" placeholder="@T("Plugins.MotorShop.AdminPanel.Category.Search")" aria-label="@T("Plugins.MotorShop.AdminPanel.Category.Search")" data-filter-list="#cp-category-list" />
+            <div class="mp-checklist" id="cp-category-list">
+                @foreach (var c in Model.AllCategories)
+                {
+                    <label class="mp-check-field" style="padding-inline-start: @(c.Depth * 18)px" data-filter-text="@c.Name">
+                        <input type="checkbox" name="CategoryIds" value="@c.Id" checked="@Model.CategoryIds.Contains(c.Id)" />
+                        <span>@c.Name</span>
+                    </label>
+                }
+            </div>
+            <small class="mp-field-error" data-error-for="CategoryIds"></small>
+        </fieldset>
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)" data-show-skus>
+            <legend>@T("Plugins.MotorShop.AdminPanel.Coupon.Products")</legend>
+            <label class="mp-form-field">
+                <span>@T("Plugins.MotorShop.AdminPanel.Coupon.SkuList")</span>
+                <textarea name="Skus" rows="4" class="mp-mono">@Model.Skus</textarea>
+                <small class="mp-field-error" data-error-for="Skus"></small>
+            </label>
+        </fieldset>
+    </div>
+
+    <footer class="mp-drawer__foot">
+        @if (Model.Id > 0)
+        {
+            <a class="mp-btn mp-btn--ghost" href="@Url.Action("Edit", "Discount", new { area = "Admin", id = Model.Id })" target="_blank" rel="noopener">@T("Plugins.MotorShop.AdminPanel.Editor.OpenClassic")</a>
+        }
+        <span class="mp-spacer"></span>
+        <button type="button" class="mp-btn mp-btn--outline" data-close>@T("Plugins.MotorShop.AdminPanel.Js.Cancel")</button>
+        @if (canSave)
+        {
+            <button type="submit" class="mp-btn mp-btn--accent">@T("Plugins.MotorShop.AdminPanel.Save")</button>
+        }
+    </footer>
+</form>

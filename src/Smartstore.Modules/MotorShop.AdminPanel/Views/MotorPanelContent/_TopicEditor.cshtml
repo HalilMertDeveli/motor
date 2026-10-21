@@ -1,0 +1,89 @@
+@model TopicEditorModel
+@{
+    var canUpdate = ViewBag.CanUpdate == true;
+}
+
+<form class="mp-editor" method="post" action="@Url.Action("Edit", "MotorPanelContent", new { area = "Admin", id = Model.Id })" novalidate data-editor data-reload>
+    <header class="mp-drawer__head">
+        <div>
+            <h2 id="mp-drawer-title" class="mp-drawer__title">@(Model.Title.NullEmpty() ?? Model.SystemName)</h2>
+            <p class="mp-muted mp-drawer__sub mp-mono">@Model.SystemName</p>
+        </div>
+        <button type="button" class="mp-icon-btn" data-close title="@T("Plugins.MotorShop.AdminPanel.Js.Close")">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Js.Close")</span>
+        </button>
+    </header>
+
+    <div class="mp-drawer__body">
+        <div class="mp-form-error" data-form-error role="alert" hidden></div>
+        @if (Model.IsSystemTopic)
+        {
+            <p class="mp-note">@T("Plugins.MotorShop.AdminPanel.Content.SystemTopic")</p>
+        }
+
+        <fieldset class="mp-fieldset" disabled="@(!canUpdate)">
+            <div class="mp-form-grid">
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Content.Title") *</span>
+                    <input name="Title" value="@Model.Title" required maxlength="400" />
+                    <small class="mp-field-error" data-error-for="Title"></small>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Content.ShortTitle")</span>
+                    <input name="ShortTitle" value="@Model.ShortTitle" maxlength="50" />
+                </label>
+                <label class="mp-check-field">
+                    <input type="checkbox" name="IsPublished" value="true" checked="@Model.IsPublished" />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Status.Published")</span>
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Content.Intro")</span>
+                    <textarea name="Intro" rows="2">@Model.Intro</textarea>
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Content.Body")</span>
+                    <textarea name="Body" rows="12" class="mp-mono">@Model.Body</textarea>
+                    <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Editor.HtmlHint")</small>
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset class="mp-fieldset" disabled="@(!canUpdate)">
+            <legend>SEO</legend>
+            <div class="mp-form-grid">
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.SeName")</span>
+                    <input name="SeName" value="@Model.SeName" maxlength="400" />
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaTitle")</span>
+                    <input name="MetaTitle" value="@Model.MetaTitle" maxlength="400" />
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaDescription")</span>
+                    <textarea name="MetaDescription" rows="2" maxlength="4000">@Model.MetaDescription</textarea>
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaKeywords")</span>
+                    <input name="MetaKeywords" value="@Model.MetaKeywords" maxlength="400" />
+                </label>
+            </div>
+        </fieldset>
+        <p class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Editor.LocalizedHint")</p>
+    </div>
+
+    <footer class="mp-drawer__foot">
+        <a class="mp-btn mp-btn--ghost" href="@Url.Action("Edit", "Topic", new { area = "Admin", id = Model.Id })" target="_blank" rel="noopener">@T("Plugins.MotorShop.AdminPanel.Editor.OpenClassic")</a>
+        @if (Model.Slug.HasValue())
+        {
+            <a class="mp-btn mp-btn--ghost" href="@Url.RouteUrl("Topic", new { SeName = Model.Slug, area = "" })" target="_blank" rel="noopener">@T("Plugins.MotorShop.AdminPanel.Action.View")</a>
+        }
+        <span class="mp-spacer"></span>
+        <button type="button" class="mp-btn mp-btn--outline" data-close>@T("Plugins.MotorShop.AdminPanel.Js.Cancel")</button>
+        @if (canUpdate)
+        {
+            <button type="submit" class="mp-btn mp-btn--accent">@T("Plugins.MotorShop.AdminPanel.Save")</button>
+        }
+    </footer>
+</form>
