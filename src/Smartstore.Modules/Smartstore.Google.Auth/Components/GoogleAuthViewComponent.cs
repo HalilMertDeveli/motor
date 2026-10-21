@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Smartstore.Core.Security;
+using Smartstore.Google.Auth.Models;
 using Smartstore.Web.Components;
 
 namespace Smartstore.Google.Auth.Components;
@@ -9,22 +11,32 @@ public class GoogleAuthViewComponent : SmartViewComponent
 
     public GoogleAuthViewComponent(IOptionsMonitor<GoogleOptions> googleOptions)
     {
-        _googleOptions = googleOptions.CurrentValue;
+        _googleOptions = googleOptions.Get(GoogleDefaults.AuthenticationScheme);
     }
 
-    public IViewComponentResult Invoke()
+    public async Task<IViewComponentResult> InvokeAsync()
     {
         if (!_googleOptions.ClientId.HasValue() || !_googleOptions.ClientSecret.HasValue())
         {
+            // Never render a button that cannot work. Tell administrators what is missing instead.
+            if (await Services.Permissions.AuthorizeAsync(Permissions.Configuration.Authentication.Update))
+            {
+                return View("NotConfigured", Url.Action("Configure", "GoogleAuth", new { area = "Admin" }));
+            }
+
             return Empty();
         }
 
         var returnUrl = HttpContext.Request.Query["returnUrl"].ToString();
-        var href = Url.Action("ExternalLogin", "Identity", new { provider = "Google", returnUrl });
-        var title = T("Plugins.Smartstore.Google.Auth.Login").Value;
-        var html = $"<a class='btn btn-primary btn-block btn-lg btn-extauth btn-brand-google' href='{href}' rel='nofollow'>" +
-                   $"<i class='fab fa-fw fa-lg fa-google' aria-hidden='true'></i><span>{title}</span></a>";
+        var model = new GoogleAuthButtonModel
+        {
+            Url = Url.Action("ExternalLogin", "Identity", new
+            {
+                provider = GoogleDefaults.AuthenticationScheme,
+                returnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : null
+            })
+        };
 
-        return HtmlContent(html);
+        return View(model);
     }
 }

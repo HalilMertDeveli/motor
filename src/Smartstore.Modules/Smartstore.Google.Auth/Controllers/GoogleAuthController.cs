@@ -27,6 +27,14 @@ public class GoogleAuthController : AdminController
         var model = MiniMapper.Map<GoogleExternalAuthSettings, ConfigurationModel>(settings);
         var host = Services.StoreContext.CurrentStore.GetBaseUrl();
         model.RedirectUrl = $"{host}signin-google";
+        model.IsConfigured = settings.ConsumerKey.HasValue() && settings.ConsumerSecret.HasValue();
+
+        // The handler builds the redirect URI from the request (scheme and host as forwarded by the reverse proxy).
+        var requestRedirectUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}/signin-google";
+        if (!requestRedirectUrl.EqualsNoCase(model.RedirectUrl))
+        {
+            model.RequestRedirectUrl = requestRedirectUrl;
+        }
 
         ViewBag.Provider = _providerManager.GetProvider("Smartstore.Google.Auth").Metadata;
 

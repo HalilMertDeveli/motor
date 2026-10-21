@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -16,6 +17,7 @@ using Smartstore.Core.Security;
 using Smartstore.Core.Seo.Routing;
 using Smartstore.Core.Stores;
 using Smartstore.Core.Web;
+using Smartstore.Engine.Modularity;
 using Smartstore.Web.Models.Customers;
 using Smartstore.Web.Models.Identity;
 using Smartstore.Web.Rendering;
@@ -41,6 +43,9 @@ public class IdentityController : PublicController
     private readonly TaxSettings _taxSettings;
     private readonly LocalizationSettings _localizationSettings;
     private readonly RewardPointsSettings _rewardPointsSettings;
+    private readonly IProviderManager _providerManager;
+    private readonly IAuthenticationHandlerProvider _authenticationHandlerProvider;
+    private readonly ExternalAuthenticationSettings _externalAuthenticationSettings;
 
     public IdentityController(
         SmartDbContext db,
@@ -59,7 +64,10 @@ public class IdentityController : PublicController
         DateTimeSettings dateTimeSettings,
         TaxSettings taxSettings,
         LocalizationSettings localizationSettings,
-        RewardPointsSettings rewardPointsSettings)
+        RewardPointsSettings rewardPointsSettings,
+        IProviderManager providerManager,
+        IAuthenticationHandlerProvider authenticationHandlerProvider,
+        ExternalAuthenticationSettings externalAuthenticationSettings)
     {
         _db = db;
         _userManager = userManager;
@@ -78,6 +86,9 @@ public class IdentityController : PublicController
         _taxSettings = taxSettings;
         _localizationSettings = localizationSettings;
         _rewardPointsSettings = rewardPointsSettings;
+        _providerManager = providerManager;
+        _authenticationHandlerProvider = authenticationHandlerProvider;
+        _externalAuthenticationSettings = externalAuthenticationSettings;
     }
 
     #region Login / Logout / Register
@@ -207,6 +218,7 @@ public class IdentityController : PublicController
     }
 
     [HttpGet]
+    [TypeFilter(typeof(DisplayExternalAuthWidgets))]
     [AllowAnonymous, NeverAuthorize]
     [LocalizedRoute("/register", Name = "Register")]
     public async Task<IActionResult> Register(string returnUrl = null)
@@ -611,24 +623,39 @@ public class IdentityController : PublicController
 
     [HttpGet]
     [AllowAnonymous, DisallowRobot]
-    public IActionResult ExternalLogin(string provider, string returnUrl = null)
+    public async Task<IActionResult> ExternalLogin(string provider, string returnUrl = null)
     {
-        var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Identity");
-        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        var scheme = await GetAvailableExternalSchemeAsync(provider);
+        if (scheme == null)
+        {
+            NotifyError(T("ExternalAuthentication.ConfigError"));
+            return RedirectToAction(nameof(Login));
+        }
+
+        // Pass on local return URLs only (no open redirect).
+        var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Identity", new { returnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : null });
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(scheme, redirectUrl);
         properties.AllowRefresh = true;
         properties.IsPersistent = true;
 
-        return Challenge(properties, provider);
+        return Challenge(properties, scheme);
     }
 
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
     {
+        if (!Url.IsLocalUrl(returnUrl))
+        {
+            returnUrl = null;
+        }
+
         if (remoteError != null)
         {
-            NotifyError(remoteError);
-            return RedirectToAction(nameof(Login));
+            // Provider error texts are logged, never displayed.
+            Logger.Warn("Error from external authentication provider: {RemoteError}", remoteError.Truncate(500));
+            NotifyError(T("ExternalAuthentication.ConfigError"));
+            return RedirectToAction(nameof(Login), new { returnUrl });
         }
 
         var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -636,75 +663,217 @@ public class IdentityController : PublicController
         {
             // INFO: if you get here and wonder why it fails, call HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme)
             // (which is internally called by GetExternalLoginInfoAsync) and check AuthenticateResult for errors.
-            return RedirectToAction(nameof(Login));
-        }
-
-        // Sign in the user with this external login provider if the user already has a login.
-        var signinResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
-        if (signinResult.Succeeded)
-        {
-            var customer = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
-            if (customer != null)
+            // Also reached when the callback is opened again after the sign-in was completed (browser back, reload).
+            if (Services.WorkContext.CurrentCustomer.IsRegistered())
             {
-                await FinalizeLoginAsync(Services.WorkContext.CurrentCustomer, customer, logActivity: false);
+                return RedirectToReferrer(returnUrl, () => RedirectToRoute("Homepage"));
             }
 
-            Services.ActivityLogger.LogActivity(KnownActivityLogTypes.PublicStoreLogin, T("ActivityLog.PublicStore.LoginExternal"), info.LoginProvider);
-            return RedirectToReferrer(returnUrl, () => RedirectToRoute("Homepage"));
+            NotifyWarning(T("ExternalAuthentication.Error.SessionExpired"));
+            return RedirectToAction(nameof(Login), new { returnUrl });
         }
-        else
+
+        var customer = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+        if (customer != null)
         {
-            // User doesn't have an account yet.
-            if (_customerSettings.UserRegistrationType != UserRegistrationType.Disabled)
+            // The external account is linked to a customer: sign in, unless the account is blocked or not (yet) active.
+            if (!customer.Active || !customer.IsRegistered())
             {
-                var customer = new Customer
-                {
-                    Username = info.Principal.FindFirstValue(ClaimTypes.Name),
-                    Email = info.Principal.FindFirstValue(ClaimTypes.Email),
-                    PasswordFormat = _customerSettings.DefaultPasswordFormat,
-                    Active = _customerSettings.UserRegistrationType == UserRegistrationType.Standard,
-                    CreatedOnUtc = DateTime.UtcNow,
-                    LastActivityDateUtc = DateTime.UtcNow
-                };
+                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+                NotifyError(T("ExternalAuthentication.Error.AccountNotActive"));
+                return RedirectToAction(nameof(Login), new { returnUrl });
+            }
 
-                var identityResult = await _userManager.CreateAsync(customer);
-                if (identityResult.Succeeded)
-                {
-                    // INFO: this creates the external auth record.
-                    identityResult = await _userManager.AddLoginAsync(customer, info);
-                    if (identityResult.Succeeded)
-                    {
-                        var result = await FinalizeCustomerRegistrationAsync(customer, returnUrl);
-                        await FinalizeLoginAsync(Services.WorkContext.CurrentCustomer, customer, logActivity: true);
+            var signinResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
+            if (signinResult.Succeeded)
+            {
+                await FinalizeLoginAsync(Services.WorkContext.CurrentCustomer, customer, logActivity: false);
 
-                        return result;
-                    }
+                Services.ActivityLogger.LogActivity(KnownActivityLogTypes.PublicStoreLogin, T("ActivityLog.PublicStore.LoginExternal"), info.LoginProvider);
+                return RedirectToReferrer(returnUrl, () => RedirectToRoute("Homepage"));
+            }
+
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            NotifyError(signinResult.IsLockedOut ? T("ExternalAuthentication.Error.AccountNotActive") : T("Account.Login.Unsuccessful"));
+            return RedirectToAction(nameof(Login), new { returnUrl });
+        }
+
+        // The external account is not linked to any customer yet.
+        if (Services.WorkContext.CurrentCustomer.IsRegistered())
+        {
+            // Signed-in customers link external accounts explicitly on the customer info page.
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            NotifyInfo(T("ExternalAuthentication.LinkOnInfoPage", info.ProviderDisplayName));
+            return RedirectToAction("Info", "Customer");
+        }
+
+        if (_customerSettings.UserRegistrationType == UserRegistrationType.Disabled)
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            NotifyError(T("Account.Register.Result.Disabled"));
+            return RedirectToAction(nameof(Login), new { returnUrl });
+        }
+
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email).TrimSafe();
+        if (email.IsEmpty())
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            NotifyError(T("ExternalAuthentication.Error.EmailMissing", info.ProviderDisplayName));
+            return RedirectToAction(nameof(Login), new { returnUrl });
+        }
+
+        // Never attach an external login to an existing account because of a matching email address.
+        // The owner signs in with the password and links the external account on the customer info page.
+        if (await _userManager.FindByEmailAsync(email) != null)
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            NotifyWarning(T("ExternalAuthentication.Error.EmailInUse", info.ProviderDisplayName));
+            return RedirectToAction(nameof(Login), new { returnUrl });
+        }
+
+        customer = new Customer
+        {
+            // Display names are not unique, the email address is.
+            Username = email,
+            Email = email,
+            FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName).TrimSafe().NullEmpty(),
+            LastName = info.Principal.FindFirstValue(ClaimTypes.Surname).TrimSafe().NullEmpty(),
+            PasswordFormat = _customerSettings.DefaultPasswordFormat,
+            Active = _customerSettings.UserRegistrationType == UserRegistrationType.Standard,
+            CreatedOnUtc = DateTime.UtcNow,
+            LastActivityDateUtc = DateTime.UtcNow
+        };
+
+        var identityResult = await _userManager.CreateAsync(customer);
+        if (identityResult.Succeeded)
+        {
+            // INFO: this creates the external auth record.
+            identityResult = await _userManager.AddLoginAsync(customer, info);
+            if (identityResult.Succeeded)
+            {
+                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+                // External registrations get the standard "Registered" role only, never the additional registration role.
+                var result = await FinalizeCustomerRegistrationAsync(customer, returnUrl, assignAdditionalRole: false);
+                if (customer.Active)
+                {
+                    await FinalizeLoginAsync(Services.WorkContext.CurrentCustomer, customer, logActivity: true);
                 }
 
-                // Display errors to user.
-                identityResult.Errors.Each(x => NotifyError(x.Description));
+                return result;
+            }
+        }
+
+        // Display errors to user.
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        identityResult.Errors.Each(x => NotifyError(x.Description));
+
+        return RedirectToAction(nameof(Login), new { returnUrl });
+    }
+
+    /// <summary>
+    /// Starts linking an external account to the signed-in customer (customer info page).
+    /// </summary>
+    [HttpPost]
+    [ValidateAntiForgeryToken, DisallowRobot]
+    public async Task<IActionResult> ExternalLink(string provider)
+    {
+        var customer = Services.WorkContext.CurrentCustomer;
+        if (!customer.IsRegistered() || Services.WorkContext.CurrentImpersonator != null)
+        {
+            return ChallengeOrForbid();
+        }
+
+        var scheme = await GetAvailableExternalSchemeAsync(provider);
+        if (scheme == null)
+        {
+            NotifyError(T("ExternalAuthentication.ConfigError"));
+            return RedirectToAction("Info", "Customer");
+        }
+
+        // Drop a pending external sign-in, so that the callback only sees the result of this challenge.
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+        // The customer id travels in the protected OAuth state and is checked again in the callback.
+        var redirectUrl = Url.Action(nameof(ExternalLinkCallback), "Identity");
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(scheme, redirectUrl, await _userManager.GetUserIdAsync(customer));
+
+        return Challenge(properties, scheme);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExternalLinkCallback()
+    {
+        var customer = Services.WorkContext.CurrentCustomer;
+        if (!customer.IsRegistered() || Services.WorkContext.CurrentImpersonator != null)
+        {
+            return ChallengeOrForbid();
+        }
+
+        // Returns null if the challenge was started for another customer.
+        var info = await _signInManager.GetExternalLoginInfoAsync(await _userManager.GetUserIdAsync(customer));
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+        if (info == null)
+        {
+            NotifyError(T("ExternalAuthentication.Error.LinkFailed"));
+            return RedirectToAction("Info", "Customer");
+        }
+
+        var owner = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+        if (owner == null)
+        {
+            var result = await _userManager.AddLoginAsync(customer, info);
+            if (result.Succeeded)
+            {
+                NotifySuccess(T("ExternalAuthentication.Linked", info.ProviderDisplayName));
             }
             else
             {
-                // Creating new accounts is disabled.
-                NotifyError(T("Account.Register.Result.Disabled"));
+                result.Errors.Each(x => NotifyError(x.Description));
             }
-
-            return RedirectToReferrer(returnUrl, () => RedirectToRoute("Login"));
         }
+        else if (owner.Id == customer.Id)
+        {
+            NotifyInfo(T("ExternalAuthentication.AlreadyLinked", info.ProviderDisplayName));
+        }
+        else
+        {
+            NotifyError(T("ExternalAuthentication.Error.LinkedToOtherAccount", info.ProviderDisplayName));
+        }
+
+        return RedirectToAction("Info", "Customer");
     }
 
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult ExternalErrorCallback(string provider, string errorMessage)
+    public IActionResult ExternalErrorCallback(string provider, string errorCode, string errorMessage)
     {
-        if (provider.HasValue() || errorMessage.HasValue())
+        // Provider error texts are logged, never displayed.
+        if (errorMessage.HasValue())
         {
-            Logger.Error($"Error from external provider {provider}: {errorMessage}");
+            Logger.Error("Error from external provider {Provider}: {ErrorMessage}", provider.Truncate(50), errorMessage.Truncate(500));
         }
 
-        NotifyError(T("ExternalAuthentication.ConfigError"));
-        return RedirectToAction(nameof(Login));
+        switch (errorCode)
+        {
+            case ExternalAuthenticationErrorCodes.AccessDenied:
+                NotifyInfo(T("ExternalAuthentication.Error.AccessDenied"));
+                break;
+            case ExternalAuthenticationErrorCodes.SessionExpired:
+                NotifyWarning(T("ExternalAuthentication.Error.SessionExpired"));
+                break;
+            case ExternalAuthenticationErrorCodes.EmailNotVerified:
+                NotifyError(T("ExternalAuthentication.Error.EmailNotVerified"));
+                break;
+            default:
+                NotifyError(T("ExternalAuthentication.ConfigError"));
+                break;
+        }
+
+        return Services.WorkContext.CurrentCustomer.IsRegistered()
+            ? RedirectToAction("Info", "Customer")
+            : RedirectToAction(nameof(Login));
     }
 
     #endregion
@@ -752,12 +921,12 @@ public class IdentityController : PublicController
     /// <summary>
     /// Assigns customer roles, publishes an event, sends email messages, signs the customer in depending on configuration & returns appropriate redirect.
     /// </summary>
-    private async Task<IActionResult> FinalizeCustomerRegistrationAsync(Customer customer, string returnUrl)
+    private async Task<IActionResult> FinalizeCustomerRegistrationAsync(Customer customer, string returnUrl, bool assignAdditionalRole = true)
     {
         // Remove ClientIdent: no other "same-building" guest should be identified by this ident.
         customer.ClientIdent = null;
 
-        await AssignCustomerRolesAsync(customer);
+        await AssignCustomerRolesAsync(customer, assignAdditionalRole);
 
         // Add reward points for customer registration (if enabled).
         if (_rewardPointsSettings.Enabled && _rewardPointsSettings.PointsForRegistration > 0)
@@ -978,7 +1147,7 @@ public class IdentityController : PublicController
         await _db.SaveChangesAsync();
     }
 
-    private async Task AssignCustomerRolesAsync(Customer customer)
+    private async Task AssignCustomerRolesAsync(Customer customer, bool assignAdditionalRole = true)
     {
         // Add customer to 'Registered' role.
         var registeredRole = await _db.CustomerRoles
@@ -988,7 +1157,7 @@ public class IdentityController : PublicController
         await _userManager.AddToRoleAsync(customer, registeredRole.Name);
 
         // Add customer to an additional role.
-        var roleIdToAdd = _customerSettings.RegisterCustomerRoleId ?? 0;
+        var roleIdToAdd = assignAdditionalRole ? _customerSettings.RegisterCustomerRoleId ?? 0 : 0;
         if (roleIdToAdd != 0 && roleIdToAdd != registeredRole.Id)
         {
             var customerRole = await _roleManager.FindByIdAsync(roleIdToAdd);
@@ -1017,6 +1186,37 @@ public class IdentityController : PublicController
                 descriptions.Each(x => ModelState.AddModelError(string.Empty, x));
             }
         }
+    }
+
+    /// <summary>
+    /// Gets the scheme name of an external authentication provider whose module is active and configured, otherwise <c>null</c>.
+    /// </summary>
+    private async Task<string> GetAvailableExternalSchemeAsync(string provider)
+    {
+        if (provider.IsEmpty())
+        {
+            return null;
+        }
+
+        var scheme = (await _signInManager.GetExternalAuthenticationSchemesAsync())
+            .FirstOrDefault(x => x.Name.EqualsNoCase(provider));
+        if (scheme == null)
+        {
+            return null;
+        }
+
+        if (!_providerManager.IsSchemeActive(scheme.Name, _externalAuthenticationSettings, Services.StoreContext.CurrentStore.Id))
+        {
+            return null;
+        }
+
+        if (!await _authenticationHandlerProvider.IsSchemeConfiguredAsync(HttpContext, scheme.Name))
+        {
+            Logger.Warn("External authentication '{Scheme}' is active but not configured.", scheme.Name);
+            return null;
+        }
+
+        return scheme.Name;
     }
 
     private async Task FinalizeLoginAsync(Customer guest, Customer registered, bool logActivity)

@@ -119,10 +119,10 @@
         </div>
     </fieldset>
 
-    <fieldset sm-if="Model.AssociatedExternalAuthRecords.Count > 0" class="content-group">
+    <fieldset sm-if="Model.AssociatedExternalAuthRecords.Count > 0 || Model.LinkableExternalAuthMethods.Count > 0" class="content-group">
         <legend><span>@T("Account.AssociatedExternalAuth")</span></legend>
 
-        <div class="table-responsive">
+        <div sm-if="Model.AssociatedExternalAuthRecords.Count > 0" class="table-responsive">
             <table class="table table-hover border-top-0">
                 <thead>
                     <tr>
@@ -148,6 +148,20 @@
                     }
                 </tbody>
             </table>
+        </div>
+
+        @* Linking needs the explicit action of the signed-in customer. The buttons submit a separate form, so that Enter in a field of this form still saves it. *@
+        <div sm-if="Model.LinkableExternalAuthMethods.Count > 0" class="external-auth-link">
+            <p class="text-muted">@T("Account.AssociatedExternalAuth.LinkHint")</p>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var method in Model.LinkableExternalAuthMethods)
+                {
+                    <button type="submit" class="btn btn-secondary" form="external-auth-link-form" name="provider" value="@method.Provider">
+                        <i class="fa fa-link" aria-hidden="true"></i>
+                        <span>@T("Account.AssociatedExternalAuth.Link", method.DisplayName)</span>
+                    </button>
+                }
+            </div>
         </div>
     </fieldset>
 
@@ -323,3 +337,5 @@
         </div>
     </div>
 </form>
+
+<form sm-if="Model.LinkableExternalAuthMethods.Count > 0" id="external-auth-link-form" asp-controller="Identity" asp-action="ExternalLink" method="post"></form>

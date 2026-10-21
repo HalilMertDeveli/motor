@@ -115,11 +115,25 @@ public partial class CustomerInfoModel : TabbableModel
     [LocalizedDisplay("*PreferredPaymentMethod")]
     public string PreferredPaymentMethod { get; set; }
 
+    /// <summary>
+    /// Active and configured external authentication methods the customer can still link.
+    /// </summary>
+    public List<LinkableExternalAuthModel> LinkableExternalAuthMethods { get; set; } = [];
+
     public partial class AssociatedExternalAuthModel : EntityModelBase
     {
         public string Email { get; set; }
         public string ExternalIdentifier { get; set; }
         public string AuthMethodName { get; set; }
+    }
+
+    public partial class LinkableExternalAuthModel
+    {
+        /// <summary>
+        /// Authentication scheme name, e.g. "Google".
+        /// </summary>
+        public string Provider { get; set; }
+        public string DisplayName { get; set; }
     }
 }
 
