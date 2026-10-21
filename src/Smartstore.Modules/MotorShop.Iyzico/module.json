@@ -4,7 +4,7 @@
   "Group": "Payment",
   "SystemName": "MotorShop.Iyzico",
   "FriendlyName": "iyzico",
-  "Description": "Card payments through the iyzico hosted Checkout Form with server-side verification, webhooks and refunds.",
+  "Description": "iyzico ortak ödeme formu ile kartlı ödeme; sunucu tarafı doğrulama, webhook ve iade desteği.",
   "Version": "1.0.0",
   "MinAppVersion": "6.4.0",
   "Order": 1,

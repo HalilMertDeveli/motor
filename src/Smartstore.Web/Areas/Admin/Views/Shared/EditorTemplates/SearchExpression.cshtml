@@ -6,10 +6,17 @@
     // We are not going to enable localized views just for this,
     // but do it the shitty way just for once.
     var helpPartialName = "SearchExpressionHelp";
+    var helpTitle = "Search filter expressions";
     var lang = WorkContext.WorkingLanguage.GetTwoLetterISOLanguageName();
     if (lang == "de")
     {
         helpPartialName += ".de";
+    }
+    else if (lang == "tr")
+    {
+        // MOTOR: Turkish help
+        helpPartialName += ".tr";
+        helpTitle = "Arama filtresi ifadeleri";
     }
 
     var attributes = new AttributeDictionary().Merge(ConvertUtility.ObjectToDictionary(ViewData["htmlAttributes"] ?? new object()));
@@ -26,7 +33,7 @@
 
 <widget target-zone="end" key="search-expression-help">
     <modal id="search-expression-help-window" sm-backdrop="Invisible" sm-render-at-page-end="false">
-        <modal-header sm-title="Search filter expressions"></modal-header>
+        <modal-header sm-title="@helpTitle"></modal-header>
         <modal-body>
             <partial name="@helpPartialName" />
         </modal-body>

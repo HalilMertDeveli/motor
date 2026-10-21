@@ -1,0 +1,96 @@
+@* MOTOR: Turkish version of SearchExpressionHelp. The operators "and" / "or" are syntax and stay English. *@
+@{
+    Layout = "";
+}
+
+<table class="table table-sm table-striped small mb-4">
+    <thead>
+        <tr>
+            <th>Örnek</th>
+            <th>Sonuç</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td nowrap>banana joe</td>
+            <td>"banana" veya "joe" içerir</td>
+        </tr>
+        <tr>
+            <td nowrap>banana and !*.joe</td>
+            <td>"banana" içerir, ancak "*.joe" ile eşleşmez</td>
+        </tr>
+        <tr>
+            <td nowrap>banana and (!~"hello world" or !*jim)</td>
+            <td>"banana" içerir, ancak "hello world" içermez veya "jim" ile bitmez</td>
+        </tr>
+        <tr>
+            <td nowrap>*Leather and !(Sofa* Jacket*)</td>
+            <td>"Leather" ile biter, ancak "Sofa" veya "Jacket" ile başlamaz</td>
+        </tr>
+        <tr>
+            <td nowrap>(&gt;=10 and &lt;=100) or 1 or &gt;1000</td>
+            <td>10 ile 100 arasındadır, 1'e eşittir veya 1000'den büyüktür</td>
+        </tr>
+    </tbody>
+</table>
+
+<h6 class="mb-3">Terimler</h6>
+
+<p class="mb-4">
+    Tırnak içinde (çift veya tek) arama terimi ya da boşluk içermeyen tırnaksız arama terimi.
+    Örneğin tırnaksız <i>banana joe</i>, <i>~banana or ~joe</i> ile aynıdır;
+    tırnaklı <i>"banana joe"</i> ise terimin tam eşleşmesini arar.
+    Joker karakterler (* veya ?) desteklenir. Joker karakter varsa varsayılan operatör
+    "Eşittir" (=) olur. Deseni tersine çevirmek için "Eşit değildir" (!) kullanın.
+</p>
+
+<h6 class="mb-3">Gruplar</h6>
+
+<p class="mb-4">
+    Birden fazla arama kelimesi veya ifade parantez içine alınarak gruplanabilir.
+    Her grup başına ! (ünlem işareti) koyarak tersine çevrilebilir, örn. <i>!(banana and joe)</i>.
+    Gruplar gerektiği kadar iç içe kullanılabilir.
+</p>
+
+<h6 class="mb-3">Operatörler</h6>
+
+<table class="table table-sm table-striped small mb-4">
+    <tbody>
+        <tr>
+            <td>=[=]</td>
+            <td>Eşittir (sayısal terimlerde operatör yazılmazsa varsayılan)</td>
+        </tr>
+        <tr>
+            <td>![=]</td>
+            <td>Eşit değildir</td>
+        </tr>
+        <tr>
+            <td>&gt;</td>
+            <td>Büyüktür</td>
+        </tr>
+        <tr>
+            <td>&gt;=</td>
+            <td>Büyük veya eşittir</td>
+        </tr>
+        <tr>
+            <td>&lt;</td>
+            <td>Küçüktür</td>
+        </tr>
+        <tr>
+            <td>&lt;=</td>
+            <td>Küçük veya eşittir</td>
+        </tr>
+        <tr>
+            <td>~</td>
+            <td>İçerir (metin terimlerinde operatör yazılmazsa varsayılan)</td>
+        </tr>
+        <tr>
+            <td>!~</td>
+            <td>İçermez</td>
+        </tr>
+        <tr>
+            <td nowrap>and, or</td>
+            <td>Terimleri birleştiren mantıksal operatörler ("ve", "veya"; büyük/küçük harf fark etmez). Yazılmazsa "or" varsayılır.</td>
+        </tr>
+    </tbody>
+</table>

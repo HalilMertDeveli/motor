@@ -1,0 +1,68 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.SmartStore.DevTools" AppendRootKey="false">
+        <Value>Geliştirici Araçları</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.SmartStore.DevTools" AppendRootKey="false">
+        <Value>Smartstore Geliştirici Araçları (MiniProfiler ve diğer faydalı araçlar).</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Widgets.DevToolsDemo" AppendRootKey="false">
+        <Value>Geliştirici Araçları demo widget'ı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Permissions.DisplayName.DevTools" AppendRootKey="false">
+        <Value>Geliştirici Araçları</Value>
+    </LocaleResource>
+
+    <LocaleResource Name="EnableMiniProfilerInPublicStore">
+        <Value>MiniProfiler'ı etkinleştir</Value>
+    </LocaleResource>
+    <LocaleResource Name="EnableMiniProfilerInPublicStore.Hint">
+        <Value>MiniProfiler'ı etkinleştirir. Bu araçla ilk istekten tarayıcıya gönderilen ilk bayta kadar geçen süreyi ölçebilirsiniz. Profiler widget'ını yalnızca yöneticiler görebilir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MiniProfilerIgnorePaths">
+        <Value>MiniProfiler'ın yok saydığı yollar</Value>
+    </LocaleResource>
+    <LocaleResource Name="MiniProfilerIgnorePaths.Hint">
+        <Value>MiniProfiler tarafından yok sayılacak yolların virgülle ayrılmış listesi.</Value>
+    </LocaleResource>
+    <LocaleResource Name="DisplayWidgetZones">
+        <Value>Widget bölgelerini göster</Value>
+    </LocaleResource>
+    <LocaleResource Name="DisplayWidgetZones.Hint">
+        <Value>Her widget bölgesine, o bölgenin adını içeren bir araç ipucu ekler. Bu araç ipuçları yalnızca yöneticilere gösterilir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="WidgetZoneMenu">
+        <Value>Widget bölgesi menüsünü göster</Value>
+        <Children>
+            <LocaleResource Name="ActivateZones">
+                <Value>
+                    <![CDATA[
+                        Şu anda etkin bir widget bölgesi yok.
+                        <i class="fa fa-power-off px-1"></i> simgesine tıklayarak widget bölgelerini etkinleştirebilirsiniz.
+                    ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="Toolbar">
+                <Value>Widget bölgesi araç çubuğu</Value>
+            </LocaleResource>
+            <LocaleResource Name="Toggle">
+                <Value>
+                    <![CDATA[
+                        Widget bölgelerini aç/kapat (Alt&nbsp;+&nbsp;K)
+                    ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PersistentToggle">
+                <Value>Widget bölgelerini her zaman göster</Value>
+            </LocaleResource>
+            <LocaleResource Name="CloseButton">
+                <Value>Widget bölgesi menüsünü kapat</Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+    <LocaleResource Name="DisplayMachineName">
+        <Value>Makine adını göster</Value>
+    </LocaleResource>
+    <LocaleResource Name="DisplayMachineName.Hint">
+        <Value>Geçerli makine adını alt bilginin (footer) altında gösterir. Bu işlevle dağıtık bir uygulamada geçerli makineyi belirleyebilirsiniz.</Value>
+    </LocaleResource>
+</Language>

@@ -1,0 +1,272 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.SmartStore.AmazonPay" AppendRootKey="false">
+        <Value>Amazon Pay</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.AmazonPay" AppendRootKey="false">
+        <Value>Amazon Pay</Value>
+    </LocaleResource>
+
+    <LocaleResource Name="Plugins.Description.Payments.AmazonPay" AppendRootKey="false">
+        <Value>Mağazaya Amazon Pay ile ödeme özelliğini ekler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Smartstore.AmazonPay" AppendRootKey="false">
+        <Value>Mağazaya Amazon Pay ile ödeme ve giriş özelliklerini ekler.</Value>
+    </LocaleResource>
+
+    <LocaleResource Name="Plugins.FriendlyName.Authentications.AmazonPay" AppendRootKey="false">
+        <Value>Amazon ile giriş</Value>
+    </LocaleResource>
+
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[
+                <div class="mb-1"><b>Login and Pay with Amazon</b> kurulumu:</div><ul>
+                <li><a class="alert-link" href="https://sellercentral-europe.amazon.com" target="_blank">Amazon Seller Central</a> hesabınızda bir <b>Login with Amazon</b> uygulaması oluşturun. Bunun için aşağıda listelenen <b>Allowed JavaScript Origins</b> ve <b>Allowed Return URLs</b> değerlerini kullanın (SSL gereklidir!).</li>
+                <li>
+                    Amazon erişim bilgilerinizi aşağıdaki ilgili alanlara girin. API anahtarlarını aşağıdaki şekilde oluşturabilirsiniz.
+                    <ul>
+                        <li><a class="alert-link" href="https://sellercentral-europe.amazon.com" target="_blank">Amazon Seller Central</a> hesabınıza giriş yapın.</li>
+                        <li>Sol üst köşedeki menü simgesine, ardından <b>Integration > Integration Central</b> öğesine tıklayın.</li>
+                        <li><b>Ecommerce provider or integration type</b> için <b>Self-developed</b>, ödeme türü olarak da <b>One-time Payments, Single Authorization</b> seçin.</li>
+                        <li><b>API keys</b> bölümünde <b>Create keys</b> düğmesine tıklayın.</li>
+                        <li>Varsayılan <b>Generate API credentials</b> ayarını kullanın ve API anahtarları için bir ad girin.</li>
+                        <li><b>Create Key</b> düğmesine tıkladığınızda özel anahtarı içeren .pem uzantılı bir dosya indirilir. Bu dosyayı aşağıda bu sayfadan yükleyebilirsiniz.
+                        Dosya daha sonra Amazon Seller Central'da görüntülenemez. Dosyayı güvenli bir yerde saklayın veya gerekirse yeni anahtarlar oluşturun.</li>
+                    </ul>
+                </li>
+                <li>Anlık ödeme bildirimleri almak istiyorsanız (SSL gereklidir!) aşağıda listelenen IPN URL'sini <b>Integration Settings - Instant Notification Settings - Merchant URL</b> alanına girin.</li>
+                </ul>
+                <div class="mb-1">Lütfen ödeme bilgileri sayfanıza <b>Login and Pay with Amazon</b> hakkında bilgi ekleyin (bkz. <b>CMS > Topics</b>). Görsel materyalleri <a class="alert-link" href="https://payments.amazon.de/resources#marks">burada</a> bulabilirsiniz.
+                Metin önerileri:</div><ul>
+                <li>Seçenek 1: Amazon Pay: Amazon hesabınızdaki ödeme ve teslimat bilgileriyle hemen ödeyin.</li>
+                <li>Seçenek 2: Zaten Amazon müşterisi misiniz? Amazon hesabınızdaki ödeme ve teslimat bilgileriyle hemen ödeyin.</li>
+                <li>Seçenek 3: Zaten Amazon müşterisi misiniz? Amazon hesabınızdaki bilgilerle hemen ödeyin.</li>
+                </ul>
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="OrderNotFound">
+        <Value>"Login and Pay with Amazon" ödeme yöntemine ve '{0}' kimliğine sahip bir sipariş bulunamadı.</Value>
+    </LocaleResource>
+    <LocaleResource Name="SignInFailureMessage">
+        <Value>Amazon ile giriş sırasında bir sorun oluştu.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AuthorizationSoftDeclineMessage">
+        <Value>Maalesef Amazon Pay, online mağazamızdaki siparişinizin ödemesini reddetti.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AuthorizationHardDeclineMessage">
+        <Value>Maalesef Amazon Pay, online mağazamızdaki siparişinizin ödemesini reddetti. Lütfen bizimle iletişime geçin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AuthenticationStatusFailureMessage">
+        <Value>Amazon Pay ile yaptığınız ödemede bir sorun oluştu. Siparişiniz oluşturulmadı ve sizden herhangi bir ücret alınmadı.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ShippingToCountryNotAllowed">
+        <Value>Seçilen ülkeye gönderim yapılamıyor. Lütfen başka bir teslimat adresi seçin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="BillingToCountryNotAllowed">
+        <Value>Seçilen ülke için faturalandırma yapılamıyor. Lütfen başka bir fatura adresi seçin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AsyncPaymentAuthorizationNote">
+        <Value>Amazon Pay ile yaptığınız işlem şu anda doğrulanıyor. Gerekirse kısa süre içinde sizi bilgilendireceğiz.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Signout">
+        <Value>Amazon hesabından çıkış yap</Value>
+    </LocaleResource>
+    <LocaleResource Name="SuccessfullySignedOut">
+        <Value>Amazon hesabınızdan başarıyla çıkış yaptınız.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RegisterNow">
+        <Value>Şimdi kaydolun</Value>
+    </LocaleResource>
+    <LocaleResource Name="RegisterNote">
+        <Value>
+            <![CDATA[Henüz bir hesabınız yoksa <b>Şimdi kaydolun</b> düğmesine tıklayın. Amazon Pay size yeni erişim bilgileri sağlar; bu bilgileri <b>Erişim bilgilerini yapıştır</b> penceresine girebilirsiniz.]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="SaveAccessData">
+        <Value>Erişim bilgilerini kaydet</Value>
+    </LocaleResource>
+    <LocaleResource Name="PasteAccessData">
+        <Value>Erişim bilgilerini yapıştır</Value>
+    </LocaleResource>
+    <LocaleResource Name="PasteAccessData.Hint">
+        <Value>Erişim bilgilerinizi buraya yapıştırın (merchant_id, public_key_id, store_id vb.)...</Value>
+    </LocaleResource>
+    <LocaleResource Name="MissingAccessToken">
+        <Value>Amazon Pay ile giriş için token parametresi eksik!</Value>
+    </LocaleResource>
+    <LocaleResource Name="SaveAccessDataSucceeded">
+        <Value>Erişim bilgileri başarıyla kaydedildi.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MissingPayloadParameter">
+        <Value>Payload parametresi eksik.</Value>
+    </LocaleResource>
+    <LocaleResource Name="EncryptionNotSupported">
+        <Value>Erişim bilgilerinin şifrelenmesi desteklenmiyor.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MissingBillingAddress">
+        <Value>Müşterinin Amazon fatura adresi eksik. Lütfen Amazon'da bir fatura adresi girin veya başka bir ödeme yöntemi seçin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Layout">
+        <Value>Düzen</Value>
+    </LocaleResource>
+    <LocaleResource Name="CloseChargeReason">
+        <Value>Başka tahsilat gerekmiyor.</Value>
+    </LocaleResource>
+    <LocaleResource Name="IpnOrderNote">
+        <Value>
+            <![CDATA[Amazon Pay bildirimi:<br />Mesaj ID: {0}<br />Bildirim: {1} {2}<br />İşlem: {3} {4}<br />Charge Permission: {5}<br />Durum (eski\yeni): {6} -&gt; {7}]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="IpnChargebackOrderNote">
+        <Value>
+            <![CDATA[Amazon Pay bir ters ibraz (chargeback) bildirdi. Ters ibraz ayrıntılarını <a href="https://sellercentral-europe.amazon.com" target="_blank">Amazon Seller Central</a> üzerinden görüntüleyebilirsiniz.<br />Mesaj ID: {0}<br />Bildirim: {1} {2}<br />İşlem: {3} {4}<br />Charge Permission: {5}]]>
+        </Value>
+    </LocaleResource>
+
+    <LocaleResource Name="UseSandbox">
+        <Value>Sandbox kullan</Value>
+    </LocaleResource>
+    <LocaleResource Name="UseSandbox.Hint">
+        <Value>Sandbox'ı (test ortamı) kullanmak için kutuyu işaretleyin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="PublicKeyId">
+        <Value>Public Key ID</Value>
+    </LocaleResource>
+    <LocaleResource Name="PublicKeyId.Hint">
+        <Value>Public Key ID, Amazon Pay API'ye erişmek için kullanılan benzersiz tanımlayıcınızdır, ör. SANDBOX-ACFGIC3ZV2...</Value>
+    </LocaleResource>
+    <LocaleResource Name="PrivateKey">
+        <Value>Private Key</Value>
+    </LocaleResource>
+    <LocaleResource Name="PrivateKey.Hint">
+        <Value>Amazon Pay API'ye erişim için Private Key. API anahtarlarını Amazon Seller Central'da Integration - Integration Central altında oluşturduktan sonra Private Key'i .pem uzantılı, indirilebilir bir dosya olarak alırsınız.</Value>
+    </LocaleResource>
+    <LocaleResource Name="UploadPrivateKey">
+        <Value>Private Key dosyasını yükle (.pem)</Value>
+    </LocaleResource>
+    <LocaleResource Name="SellerId">
+        <Value>Satıcı kimliğiniz (Merchant ID)</Value>
+    </LocaleResource>
+    <LocaleResource Name="SellerId.Hint">
+        <Value>Amazon Seller Central'a kayıt sırasında aldığınız Merchant ID, ör. A2OJ13VBAM92IX.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientId">
+        <Value>Mağaza kimliği (Store ID)</Value>
+    </LocaleResource>
+    <LocaleResource Name="ClientId.Hint">
+        <Value>Store ID, logo ve web sitesi adı gibi belirli bir web sitesi yapılandırmasını ifade eder, ör. amzn1.application-oa2-client.1ab987...</Value>
+    </LocaleResource>
+    <LocaleResource Name="Marketplace">
+        <Value>Para birimi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Marketplace.Hint">
+        <Value>Hem para birimini hem de Amazon bölgesini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Marketplace.De">
+        <Value>EUR (Euro)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Marketplace.Uk">
+        <Value>GBP (İngiliz Sterlini)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Marketplace.Us">
+        <Value>USD (ABD Doları)</Value>
+    </LocaleResource>
+    <LocaleResource Name="Marketplace.Jp">
+        <Value>JPY (Japon Yeni)</Value>
+    </LocaleResource>
+    <LocaleResource Name="MerchantLoginDomains">
+        <Value>İzin verilen JavaScript kaynakları</Value>
+    </LocaleResource>
+    <LocaleResource Name="MerchantLoginDomains.Hint">
+        <Value>Lütfen bu kaynakları Amazon Seller Central'da Login with Amazon altına girin. Kaynaklar HTTPS protokolünü kullanmalıdır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MerchantLoginRedirectUrls">
+        <Value>İzin verilen yönlendirme URL'leri</Value>
+    </LocaleResource>
+    <LocaleResource Name="MerchantLoginRedirectUrls.Hint">
+        <Value>Lütfen bu URL'leri Amazon Seller Central'da Login with Amazon altına girin. Yönlendirme URL'leri HTTPS protokolünü kullanmalıdır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="PayButtonColor">
+        <Value>Ödeme düğmesi rengi</Value>
+    </LocaleResource>
+    <LocaleResource Name="PayButtonColor.Hint">
+        <Value>Ödeme düğmesinin tercih edilen rengini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ButtonColor.Gold">
+        <Value>Turuncu</Value>
+    </LocaleResource>
+    <LocaleResource Name="ButtonColor.LightGray">
+        <Value>Açık gri</Value>
+    </LocaleResource>
+    <LocaleResource Name="ButtonColor.DarkGray">
+        <Value>Koyu gri</Value>
+    </LocaleResource>
+    <LocaleResource Name="AuthButtonColor">
+        <Value>Giriş düğmesi rengi</Value>
+    </LocaleResource>
+    <LocaleResource Name="AuthButtonColor.Hint">
+        <Value>Giriş düğmesinin tercih edilen rengini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="DataFetching.Warning">
+        <Value>
+            <![CDATA[IPN (Instant Payment Notification) URL'si, Amazon Seller Central'da Sandbox ve canlı mod için ayrı ayrı girilmelidir. Canlı mod, güvenilir bir sertifika yetkilisi tarafından verilmiş geçerli bir SSL sertifikası gerektirir; kendinden imzalı sertifikalara izin verilmez. Sandbox için SSL sertifikası gerekmez. Bu durumda IPN URL'si HTTP ile belirtilmelidir.]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="IpnUrl">
+        <Value>IPN URL</Value>
+    </LocaleResource>
+    <LocaleResource Name="IpnUrl.Hint">
+        <Value>Ödeme durumunu güncellemek için anlık bildirim URL'si. Lütfen bu URL'yi Amazon Seller Central'da "Integration Settings - Instant Notification Settings - Merchant URL" altına girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="TransactionType">
+        <Value>Ödeme işlemi</Value>
+    </LocaleResource>
+    <LocaleResource Name="TransactionType.Hint">
+        <Value>Müşterinin hesabından ne zaman tahsilat yapılacağını belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="TransactionType.AuthAndCapture">
+        <Value>Hemen tahsil et</Value>
+    </LocaleResource>
+    <LocaleResource Name="TransactionType.Auth">
+        <Value>Hemen yetkilendir, sonra tahsil et</Value>
+    </LocaleResource>
+    <LocaleResource Name="TransactionType.Warning">
+        <Value>
+            <![CDATA[<b>Hemen tahsil et</b> yöntemini yalnızca ürünleri sipariş edildikleri gün gönderiyorsanız ve bu hizmet için onaylı listeye alındıysanız kullanın. Önce Amazon Pay ile iletişime geçmeden bu seçeneği etkinleştirmeyin.]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="SaveEmailAndPhone">
+        <Value>Müşteri verilerini aktar</Value>
+    </LocaleResource>
+    <LocaleResource Name="SaveEmailAndPhone.Hint">
+        <Value>Müşterinin Amazon e-posta adresinin ve telefon numarasının kaydedilip kaydedilmeyeceğini ve ne zaman kaydedileceğini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AmazonPaySaveDataType.OnlyIfEmpty">
+        <Value>Yalnızca boşsa</Value>
+    </LocaleResource>
+    <LocaleResource Name="AmazonPaySaveDataType.Always">
+        <Value>Her zaman</Value>
+    </LocaleResource>
+    <LocaleResource Name="ShowPayButtonForAdminOnly">
+        <Value>Ödeme düğmesini yalnızca yöneticilere göster</Value>
+    </LocaleResource>
+    <LocaleResource Name="ShowPayButtonForAdminOnly.Hint">
+        <Value>Ödeme düğmesinin yalnızca yöneticilere görünür olup olmayacağını belirler. Ödeme yöntemini müşterilere sunmadan test yapmak için tasarlanmıştır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ShowButtonInMiniShoppingCart">
+        <Value>Düğmeyi mini sepette göster</Value>
+    </LocaleResource>
+    <LocaleResource Name="ShowButtonInMiniShoppingCart.Hint">
+        <Value>Amazon Pay düğmesinin mini sepette de gösterilip gösterilmeyeceğini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ShowSignoutButton">
+        <Value>Çıkış düğmesini göster</Value>
+    </LocaleResource>
+    <LocaleResource Name="ShowSignoutButton.Hint">
+        <Value>Amazon Pay çıkış düğmesinin sipariş tamamlandı sayfasında gösterilip gösterilmeyeceğini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="CookieInfo">
+        <Value>Amazon Pay, ödeme veya giriş işlemini görüntülemek ve gerçekleştirmek için çerezleri kullanır.</Value>
+    </LocaleResource>
+</Language>

@@ -1,0 +1,670 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+
+    <!-- Friendly plugin backend name & description (e.g. in payment configuration list) -->
+    <LocaleResource Name="Plugins.FriendlyName.Smartstore.PayPal" AppendRootKey="false">
+        <Value>PayPal</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Smartstore.PayPal" AppendRootKey="false">
+        <Value>Mağazaya PayPal ile ödeme özelliğini ekler.</Value>
+    </LocaleResource>
+
+    <!-- Friendly provider name & description -->
+    <!-- Frontend payment option & backend -->
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalStandard" AppendRootKey="false">
+        <Value>PayPal Checkout</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalPayUponInvoice" AppendRootKey="false">
+        <Value>Fatura ile ödeme</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalSepa" AppendRootKey="false">
+        <Value>PayPal Sepa</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalPayLater" AppendRootKey="false">
+        <Value>PayPal Pay Later</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalGooglePay" AppendRootKey="false">
+        <Value>Google Pay</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalApplePay" AppendRootKey="false">
+        <Value>Apple Pay</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalCreditCard" AppendRootKey="false">
+        <Value>PayPal Kredi Kartı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalTrustly" AppendRootKey="false">
+        <Value>Trustly</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalBancontact" AppendRootKey="false">
+        <Value>Bancontact</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalBlik" AppendRootKey="false">
+        <Value>BLIK</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalEps" AppendRootKey="false">
+        <Value>eps</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalIdeal" AppendRootKey="false">
+        <Value>iDEAL</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalMyBank" AppendRootKey="false">
+        <Value>MyBank</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.PayPalPrzelewy24" AppendRootKey="false">
+        <Value>Przelewy24</Value>
+    </LocaleResource>
+
+    <!-- Backend provider description -->
+    <LocaleResource Name="Plugins.Description.Payments.PayPalStandard" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Ödemenin doğrudan PayPal üzerinde yapıldığı güvenli bir ödeme penceresi açar.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalPayUponInvoice" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+				Alıcının sipariş vermesine, ürünleri teslim alıp denemesine, sorunsuz olduklarını kontrol etmesine
+                ve ardından faturayı 30 gün içinde ödemesine olanak tanıyan bir "şimdi al, sonra öde" ödeme yöntemidir.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalSepa" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Ödemenin doğrudan PayPal üzerinde yapıldığı güvenli bir ödeme penceresi açar.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalPayLater" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Ödemenin doğrudan PayPal üzerinde yapıldığı güvenli bir ödeme penceresi açar.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalGooglePay" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+                            Google Pay ile sorunsuz entegre olan güvenli bir ödeme süreci sunar.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalApplePay" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+                            Apple Pay kullanıcılarına doğrudan mağazanızda güvenli ve sorunsuz bir ödeme deneyimi sunar.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalCreditCard" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Kredi kartıyla ödeme imkânı sunar.
+                Kredi kartı bilgilerinin girildiği alanlar, doğrudan PayPal tarafından sağlanan iframe'ler aracılığıyla ödeme adımına entegre edilir.
+                Böylece kredi kartı bilgileri mağazayla hiçbir şekilde temas etmez.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalTrustly" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+                Sipariş tamamlandıktan sonra müşteri, ödeme işlemini tamamlamak için doğrudan Trustly sayfasına yönlendirilir.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalBancontact" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Sipariş tamamlandıktan sonra müşteri, ödeme işlemini tamamlamak için doğrudan Bancontact sayfasına yönlendirilir.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalBlik" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Sipariş tamamlandıktan sonra müşteri, ödeme işlemini tamamlamak için doğrudan BLIK sayfasına yönlendirilir.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalEps" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Sipariş tamamlandıktan sonra müşteri, ödeme işlemini tamamlamak için doğrudan eps-Überweisung sayfasına yönlendirilir.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalIdeal" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Sipariş tamamlandıktan sonra müşteri, ödeme işlemini tamamlamak için doğrudan iDEAL sayfasına yönlendirilir.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalMyBank" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Sipariş tamamlandıktan sonra müşteri, ödeme işlemini tamamlamak için doğrudan MyBank sayfasına yönlendirilir.
+            ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Payments.PayPalPrzelewy24" AppendRootKey="false">
+        <Value>
+            <![CDATA[
+			    Sipariş tamamlandıktan sonra müşteri, ödeme işlemini tamamlamak için doğrudan Przelewy24 sayfasına yönlendirilir.
+            ]]>
+        </Value>
+    </LocaleResource>
+
+
+    <!-- Should be rendered in frontend by default. As long as the shop admin doesn't enter a FullDescription for the PaymentMethod -->
+    <LocaleResource Name="Plugins.PaymentInfo.Payments" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="PayPalStandard" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+				        Ödemeyi doğrudan PayPal üzerinde, güvenli bir tarayıcı penceresinde yapın.
+				        Mağazaya geri yönlendirildikten sonra siparişinizi birkaç tıklamayla tamamlayabilirsiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalPayUponInvoice" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Sipariş verin, ürünleri teslim alıp deneyin, sorunsuz olduklarını kontrol edin ve ardından faturayı 30 gün içinde ödeyin.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalSepa" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+				        Ödemeyi doğrudan PayPal üzerinde, güvenli bir tarayıcı penceresinde yapın.
+				        Mağazaya geri yönlendirildikten sonra siparişinizi birkaç tıklamayla tamamlayabilirsiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalPayLater" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+				        Ödemeyi doğrudan PayPal üzerinde, güvenli bir tarayıcı penceresinde yapın.
+				        Mağazaya geri yönlendirildikten sonra siparişinizi birkaç tıklamayla tamamlayabilirsiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalGooglePay" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                                        Güvenli bir ortamda doğrudan Google Pay ile ödeyin.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalApplePay" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                                        Mağazadan ayrılmadan doğrudan Apple Pay ile ödeyin.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalCreditCard" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Kredi kartı bilgileriniz doğrudan PayPal sunucusunda kaydedilir.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalTrustly" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Ödemeyi tamamlamak için Trustly web sitesine yönlendirileceksiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalBancontact" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Ödemeyi tamamlamak için Bancontact web sitesine yönlendirileceksiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalBlik" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Ödemeyi tamamlamak için BLIK web sitesine yönlendirileceksiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalEps" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Ödemeyi tamamlamak için eps-Überweisung web sitesine yönlendirileceksiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalIdeal" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Ödemeyi tamamlamak için iDEAL web sitesine yönlendirileceksiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalMyBank" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Ödemeyi tamamlamak için MyBank web sitesine yönlendirileceksiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayPalPrzelewy24" AppendRootKey="false">
+                <Value>
+                    <![CDATA[
+                        Ödemeyi tamamlamak için Przelewy24 web sitesine yönlendirileceksiniz.
+                      ]]>
+                </Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <LocaleResource Name="Plugins.Smartstore.PayPal" AppendRootKey="false">
+        <Children>
+            <LocaleResource Name="AdminInstruction">
+                <Value>
+                    <![CDATA[
+                        <p>
+                            Bu eklentiyle PayPal Checkout'u kullanabilir; daha fazla ödeme yönteminden, iyileştirilmiş kullanıcı deneyiminden ve geleceğe hazır teknolojiden yararlanabilirsiniz.
+                        </p>
+                        <ul>
+                            <li>PayPal Checkout; PayPal, otomatik ödeme talimatı, kredi ve banka kartı ile fatura ile ödemenin yanı sıra
+                                online mağazanızı yurt içinde ve yurt dışında daha cazip hâle getirebilecek ondan fazla yerel ödeme yöntemi sunar.</li>
+                            <li>Dinamik banner'lar ve <i>Pay Later</i> düğmesiyle müşterilerinizin dikkatini PayPal taksitli ödeme seçeneğine çekebilirsiniz.</li>
+                            <li>PayPal Express Checkout düğmesiyle ödeme sürecini kısaltır ve satın alma deneyimini iyileştirirsiniz.</li>
+                        </ul>
+                        <p>
+							PayPal'ı mağazanızda kurmak için <b>Hesabı bağla</b> düğmesini kullanın veya alternatif olarak aşağıdaki kılavuzdaki adımları izleyin.
+						</p>
+						<ul>
+							<li>PayPal hesap bilgilerinizle <a href="https://developer.paypal.com/developer/applications" target="_blank" class="alert-link">geliştirici paneline</a> giriş yapın.</li>
+							<li><b>Create App</b> düğmesine tıklayarak yeni bir uygulama oluşturun.</li>
+							<li>Ardından hesabı, Client ID'yi ve Secret'ı bu sayfanın aşağısındaki ilgili alanlara girin.</li>
+							<li>Bir webhook oluşturun ve aşağıdaki URL'yi PayPal uygulamanızda webhook URL'si olarak kaydedin.</li>
+							<li>Tüm olaylar için bildirimleri etkinleştirin.</li>
+						</ul>
+                      ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="CookieInfo">
+                <Value>PayPal, ödeme işlemini görüntülemek ve gerçekleştirmek için çerezler kullanır.</Value>
+            </LocaleResource>
+
+            <LocaleResource Name="OrderUpdateFailed">
+                <Value>
+                    Kargo ücretleri PayPal'da hesaplandıktan sonra siparişin toplam tutarı güncellenemedi.
+                    Lütfen toplam tutarı PayPal'da yeniden onaylayın.
+                </Value>
+            </LocaleResource>
+
+            <LocaleResource Name="GenericErrorMessage">
+                <Value>
+                    Ödeme yönteminde bir hata oluştu. Lütfen başka bir ödeme yöntemi seçin.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PaymentSourceCouldNotBeVerified">
+                <Value>
+                    Ödeme bilgileri doğrulanamadığı için ödeme PayPal tarafından reddedildi. Lütfen bilgilerinizi kontrol edip tekrar deneyin.
+                </Value>
+            </LocaleResource>
+
+            <LocaleResource Name="UseSandbox">
+                <Value>Sandbox kullan</Value>
+            </LocaleResource>
+            <LocaleResource Name="UseSandbox.Hint">
+                <Value>Ödemelerin PayPal Sandbox ortamında gerçekleştirilip gerçekleştirilmeyeceğini belirtir.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Account">
+                <Value>Hesap</Value>
+            </LocaleResource>
+            <LocaleResource Name="Account.Hint">
+                <Value>PayPal hesabınızı girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="ClientId">
+                <Value>Client ID</Value>
+            </LocaleResource>
+            <LocaleResource Name="ClientId.Hint">
+                <Value>PayPal geliştirici panelinde oluşturduğunuz uygulamanın Client ID'sini girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="PayerId">
+                <Value>Payer ID</Value>
+            </LocaleResource>
+            <LocaleResource Name="PayerId.Hint">
+                <Value>PayPal Payer ID'nizi PayPal hesabınızda Hesap Ayarları / İşletme Bilgileri altında bulabilirsiniz.</Value>
+            </LocaleResource>
+            <LocaleResource Name="MerchantName">
+                <Value>Satıcı adı</Value>
+            </LocaleResource>
+            <LocaleResource Name="MerchantName.Hint">
+                <Value>Fatura ile ödeme yönteminde benzersiz bir tanımlama anahtarı oluşturmak için gereklidir. Boşluk içermemelidir.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Secret">
+                <Value>Secret</Value>
+            </LocaleResource>
+            <LocaleResource Name="Secret.Hint">
+                <Value>PayPal geliştirici panelinde oluşturduğunuz uygulamanın Secret değerini girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebhookId">
+                <Value>Webhook ID</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebhookId.Hint">
+                <Value>PayPal'ın webhook'unuz için oluşturduğu ID'yi girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebhookUrl">
+                <Value>Webhook URL</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebhookUrl.Hint">
+                <Value>Bu URL'yi PayPal uygulamanızda webhook URL'si olarak kaydedin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="DisabledFundings">
+                <Value>Devre dışı ödeme kaynakları</Value>
+            </LocaleResource>
+            <LocaleResource Name="DisabledFundings.Hint">
+                <Value>
+                    İşlem için devre dışı bırakılan ödeme kaynakları. Burada belirtilen ödeme kaynakları görüntülenmez.
+                    Bir ödeme kaynağının kullanılabilirliği çeşitli faktörlere göre belirlenir.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="EnabledFundings">
+                <Value>Etkin ödeme kaynakları</Value>
+            </LocaleResource>
+            <LocaleResource Name="EnabledFundings.Hint">
+                <Value>
+                    Bir ödeme kaynağının kullanılabilirliği çeşitli faktörlere göre belirlenir.
+                    Bu seçenekle, kullanılabilir olması durumunda bir ödeme kaynağının görüntülenmesini sağlayabilirsiniz.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="PayUponInvoiceLimit">
+                <Value>Fatura ile ödeme için üst limit</Value>
+            </LocaleResource>
+            <LocaleResource Name="PayUponInvoiceLimit.Hint">
+                <Value>
+                    Fatura ile ödemenin sunulacağı üst tutar limitini belirler.
+                    Bu limit şu anda 2.500 € olup bazı durumlarda farklılık gösterebilir.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="DisplayProductDetailPayLaterWidget">
+                <Value>Pay Later widget'ını göster</Value>
+            </LocaleResource>
+            <LocaleResource Name="DisplayProductDetailPayLaterWidget.Hint">
+                <Value>
+                    Pay Later widget'ının ürün detay sayfasında gösterilip gösterilmeyeceğini belirtir.
+                    Müşteri dili değiştirdiğinde widget'ın seçilen dilde görüntülenmeyeceğini lütfen unutmayın.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="CustomerServiceInstructions">
+                <Value>Müşteri hizmetleri bilgisi</Value>
+            </LocaleResource>
+            <LocaleResource Name="CustomerServiceInstructions.Hint">
+                <Value>Müşteri hizmetlerine nasıl ulaşılabileceğine dair bir not metni girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="CustomerServiceInstructions.Placeholder">
+                <Value>Müşteri hizmetleri telefonu: +49 1234567890</Value>
+            </LocaleResource>
+            <LocaleResource Name="Intent">
+                <Value>İşlem modu</Value>
+            </LocaleResource>
+            <LocaleResource Name="Intent.Hint">
+                <Value>Ödemenin hemen mi yoksa daha sonra satıcının işlemiyle mi gerçekleştirileceğini belirtir.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Intent.Alert">
+                <Value>
+                    Ödemelerin önce yetkilendirilip sonradan tahsil edilmesinin yalnızca şu PayPal ödeme yöntemlerinde desteklendiğini lütfen unutmayın:
+                    PayPal Checkout, Fatura ile ödeme, Pay Later, Kredi kartı ve Otomatik ödeme talimatı.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="FundingsOffCanvasCart">
+                <Value>Mini sepetteki ödeme kaynakları</Value>
+            </LocaleResource>
+            <LocaleResource Name="FundingsOffCanvasCart.Hint">
+                <Value>Mini sepette hangi ödeme seçeneklerinin görüntüleneceğini belirtir.</Value>
+            </LocaleResource>
+            <LocaleResource Name="FundingsCart">
+                <Value>Sepet sayfasındaki ödeme kaynakları</Value>
+            </LocaleResource>
+            <LocaleResource Name="FundingsCart.Hint">
+                <Value>Sepet sayfasında hangi ödeme seçeneklerinin görüntüleneceğini belirtir.</Value>
+            </LocaleResource>
+
+            <LocaleResource Name="TransmitTrackingNumbers">
+                <Value>Kargo takip numaralarını aktar</Value>
+            </LocaleResource>
+            <LocaleResource Name="TransmitTrackingNumbers.Hint">
+                <Value>
+                    Kargo takip numaralarının gönderide girildiği veya güncellendiği anda PayPal'a aktarılıp aktarılmayacağını belirtir.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="CancelOrdersForDeclinedPayments">
+                <Value>Reddedilen ödemelerde siparişi iptal et</Value>
+            </LocaleResource>
+            <LocaleResource Name="CancelOrdersForDeclinedPayments.Hint">
+                <Value>
+                    Ödemesi reddedilen siparişlerin iptal edilip edilmeyeceğini belirler.
+                    Bu seçenek devre dışıysa yalnızca siparişin ödeme durumu 'Beklemede' olarak ayarlanır.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="UseTransmittedAddresses">
+                <Value>Aktarılan adresleri kullan</Value>
+            </LocaleResource>
+            <LocaleResource Name="UseTransmittedAddresses.Hint">
+                <Value>
+                    PayPal tarafından döndürülen adreslerin, henüz mevcut değilse müşterinin fatura ve teslimat adresleri olarak eklenip eklenmeyeceğini belirtir.
+                    Örneğin PayPal telefon numaralarını aktarmaz. Bu nedenle adres doğrulama ayarlarına rağmen
+                    telefon numarası bulunmayabilir.
+                    Müşteri adreslerinin mağazanızın adres doğrulama ayarlarına uyması gerekiyorsa bu özelliği devre dışı bırakın.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="Capture">
+                <Value>Hemen tahsil et</Value>
+            </LocaleResource>
+            <LocaleResource Name="Auth">
+                <Value>Hemen yetkilendir, sonra tahsil et</Value>
+            </LocaleResource>
+
+            <LocaleResource Name="ButtonShape">
+                <Value>Düğme şekli</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonShape.Hint">
+                <Value>PayPal düğmesinin şeklini belirler.</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonShape.Rect">
+                <Value>Dikdörtgen</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonShape.Pill">
+                <Value>Hap şeklinde</Value>
+            </LocaleResource>
+
+            <LocaleResource Name="ButtonColor">
+                <Value>Düğme rengi</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonColor.Hint">
+                <Value>PayPal düğmesinin rengini belirler.</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonColor.Gold">
+                <Value>Altın</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonColor.Blue">
+                <Value>Mavi</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonColor.Silver">
+                <Value>Gümüş</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonColor.White">
+                <Value>Beyaz</Value>
+            </LocaleResource>
+            <LocaleResource Name="ButtonColor.Black">
+                <Value>Siyah</Value>
+            </LocaleResource>
+
+            <LocaleResource Name="BillingPlanName">
+                <Value>Ödeme planı {1}</Value>
+            </LocaleResource>
+            <LocaleResource Name="Credentials">
+                <Value>Erişim bilgileri</Value>
+            </LocaleResource>
+            <LocaleResource Name="PaymentSettings">
+                <Value>Ödeme ayarları</Value>
+            </LocaleResource>
+            <LocaleResource Name="Misc">
+                <Value>Diğer</Value>
+            </LocaleResource>
+            <LocaleResource Name="Onboarding">
+                <Value>Hesabı bağla</Value>
+            </LocaleResource>
+            <LocaleResource Name="Onboarding.Success">
+                <Value>Mağazanız PayPal hesabınıza başarıyla bağlandı.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Error.PaymentsReceivable">
+                <Value>Bu hesapla ödeme alınamıyor. Lütfen PayPal ile iletişime geçin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Error.PrimaryEmailConfirmed">
+                <Value>Bu hesabın e-posta adresi henüz onaylanmamış. Lütfen PayPal ile iletişime geçin veya e-posta gelen kutunuzu kontrol edin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Error.Refund.NoTransactionId">
+                <Value>Bu sipariş için bir işlem ID'si kaydedilmemiş. Lütfen webhook bağlantınızı kontrol edin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Error.CannotBeZeroOrNegative">
+                <Value>Sepette ödenecek ürün bulunmadığından ödeme gerekmiyor. Lütfen sepetinizi kontrol edin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="HasCredentials.True">
+                <Value>Erişim bilgileri kaydedildi.</Value>
+            </LocaleResource>
+            <LocaleResource Name="HasCredentials.False">
+                <Value>Erişim bilgileri kaydedilmedi.</Value>
+            </LocaleResource>
+            <LocaleResource Name="PrimaryEmailConfirmed.True">
+                <Value>PayPal'daki birincil e-posta adresi onaylandı.</Value>
+            </LocaleResource>
+            <LocaleResource Name="PrimaryEmailConfirmed.False">
+                <Value>PayPal'daki birincil e-posta adresi onaylanmadı.</Value>
+            </LocaleResource>
+            <LocaleResource Name="PaymentsReceivable.True">
+                <Value>Bu hesapla ödeme alınabilir.</Value>
+            </LocaleResource>
+            <LocaleResource Name="PaymentsReceivable.False">
+                <Value>Bu hesapla ödeme alınamıyor. Lütfen PayPal ile iletişime geçin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebHookCreated.True">
+                <Value>Webhook oluşturuldu.</Value>
+            </LocaleResource>
+            <LocaleResource Name="WebHookCreated.False">
+                <Value>Webhook oluşturulmadı.</Value>
+            </LocaleResource>
+            <LocaleResource Name="CreateWebhook">
+                <Value>Webhook oluştur.</Value>
+            </LocaleResource>
+            <LocaleResource Name="RatePayLegalHint">
+                <Value>
+                    <![CDATA[
+                        Düğmeye tıklayarak ödeme ortağı Ratepay'in <a href="https://www.ratepay.com/legal-payment-terms" target="_blank">ödeme koşullarını</a>
+                        ve <a href="https://www.ratepay.com/legal-payment-dataprivacy" target="_blank">risk kontrolü yapılmasını</a> kabul etmiş olursunuz.
+                        Ayrıca PayPal'ın <a href="https://www.paypal.com/us/webapps/mpp/ua/privacy-full" target="_blank">gizlilik bildirimini</a> de kabul edersiniz.
+                        Fatura ile satın alma talebiniz kabul edilirse satın alma bedeli alacağı Ratepay'e devredilir ve ödemeyi satıcıya değil,
+                        yalnızca Ratepay'e yapabilirsiniz.
+                    ]]>
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="NoWhitespace">
+                <Value>Boşluk kullanılamaz.</Value>
+            </LocaleResource>
+            <LocaleResource Name="PhoneNumber.Invalid">
+                <Value>Lütfen boşluk içermeyen geçerli bir telefon numarası girin.</Value>
+            </LocaleResource>
+
+            <LocaleResource Name="FullName">
+                <Value>Ad soyad</Value>
+            </LocaleResource>
+            <LocaleResource Name="FullName.NotEmpty">
+                <Value>Lütfen adınızı ve soyadınızı girin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Country.NotEmpty">
+                <Value>Lütfen bir ülke seçin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="BIC">
+                <Value>BIC</Value>
+            </LocaleResource>
+            <LocaleResource Name="Error.CreditCardData">
+                <Value>Lütfen kredi kartı bilgilerinizi kontrol edin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Error.3DSecure">
+                <Value>Kartınız kart sağlayıcınız tarafından onaylanırken bir hata oluştu.</Value>
+            </LocaleResource>
+<!-- TODO: Consolidate -->
+            <LocaleResource Name="Error.GooglePayTranactionError">
+                <Value>Bu işlem başarısız oldu.</Value>
+            </LocaleResource>
+            <LocaleResource Name="Error.ApplePayTranactionError">
+                <Value>Apple Pay işlemi başarısız oldu.</Value>
+            </LocaleResource>
+            <LocaleResource Name="CartHasChanged">
+                <Value>Giriş yaptıktan sonra sepetiniz değişti. Lütfen güncel sepetinizi PayPal'da onaylayın.</Value>
+            </LocaleResource>
+            <LocaleResource Name="NoScriptsLoaded">
+                <Value>PayPal ile ödeme için gerekli betikler yüklenmedi.</Value>
+            </LocaleResource>
+            <LocaleResource Name="NoClientToken">
+                <Value>PayPal üzerinden kredi kartıyla ödeme şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools">
+                <Value>Destek araçları</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.Intro">
+                <Value>
+                    Görüntülenen değerler, burada kayıtlı Client ID PayPal API'sine iletilerek alınmıştır.
+                    Değerler doğrudan PayPal'dan gelir.
+                </Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.OnboardingHint">
+                <Value>Lütfen önce hesap bağlama işlemini gerçekleştirin veya erişim bilgilerinizi ilgili yapılandırma alanlarına kaydedin.</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.Products">
+                <Value>Ürünler</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.Products.Name">
+                <Value>Ad</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.Capabilities">
+                <Value>Yetenekler</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.VettingStatus">
+                <Value>İnceleme durumu</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.Limits">
+                <Value>Limitler</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.Status">
+                <Value>Durum</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.AccountInformation">
+                <Value>Hesap bilgileri</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.Requirement">
+                <Value>Gereksinim</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.Result">
+                <Value>Sonuç</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.PrimaryEmailConfirmed">
+                <Value>Birincil e-posta onaylandı</Value>
+            </LocaleResource>
+            <LocaleResource Name="SupportTools.PaymentsReceivable">
+                <Value>Ödeme alınabilir</Value>
+            </LocaleResource>
+        </Children>
+    </LocaleResource>
+
+    <LocaleResource Name="Enums.FundingOptions.PayPal" AppendRootKey="false">
+        <Value>PayPal</Value>
+    </LocaleResource>
+    <LocaleResource Name="Enums.FundingOptions.PayLater" AppendRootKey="false">
+        <Value>Pay Later</Value>
+    </LocaleResource>
+    <LocaleResource Name="Enums.FundingOptions.Sepa" AppendRootKey="false">
+        <Value>Sepa</Value>
+    </LocaleResource>
+</Language>
