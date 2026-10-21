@@ -30,6 +30,19 @@ $sm-gray4:                      #4a4a49;
 
 
 //
+// MOTOR: Prosev brand colors (same values as the MotorDark storefront theme)
+// --------------------------------------------------
+
+$prosev-red:                    #e3262f; // catalog red, white text on it is 4.6:1
+$prosev-red-dark:               #c81f27;
+$prosev-red-light:              #ff5059;
+$prosev-black:                  #08090b;
+$prosev-graphite:               #15171b;
+$prosev-graphite-2:             #1c1f24;
+$prosev-font-display:           "Barlow Semi Condensed", "Arial Narrow", Arial, sans-serif;
+
+
+//
 // Backend specific variables
 // --------------------------------------------------
 
@@ -41,7 +54,8 @@ $content-padding-y:             15px;
 // Shared variables
 // --------------------------------------------------
 
-$alert-info-is-primary:         true;
+// MOTOR: primary is red now, info alerts must not look like errors.
+$alert-info-is-primary:         false;
 $enable-lightbtn-tweak:         true;
 $enable-social-buttons:         false;
 
@@ -62,7 +76,8 @@ $body-secondary-color:          $gray-500;
 $body-tertiary-color:           $gray-400;
 
 $blue:                          $sm-blue;
-$indigo:                        $sm-blue2;
+// MOTOR: $indigo paints the admin header, Prosev graphite instead of Smartstore blue.
+$indigo:                        $prosev-graphite;
 $purple:                        $sm-violet;
 $pink:                          #e91e63; // Pink 500
 $red:                           $sm-red2;
@@ -73,16 +88,16 @@ $teal:                          #009688; // Teal 500
 $cyan:                          #00bcd4; // Cyan 500
 $bluegrey:                      #78909c; // Bluegrey 500
 
-$primary:                       $blue;
+$primary:                       $prosev-red;
 $secondary:                     lighten($gray-200, 2%);
 $success:                       $green;
 $info:                          $sm-bluegreen;
 $warning:                       $orange;
 $danger:                        $red;
 $light:                         $gray-100;
-$dark:                          #001f52;
+$dark:                          $prosev-black;
 
-$theme-colors:                  ( "gray": $gray-700, "primary-dark": $sm-blue2, "warning-dark": $sm-orange2 );
+$theme-colors:                  ( "gray": $gray-700, "primary-dark": $prosev-red-dark, "warning-dark": $sm-orange2 );
 
 $body-color:                    $gray-800;
 $link-color:                    desaturate(darken($primary, 12%), 0%);
@@ -142,13 +157,13 @@ $table-head-color:              $gray-700;
 // Buttons + Forms
 
 $input-btn-font-size:           $font-size-base;
-$input-btn-focus-color:         rgba($sm-blue2, .25);
+$input-btn-focus-color:         rgba($prosev-red, .25);
 $input-btn-font-size-sm:        $font-size-sm; // --> 14px
 $input-btn-border-width:        $border-width;
 $input-border-radius:           $border-radius;
 $input-border-radius-lg:        $border-radius;
 $input-border-radius-sm:        $border-radius;
-$input-focus-border-color:      lighten($sm-blue2, 30%);
+$input-focus-border-color:      lighten($prosev-red, 20%);
 $input-group-addon-bg:		    $gray-100;
 $input-border-color:            $gray-300;
 $input-disabled-bg:             $gray-100;
