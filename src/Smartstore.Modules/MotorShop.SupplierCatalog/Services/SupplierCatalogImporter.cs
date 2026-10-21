@@ -250,6 +250,8 @@ public class SupplierCatalogImporter
     /// <summary>
     /// Copies catalog values to a product. New products stay unpublished; the published state of existing products
     /// is never changed. A missing price never overwrites an existing one.
+    /// A new product without a catalog price becomes "call for price" instead of a purchasable 0 TL product;
+    /// a later import that brings a price for such a product makes it purchasable again.
     /// </summary>
     internal static void ApplyValues(CatalogPackageProduct item, Product product, bool isNew)
     {
@@ -262,11 +264,19 @@ public class SupplierCatalogImporter
 
         if (item.Price.HasValue)
         {
+            // Only lift "call for price" that stands in for a missing price (price 0), never one an admin set
+            // for a priced product.
+            if (product.CallForPrice && product.Price == 0 && item.Price.Value > 0)
+            {
+                product.CallForPrice = false;
+            }
+
             product.Price = item.Price.Value;
         }
         else if (isNew)
         {
             product.Price = 0;
+            product.CallForPrice = true;
         }
 
         if (isNew)
