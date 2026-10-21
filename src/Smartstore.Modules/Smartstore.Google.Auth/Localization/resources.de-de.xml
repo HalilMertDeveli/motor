@@ -21,7 +21,22 @@
         </Value>
     </LocaleResource>
     <LocaleResource Name="Login">
-        <Value>Mit Google anmelden</Value>
+        <Value>Weiter mit Google</Value>
+    </LocaleResource>
+    <LocaleResource Name="Redirecting">
+        <Value>Weiterleitung zu Google…</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfiguredAdminNotice">
+        <Value>Hinweis für Administratoren: Google Login ist aktiv, aber Client-ID oder Clientschlüssel fehlen. Kunden sehen den Button nicht.</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfiguredAdminLink">
+        <Value>Google Login konfigurieren</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfigured">
+        <Value>Der Google-Button wird im Shop erst angezeigt, wenn Client-ID und Clientschlüssel eingetragen sind.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUriMismatch">
+        <Value>Sie haben diese Seite unter einer anderen Adresse als der Shop-URL geöffnet. Falls Kunden diese Adresse auch nutzen, tragen Sie bei Google zusätzlich diese Weiterleitungs-URI ein: {0}</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerKey">
         <Value>Client-ID</Value>

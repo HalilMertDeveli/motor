@@ -3,42 +3,59 @@
         <Value>Google ile giriş</Value>
     </LocaleResource>
     <LocaleResource Name="Plugins.Description.Smartstore.Google.Auth" AppendRootKey="false">
-        <Value>Mağazaya Google ile kimlik doğrulama ekler.</Value>
+        <Value>Müşterilerin Google hesaplarıyla kayıt olmasını ve giriş yapmasını sağlar.</Value>
     </LocaleResource>
     <LocaleResource Name="AdminInstruction">
         <Value>
             <![CDATA[
-			<p>Google ile kimlik doğrulamayı ayarlamak için: </p>
-				<ul>
-					<li><a href="https://console.developers.google.com/apis/credentials">Google</a> üzerinde yeni kimlik bilgileri oluşturun.
-							Henüz yapmadıysanız önce <a href="https://console.cloud.google.com/">Google Cloud Platform</a> üzerinde yeni bir proje oluşturmanız gerekir.
-					</li>
-					<li><b>Create credentials &gt; OAuth client ID</b> seçeneğine tıklayın.</li>
-					<li>Kimlik bilgilerini bu formun alt kısmına girin.</li>.
-					<li>Aşağıda listelenen URL, <b>Sign-in credentials &gt; Authorized forwarding URIs</b> alanına girilmelidir.</li>.
-				</ul>
+			<p>Google ile giriş için Google Cloud Console'da bir OAuth 2.0 istemcisi gerekir:</p>
+				<ol>
+					<li><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>'da bir proje seçin veya oluşturun.</li>
+					<li><b>Google Auth Platform &gt; Branding</b> (OAuth izin ekranı): uygulama adı, destek e-postası, mağaza alan adı, gizlilik politikası ve hizmet şartları bağlantılarını girin.
+						<b>Audience</b> bölümünde <b>External</b> seçin; testler bitince uygulamayı <b>In production</b> durumuna alın.</li>
+					<li><b>Data Access</b> bölümünde yalnızca <code>openid</code>, <code>userinfo.email</code> ve <code>userinfo.profile</code> kapsamlarını kullanın.</li>
+					<li><b>Clients &gt; Create client</b>: uygulama türü <b>Web application</b>. Aşağıdaki yönlendirme URI'sini <b>Authorized redirect URIs</b> alanına birebir girin (https, sonda eğik çizgi yok).
+						Geliştirme ortamı için ayrı bir istemci ve <code>http://localhost:&lt;port&gt;/signin-google</code> kullanın.</li>
+					<li>Oluşan <b>Client ID</b> ve <b>Client secret</b> değerlerini bu forma girip kaydedin. Secret'ı e-posta, sohbet veya kod deposu üzerinden paylaşmayın.</li>
+					<li><b>Yapılandırma &gt; Dış kimlik doğrulama</b> sayfasında "Google ile giriş" yöntemini etkinleştirin.</li>
+				</ol>
 			]]>
         </Value>
     </LocaleResource>
     <LocaleResource Name="Login">
-        <Value>Google ile giriş yap</Value>
+        <Value>Google ile devam et</Value>
+    </LocaleResource>
+    <LocaleResource Name="Redirecting">
+        <Value>Google'a yönlendiriliyorsunuz…</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfiguredAdminNotice">
+        <Value>Yönetici bilgisi: Google ile giriş etkin, ancak OAuth istemci kimliği (Client ID) veya gizli anahtarı (Client secret) girilmemiş. Müşterilere buton gösterilmiyor.</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfiguredAdminLink">
+        <Value>Google ile girişi yapılandır</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfigured">
+        <Value>Client ID ve Client secret girilmeden Google ile giriş butonu mağazada gösterilmez.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUriMismatch">
+        <Value>Bu sayfayı mağaza URL'sinden farklı bir adresle açtınız. Müşteriler bu adresi de kullanıyorsa şu yönlendirme URI'sini de Google'a ekleyin: {0}</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerKey">
-        <Value>API anahtarı</Value>
+        <Value>İstemci kimliği (Client ID)</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerKey.Hint">
-        <Value>API anahtarınızı buraya girin.</Value>
+        <Value>Google Cloud Console'daki OAuth 2.0 web istemcisinin Client ID değeri (….apps.googleusercontent.com).</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerSecret">
-        <Value>Gizli anahtar</Value>
+        <Value>Gizli anahtar (Client secret)</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerSecret.Hint">
-        <Value>Gizli anahtarınızı (client secret) buraya girin.</Value>
+        <Value>OAuth 2.0 web istemcisinin Client secret değeri. Yalnızca bu forma girin; kod deposuna veya e-postaya koymayın.</Value>
     </LocaleResource>
     <LocaleResource Name="RedirectUri">
         <Value>OAuth yönlendirme URI'si</Value>
     </LocaleResource>
     <LocaleResource Name="RedirectUri.Hint">
-        <Value>Google'da girilmesi gereken OAuth yönlendirme URI'si.</Value>
+        <Value>Google Cloud Console'da "Authorized redirect URIs" alanına birebir girilmesi gereken adres.</Value>
     </LocaleResource>
 </Language>

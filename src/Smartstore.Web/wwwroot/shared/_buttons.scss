@@ -246,6 +246,93 @@ button:where(.reset) {
 }
 
 
+// btn-gsi (Sign in with Google)
+// Google Identity branding: neutral fill, 1px stroke, standard "G" logo, Roboto Medium.
+// Light theme by default, dark themes override the --gsi-* variables.
+// --------------------------------------------------
+
+.btn-gsi {
+    --gsi-bg: #fff;
+    --gsi-border: #747775;
+    --gsi-color: #1f1f1f;
+    --gsi-state: #{rgba(#1f1f1f, 0.08)};
+    --gsi-state-active: #{rgba(#1f1f1f, 0.12)};
+
+    --btn-color: var(--gsi-color);
+    --btn-bg: var(--gsi-bg);
+    --btn-border-color: var(--gsi-border);
+    --btn-hover-color: var(--gsi-color);
+    --btn-hover-bg: var(--gsi-bg);
+    --btn-hover-border-color: var(--gsi-border);
+    --btn-active-color: var(--gsi-color);
+    --btn-active-bg: var(--gsi-bg);
+    --btn-active-border-color: var(--gsi-border);
+    --btn-disabled-color: var(--gsi-color);
+    --btn-disabled-bg: var(--gsi-bg);
+    --btn-disabled-border-color: var(--gsi-border);
+    --btn-box-shadow: none;
+    --btn-hover-shadow: none;
+    --btn-font-weight: 500;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0.625rem 12px;
+    border-radius: 4px;
+    font-family: Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.25px;
+    text-transform: none;
+    white-space: normal;
+
+    &:hover {
+        background-image: linear-gradient(var(--gsi-state), var(--gsi-state));
+        box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    &:active {
+        background-image: linear-gradient(var(--gsi-state-active), var(--gsi-state-active));
+    }
+
+    &:focus-visible {
+        outline: 2px solid #4285f4;
+        outline-offset: 2px;
+        box-shadow: none;
+    }
+
+    &.is-loading {
+        cursor: progress;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+}
+
+.btn-gsi-icon {
+    display: inline-flex;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+
+    > svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.btn-gsi-spinner {
+    display: none;
+    flex: 0 0 auto;
+
+    .btn-gsi.is-loading > & {
+        display: inline-block;
+    }
+}
+
+
 // btn-clear
 // --------------------------------------------------
 

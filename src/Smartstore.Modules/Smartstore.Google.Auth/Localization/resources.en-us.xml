@@ -3,42 +3,59 @@
         <Value>Google Login</Value>
     </LocaleResource>
     <LocaleResource Name="Plugins.Description.Smartstore.Google.Auth" AppendRootKey="false">
-        <Value>Adds Google authentication to the store.</Value>
+        <Value>Lets customers register and sign in with their Google account.</Value>
     </LocaleResource>
     <LocaleResource Name="AdminInstruction">
         <Value>
             <![CDATA[
-			<p>How to set up Google authentication: </p>
-				<ul>
-					<li>Create new credentials at <a href="https://console.developers.google.com/apis/credentials">Google</a>.
-							If not done already, a new project must be created on the <a href="https://console.cloud.google.com/">Google Cloud Platform</a> beforehand.
-					</li>
-					<li>Click <b>Create credentials &gt; OAuth client ID</b>.</li>
-					<li>Enter the credentials at the bottom of this form.</li>.
-					<li>The URL listed below must be entered at <b>Sign-in credentials &gt; Authorized forwarding URIs</b>.</li>.
-				</ul>
+			<p>Google sign-in needs an OAuth 2.0 client in the Google Cloud Console:</p>
+				<ol>
+					<li>Select or create a project in the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>.</li>
+					<li><b>Google Auth Platform &gt; Branding</b> (OAuth consent screen): enter the app name, support email, store domain and the links to the privacy policy and terms of service.
+						Under <b>Audience</b> choose <b>External</b> and publish the app (<b>In production</b>) after testing.</li>
+					<li>Under <b>Data Access</b> use only the scopes <code>openid</code>, <code>userinfo.email</code> and <code>userinfo.profile</code>.</li>
+					<li><b>Clients &gt; Create client</b>: application type <b>Web application</b>. Enter the redirect URI below exactly as shown at <b>Authorized redirect URIs</b> (https, no trailing slash).
+						Use a separate client and <code>http://localhost:&lt;port&gt;/signin-google</code> for development.</li>
+					<li>Enter the generated <b>Client ID</b> and <b>Client secret</b> in this form and save. Never share the secret by email, chat or in a code repository.</li>
+					<li>Activate "Google Login" under <b>Configuration &gt; External authentication</b>.</li>
+				</ol>
 			]]>
         </Value>
     </LocaleResource>
     <LocaleResource Name="Login">
-        <Value>Sign in with Google</Value>
+        <Value>Continue with Google</Value>
+    </LocaleResource>
+    <LocaleResource Name="Redirecting">
+        <Value>Redirecting to Google…</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfiguredAdminNotice">
+        <Value>Admin notice: Google Login is active, but the OAuth Client ID or Client secret is missing. Customers do not see the button.</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfiguredAdminLink">
+        <Value>Configure Google Login</Value>
+    </LocaleResource>
+    <LocaleResource Name="NotConfigured">
+        <Value>The Google button is not shown in the store until the Client ID and Client secret are entered.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUriMismatch">
+        <Value>You opened this page at an address other than the store URL. If customers use that address as well, add this redirect URI at Google too: {0}</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerKey">
-        <Value>API Key</Value>
+        <Value>Client ID</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerKey.Hint">
-        <Value>Enter your API Key here.</Value>
+        <Value>Client ID of the OAuth 2.0 web client in the Google Cloud Console (….apps.googleusercontent.com).</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerSecret">
-        <Value>Secret</Value>
+        <Value>Client secret</Value>
     </LocaleResource>
     <LocaleResource Name="ConsumerSecret.Hint">
-        <Value>Enter your consumer secret here.</Value>
+        <Value>Client secret of the OAuth 2.0 web client. Enter it in this form only, never in a code repository or email.</Value>
     </LocaleResource>
     <LocaleResource Name="RedirectUri">
         <Value>OAuth Redirect URI</Value>
     </LocaleResource>
     <LocaleResource Name="RedirectUri.Hint">
-        <Value>The OAuth Redirect URI to be entered on Google.</Value>
+        <Value>The address to be entered exactly at "Authorized redirect URIs" in the Google Cloud Console.</Value>
     </LocaleResource>
 </Language>

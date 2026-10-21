@@ -48,6 +48,36 @@
     }
 }
 
+// "Continue with Google": dark theme colors of the Google Identity branding guidelines
+.btn-gsi {
+    --gsi-bg: #131314;
+    --gsi-border: #8e918f;
+    --gsi-color: #e3e3e3;
+    --gsi-state: #{rgba(#e3e3e3, 0.08)};
+    --gsi-state-active: #{rgba(#e3e3e3, 0.12)};
+
+    &:active:not(:disabled) {
+        transform: none;
+    }
+}
+
+.external-auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: $motor-text-muted;
+    font-size: $font-size-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+
+    &::before,
+    &::after {
+        content: "";
+        flex: 1 1 auto;
+        border-top: 1px solid $motor-line;
+    }
+}
+
 .pwd-policy {
     background-color: $motor-surface-2;
     @include bubble(top, near, 12, $motor-surface-2, $motor-surface-2);

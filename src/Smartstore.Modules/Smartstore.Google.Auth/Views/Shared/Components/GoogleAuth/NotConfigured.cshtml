@@ -1,0 +1,8 @@
+@model string
+
+@* Only rendered for administrators: the Google login is active but has no OAuth client yet. *@
+<div class="alert alert-warning mb-0 small" role="status">
+    <i class="fa fa-triangle-exclamation me-1" aria-hidden="true"></i>
+    @T("Plugins.Smartstore.Google.Auth.NotConfiguredAdminNotice")
+    <a href="@Model" class="alert-link">@T("Plugins.Smartstore.Google.Auth.NotConfiguredAdminLink")</a>
+</div>

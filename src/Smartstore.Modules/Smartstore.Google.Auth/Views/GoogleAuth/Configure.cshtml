@@ -11,6 +11,13 @@
     <button class="btn-close" data-dismiss="alert"></button>
 </div>
 
+@if (!Model.IsConfigured)
+{
+    <div class="alert alert-warning">
+        @T("Plugins.Smartstore.Google.Auth.NotConfigured")
+    </div>
+}
+
 @await Component.InvokeAsync("StoreScope")
 
 <form asp-action="Configure">
@@ -55,6 +62,12 @@
                         </button>
                     </div>
                 </div>
+                @if (!string.IsNullOrEmpty(Model.RequestRedirectUrl))
+                {
+                    <div class="form-text text-warning">
+                        @T("Plugins.Smartstore.Google.Auth.RedirectUriMismatch", Model.RequestRedirectUrl)
+                    </div>
+                }
             </div>
         </div>
     </div>
