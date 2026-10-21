@@ -14,8 +14,10 @@ using Smartstore.Web.Modelling.Settings;
 
 namespace MotorShop.Iyzico.Controllers;
 
-[Area("Admin")]
-public class IyzicoAdminController : ModuleController
+/// <summary>
+/// AdminController brings backend access, the admin IP check and antiforgery validation for every POST.
+/// </summary>
+public class IyzicoAdminController : AdminController
 {
     private readonly SmartDbContext _db;
     private readonly IIyzicoCredentialProvider _credentialProvider;
@@ -34,7 +36,7 @@ public class IyzicoAdminController : ModuleController
         _paymentService = paymentService;
     }
 
-    [LoadSetting, AuthorizeAdmin]
+    [LoadSetting, Permission(Permissions.Configuration.PaymentMethod.Read)]
     public async Task<IActionResult> Configure(IyzicoSettings settings)
     {
         var model = MiniMapper.Map<IyzicoSettings, ConfigurationModel>(settings);
@@ -43,7 +45,7 @@ public class IyzicoAdminController : ModuleController
         return View(model);
     }
 
-    [HttpPost, SaveSetting, AuthorizeAdmin]
+    [HttpPost, SaveSetting, Permission(Permissions.Configuration.PaymentMethod.Update)]
     public async Task<IActionResult> Configure(ConfigurationModel model, IyzicoSettings settings)
     {
         if (!ModelState.IsValid)
@@ -80,7 +82,7 @@ public class IyzicoAdminController : ModuleController
         return RedirectToAction(nameof(Configure));
     }
 
-    [HttpPost, AuthorizeAdmin, ActionName("Configure"), FormValueRequired("clearkeys")]
+    [HttpPost, ActionName("Configure"), FormValueRequired("clearkeys"), Permission(Permissions.Configuration.PaymentMethod.Update)]
     public async Task<IActionResult> ClearKeys()
     {
         var storeScope = GetActiveStoreScopeConfiguration();
@@ -97,7 +99,7 @@ public class IyzicoAdminController : ModuleController
     /// <summary>
     /// Asks the iyzico transaction report whether unconfirmed refunds of a transaction were processed.
     /// </summary>
-    [HttpPost, AuthorizeAdmin, ValidateAntiForgeryToken, Permission(Permissions.Order.Update)]
+    [HttpPost, Permission(Permissions.Order.Update)]
     public async Task<IActionResult> CheckRefunds(int transactionId)
     {
         var confirmed = await _paymentService.CheckPendingRefundsAsync(transactionId, HttpContext.RequestAborted);
@@ -116,7 +118,7 @@ public class IyzicoAdminController : ModuleController
     /// <summary>
     /// Admin decision on a refund with an unknown outcome, after checking the iyzico merchant panel.
     /// </summary>
-    [HttpPost, AuthorizeAdmin, ValidateAntiForgeryToken, Permission(Permissions.Order.Update)]
+    [HttpPost, Permission(Permissions.Order.Update)]
     public async Task<IActionResult> ResolveRefund(int transactionId, string conversationId, bool processed)
     {
         var resolvedBy = $"admin (customer id {Services.WorkContext.CurrentCustomer.Id})";
