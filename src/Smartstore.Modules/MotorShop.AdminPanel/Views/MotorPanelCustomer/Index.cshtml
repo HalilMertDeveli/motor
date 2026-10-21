@@ -1,0 +1,36 @@
+@model CustomerListModel
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Customers").Value;
+    ViewData["PanelTab"] = "customers";
+    var f = Model.Filter;
+}
+
+<section class="mp-panel" aria-labelledby="mp-cust-title">
+    <div class="mp-panel__head">
+        <h1 id="mp-cust-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Tab.Customers")</h1>
+        <a class="mp-btn mp-btn--ghost" href="@Url.Action("List", "Customer", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.ClassicList")</a>
+    </div>
+
+    <form class="mp-toolbar" method="get" action="@Url.Action("Index", "MotorPanelCustomer", new { area = "Admin" })"
+          data-grid-url="@Url.Action("List", "MotorPanelCustomer", new { area = "Admin" })"
+          data-error-text="@T("Plugins.MotorShop.AdminPanel.LoadError")" role="search">
+        <label class="mp-field mp-field--search">
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Customer.Search")</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input type="search" name="q" value="@f.Q" maxlength="200" autocomplete="off" placeholder="@T("Plugins.MotorShop.AdminPanel.Customer.SearchPlaceholder")" />
+        </label>
+        <label class="mp-field">
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Customer.Role")</span>
+            <select name="role">
+                <option value="registered" selected="@(f.Role == "registered")">@T("Plugins.MotorShop.AdminPanel.Customer.Registered")</option>
+                <option value="guests" selected="@(f.Role == "guests")">@T("Plugins.MotorShop.AdminPanel.Customer.GuestsWithOrders")</option>
+                <option value="all" selected="@(f.Role == "all")">@T("Plugins.MotorShop.AdminPanel.Customer.All")</option>
+            </select>
+        </label>
+        <noscript><button type="submit" class="mp-btn mp-btn--outline">@T("Plugins.MotorShop.AdminPanel.Apply")</button></noscript>
+    </form>
+
+    <div id="mp-grid" class="mp-grid" aria-live="polite" aria-busy="false">
+        <partial name="_CustomerGrid" model="Model" />
+    </div>
+</section>

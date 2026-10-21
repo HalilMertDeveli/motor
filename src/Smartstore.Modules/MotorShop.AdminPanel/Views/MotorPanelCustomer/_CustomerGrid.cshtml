@@ -1,0 +1,69 @@
+@model CustomerListModel
+@{
+    var f = Model.Filter;
+}
+
+<div class="mp-grid__meta" data-total="@Model.TotalCount">
+    <span>@T("Plugins.MotorShop.AdminPanel.Customer.Count", Model.TotalCount.ToString("N0"))</span>
+    <span class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Customer.SpendHint")</span>
+</div>
+
+@if (Model.Rows.Count == 0)
+{
+    <div class="mp-empty"><p>@T("Plugins.MotorShop.AdminPanel.Customer.None")</p></div>
+}
+else
+{
+    <div class="mp-table-wrap">
+        <table class="mp-table">
+            <thead>
+                <tr>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Customer.Name")</th>
+                    <th scope="col">E-posta</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.City")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Status")</th>
+                    <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Customer.Orders")</th>
+                    <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Customer.TotalSpend")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Customer.LastOrder")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Rows)
+                {
+                    <tr>
+                        <td>
+                            <button type="button" class="mp-link mp-link--plain mp-link-btn" data-open-editor="@Url.Action("Details", "MotorPanelCustomer", new { area = "Admin", id = c.Id })">@c.Name</button>
+                            @if (c.IsGuest)
+                            {
+                                <span class="mp-badge mp-badge--gray">@T("Plugins.MotorShop.AdminPanel.Customer.Guest")</span>
+                            }
+                        </td>
+                        <td class="mp-truncate">@(c.Email.NullEmpty() ?? "-")</td>
+                        <td class="mp-truncate">@(c.City.NullEmpty() ?? "-")</td>
+                        <td>
+                            <span class="mp-badge @(c.Active ? "mp-badge--green" : "mp-badge--red")">@(c.Active ? T("Plugins.MotorShop.AdminPanel.Customer.Active") : T("Plugins.MotorShop.AdminPanel.Customer.Inactive"))</span>
+                        </td>
+                        <td class="mp-num">@c.OrderCount</td>
+                        <td class="mp-num mp-nowrap">@c.TotalSpend</td>
+                        <td class="mp-nowrap">@(c.LastOrderOn?.ToString("d") ?? "-")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mp-pager" aria-label="@T("Plugins.MotorShop.AdminPanel.Pagination")">
+            @if (f.Page > 1)
+            {
+                <a class="mp-pager__link" href="@Url.Action("Index", "MotorPanelCustomer", f.ToRouteValues(f.Page - 1))" rel="prev">‹ @T("Plugins.MotorShop.AdminPanel.Prev")</a>
+            }
+            <span class="mp-pager__link is-current" aria-current="page">@f.Page / @Model.TotalPages</span>
+            @if (f.Page < Model.TotalPages)
+            {
+                <a class="mp-pager__link" href="@Url.Action("Index", "MotorPanelCustomer", f.ToRouteValues(f.Page + 1))" rel="next">@T("Plugins.MotorShop.AdminPanel.Next") ›</a>
+            }
+        </nav>
+    }
+}

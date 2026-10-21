@@ -1,0 +1,70 @@
+@using Smartstore.Core.Checkout.Orders
+@using Smartstore.Core.Checkout.Payment
+@using Smartstore.Core.Checkout.Shipping
+@model OrderListModel
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Orders").Value;
+    ViewData["PanelTab"] = "orders";
+    var f = Model.Filter;
+    var loc = CommonServices.Localization;
+}
+
+<section class="mp-panel" aria-labelledby="mp-orders-title" id="mp-orders">
+    <div class="mp-panel__head">
+        <h1 id="mp-orders-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Tab.Orders")</h1>
+        <a class="mp-btn mp-btn--ghost" href="@Url.Action("List", "Order", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.ClassicList")</a>
+    </div>
+
+    <form class="mp-toolbar" method="get" action="@Url.Action("Index", "MotorPanelOrder", new { area = "Admin" })"
+          data-grid-url="@Url.Action("List", "MotorPanelOrder", new { area = "Admin" })"
+          data-error-text="@T("Plugins.MotorShop.AdminPanel.LoadError")" role="search">
+        <label class="mp-field mp-field--search">
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Order.Search")</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input type="search" name="q" value="@f.Q" maxlength="200" autocomplete="off" placeholder="@T("Plugins.MotorShop.AdminPanel.Order.SearchPlaceholder")" />
+        </label>
+        <label class="mp-field">
+            <span class="mp-field-label">@T("Plugins.MotorShop.AdminPanel.Order.From")</span>
+            <input type="date" name="from" value="@f.From?.ToString("yyyy-MM-dd")" />
+        </label>
+        <label class="mp-field">
+            <span class="mp-field-label">@T("Plugins.MotorShop.AdminPanel.Order.To")</span>
+            <input type="date" name="to" value="@f.To?.ToString("yyyy-MM-dd")" />
+        </label>
+        <label class="mp-field">
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Order.Status")</span>
+            <select name="orderStatus">
+                <option value="">@T("Plugins.MotorShop.AdminPanel.Order.AnyOrderStatus")</option>
+                @foreach (var s in Enum.GetValues<OrderStatus>())
+                {
+                    <option value="@s" selected="@(f.OrderStatus == s)">@loc.GetLocalizedEnum(s)</option>
+                }
+            </select>
+        </label>
+        <label class="mp-field">
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Order.PaymentStatus")</span>
+            <select name="paymentStatus">
+                <option value="">@T("Plugins.MotorShop.AdminPanel.Order.AnyPaymentStatus")</option>
+                @foreach (var s in Enum.GetValues<PaymentStatus>())
+                {
+                    <option value="@s" selected="@(f.PaymentStatus == s)">@loc.GetLocalizedEnum(s)</option>
+                }
+            </select>
+        </label>
+        <label class="mp-field">
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Order.ShippingStatus")</span>
+            <select name="shippingStatus">
+                <option value="">@T("Plugins.MotorShop.AdminPanel.Order.AnyShippingStatus")</option>
+                @foreach (var s in Enum.GetValues<ShippingStatus>())
+                {
+                    <option value="@s" selected="@(f.ShippingStatus == s)">@loc.GetLocalizedEnum(s)</option>
+                }
+            </select>
+        </label>
+        <noscript><button type="submit" class="mp-btn mp-btn--outline">@T("Plugins.MotorShop.AdminPanel.Apply")</button></noscript>
+    </form>
+
+    <div id="mp-grid" class="mp-grid" aria-live="polite" aria-busy="false">
+        <partial name="_OrderGrid" model="Model" />
+    </div>
+</section>

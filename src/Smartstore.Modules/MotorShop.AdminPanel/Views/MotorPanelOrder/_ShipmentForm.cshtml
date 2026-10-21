@@ -1,0 +1,93 @@
+@model ShipmentFormModel
+
+<form class="mp-editor" method="post" action="@Url.Action("NewShipment", "MotorPanelOrder", new { area = "Admin", id = Model.OrderId })" novalidate data-editor
+      data-return-url="@Url.Action("Details", "MotorPanelOrder", new { area = "Admin", id = Model.OrderId })">
+    <header class="mp-drawer__head">
+        <div>
+            <h2 id="mp-drawer-title" class="mp-drawer__title">@T("Plugins.MotorShop.AdminPanel.Shipment.New")</h2>
+            <p class="mp-muted mp-drawer__sub">@T("Plugins.MotorShop.AdminPanel.Order.Title", Model.OrderNumber)</p>
+        </div>
+        <button type="button" class="mp-icon-btn" data-close title="@T("Plugins.MotorShop.AdminPanel.Js.Close")">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Js.Close")</span>
+        </button>
+    </header>
+
+    <div class="mp-drawer__body">
+        <div class="mp-form-error" data-form-error role="alert" hidden></div>
+
+        <fieldset class="mp-fieldset">
+            <legend>@T("Plugins.MotorShop.AdminPanel.Shipment.Items")</legend>
+            @if (Model.Items.Count == 0)
+            {
+                <p class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Shipment.NothingLeft")</p>
+            }
+            else
+            {
+                <p class="mp-small mp-muted">@T("Plugins.MotorShop.AdminPanel.Shipment.PartialHint")</p>
+                <div class="mp-table-wrap">
+                    <table class="mp-table mp-table--compact">
+                        <thead>
+                            <tr>
+                                <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Name")</th>
+                                <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Order.Qty")</th>
+                                <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Order.Shipped")</th>
+                                <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Shipment.ShipNow")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.Name</strong>
+                                        @if (item.Sku.HasValue())
+                                        {
+                                            <span class="mp-mono mp-muted"> · @item.Sku</span>
+                                        }
+                                    </td>
+                                    <td class="mp-num">@item.Ordered</td>
+                                    <td class="mp-num">@item.AlreadyShipped</td>
+                                    <td class="mp-num">
+                                        <input class="mp-qty" type="number" name="qty_@item.OrderItemId" value="@item.Remaining" min="0" max="@item.Remaining" step="1"
+                                               disabled="@(item.Remaining == 0)" aria-label="@T("Plugins.MotorShop.AdminPanel.Shipment.ShipNow"): @item.Name" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </fieldset>
+
+        <fieldset class="mp-fieldset">
+            <legend>@T("Plugins.MotorShop.AdminPanel.Shipment.Tracking")</legend>
+            <div class="mp-form-grid">
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Shipment.Carrier")</span>
+                    <input name="carrier" maxlength="100" list="mp-carriers" autocomplete="off" />
+                    <datalist id="mp-carriers">
+                        @foreach (var carrier in Model.Carriers)
+                        {
+                            <option value="@carrier"></option>
+                        }
+                    </datalist>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Shipment.TrackingNumber")</span>
+                    <input name="trackingNumber" maxlength="100" autocomplete="off" />
+                </label>
+            </div>
+            <p class="mp-small mp-muted">@T("Plugins.MotorShop.AdminPanel.Shipment.TrackingHint")</p>
+        </fieldset>
+    </div>
+
+    <footer class="mp-drawer__foot">
+        <span class="mp-spacer"></span>
+        <button type="button" class="mp-btn mp-btn--outline" data-open-editor="@Url.Action("Details", "MotorPanelOrder", new { area = "Admin", id = Model.OrderId })">@T("Plugins.MotorShop.AdminPanel.Js.Cancel")</button>
+        @if (Model.Items.Any(x => x.Remaining > 0))
+        {
+            <button type="submit" class="mp-btn mp-btn--accent">@T("Plugins.MotorShop.AdminPanel.Shipment.Create")</button>
+        }
+    </footer>
+</form>

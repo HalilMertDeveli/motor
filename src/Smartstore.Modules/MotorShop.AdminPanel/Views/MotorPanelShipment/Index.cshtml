@@ -1,0 +1,117 @@
+@model ShipmentQueueModel
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Shipments").Value;
+    ViewData["PanelTab"] = "shipments";
+    var loc = CommonServices.Localization;
+    var canEdit = ViewBag.CanEditShipments == true;
+}
+
+<section class="mp-panel" aria-labelledby="mp-ship-title">
+    <div class="mp-panel__head">
+        <div>
+            <h1 id="mp-ship-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Shipment.Awaiting")</h1>
+            <p class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Shipment.AwaitingHint", Model.AwaitingCount)</p>
+        </div>
+        <a class="mp-btn mp-btn--ghost" href="@Url.Action("Index", "MotorPanelOrder", new { area = "Admin", shippingStatus = "NotYetShipped" })">@T("Plugins.MotorShop.AdminPanel.Shipment.AllAwaiting")</a>
+    </div>
+
+    @if (Model.AwaitingShipment.Count == 0)
+    {
+        <p class="mp-empty">@T("Plugins.MotorShop.AdminPanel.Shipment.NoneAwaiting")</p>
+    }
+    else
+    {
+        <div class="mp-table-wrap">
+            <table class="mp-table">
+                <thead>
+                    <tr>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Number")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Date")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Customer")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.City")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.PaymentStatus")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.ShippingStatus")</th>
+                        <th scope="col" class="mp-col-actions"><span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Col.Actions")</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model.AwaitingShipment)
+                    {
+                        <tr>
+                            <td><button type="button" class="mp-link mp-link-btn" data-open-editor="@Url.Action("Details", "MotorPanelOrder", new { area = "Admin", id = o.Id })">#@o.OrderNumber</button></td>
+                            <td class="mp-nowrap">@o.CreatedOn.ToString("g")</td>
+                            <td class="mp-truncate">@o.Customer</td>
+                            <td class="mp-truncate">@(o.City.NullEmpty() ?? "-")</td>
+                            <td><span class="mp-badge @PanelBadges.Payment(o.PaymentStatus)">@loc.GetLocalizedEnum(o.PaymentStatus)</span></td>
+                            <td><span class="mp-badge @PanelBadges.Shipping(o.ShippingStatus)">@loc.GetLocalizedEnum(o.ShippingStatus)</span></td>
+                            <td class="mp-col-actions">
+                                @if (canEdit)
+                                {
+                                    <button type="button" class="mp-btn mp-btn--outline mp-btn--sm" data-open-editor="@Url.Action("NewShipment", "MotorPanelOrder", new { area = "Admin", id = o.Id })">@T("Plugins.MotorShop.AdminPanel.Shipment.New")</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+<section class="mp-panel mp-section-gap" aria-labelledby="mp-transit-title">
+    <div class="mp-panel__head">
+        <h2 id="mp-transit-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Shipment.InTransit")</h2>
+    </div>
+    @if (Model.InTransit.Count == 0)
+    {
+        <p class="mp-empty">@T("Plugins.MotorShop.AdminPanel.Shipment.NoneInTransit")</p>
+    }
+    else
+    {
+        <div class="mp-table-wrap">
+            <table class="mp-table">
+                <thead>
+                    <tr>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Number")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Customer")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Shipment.Carrier")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Shipment.TrackingNumber")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Shipment.Shipped")</th>
+                        <th scope="col" class="mp-col-actions"><span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Col.Actions")</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.InTransit)
+                    {
+                        <tr>
+                            <td><button type="button" class="mp-link mp-link-btn" data-open-editor="@Url.Action("Details", "MotorPanelOrder", new { area = "Admin", id = s.OrderId })">#@s.OrderNumber</button></td>
+                            <td class="mp-truncate">@s.Customer</td>
+                            <td>@(s.Carrier.NullEmpty() ?? "-")</td>
+                            <td class="mp-mono">
+                                @if (s.TrackingUrl.HasValue())
+                                {
+                                    <a class="mp-link" href="@s.TrackingUrl" target="_blank" rel="noopener noreferrer">@(s.TrackingNumber.NullEmpty() ?? T("Plugins.MotorShop.AdminPanel.Shipment.Track").Value)</a>
+                                }
+                                else
+                                {
+                                    @(s.TrackingNumber.NullEmpty() ?? "-")
+                                }
+                            </td>
+                            <td class="mp-nowrap">@s.ShippedOn.ToString("g")</td>
+                            <td class="mp-col-actions">
+                                @if (canEdit)
+                                {
+                                    <form method="post" class="mp-inline-form" action="@Url.Action("Deliver", "MotorPanelOrder", new { area = "Admin", shipmentId = s.ShipmentId })" data-page-action
+                                          data-confirm="@T("Plugins.MotorShop.AdminPanel.Shipment.DeliverConfirm", s.OrderNumber)">
+                                        <input type="hidden" name="notifyCustomer" value="true" />
+                                        <button type="submit" class="mp-btn mp-btn--outline mp-btn--sm">@T("Plugins.MotorShop.AdminPanel.Shipment.MarkDelivered")</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

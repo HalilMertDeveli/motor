@@ -1,6 +1,27 @@
 @{
     var activeTab = ViewData["PanelTab"] as string ?? "products";
     var language = WorkContext.WorkingLanguage;
+
+    // Texts the scripts need, in the admin language.
+    var strings = new Dictionary<string, string>
+    {
+        ["saving"] = T("Plugins.MotorShop.AdminPanel.Js.Saving"),
+        ["saved"] = T("Plugins.MotorShop.AdminPanel.Saved"),
+        ["error"] = T("Plugins.MotorShop.AdminPanel.Js.Error"),
+        ["loadError"] = T("Plugins.MotorShop.AdminPanel.LoadError"),
+        ["confirm"] = T("Plugins.MotorShop.AdminPanel.Js.Confirm"),
+        ["cancel"] = T("Plugins.MotorShop.AdminPanel.Js.Cancel"),
+        ["unsaved"] = T("Plugins.MotorShop.AdminPanel.Js.Unsaved"),
+        ["close"] = T("Plugins.MotorShop.AdminPanel.Js.Close"),
+        ["selected"] = T("Plugins.MotorShop.AdminPanel.Bulk.Selected"),
+        ["bulkDone"] = T("Plugins.MotorShop.AdminPanel.Bulk.Done"),
+        ["bulkFailed"] = T("Plugins.MotorShop.AdminPanel.Bulk.Failures"),
+        ["bulkConfirm"] = T("Plugins.MotorShop.AdminPanel.Bulk.Confirm"),
+        ["deleteConfirm"] = T("Plugins.MotorShop.AdminPanel.Delete.Confirm"),
+        ["duplicateConfirm"] = T("Plugins.MotorShop.AdminPanel.Duplicate.Confirm"),
+        ["priceLockOn"] = T("Plugins.MotorShop.AdminPanel.PriceLock.ConfirmOn"),
+        ["priceLockOff"] = T("Plugins.MotorShop.AdminPanel.PriceLock.ConfirmOff")
+    };
 }
 <!DOCTYPE html>
 <html lang="@language.LanguageCulture" dir="@(language.Rtl ? "rtl" : "ltr")">
@@ -8,6 +29,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="mp-xsrf" content="@Html.GetAntiforgeryToken()" />
     <title>@ViewBag.Title</title>
     <link rel="stylesheet" href="@Url.Content("~/Modules/MotorShop.AdminPanel/css/motor-panel.css")" asp-append-version="true" />
 </head>
@@ -20,8 +42,25 @@
         @RenderBody()
     </main>
 
+    <dialog id="mp-drawer" class="mp-drawer" aria-labelledby="mp-drawer-title">
+        <div class="mp-drawer__content"></div>
+    </dialog>
+
+    <dialog id="mp-confirm" class="mp-dialog" aria-labelledby="mp-confirm-title">
+        <div class="mp-dialog__form">
+            <h2 id="mp-confirm-title" class="mp-dialog__title"></h2>
+            <div class="mp-dialog__text"></div>
+            <div class="mp-dialog__actions">
+                <button type="button" value="cancel" class="mp-btn mp-btn--outline">@T("Plugins.MotorShop.AdminPanel.Js.Cancel")</button>
+                <button type="button" value="ok" class="mp-btn mp-btn--danger mp-dialog__ok">@T("Plugins.MotorShop.AdminPanel.Js.Confirm")</button>
+            </div>
+        </div>
+    </dialog>
+
     <div class="mp-toasts" role="status" aria-live="polite" aria-atomic="true"></div>
 
+    <script type="application/json" id="mp-strings">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(strings).Replace("</", "<\\/"))</script>
     <script src="@Url.Content("~/Modules/MotorShop.AdminPanel/js/motor-panel.js")" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("scripts", false)
 </body>
 </html>

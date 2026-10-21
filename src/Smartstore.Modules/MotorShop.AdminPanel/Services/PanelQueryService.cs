@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.AdminPanel.Models;
 using Smartstore.Core;
@@ -266,7 +267,10 @@ public class PanelQueryService
                 },
                 CallForPrice = x.CallForPrice,
                 Published = x.Published,
-                Slug = slug.NullEmpty()
+                Slug = slug.NullEmpty(),
+                PriceValue = x.Price.ToString("0.####", CultureInfo.InvariantCulture),
+                SpecialPriceValue = x.SpecialPrice?.ToString("0.####", CultureInfo.InvariantCulture) ?? string.Empty,
+                ManageStock = method == ManageInventoryMethod.ManageStock
             });
         }
 
