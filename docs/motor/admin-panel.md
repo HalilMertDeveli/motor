@@ -35,7 +35,7 @@ Storefront (MotorDark) ─┐
 * All counts exclude deleted (`Deleted`) and system products (`IsSystemProduct`); unpublished products are included.
 * **Stokta yok**: `ManageStock` with `StockQuantity <= 0`, or `ManageStockByAttributes` without any *active* combination with stock > 0. Products that do not track stock are never out of stock.
 * **Gizli fiyatlı**: `CallForPrice = true`. These cannot be added to the cart (`ShoppingCartValidator`).
-* **Fiyatsız** (list filter and red badge): `Price <= 0` and not `CallForPrice`. Once published such a product can be bought for 0; supplier PR #43 turns these into call-for-price.
+* **Fiyatsız** (list filter and red badge): `Price <= 0` and not `CallForPrice`. Once published such a product can be bought for 0. Since PR #43 the supplier import marks unpriced products call-for-price; the filter finds products that were imported earlier or edited by hand.
 
 ### Brand settings
 
@@ -76,7 +76,8 @@ resources.
 | Customers | Yes | Customer query extensions; guests are hidden by default in the classic list | `Areas/Admin/Controllers/CustomerController.cs` |
 | Discounts / coupons | Yes | `IDiscountService`, `Discount` entity | `Areas/Admin/Controllers/DiscountController.cs` |
 | Reports | Partly | Dashboard view components and `OrderQueryExtensions` (no report service) | `Areas/Admin/Components/Dashboard*.cs` |
-| Topics (pages) | Yes | `_db.Topics`; **no blog/news module in this repository** | `Areas/Admin/Controllers/TopicController.cs` |
+| Topics (pages) | Yes | `_db.Topics` | `Areas/Admin/Controllers/TopicController.cs` |
+| Blog | Yes (external) | `MotorShop.WordPress` (PR #44) reads posts from a headless WordPress; content is edited in WordPress, the panel can only link to its configuration | `MotorShop.WordPress/Controllers/MotorWordPressAdminController.cs` |
 | Order PDF | Yes | Not a legal invoice | `docs/motor/invoicing.md` |
 | e-Arşiv / e-Fatura | No | Provider-neutral design only, no integrator chosen | `docs/motor/invoicing.md` |
 | Audit log | Yes | `IActivityLogger` (needs an `ActivityLogType` row per keyword) | `Platform/Logging/Services/IActivityLogger.cs` |
@@ -99,5 +100,5 @@ resources.
 
 ## Known gaps
 
-* Topics are the only CMS content; a blog module is not part of this repository.
+* Blog posts live in WordPress (`MotorShop.WordPress`), not in the Smartstore database, so "Pages & Blog" can edit topics but only link to the blog source.
 * The QA tenant used for local checks has USD as primary currency and a TRY rate of 1 (sample data). The panel shows what is configured.
