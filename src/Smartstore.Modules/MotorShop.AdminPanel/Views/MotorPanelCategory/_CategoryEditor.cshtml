@@ -1,0 +1,113 @@
+@model CategoryEditorModel
+@{
+    var canSave = Model.Id == 0 ? ViewBag.CanCreate == true : ViewBag.CanUpdate == true;
+}
+
+<form class="mp-editor" method="post" enctype="multipart/form-data" action="@Url.Action("Save", "MotorPanelCategory", new { area = "Admin" })" novalidate data-editor data-reload>
+    <header class="mp-drawer__head">
+        <div>
+            <h2 id="mp-drawer-title" class="mp-drawer__title">@(Model.Id == 0 ? T("Plugins.MotorShop.AdminPanel.Category.New") : Model.Name)</h2>
+            @if (Model.Id > 0)
+            {
+                <p class="mp-muted mp-drawer__sub">#@Model.Id</p>
+            }
+        </div>
+        <button type="button" class="mp-icon-btn" data-close title="@T("Plugins.MotorShop.AdminPanel.Js.Close")">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Js.Close")</span>
+        </button>
+    </header>
+
+    <div class="mp-drawer__body">
+        <div class="mp-form-error" data-form-error role="alert" hidden></div>
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <input type="hidden" name="Version" value="@Model.Version" />
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)">
+            <div class="mp-form-grid">
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.Name") *</span>
+                    <input name="Name" value="@Model.Name" required maxlength="400" />
+                    <small class="mp-field-error" data-error-for="Name"></small>
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.Parent")</span>
+                    <select name="ParentId">
+                        <option value="0">@T("Plugins.MotorShop.AdminPanel.Category.Root")</option>
+                        @foreach (var c in Model.ParentOptions)
+                        {
+                            <option value="@c.Id" selected="@(c.Id == Model.ParentId)">@(new string(' ', c.Depth * 3))@c.Name</option>
+                        }
+                    </select>
+                    <small class="mp-field-error" data-error-for="ParentId"></small>
+                </label>
+                <label class="mp-check-field">
+                    <input type="checkbox" name="Published" value="true" checked="@Model.Published" />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Status.Published")</span>
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.DisplayOrder")</span>
+                    <input type="number" name="DisplayOrder" value="@Model.DisplayOrder" step="1" />
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)">
+            <legend>@T("Plugins.MotorShop.AdminPanel.Category.Image")</legend>
+            @if (Model.ImageUrl.HasValue())
+            {
+                <img class="mp-category-image" src="@Model.ImageUrl" alt="" width="128" height="128" />
+                <label class="mp-check-field">
+                    <input type="checkbox" name="RemoveImage" value="true" />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.RemoveImage")</span>
+                </label>
+            }
+            <label class="mp-form-field">
+                <span>@T("Plugins.MotorShop.AdminPanel.Category.UploadImage")</span>
+                <input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif" />
+                <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Category.ImageHint")</small>
+                <small class="mp-field-error" data-error-for="Image"></small>
+            </label>
+        </fieldset>
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)">
+            <legend>@T("Plugins.MotorShop.AdminPanel.Editor.Description")</legend>
+            <label class="mp-form-field">
+                <span>@T("Plugins.MotorShop.AdminPanel.Category.Description")</span>
+                <textarea name="Description" rows="5" class="mp-mono">@Model.Description</textarea>
+                <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Editor.HtmlHint")</small>
+            </label>
+        </fieldset>
+
+        <fieldset class="mp-fieldset" disabled="@(!canSave)">
+            <legend>SEO</legend>
+            <div class="mp-form-grid">
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.SeName")</span>
+                    <input name="SeName" value="@Model.SeName" maxlength="400" />
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaTitle")</span>
+                    <input name="MetaTitle" value="@Model.MetaTitle" maxlength="400" />
+                </label>
+                <label class="mp-form-field mp-form-field--wide">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaDescription")</span>
+                    <textarea name="MetaDescription" rows="2" maxlength="4000">@Model.MetaDescription</textarea>
+                </label>
+            </div>
+        </fieldset>
+    </div>
+
+    <footer class="mp-drawer__foot">
+        @if (Model.Id > 0)
+        {
+            <a class="mp-btn mp-btn--ghost" href="@Url.Action("Edit", "Category", new { area = "Admin", id = Model.Id })" target="_blank" rel="noopener">@T("Plugins.MotorShop.AdminPanel.Editor.OpenClassic")</a>
+        }
+        <span class="mp-spacer"></span>
+        <button type="button" class="mp-btn mp-btn--outline" data-close>@T("Plugins.MotorShop.AdminPanel.Js.Cancel")</button>
+        @if (canSave)
+        {
+            <button type="submit" class="mp-btn mp-btn--accent">@T("Plugins.MotorShop.AdminPanel.Save")</button>
+        }
+    </footer>
+</form>

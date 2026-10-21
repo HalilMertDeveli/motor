@@ -55,7 +55,10 @@ public partial class MotorPanelHeaderViewComponent : SmartViewComponent
         await AddClassicTabAsync(model, "content", "Tab.Content", Permissions.Cms.Topic.Read, "List", "Topic");
         await AddClassicTabAsync(model, "settings", "Tab.Settings", Permissions.Configuration.Setting.Read, "GeneralCommon", "Setting");
         await AddClassicTabAsync(model, "coupons", "Tab.Coupons", Permissions.Promotion.Discount.Read, "List", "Discount");
-        await AddClassicTabAsync(model, "categories", "Tab.Categories", Permissions.Catalog.Category.Read, "List", "Category");
+        if (await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Category.Read))
+        {
+            model.Tabs.Add(new("categories", T("Plugins.MotorShop.AdminPanel.Tab.Categories"), Url.Action("Index", "MotorPanelCategory", new { area = "Admin" }), false));
+        }
         await AddClassicTabAsync(model, "shipments", "Tab.Shipments", Permissions.Order.Read, "List", "Shipment");
 
         return View(model);

@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using MotorShop.AdminPanel.Components;
 using MotorShop.AdminPanel.Controllers;
 using MotorShop.AdminPanel.Models;
@@ -28,17 +30,55 @@ public class PanelContractTests
     }
 
     [Test]
-    public void Panel_actions_are_read_only_gets()
+    public void Every_panel_controller_is_an_admin_controller_with_a_panel_route()
     {
-        var actions = typeof(MotorPanelController)
-            .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-
-        Assert.That(actions, Is.Not.Empty);
-        foreach (var action in actions)
+        foreach (var type in PanelControllers)
         {
-            Assert.That(action.GetCustomAttribute<HttpGetAttribute>(), Is.Not.Null, action.Name);
+            Assert.That(type.IsSubclassOf(typeof(AdminController)), Is.True, type.Name);
+            Assert.That(type.GetCustomAttribute<RouteAttribute>()?.Template, Does.StartWith("motor-panel"), type.Name);
         }
     }
+
+    // Save checks Create or Update itself, depending on whether the category is new.
+    static readonly string[] PermissionCheckedInBody = ["MotorPanelCategoryController.Save"];
+
+    [Test]
+    public void Every_write_requires_a_permission_and_keeps_antiforgery()
+    {
+        var posts = PanelControllers
+            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
+            .Where(m => m.GetCustomAttributes<HttpMethodAttribute>().Any(a => !a.HttpMethods.Contains("GET")))
+            .ToList();
+
+        Assert.That(posts, Has.Count.GreaterThanOrEqualTo(9));
+        foreach (var post in posts)
+        {
+            var name = $"{post.DeclaringType!.Name}.{post.Name}";
+            Assert.That(post.GetCustomAttribute<IgnoreAntiforgeryTokenAttribute>(), Is.Null, name);
+            Assert.That(post.GetCustomAttribute<PermissionAttribute>() != null || PermissionCheckedInBody.Contains(name), Is.True, name);
+        }
+    }
+
+    [Test]
+    public void Every_read_action_requires_backend_access_and_a_permission_or_checks_blocks()
+    {
+        var gets = PanelControllers
+            .SelectMany(t => t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
+            .Where(m => m.GetCustomAttribute<HttpGetAttribute>() != null)
+            .ToList();
+
+        foreach (var get in gets)
+        {
+            var name = $"{get.DeclaringType!.Name}.{get.Name}";
+            // The dashboard checks a permission per block instead.
+            Assert.That(get.GetCustomAttribute<PermissionAttribute>() != null || name == "MotorPanelController.Index", Is.True, name);
+        }
+    }
+
+    private static Type[] PanelControllers => typeof(MotorPanelController).Assembly
+        .GetTypes()
+        .Where(t => typeof(Controller).IsAssignableFrom(t) && !t.IsAbstract)
+        .ToArray();
 
     [Test]
     public void Product_grid_requires_product_read_permission()

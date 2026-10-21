@@ -25,6 +25,7 @@ public class DashboardModel
 
     public CatalogSummary Summary { get; set; }
     public PriceDisplayState PriceDisplay { get; set; }
+    public PriceLockState PriceLock { get; set; }
     public List<RecentOrderModel> RecentOrders { get; set; } = [];
     public CurrencyStripModel Currency { get; set; }
     public ProductListModel Products { get; set; }
@@ -182,6 +183,11 @@ public class ProductListModel
     public int TotalPages => Filter.Size > 0 ? (int)Math.Ceiling((double)TotalCount / Filter.Size) : 0;
     public string CurrencyCode { get; set; }
     public List<CategoryOption> Categories { get; set; } = [];
+
+    public bool CanUpdate { get; set; }
+    public bool CanCreate { get; set; }
+    public bool CanDelete { get; set; }
+    public bool CanEditCategories { get; set; }
 }
 
 public class CategoryOption
@@ -214,4 +220,17 @@ public class ProductRowModel
     public bool CallForPrice { get; set; }
     public bool Published { get; set; }
     public string Slug { get; set; }
+
+    // Raw values (invariant culture) for inline edits and their optimistic check.
+    public string PriceValue { get; set; }
+    public string SpecialPriceValue { get; set; }
+    public bool ManageStock { get; set; }
+}
+
+public class PriceLockState
+{
+    public bool HideAllPrices { get; set; }
+    public DateTime? ChangedOn { get; set; }
+    public string ChangedBy { get; set; }
+    public bool CanChange { get; set; }
 }

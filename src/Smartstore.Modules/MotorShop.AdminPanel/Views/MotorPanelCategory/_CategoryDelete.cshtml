@@ -1,0 +1,53 @@
+@model CategoryDeleteInfo
+
+<form class="mp-editor" method="post" action="@Url.Action("Delete", "MotorPanelCategory", new { area = "Admin", id = Model.Id })" data-editor data-reload>
+    <header class="mp-drawer__head">
+        <div>
+            <h2 id="mp-drawer-title" class="mp-drawer__title">@T("Plugins.MotorShop.AdminPanel.Category.DeleteTitle", Model.Name)</h2>
+        </div>
+        <button type="button" class="mp-icon-btn" data-close title="@T("Plugins.MotorShop.AdminPanel.Js.Close")">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Js.Close")</span>
+        </button>
+    </header>
+
+    <div class="mp-drawer__body">
+        <div class="mp-form-error" data-form-error role="alert" hidden></div>
+
+        <ul class="mp-facts">
+            <li>@T("Plugins.MotorShop.AdminPanel.Category.DeleteProducts", Model.ProductCount)</li>
+            @if (Model.OrphanedProductCount > 0)
+            {
+                <li class="mp-text-warn">@T("Plugins.MotorShop.AdminPanel.Category.DeleteOrphans", Model.OrphanedProductCount)</li>
+            }
+            <li>@T("Plugins.MotorShop.AdminPanel.Category.DeleteChildren", Model.ChildCount, Model.DescendantCount)</li>
+        </ul>
+
+        @if (Model.ChildCount > 0)
+        {
+            <fieldset class="mp-fieldset">
+                <legend>@T("Plugins.MotorShop.AdminPanel.Category.DeleteChildrenQuestion")</legend>
+                <label class="mp-check-field">
+                    <input type="radio" name="deleteSubCategories" value="false" checked />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.DeleteMoveUp", Model.ParentName ?? T("Plugins.MotorShop.AdminPanel.Category.Root").Value)</span>
+                </label>
+                <label class="mp-check-field">
+                    <input type="radio" name="deleteSubCategories" value="true" />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.DeleteAll", Model.DescendantCount)</span>
+                </label>
+            </fieldset>
+        }
+        else
+        {
+            <input type="hidden" name="deleteSubCategories" value="false" />
+        }
+
+        <p class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Category.DeleteSoft")</p>
+    </div>
+
+    <footer class="mp-drawer__foot">
+        <span class="mp-spacer"></span>
+        <button type="button" class="mp-btn mp-btn--outline" data-close>@T("Plugins.MotorShop.AdminPanel.Js.Cancel")</button>
+        <button type="submit" class="mp-btn mp-btn--danger">@T("Plugins.MotorShop.AdminPanel.Action.Delete")</button>
+    </footer>
+</form>
