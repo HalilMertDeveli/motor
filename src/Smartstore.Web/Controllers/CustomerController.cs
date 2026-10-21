@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Humanizer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -58,6 +59,8 @@ public class CustomerController : PublicController
     private readonly OrderSettings _orderSettings;
     private readonly RewardPointsSettings _rewardPointsSettings;
     private readonly ShoppingCartSettings _shoppingCartSettings;
+    private readonly ExternalAuthenticationSettings _externalAuthenticationSettings;
+    private readonly IAuthenticationHandlerProvider _authenticationHandlerProvider;
 
     public CustomerController(
         SmartDbContext db,
@@ -85,7 +88,9 @@ public class CustomerController : PublicController
         LocalizationSettings localizationSettings,
         OrderSettings orderSettings,
         RewardPointsSettings rewardPointsSettings,
-        ShoppingCartSettings shoppingCartSettings)
+        ShoppingCartSettings shoppingCartSettings,
+        ExternalAuthenticationSettings externalAuthenticationSettings,
+        IAuthenticationHandlerProvider authenticationHandlerProvider)
     {
         _db = db;
         _newsletterSubscriptionService = newsletterSubscriptionService;
@@ -113,6 +118,8 @@ public class CustomerController : PublicController
         _orderSettings = orderSettings;
         _rewardPointsSettings = rewardPointsSettings;
         _shoppingCartSettings = shoppingCartSettings;
+        _externalAuthenticationSettings = externalAuthenticationSettings;
+        _authenticationHandlerProvider = authenticationHandlerProvider;
     }
 
     public async Task<IActionResult> Info()
@@ -1111,6 +1118,27 @@ public class CustomerController : PublicController
                 };
             })
             .ToList();
+
+        // External accounts are linked only on explicit request of the signed-in customer, never by email address.
+        if (Services.WorkContext.CurrentImpersonator == null)
+        {
+            // Records store the legacy system name, e.g. "Smartstore.GoogleAuth" for the scheme "Google".
+            var unlinkedSchemes = authSchemes.Where(scheme => !customer.ExternalAuthenticationRecords
+                .Any(x => x.ProviderSystemName.EmptyNull().Contains(scheme.Name, StringComparison.OrdinalIgnoreCase)));
+
+            foreach (var scheme in unlinkedSchemes)
+            {
+                if (_providerManager.IsSchemeActive(scheme.Name, _externalAuthenticationSettings, store.Id)
+                    && await _authenticationHandlerProvider.IsSchemeConfiguredAsync(HttpContext, scheme.Name))
+                {
+                    model.LinkableExternalAuthMethods.Add(new()
+                    {
+                        Provider = scheme.Name,
+                        DisplayName = scheme.DisplayName.NullEmpty() ?? scheme.Name
+                    });
+                }
+            }
+        }
 
         if (_shoppingCartSettings.QuickCheckoutEnabled)
         {

@@ -11,4 +11,11 @@ public class ConfigurationModel : ModelBase
 
     [LocalizedDisplay("*RedirectUri")]
     public string RedirectUrl { get; set; }
+
+    /// <summary>
+    /// Redirect URI built from the current request, if it differs from <see cref="RedirectUrl"/> (e.g. another host name).
+    /// </summary>
+    public string RequestRedirectUrl { get; set; }
+
+    public bool IsConfigured { get; set; }
 }

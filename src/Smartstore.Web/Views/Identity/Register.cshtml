@@ -17,6 +17,15 @@
 
                 <div asp-validation-summary="ModelOnly"></div>
 
+                <div sm-suppress-if-empty-zone="external_auth_buttons" class="external-auth-buttons mb-4">
+                    <div class="vstack gap-2">
+                        <zone name="external_auth_buttons" />
+                    </div>
+                    <div class="external-auth-divider text-center text-uppercase mt-3">
+                        @T("Account.Register.OrRegisterWithEmail")
+                    </div>
+                </div>
+
                 <fieldset class="content-group">
                     <legend><span>@T("Account.YourPersonalDetails")</span></legend>
 
