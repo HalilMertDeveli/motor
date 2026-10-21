@@ -37,6 +37,21 @@ Storefront (MotorDark) ─┐
 * **Gizli fiyatlı**: `CallForPrice = true`. These cannot be added to the cart (`ShoppingCartValidator`).
 * **Fiyatsız** (list filter and red badge): `Price <= 0` and not `CallForPrice`. Once published such a product can be bought for 0. Since PR #43 the supplier import marks unpriced products call-for-price; the filter finds products that were imported earlier or edited by hand.
 
+## Phase 2: products, categories, price lock
+
+| Area | State | Notes |
+| --- | --- | --- |
+| Inline edit (price, sale price, stock) | Done | Click the cell, Enter saves, Esc cancels. Turkish input (`1.250,50`, `9.999`) and `1250.50` are parsed on the server (`AmountParser`); at most 2 decimals. Each save sends the value the user saw; if the stored value changed meanwhile the server answers 409 and shows the current value. |
+| Price visibility and publication toggles | Done | Badge buttons per row. |
+| Product rules (`ProductRules`) | Done | A published product that is not call-for-price cannot get price 0 (price edit, "show price", publish); sale price must be > 0 and < price; tracked stock 0–1,000,000. Only rules touching the changed field are checked. A refused value is reloaded from the database, so the request-wide SaveChanges filter cannot persist it. |
+| Bulk actions | Done | Selection on the page or "all N matching the filter" (max 5,000, saved in batches of 100): price ± percent (rounded to 2 decimals), price ± amount, hide/show price, set stock, track/untrack stock, publish/unpublish, add to/remove from category, delete (recycle bin). Products that would break a rule stay unchanged and are listed with the reason. One activity log entry per run. |
+| Product editor (drawer) | Done | General, tags, pricing (incl. sale dates, call for price), inventory, categories, short/full description, SEO (slug via `IUrlService.SaveSlugAsync`), shipping dimensions, publication and visibility. Optimistic check on `UpdatedOnUtc`. Unsaved-changes warning on close and on page leave. Tax category, images, variants and other languages stay in the classic editor (linked). |
+| Duplicate / delete | Done | Duplicate uses `IProductCloner` like the classic "copy" and is always created unpublished. Delete is Smartstore's soft delete (recycle bin). |
+| Categories | Done | Tree with search, product counts, create/edit (parent, published, order, description, SEO, image upload ≤ 5 MB), move up/down (siblings renumbered), delete with an explanation of products and subcategories. A category cannot become a child of itself or a descendant. Deleting moves direct children to the parent by default (Smartstore alone would move the whole subtree to the root) or deletes the subtree. |
+| "Tüm fiyatları gizle" | Done | `MotorPanelSettings.HideAllPrices`. Two decorators, active only while the module is installed: `IPermissionService` denies `Catalog.DisplayPrice` (Smartstore then hides prices and buy buttons everywhere) and `IShoppingCartValidator` refuses shopping cart items (add to cart, cart page, checkout, order placement). Wishlists keep working. Stored prices, orders and invoices are untouched. Confirmation dialog, `Configuration.Setting.Update` permission, activity log entry with who and when. |
+
+Verified locally with the lock on: product page without price and buy button; `POST /cart/addproduct` refused with the lock message; a customer who added a product before the lock is sent from `/checkout` back to the cart, and `PlaceOrder` validates the cart again.
+
 ### Brand settings
 
 There is no settings page yet. Until phase 5, set them under Admin →

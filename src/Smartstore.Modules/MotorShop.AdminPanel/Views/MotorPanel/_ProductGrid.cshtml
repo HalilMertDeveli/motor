@@ -7,9 +7,14 @@
 
     string AriaSort(ProductSort asc, ProductSort desc)
         => f.Sort == asc ? "ascending" : f.Sort == desc ? "descending" : null;
+
+    var labelHidden = T("Plugins.MotorShop.AdminPanel.Price.CallForPrice").Value;
+    var labelVisible = T("Plugins.MotorShop.AdminPanel.Price.Visible").Value;
+    var labelPublished = T("Plugins.MotorShop.AdminPanel.Status.Published").Value;
+    var labelUnpublished = T("Plugins.MotorShop.AdminPanel.Status.Unpublished").Value;
 }
 
-<div class="mp-grid__meta">
+<div class="mp-grid__meta" data-total="@Model.TotalCount" data-page-ids="@string.Join(",", Model.Rows.Select(x => x.Id))">
     <span>@T("Plugins.MotorShop.AdminPanel.ResultCount", Model.TotalCount.ToString("N0"))</span>
     <span class="mp-muted">@T("Plugins.MotorShop.AdminPanel.PricesIn", Model.CurrencyCode)</span>
 </div>
@@ -27,6 +32,12 @@ else
         <table class="mp-table mp-table--products">
             <thead>
                 <tr>
+                    @if (Model.CanUpdate)
+                    {
+                        <th scope="col" class="mp-col-check">
+                            <input type="checkbox" class="mp-check" data-select-page aria-label="@T("Plugins.MotorShop.AdminPanel.Bulk.SelectPage")" />
+                        </th>
+                    }
                     <th scope="col" class="mp-col-thumb"><span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Col.Image")</span></th>
                     <th scope="col" aria-sort="@AriaSort(ProductSort.NameAsc, ProductSort.NameDesc)">
                         <a class="mp-sort" href="@SortUrl(ProductSort.NameAsc, ProductSort.NameDesc)">@T("Plugins.MotorShop.AdminPanel.Col.Name")</a>
@@ -48,8 +59,15 @@ else
             <tbody>
                 @foreach (var p in Model.Rows)
                 {
-                    var editUrl = Url.Action("Edit", "Product", new { area = "Admin", id = p.Id });
-                    <tr>
+                    var editUrl = Url.Action("Edit", "MotorPanelProduct", new { area = "Admin", id = p.Id });
+                    var zeroPrice = p.Price.Amount <= 0 && !p.CallForPrice;
+                    <tr data-id="@p.Id" data-name="@p.Name">
+                        @if (Model.CanUpdate)
+                        {
+                            <td class="mp-col-check">
+                                <input type="checkbox" class="mp-check" data-select value="@p.Id" aria-label="@T("Plugins.MotorShop.AdminPanel.Bulk.SelectRow", p.Name)" />
+                            </td>
+                        }
                         <td class="mp-col-thumb">
                             @if (p.ThumbnailUrl.HasValue())
                             {
@@ -60,8 +78,10 @@ else
                                 <span class="mp-thumb mp-thumb--empty" aria-hidden="true"></span>
                             }
                         </td>
-                        <td class="mp-col-name"><a class="mp-link mp-link--plain" href="@editUrl">@p.Name</a></td>
-                        <td class="mp-mono">@(p.Sku.NullEmpty() ?? "-")</td>
+                        <td class="mp-col-name">
+                            <button type="button" class="mp-link mp-link--plain mp-link-btn" data-open-editor="@editUrl">@p.Name</button>
+                        </td>
+                        <td class="mp-mono mp-col-sku">@(p.Sku.NullEmpty() ?? "-")</td>
                         <td class="mp-col-cats">
                             @if (p.Categories.Count == 0)
                             {
@@ -72,31 +92,48 @@ else
                                 <span class="mp-truncate" title="@string.Join(", ", p.Categories)">@string.Join(", ", p.Categories)</span>
                             }
                         </td>
-                        <td class="mp-num mp-nowrap">
-                            @p.Price
-                            @if (p.Price.Amount <= 0 && !p.CallForPrice)
+                        <td class="mp-num mp-nowrap mp-col-price">
+                            @if (Model.CanUpdate)
                             {
-                                <span class="mp-badge mp-badge--red" title="@T("Plugins.MotorShop.AdminPanel.ZeroPrice.Hint")">@T("Plugins.MotorShop.AdminPanel.ZeroPrice")</span>
+                                <button type="button" class="mp-cell" data-edit="price" data-value="@p.PriceValue"
+                                        aria-label="@T("Plugins.MotorShop.AdminPanel.Edit.Price", p.Name)">@p.Price</button>
                             }
-                        </td>
-                        <td class="mp-num mp-nowrap">
-                            @if (p.SpecialPrice.HasValue)
+                            else
                             {
-                                <span class="@(p.SpecialPriceActive ? "" : "mp-muted mp-strike")" title="@(p.SpecialPriceActive ? null : T("Plugins.MotorShop.AdminPanel.SpecialPriceInactive").Value)">@p.SpecialPrice.Value</span>
+                                @p.Price
+                            }
+                            <span class="mp-badge mp-badge--red" data-zero-badge title="@T("Plugins.MotorShop.AdminPanel.ZeroPrice.Hint")" hidden="@(!zeroPrice)">@T("Plugins.MotorShop.AdminPanel.ZeroPrice")</span>
+                        </td>
+                        <td class="mp-num mp-nowrap mp-col-special">
+                            @if (Model.CanUpdate)
+                            {
+                                <button type="button" class="mp-cell@(p.SpecialPrice.HasValue && !p.SpecialPriceActive ? " mp-muted mp-strike" : "")" data-edit="specialPrice" data-value="@p.SpecialPriceValue" data-optional="true"
+                                        title="@(p.SpecialPrice.HasValue && !p.SpecialPriceActive ? T("Plugins.MotorShop.AdminPanel.SpecialPriceInactive").Value : null)"
+                                        aria-label="@T("Plugins.MotorShop.AdminPanel.Edit.SpecialPrice", p.Name)">@(p.SpecialPrice.HasValue ? p.SpecialPrice.Value.ToString() : "-")</button>
+                            }
+                            else if (p.SpecialPrice.HasValue)
+                            {
+                                @p.SpecialPrice.Value
                             }
                             else
                             {
                                 <span class="mp-muted">-</span>
                             }
                         </td>
-                        <td class="mp-num mp-nowrap">
+                        <td class="mp-num mp-nowrap mp-col-stock">
                             @switch (p.Stock)
                             {
                                 case StockState.InStock:
-                                    <span class="mp-badge mp-badge--green">@p.StockQuantity.ToString("N0")</span>
-                                    break;
                                 case StockState.OutOfStock:
-                                    <span class="mp-badge mp-badge--red">@p.StockQuantity.ToString("N0")</span>
+                                    if (Model.CanUpdate)
+                                    {
+                                        <button type="button" class="mp-cell mp-badge @(p.Stock == StockState.InStock ? "mp-badge--green" : "mp-badge--red")" data-edit="stock" data-value="@p.StockQuantity" data-integer="true"
+                                                aria-label="@T("Plugins.MotorShop.AdminPanel.Edit.Stock", p.Name)">@p.StockQuantity.ToString("N0")</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="mp-badge @(p.Stock == StockState.InStock ? "mp-badge--green" : "mp-badge--red")">@p.StockQuantity.ToString("N0")</span>
+                                    }
                                     break;
                                 case StockState.ByAttributes:
                                     <span class="mp-badge mp-badge--gray">@T("Plugins.MotorShop.AdminPanel.Stock.ByAttributes")</span>
@@ -106,37 +143,55 @@ else
                                     break;
                             }
                         </td>
-                        <td>
-                            @if (p.CallForPrice)
+                        <td class="mp-col-visibility">
+                            @if (Model.CanUpdate)
                             {
-                                <span class="mp-badge mp-badge--amber">@T("Plugins.MotorShop.AdminPanel.Price.CallForPrice")</span>
+                                <button type="button" class="mp-badge mp-badge-btn @(p.CallForPrice ? "mp-badge--amber" : "mp-badge--green")" data-toggle="callForPrice" data-value="@(p.CallForPrice ? "true" : "false")"
+                                        data-label-true="@labelHidden" data-label-false="@labelVisible" data-class-true="mp-badge--amber" data-class-false="mp-badge--green"
+                                        title="@T("Plugins.MotorShop.AdminPanel.Toggle.Hint")">@(p.CallForPrice ? labelHidden : labelVisible)</button>
                             }
                             else
                             {
-                                <span class="mp-badge mp-badge--green">@T("Plugins.MotorShop.AdminPanel.Price.Visible")</span>
+                                <span class="mp-badge @(p.CallForPrice ? "mp-badge--amber" : "mp-badge--green")">@(p.CallForPrice ? labelHidden : labelVisible)</span>
                             }
                         </td>
-                        <td>
-                            @if (p.Published)
+                        <td class="mp-col-status">
+                            @if (Model.CanUpdate)
                             {
-                                <span class="mp-badge mp-badge--blue">@T("Plugins.MotorShop.AdminPanel.Status.Published")</span>
+                                <button type="button" class="mp-badge mp-badge-btn @(p.Published ? "mp-badge--blue" : "mp-badge--gray")" data-toggle="published" data-value="@(p.Published ? "true" : "false")"
+                                        data-label-true="@labelPublished" data-label-false="@labelUnpublished" data-class-true="mp-badge--blue" data-class-false="mp-badge--gray"
+                                        title="@T("Plugins.MotorShop.AdminPanel.Toggle.Hint")">@(p.Published ? labelPublished : labelUnpublished)</button>
                             }
                             else
                             {
-                                <span class="mp-badge mp-badge--gray">@T("Plugins.MotorShop.AdminPanel.Status.Unpublished")</span>
+                                <span class="mp-badge @(p.Published ? "mp-badge--blue" : "mp-badge--gray")">@(p.Published ? labelPublished : labelUnpublished)</span>
                             }
                         </td>
                         <td class="mp-col-actions">
-                            <a class="mp-icon-btn" href="@editUrl" title="@T("Plugins.MotorShop.AdminPanel.Action.Edit")">
+                            <button type="button" class="mp-icon-btn" data-open-editor="@editUrl" title="@T("Plugins.MotorShop.AdminPanel.Action.Edit")">
                                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Zm9-13 4 4" /></svg>
                                 <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.Edit"): @p.Name</span>
-                            </a>
+                            </button>
                             @if (p.Slug.HasValue())
                             {
                                 <a class="mp-icon-btn" href="@Url.RouteUrl("Product", new { SeName = p.Slug, area = "" })" target="_blank" rel="noopener" title="@T("Plugins.MotorShop.AdminPanel.Action.View")">
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>
                                     <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.View"): @p.Name</span>
                                 </a>
+                            }
+                            @if (Model.CanCreate)
+                            {
+                                <button type="button" class="mp-icon-btn" data-duplicate="@Url.Action("Duplicate", "MotorPanelProduct", new { area = "Admin", id = p.Id })" title="@T("Plugins.MotorShop.AdminPanel.Action.Duplicate")">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>
+                                    <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.Duplicate"): @p.Name</span>
+                                </button>
+                            }
+                            @if (Model.CanDelete)
+                            {
+                                <button type="button" class="mp-icon-btn mp-icon-btn--danger" data-delete="@Url.Action("Delete", "MotorPanelProduct", new { area = "Admin", id = p.Id })" title="@T("Plugins.MotorShop.AdminPanel.Action.Delete")">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3" /></svg>
+                                    <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.Delete"): @p.Name</span>
+                                </button>
                             }
                         </td>
                     </tr>

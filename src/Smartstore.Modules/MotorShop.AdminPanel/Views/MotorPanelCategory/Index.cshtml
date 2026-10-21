@@ -1,0 +1,119 @@
+@model CategoryTreeModel
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Categories").Value;
+    ViewData["PanelTab"] = "categories";
+    var canCreate = ViewBag.CanCreate == true;
+    var canUpdate = ViewBag.CanUpdate == true;
+    var canDelete = ViewBag.CanDelete == true;
+}
+
+<section class="mp-panel" aria-labelledby="mp-cat-title" id="mp-categories"
+         data-editor-url="@Url.Action("Editor", "MotorPanelCategory", new { area = "Admin" })">
+    <div class="mp-panel__head">
+        <div>
+            <h1 id="mp-cat-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Tab.Categories")</h1>
+            <p class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Category.Count", Model.TotalCategories)</p>
+        </div>
+        @if (canCreate)
+        {
+            <button type="button" class="mp-btn mp-btn--accent" data-open-editor="@Url.Action("Editor", "MotorPanelCategory", new { area = "Admin" })">+ @T("Plugins.MotorShop.AdminPanel.Category.New")</button>
+        }
+    </div>
+
+    <form class="mp-toolbar" method="get" action="@Url.Action("Index", "MotorPanelCategory", new { area = "Admin" })" role="search">
+        <label class="mp-field mp-field--search">
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Category.Search")</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input type="search" name="q" value="@Model.Q" maxlength="200" placeholder="@T("Plugins.MotorShop.AdminPanel.Category.Search")" />
+        </label>
+        <button type="submit" class="mp-btn mp-btn--outline">@T("Plugins.MotorShop.AdminPanel.Apply")</button>
+        @if (Model.Q.HasValue())
+        {
+            <a class="mp-btn mp-btn--ghost" href="@Url.Action("Index", "MotorPanelCategory", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.ResetFilters")</a>
+        }
+    </form>
+
+    @if (Model.Rows.Count == 0)
+    {
+        <p class="mp-empty">@T("Plugins.MotorShop.AdminPanel.Category.None")</p>
+    }
+    else
+    {
+        <div class="mp-table-wrap">
+            <table class="mp-table mp-table--tree">
+                <thead>
+                    <tr>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Category.Name")</th>
+                        <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Products")</th>
+                        <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Category.Children")</th>
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Status")</th>
+                        <th scope="col" class="mp-col-actions"><span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Col.Actions")</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr data-id="@row.Id" data-name="@row.Name" class="@(row.IsMatch ? null : "mp-tree-context")">
+                            <td>
+                                <span class="mp-tree-name" style="padding-inline-start: @(row.Depth * 22)px">
+                                    @if (row.Depth > 0)
+                                    {
+                                        <span class="mp-tree-branch" aria-hidden="true">└</span>
+                                    }
+                                    @if (row.ImageUrl.HasValue())
+                                    {
+                                        <img class="mp-thumb mp-thumb--sm" src="@row.ImageUrl" alt="" loading="lazy" width="28" height="28" />
+                                    }
+                                    @if (canUpdate)
+                                    {
+                                        <button type="button" class="mp-link mp-link--plain mp-link-btn" data-open-editor="@Url.Action("Editor", "MotorPanelCategory", new { area = "Admin", id = row.Id })">@row.Name</button>
+                                    }
+                                    else
+                                    {
+                                        <span>@row.Name</span>
+                                    }
+                                </span>
+                            </td>
+                            <td class="mp-num">
+                                <a class="mp-link" href="@Url.Action("Index", "MotorPanel", new { area = "Admin", categoryId = row.Id })#mp-products">@row.ProductCount.ToString("N0")</a>
+                            </td>
+                            <td class="mp-num">@row.ChildCount</td>
+                            <td>
+                                <span class="mp-badge @(row.Published ? "mp-badge--blue" : "mp-badge--gray")">
+                                    @(row.Published ? T("Plugins.MotorShop.AdminPanel.Status.Published") : T("Plugins.MotorShop.AdminPanel.Status.Unpublished"))
+                                </span>
+                            </td>
+                            <td class="mp-col-actions">
+                                @if (canUpdate && !Model.Q.HasValue())
+                                {
+                                    <button type="button" class="mp-icon-btn" data-move="@Url.Action("Move", "MotorPanelCategory", new { area = "Admin", id = row.Id })" data-up="true" disabled="@row.IsFirst" title="@T("Plugins.MotorShop.AdminPanel.Category.MoveUp")">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
+                                        <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Category.MoveUp"): @row.Name</span>
+                                    </button>
+                                    <button type="button" class="mp-icon-btn" data-move="@Url.Action("Move", "MotorPanelCategory", new { area = "Admin", id = row.Id })" data-up="false" disabled="@row.IsLast" title="@T("Plugins.MotorShop.AdminPanel.Category.MoveDown")">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                                        <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Category.MoveDown"): @row.Name</span>
+                                    </button>
+                                }
+                                @if (canCreate)
+                                {
+                                    <button type="button" class="mp-icon-btn" data-open-editor="@Url.Action("Editor", "MotorPanelCategory", new { area = "Admin", parentId = row.Id })" title="@T("Plugins.MotorShop.AdminPanel.Category.AddChild")">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                                        <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Category.AddChild"): @row.Name</span>
+                                    </button>
+                                }
+                                @if (canDelete)
+                                {
+                                    <button type="button" class="mp-icon-btn mp-icon-btn--danger" data-open-editor="@Url.Action("DeleteInfo", "MotorPanelCategory", new { area = "Admin", id = row.Id })" title="@T("Plugins.MotorShop.AdminPanel.Action.Delete")">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3" /></svg>
+                                        <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.Delete"): @row.Name</span>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
