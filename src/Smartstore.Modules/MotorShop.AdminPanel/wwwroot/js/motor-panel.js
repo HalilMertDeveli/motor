@@ -111,6 +111,7 @@
     let drawerDirty = false;
     let drawerOnSaved = null;
     let drawerOpener = null;
+    let drawerUrl = null;
 
     async function openDrawer(url, onSaved) {
         if (!drawer?.showModal) {
@@ -118,8 +119,11 @@
             return;
         }
 
-        drawerOpener = document.activeElement;
-        drawerOnSaved = onSaved;
+        if (!drawer.open) {
+            drawerOpener = document.activeElement;
+        }
+        drawerOnSaved = onSaved ?? drawerOnSaved;
+        drawerUrl = url;
         const content = drawer.querySelector('.mp-drawer__content');
 
         try {
@@ -131,7 +135,15 @@
 
         drawerDirty = false;
         if (!drawer.open) drawer.showModal();
-        content.querySelector('input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled])')?.focus();
+        // Editors focus their first field; detail views focus the title so they open at the top.
+        const first = content.querySelector('form[data-editor] :is(input:not([type=hidden]), select, textarea):not([disabled])');
+        if (first) {
+            first.focus();
+        } else {
+            const title = content.querySelector('.mp-drawer__title');
+            title?.setAttribute('tabindex', '-1');
+            title?.focus();
+        }
     }
 
     async function closeDrawer(force) {
@@ -171,6 +183,32 @@
             }
         });
 
+        // Small action forms in a detail view (mark paid, ship, add note...): confirm if asked, post,
+        // then reload the same view and the list behind it.
+        drawer.addEventListener('submit', async e => {
+            const form = e.target.closest('form[data-action]');
+            if (!form) return;
+            e.preventDefault();
+
+            if (form.dataset.confirm && !await confirmDialog({ title: form.dataset.confirm, danger: form.hasAttribute('data-danger') })) {
+                return;
+            }
+
+            const submit = form.querySelector('button[type=submit]');
+            submit?.setAttribute('disabled', '');
+            const result = await post(form.action, new FormData(form));
+            submit?.removeAttribute('disabled');
+
+            if (result.ok && result.data.success !== false) {
+                toast(result.data.message || strings.saved);
+                drawerDirty = false;
+                await openDrawer(drawerUrl);
+                drawerOnSaved?.(result.data);
+            } else {
+                toast(result.data.error || strings.error, true);
+            }
+        });
+
         drawer.addEventListener('submit', async e => {
             const form = e.target.closest('form[data-editor]');
             if (!form) return;
@@ -189,6 +227,11 @@
             if (result.ok && result.data.success !== false) {
                 drawerDirty = false;
                 toast(result.data.message || strings.saved);
+                if (form.dataset.returnUrl) {
+                    await openDrawer(form.dataset.returnUrl);
+                    drawerOnSaved?.(result.data);
+                    return;
+                }
                 await closeDrawer(true);
                 if (form.hasAttribute('data-reload')) {
                     window.location.reload();
@@ -225,11 +268,35 @@
     });
 
     // Anything with data-open-editor opens its URL in the drawer.
-    document.addEventListener('click', e => {
+    // Inside the drawer it replaces the current view (e.g. order → new shipment → back to the order).
+    document.addEventListener('click', async e => {
         const opener = e.target.closest('[data-open-editor]');
-        if (!opener || drawer?.contains(opener)) return;
+        if (!opener) return;
         e.preventDefault();
-        openDrawer(opener.dataset.openEditor, () => refreshGrid?.());
+
+        if (drawer?.contains(opener)) {
+            if (drawerDirty && !await confirmDialog({ title: strings.unsaved, okLabel: strings.close, danger: true })) return;
+            openDrawer(opener.dataset.openEditor);
+        } else {
+            openDrawer(opener.dataset.openEditor, () => refreshGrid?.());
+        }
+    });
+
+    // Action forms on a page (outside the drawer): confirm, post, reload the page.
+    document.addEventListener('submit', async e => {
+        const form = e.target.closest('form[data-page-action]');
+        if (!form) return;
+        e.preventDefault();
+
+        if (form.dataset.confirm && !await confirmDialog({ title: form.dataset.confirm })) return;
+
+        const result = await post(form.action, new FormData(form));
+        if (result.ok && result.data.success !== false) {
+            toast(result.data.message || strings.saved);
+            setTimeout(() => window.location.reload(), 600);
+        } else {
+            toast(result.data.error || strings.error, true);
+        }
     });
 
     // ---------- Price lock switch ----------
@@ -322,7 +389,7 @@
             if (!el.name) continue;
             const value = params.get(el.name);
             if (el.tagName === 'SELECT') {
-                el.value = value ?? (el.name === 'categoryId' ? '0' : el.name === 'size' ? '25' : 'All');
+                el.value = value ?? el.options[0]?.value ?? '';
             } else {
                 el.value = value ?? '';
             }
@@ -352,7 +419,8 @@
             clearSelection();
 
             if (push) {
-                history.pushState({ mp: qs }, '', pageUrl + (qs ? '?' + qs : '') + '#mp-products');
+                const anchor = grid.closest('section')?.id;
+                history.pushState({ mp: qs }, '', pageUrl + (qs ? '?' + qs : '') + (anchor ? '#' + anchor : ''));
             }
         } catch (err) {
             if (err.name !== 'AbortError') toast(form.dataset.errorText || strings.loadError, true);

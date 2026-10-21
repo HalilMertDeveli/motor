@@ -52,6 +52,24 @@ Storefront (MotorDark) ─┐
 
 Verified locally with the lock on: product page without price and buy button; `POST /cart/addproduct` refused with the lock message; a customer who added a product before the lock is sent from `/checkout` back to the cart, and `PlaceOrder` validates the cart again.
 
+## Phase 3: orders, shipments, customers, invoice status
+
+| Area | State | Notes |
+| --- | --- | --- |
+| Order list | Done | Search by order number (`#123`, id or GUID) or customer name/e-mail, date range (admin time zone), order/payment/shipping status, server paging, deep links. Store-scoped like the classic list. |
+| Order details (drawer) | Done | Customer, billing and shipping address, items with shipped quantities, totals (subtotal, discounts, shipping, payment fee, VAT per rate, rounding, total, refunded), applied discounts, payment method and status, shipments, notes/history, invoice status. |
+| Mark as paid | Done | `IOrderProcessingService.MarkOrderAsPaidAsync`, only when Smartstore allows it and **not for iyzico orders** (iyzico confirms its own payments). Meant for bank transfer and cash on delivery. |
+| Cancel | Done (restricted) | `CancelOrderAsync` (restocks, e-mails the customer). The panel refuses orders whose money was collected (Paid, PartiallyRefunded, Authorized), because cancelling does not refund; those go through the payment provider and the classic admin. |
+| Complete | Done (restricted) | `CompleteOrderAsync`, only for paid orders that are shipped, delivered or need no shipping, so Smartstore never captures or marks an order paid as a side effect. |
+| Notes | Done | Order note, optionally shown to the customer with Smartstore's "new order note" e-mail. |
+| Shipments | Done | New shipment with per-item quantities (partial shipments: the rest stays for later; Smartstore clamps to what is left), carrier (suggestions from MotorShop.Tracking's carrier list, read as a raw setting so there is no module dependency) and tracking number; the tracking URL is filled by MotorShop.Tracking when installed. Mark shipped / delivered with optional customer e-mail; delivered requires shipped first (Smartstore does not check that). |
+| Shipping queue | Done | Orders not (fully) shipped, oldest first, with "new shipment"; shipments in transit with "delivered". |
+| Customers | Done | Registered customers, guests with orders, or all; search by name, company, e-mail or billing name; order count, spend (not cancelled, refunds deducted), last order. Details: contact, addresses, roles, statistics, orders. Editing stays in the classic admin. |
+| Invoices | Status only | No certified e-Arşiv/e-Fatura integrator is configured, so every order shows "Entegratör yapılandırılmadı". The panel issues no invoices, creates no invoice numbers and links Smartstore's order PDF only as "order summary, not a legal invoice". |
+| Refunds, iyzico | Not in the panel | Excluded on purpose: refunds and iyzico payment state stay in the iyzico module and the classic admin. |
+
+Verified locally on order #8 (bank transfer): note, shipment, deliver-before-ship refused, ship, ship again refused, complete-unpaid refused, mark paid, cancel-paid refused, deliver → Smartstore completed the order. Order #7 (unpaid) cancelled, second cancel refused. Not verified: a real partial shipment, because every QA order has quantity 1.
+
 ### Brand settings
 
 There is no settings page yet. Until phase 5, set them under Admin →

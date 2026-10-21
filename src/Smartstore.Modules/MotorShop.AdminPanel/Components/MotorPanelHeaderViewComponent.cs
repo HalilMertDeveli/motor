@@ -49,26 +49,24 @@ public partial class MotorPanelHeaderViewComponent : SmartViewComponent
 
         model.Tabs.Add(new("products", T("Plugins.MotorShop.AdminPanel.Tab.Products"), Url.Action("Index", "MotorPanel", new { area = "Admin" }), false));
 
-        await AddClassicTabAsync(model, "orders", "Tab.Orders", Permissions.Order.Read, "List", "Order");
-        await AddClassicTabAsync(model, "customers", "Tab.Customers", Permissions.Customer.Read, "List", "Customer");
-        await AddClassicTabAsync(model, "reports", "Tab.Reports", Permissions.Order.Read, "BestsellersReport", "Order");
-        await AddClassicTabAsync(model, "content", "Tab.Content", Permissions.Cms.Topic.Read, "List", "Topic");
-        await AddClassicTabAsync(model, "settings", "Tab.Settings", Permissions.Configuration.Setting.Read, "GeneralCommon", "Setting");
-        await AddClassicTabAsync(model, "coupons", "Tab.Coupons", Permissions.Promotion.Discount.Read, "List", "Discount");
-        if (await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Category.Read))
-        {
-            model.Tabs.Add(new("categories", T("Plugins.MotorShop.AdminPanel.Tab.Categories"), Url.Action("Index", "MotorPanelCategory", new { area = "Admin" }), false));
-        }
-        await AddClassicTabAsync(model, "shipments", "Tab.Shipments", Permissions.Order.Read, "List", "Shipment");
+        await AddTabAsync(model, "orders", "Tab.Orders", Permissions.Order.Read, "Index", "MotorPanelOrder");
+        await AddTabAsync(model, "customers", "Tab.Customers", Permissions.Customer.Read, "Index", "MotorPanelCustomer");
+        await AddTabAsync(model, "reports", "Tab.Reports", Permissions.Order.Read, "BestsellersReport", "Order", classic: true);
+        await AddTabAsync(model, "content", "Tab.Content", Permissions.Cms.Topic.Read, "List", "Topic", classic: true);
+        await AddTabAsync(model, "settings", "Tab.Settings", Permissions.Configuration.Setting.Read, "GeneralCommon", "Setting", classic: true);
+        await AddTabAsync(model, "coupons", "Tab.Coupons", Permissions.Promotion.Discount.Read, "List", "Discount", classic: true);
+        await AddTabAsync(model, "categories", "Tab.Categories", Permissions.Catalog.Category.Read, "Index", "MotorPanelCategory");
+        await AddTabAsync(model, "invoices", "Tab.Invoices", Permissions.Order.Read, "Index", "MotorPanelInvoice");
+        await AddTabAsync(model, "shipments", "Tab.Shipments", Permissions.Order.Read, "Index", "MotorPanelShipment");
 
         return View(model);
     }
 
-    private async Task AddClassicTabAsync(PanelHeaderModel model, string key, string resource, string permission, string action, string controller)
+    private async Task AddTabAsync(PanelHeaderModel model, string key, string resource, string permission, string action, string controller, bool classic = false)
     {
         if (await Services.Permissions.AuthorizeAsync(permission))
         {
-            model.Tabs.Add(new(key, T("Plugins.MotorShop.AdminPanel." + resource), Url.Action(action, controller, new { area = "Admin" }), true));
+            model.Tabs.Add(new(key, T("Plugins.MotorShop.AdminPanel." + resource), Url.Action(action, controller, new { area = "Admin" }), classic));
         }
     }
 

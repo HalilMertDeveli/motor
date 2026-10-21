@@ -1,0 +1,131 @@
+@model CustomerDetailModel
+@{
+    var loc = CommonServices.Localization;
+    var canReadOrders = ViewBag.CanReadOrders == true;
+
+    void Address(string title, AddressModel a)
+    {
+        <div class="mp-address">
+            <h4>@title</h4>
+            @if (a == null)
+            {
+                <p class="mp-muted">-</p>
+            }
+            else
+            {
+                <p>
+                    <strong>@a.Name</strong>
+                    @if (a.Company.HasValue())
+                    {
+                        <br />@a.Company
+                    }
+                    <br />@a.Lines
+                    <br />@a.City
+                    @if (a.Country.HasValue())
+                    {
+                        <br />@a.Country
+                    }
+                    @if (a.Phone.HasValue())
+                    {
+                        <br /><a class="mp-link" href="tel:@a.Phone">@a.Phone</a>
+                    }
+                </p>
+            }
+        </div>
+    }
+}
+
+<div class="mp-editor">
+    <header class="mp-drawer__head">
+        <div>
+            <h2 id="mp-drawer-title" class="mp-drawer__title">@Model.Name</h2>
+            <p class="mp-muted mp-drawer__sub">
+                #@Model.Id · @T("Plugins.MotorShop.AdminPanel.Customer.Since", Model.CreatedOn.ToString("d"))
+                @if (Model.LastLoginOn.HasValue)
+                {
+                    <span> · @T("Plugins.MotorShop.AdminPanel.Customer.LastLogin", Model.LastLoginOn.Value.ToString("g"))</span>
+                }
+            </p>
+            <div class="mp-badges">
+                <span class="mp-badge @(Model.Active ? "mp-badge--green" : "mp-badge--red")">@(Model.Active ? T("Plugins.MotorShop.AdminPanel.Customer.Active") : T("Plugins.MotorShop.AdminPanel.Customer.Inactive"))</span>
+                @foreach (var role in Model.Roles)
+                {
+                    <span class="mp-badge mp-badge--gray">@role</span>
+                }
+            </div>
+        </div>
+        <button type="button" class="mp-icon-btn" data-close title="@T("Plugins.MotorShop.AdminPanel.Js.Close")">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Js.Close")</span>
+        </button>
+    </header>
+
+    <div class="mp-drawer__body">
+        <div class="mp-stats">
+            <div><span class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Customer.Orders")</span><strong>@Model.OrderCount</strong></div>
+            <div><span class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Customer.TotalSpend")</span><strong>@Model.TotalSpend</strong></div>
+            <div><span class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Customer.AverageOrder")</span><strong>@Model.AverageOrder</strong></div>
+        </div>
+
+        <section class="mp-fieldset">
+            <h3 class="mp-legend">@T("Plugins.MotorShop.AdminPanel.Customer.Contact")</h3>
+            <p>
+                @if (Model.Email.HasValue())
+                {
+                    <a class="mp-link" href="mailto:@Model.Email">@Model.Email</a>
+                }
+                @if (Model.Phone.HasValue())
+                {
+                    <br /><a class="mp-link" href="tel:@Model.Phone">@Model.Phone</a>
+                }
+            </p>
+            <div class="mp-address-grid">
+                @{ Address(T("Plugins.MotorShop.AdminPanel.Order.BillingAddress"), Model.BillingAddress); }
+                @{ Address(T("Plugins.MotorShop.AdminPanel.Order.ShippingAddress"), Model.ShippingAddress); }
+            </div>
+        </section>
+
+        @if (canReadOrders)
+        {
+            <section class="mp-fieldset">
+                <h3 class="mp-legend">@T("Plugins.MotorShop.AdminPanel.Customer.RecentOrders")</h3>
+                @if (Model.Orders.Count == 0)
+                {
+                    <p class="mp-muted">@T("Plugins.MotorShop.AdminPanel.NoOrders")</p>
+                }
+                else
+                {
+                    <div class="mp-table-wrap">
+                        <table class="mp-table mp-table--compact">
+                            <thead>
+                                <tr>
+                                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Number")</th>
+                                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Date")</th>
+                                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Status")</th>
+                                    <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Order.Total")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var o in Model.Orders)
+                                {
+                                    <tr>
+                                        <td><button type="button" class="mp-link mp-link-btn" data-open-editor="@Url.Action("Details", "MotorPanelOrder", new { area = "Admin", id = o.Id })">#@o.OrderNumber</button></td>
+                                        <td class="mp-nowrap">@o.CreatedOn.ToString("g")</td>
+                                        <td><span class="mp-badge @PanelBadges.Order(o.OrderStatus)">@loc.GetLocalizedEnum(o.OrderStatus)</span></td>
+                                        <td class="mp-num mp-nowrap">@o.Total</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
+        }
+    </div>
+
+    <footer class="mp-drawer__foot">
+        <a class="mp-btn mp-btn--ghost" href="@Url.Action("Edit", "Customer", new { area = "Admin", id = Model.Id })" target="_blank" rel="noopener">@T("Plugins.MotorShop.AdminPanel.Editor.OpenClassic")</a>
+        <span class="mp-spacer"></span>
+        <button type="button" class="mp-btn mp-btn--outline" data-close>@T("Plugins.MotorShop.AdminPanel.Js.Close")</button>
+    </footer>
+</div>

@@ -1,0 +1,81 @@
+@model OrderListModel
+@{
+    var f = Model.Filter;
+    var loc = CommonServices.Localization;
+    var action = ViewData["PagerAction"] as string ?? "Index";
+    var controller = ViewData["PagerController"] as string ?? "MotorPanelOrder";
+}
+
+<div class="mp-grid__meta" data-total="@Model.TotalCount">
+    <span>@T("Plugins.MotorShop.AdminPanel.Order.Count", Model.TotalCount.ToString("N0"))</span>
+</div>
+
+@if (Model.Rows.Count == 0)
+{
+    <div class="mp-empty">
+        <p>@T("Plugins.MotorShop.AdminPanel.Order.None")</p>
+    </div>
+}
+else
+{
+    <div class="mp-table-wrap">
+        <table class="mp-table mp-table--orders">
+            <thead>
+                <tr>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Number")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Date")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Customer")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.City")</th>
+                    <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Order.Total")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Payment")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.PaymentStatus")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Status")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.ShippingStatus")</th>
+                    @if (ViewData["ShowInvoice"] is true)
+                    {
+                        <th scope="col">@T("Plugins.MotorShop.AdminPanel.Invoice.Status")</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model.Rows)
+                {
+                    <tr>
+                        <td class="mp-nowrap">
+                            <button type="button" class="mp-link mp-link-btn" data-open-editor="@Url.Action("Details", "MotorPanelOrder", new { area = "Admin", id = o.Id })">#@o.OrderNumber</button>
+                        </td>
+                        <td class="mp-nowrap">@o.CreatedOn.ToString("g")</td>
+                        <td>
+                            <span class="mp-truncate" title="@o.Email">@o.Customer</span>
+                        </td>
+                        <td class="mp-truncate">@(o.City.NullEmpty() ?? "-")</td>
+                        <td class="mp-num mp-nowrap">@o.Total</td>
+                        <td class="mp-truncate">@o.PaymentMethod</td>
+                        <td><span class="mp-badge @PanelBadges.Payment(o.PaymentStatus)">@loc.GetLocalizedEnum(o.PaymentStatus)</span></td>
+                        <td><span class="mp-badge @PanelBadges.Order(o.OrderStatus)">@loc.GetLocalizedEnum(o.OrderStatus)</span></td>
+                        <td><span class="mp-badge @PanelBadges.Shipping(o.ShippingStatus)">@loc.GetLocalizedEnum(o.ShippingStatus)</span></td>
+                        @if (ViewData["ShowInvoice"] is true)
+                        {
+                            <td><span class="mp-badge mp-badge--gray">@T("Plugins.MotorShop.AdminPanel.Invoice.NoIntegrator")</span></td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mp-pager" aria-label="@T("Plugins.MotorShop.AdminPanel.Pagination")">
+            @if (f.Page > 1)
+            {
+                <a class="mp-pager__link" href="@Url.Action(action, controller, f.ToRouteValues(f.Page - 1))" rel="prev">‹ @T("Plugins.MotorShop.AdminPanel.Prev")</a>
+            }
+            <span class="mp-pager__link is-current" aria-current="page">@f.Page / @Model.TotalPages</span>
+            @if (f.Page < Model.TotalPages)
+            {
+                <a class="mp-pager__link" href="@Url.Action(action, controller, f.ToRouteValues(f.Page + 1))" rel="next">@T("Plugins.MotorShop.AdminPanel.Next") ›</a>
+            }
+        </nav>
+    }
+}

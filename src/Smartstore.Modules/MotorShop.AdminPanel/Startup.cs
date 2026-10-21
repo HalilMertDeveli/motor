@@ -15,6 +15,7 @@ internal class Startup : StarterBase
         builder.RegisterType<ProductEditService>().AsSelf().InstancePerLifetimeScope();
         builder.RegisterType<CategoryEditService>().AsSelf().InstancePerLifetimeScope();
         builder.RegisterType<PriceLockService>().AsSelf().InstancePerLifetimeScope();
+        builder.RegisterType<OrderPanelService>().AsSelf().InstancePerLifetimeScope();
 
         if (appContext.IsInstalled)
         {

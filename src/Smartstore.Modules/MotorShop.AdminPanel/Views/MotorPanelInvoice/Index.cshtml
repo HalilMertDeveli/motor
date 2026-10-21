@@ -1,0 +1,37 @@
+@model InvoiceListModel
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Invoices").Value;
+    ViewData["PanelTab"] = "invoices";
+    ViewData["ShowInvoice"] = true;
+    ViewData["PagerController"] = "MotorPanelInvoice";
+    var f = Model.Orders.Filter;
+}
+
+<section class="mp-panel" aria-labelledby="mp-inv-title">
+    <div class="mp-panel__head">
+        <h1 id="mp-inv-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Tab.Invoices")</h1>
+    </div>
+
+    <div class="mp-note mp-note--info">
+        <strong>@T("Plugins.MotorShop.AdminPanel.Invoice.NoIntegrator")</strong>
+        <p>@T("Plugins.MotorShop.AdminPanel.Invoice.PageExplain")</p>
+        @if (Model.PdfEnabled)
+        {
+            <p>@T("Plugins.MotorShop.AdminPanel.Invoice.PdfExplain")</p>
+        }
+    </div>
+
+    <form class="mp-toolbar" method="get" action="@Url.Action("Index", "MotorPanelInvoice", new { area = "Admin" })"
+          role="search">
+        <label class="mp-field mp-field--search">
+            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Order.Search")</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input type="search" name="q" value="@f.Q" maxlength="200" placeholder="@T("Plugins.MotorShop.AdminPanel.Order.SearchPlaceholder")" />
+        </label>
+        <button type="submit" class="mp-btn mp-btn--outline">@T("Plugins.MotorShop.AdminPanel.Apply")</button>
+    </form>
+
+    <div class="mp-grid">
+        <partial name="_OrderGrid" model="Model.Orders" view-data="ViewData" />
+    </div>
+</section>
