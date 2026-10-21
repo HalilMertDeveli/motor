@@ -233,21 +233,22 @@ internal class Startup : StarterBase
                     }
                     catch (Exception ex)
                     {
-                        ProcessException(context, ex);
+                        ProcessException(context, ex, builder.ApplicationContext.AppConfiguration.ShowCustomErrors);
                     }
                 });
             });
         }
     }
 
-    private static void ProcessException(HttpContext context, Exception ex)
+    private static void ProcessException(HttpContext context, Exception ex, bool showDetails)
     {
         if (context?.Request?.Path.StartsWithSegments("/odata", StringComparison.OrdinalIgnoreCase) ?? false)
         {
             // INFO: could be ODataException, InvalidCastException and many more.
             // Let the ErrorController handle our below ODataErrorException and (if accepted)
             // return the standard OData error JSON instead of something the client do not expect.
-            var error = ODataHelper.CreateError(ex.Message, Status500InternalServerError, ex);
+            // Without showDetails, unexpected exceptions get a generic message and no stack trace.
+            var error = ODataHelper.CreateUnhandledError(ex, Status500InternalServerError, showDetails);
             var odataEx = new ODataErrorException(ex.Message, ex, error);
             odataEx.Data["JsonContent"] = error.ToString();
             odataEx.ReThrow();

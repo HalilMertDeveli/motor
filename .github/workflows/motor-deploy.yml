@@ -1,0 +1,57 @@
+name: MOTOR deploy (manual)
+
+# Deploys an existing, approved image tag to the VPS over SSH by running
+# deploy/vps/scripts/deploy.sh there. Manual only. Inactive until the owner:
+#   1. creates the GitHub environment "production" with required reviewers,
+#   2. adds its secrets MOTOR_VPS_HOST, MOTOR_VPS_USER, MOTOR_VPS_SSH_KEY and
+#      MOTOR_VPS_KNOWN_HOSTS (output of ssh-keyscan, checked by hand),
+#   3. sets MOTOR_VPS_DIR (variable) to the checkout path on the server.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to deploy (e.g. sha-1a2b3c4); 'rollback' for the previous one"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: motor-deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+    steps:
+      - name: Validate tag
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          case "$TAG" in
+            rollback) ;;
+            latest|"") echo "Refusing tag '$TAG'"; exit 1 ;;
+            *[!A-Za-z0-9._-]*) echo "Invalid tag"; exit 1 ;;
+          esac
+
+      - name: Deploy over SSH
+        env:
+          TAG: ${{ inputs.tag }}
+          HOST: ${{ secrets.MOTOR_VPS_HOST }}
+          USER: ${{ secrets.MOTOR_VPS_USER }}
+          KEY: ${{ secrets.MOTOR_VPS_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.MOTOR_VPS_KNOWN_HOSTS }}
+          DIR: ${{ vars.MOTOR_VPS_DIR }}
+        run: |
+          set -eu
+          [ -n "$HOST" ] && [ -n "$USER" ] && [ -n "$KEY" ] && [ -n "$KNOWN_HOSTS" ] && [ -n "$DIR" ] || { echo "Deployment secrets are not configured"; exit 1; }
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf '%s\n' "$KEY" > ~/.ssh/motor_deploy
+          chmod 600 ~/.ssh/motor_deploy ~/.ssh/known_hosts
+          arg="$TAG"; [ "$TAG" = "rollback" ] && arg="--rollback"
+          ssh -i ~/.ssh/motor_deploy -o StrictHostKeyChecking=yes -o BatchMode=yes "$USER@$HOST" \
+            "cd '$DIR' && git pull --ff-only && deploy/vps/scripts/deploy.sh '$arg'"

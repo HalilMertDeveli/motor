@@ -10,7 +10,7 @@
     --art-font-size-lg: 0.9375rem;
     --art-finalprice-font-size: 1.25rem;
     --art-finalprice-color: #{$motor-text};
-    --art-finalprice-offer-color: #{$motor-accent};
+    --art-finalprice-offer-color: #{$motor-accent-text};
     --art-muted-color: #{$gray-600};
     --art-muted-color-2: #{$motor-text-muted};
     --art-divider-color: #{$motor-line};
@@ -161,7 +161,6 @@
     img {
         mix-blend-mode: multiply;
         transition: transform .6s var(--motor-ease-out);
-        will-change: transform;
     }
 
     // Generic "no image" placeholder: keep it quiet so it doesn't read as a product photo
@@ -179,12 +178,15 @@
     }
 }
 
-.art:hover .art-picture img {
-    transform: scale(1.045);
-}
+// Hover zoom only on devices that can hover (avoids sticky zoom after a tap)
+@media (hover: hover) {
+    .art:hover .art-picture img {
+        transform: scale(1.045);
+    }
 
-.art:hover .art-picture.no-picture img {
-    transform: scale(0.62);
+    .art:hover .art-picture.no-picture img {
+        transform: scale(0.62);
+    }
 }
 
 // Category / subcategory tiles reuse .art-picture but without the product plate
@@ -241,7 +243,7 @@
 }
 
 .art-price-offer .art-price-value {
-    color: $motor-accent;
+    color: $motor-accent-text;
 }
 
 .art-compareprice {
@@ -318,7 +320,7 @@
 
             &:after {
                 content: '→';
-                color: $motor-accent;
+                color: $motor-accent-text;
                 transition: transform .25s var(--motor-ease-out);
             }
 
@@ -485,7 +487,7 @@
 
     .active > a,
     .selected > a {
-        color: $motor-accent;
+        color: $motor-accent-text;
         font-weight: 600;
     }
 }
@@ -498,7 +500,7 @@
     &.selected {
         background-color: rgba($motor-accent, 0.14);
         border-color: rgba($motor-accent, 0.6);
-        color: $motor-accent;
+        color: $motor-accent-text;
     }
 }
 

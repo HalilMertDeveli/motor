@@ -1,0 +1,25 @@
+@using MotorShop.Legal.Controllers
+
+@model LegalDocumentViewModel
+
+@{
+    Layout = "_Layout";
+    Assets.AppendTitleParts(Model.Title);
+    Assets.AddMetaRobots();
+}
+
+<div class="page motor-legal-document-page">
+    <div class="page-title">
+        <h1 class="h3">@Model.Title</h1>
+        <p class="text-muted">@T("Plugins.MotorShop.Legal.SnapshotOfOrder", Model.OrderNumber)</p>
+    </div>
+    <div class="page-body">
+        @Html.Raw(Model.Html)
+    </div>
+    <div class="mt-4">
+        <a href="@Url.Action("Details", "Order", new { id = Model.OrderId })" class="btn btn-secondary">
+            <i class="fa fa-angle-left" aria-hidden="true"></i>
+            <span>@T("Plugins.MotorShop.Legal.BackToOrder")</span>
+        </a>
+    </div>
+</div>

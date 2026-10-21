@@ -1,0 +1,125 @@
+name: MOTOR build and test
+
+# Build and test only. This workflow never publishes packages, images or deployments.
+on:
+  pull_request:
+    branches: [motor, preview]
+  push:
+    branches: [motor, preview]
+  workflow_dispatch:
+
+# Superseded PR runs are cancelled; every push to motor or preview is verified to the end.
+concurrency:
+  group: motor-ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+  # Avoids InternalLoggerException on .NET CI images
+  MSBUILDTERMINALLOGGER: "off"
+
+jobs:
+  build-test:
+    # The check name used for required status checks. Keep it stable.
+    name: Build and test (Release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+
+    # Fails fast when a project MOTOR depends on is dropped from the solution,
+    # because the build and test steps would then silently skip it.
+    - name: Check solution contents
+      run: |
+        projects=$(dotnet sln Smartstore.sln list)
+        missing=0
+        for p in Smartstore.Core Smartstore.Web MotorShop.Fitment MotorShop.CatalogImport MotorShop.SupplierCatalog Smartstore.Tests Smartstore.Core.Tests Smartstore.Web.Tests; do
+          if ! grep -q "[/\\]$p\.csproj$" <<<"$projects"; then
+            echo "::error file=Smartstore.sln::$p.csproj is missing from Smartstore.sln"
+            missing=1
+          fi
+        done
+        exit $missing
+
+    # Uses the SDK pinned in global.json, the same one used for local builds.
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        global-json-file: global.json
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v6
+      with:
+        path: ~/.nuget/packages
+        key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/Directory.Build.props', '**/Directory.Packages.props', 'nuget.config', 'global.json') }}
+        restore-keys: nuget-${{ runner.os }}-
+
+    - name: Restore
+      run: dotnet restore Smartstore.sln
+
+    - name: Build
+      run: dotnet build Smartstore.sln -c Release --no-restore
+
+    - name: Check MOTOR module output
+      run: |
+        for dll in src/Smartstore.Web/Modules/MotorShop.Fitment/MotorShop.Fitment.dll src/Smartstore.Web/Modules/MotorShop.CatalogImport/MotorShop.CatalogImport.dll src/Smartstore.Web/Modules/MotorShop.SupplierCatalog/MotorShop.SupplierCatalog.dll; do
+          if [ ! -f "$dll" ]; then
+            echo "::error::$dll was not produced by the build"
+            exit 1
+          fi
+        done
+
+    # --blame-hang names the test that hangs instead of letting the job time out silently.
+    - name: Test
+      timeout-minutes: 15
+      run: >
+        dotnet test Smartstore.sln -c Release --no-build
+        --logger trx --results-directory TestResults
+        --blame-hang-timeout 5m --blame-hang-dump-type none
+
+    - name: Test summary
+      if: always()
+      run: |
+        shopt -s nullglob
+        files=(TestResults/*.trx)
+        {
+          echo "### Test results"
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No test results were produced."
+            exit 0
+          fi
+          echo "| Assembly | Total | Passed | Failed | Not run |"
+          echo "|---|---:|---:|---:|---:|"
+          for f in "${files[@]}"; do
+            counters=$(grep -o '<Counters [^>]*>' "$f" | head -1)
+            get() { sed -n "s/.* $1=\"\([0-9]*\)\".*/\1/p" <<<"$counters"; }
+            total=$(get total)
+            [ "${total:-0}" = 0 ] && continue
+            assembly=$(grep -o 'storage="[^"]*"' "$f" | head -1 | sed 's/.*[\/\\]\([^\/\\"]*\)"$/\1/')
+            echo "| $assembly | $total | $(get passed) | $(( $(get failed) + $(get error) + $(get timeout) )) | $(( total - $(get executed) )) |"
+          done
+          failed=$(cat "${files[@]}" | grep -o '<UnitTestResult [^>]*outcome="Failed"[^>]*>' | sed -n 's/.*testName="\([^"]*\)".*/\1/p' | head -50)
+          if [ -n "$failed" ]; then
+            echo
+            echo "#### Failed tests"
+            sed 's/^/- `/; s/$/`/' <<<"$failed"
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: test-results-${{ github.run_attempt }}
+        path: TestResults/
+        if-no-files-found: ignore
+        retention-days: 14

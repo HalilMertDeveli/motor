@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<Product>MotorShop Catalog Import</Product>
+		<OutputPath>..\..\Smartstore.Web\Modules\MotorShop.CatalogImport</OutputPath>
+		<OutDir>$(OutputPath)</OutDir>
+	</PropertyGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="MotorShop.CatalogImport.Tests" />
+	</ItemGroup>
+	<PropertyGroup>
+		<!--
+			The research datasets (Research/**) contain fitment compiled from part catalogues whose owners have not
+			given permission (PERMISSION_REQUIRED). Until the owner/legal decision is made they must not ship:
+			they are left out of every build unless explicitly requested, e.g. for local research work:
+			dotnet build -p:IncludeCatalogResearch=true
+		-->
+		<IncludeCatalogResearch Condition="'$(IncludeCatalogResearch)' == ''">false</IncludeCatalogResearch>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- Lets tests check that the assembly content matches the setting it was built with. -->
+		<AssemblyMetadata Include="IncludeCatalogResearch" Value="$(IncludeCatalogResearch)" />
+		<!-- Never copied to the output as content files, whatever the setting. -->
+		<Content Remove="Research\**" />
+		<None Remove="Research\**" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(IncludeCatalogResearch)' == 'true'">
+		<!-- Read by BundledResearchService. -->
+		<EmbeddedResource Include="Research\**\*.json" LogicalName="MotorShop.CatalogImport.Research.%(Filename)%(Extension)" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Smartstore.Web\Smartstore.Web.csproj">
+			<Private>False</Private>
+			<CopyLocal>False</CopyLocal>
+			<CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+		<!-- Loaded by the module system (see DependsOn in module.json), not copied. -->
+		<ProjectReference Include="..\MotorShop.Fitment\MotorShop.Fitment.csproj">
+			<Private>False</Private>
+			<CopyLocal>False</CopyLocal>
+			<CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
+		</ProjectReference>
+	</ItemGroup>
+</Project>

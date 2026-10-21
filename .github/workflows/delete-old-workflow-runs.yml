@@ -1,8 +1,6 @@
 name: Delete old workflow runs
 on:
-  schedule:
-    # Run monthly, at 00:00 on the 1st day of month.
-    - cron: '0 0 1 * *'
+  # MOTOR: manual only. The upstream monthly schedule is removed so runs are never deleted unattended.
   workflow_dispatch:
     inputs:
       days:
@@ -30,13 +28,19 @@ on:
       dry_run:
         description: 'Only log actions, do not perform any delete operations.'
         required: false
+        default: 'true'
+
+# Deleting runs needs actions: write and nothing else.
+permissions:
+  actions: write
 
 jobs:
   del_runs:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
+        uses: Mattraks/delete-workflow-runs@0cf693bc9909e5e867ee8f27b813224ba862939c # v2.1.0
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}

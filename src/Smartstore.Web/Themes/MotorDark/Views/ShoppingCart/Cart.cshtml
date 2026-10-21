@@ -1,0 +1,45 @@
+@using Smartstore.Web.Controllers
+@using Smartstore.Web.Models.Cart
+
+@model ShoppingCartModel
+
+@*
+    MotorDark copy of Views/ShoppingCart/Cart.cshtml.
+    Only addition: an empty-cart block with next steps (shown by CSS when the order summary
+    contains just the "cart is empty" message, also after the last item is removed via AJAX).
+*@
+
+@{
+    Layout = "_Checkout";
+    Assets.BodyAttributes.AppendCssClass("order-summary-page no-offcanvas-cart");
+    Assets.AppendTitleParts(T("PageTitle.ShoppingCart").Value);
+    Assets.AddMetaRobots();
+
+    var cartItemSelectionLink = ViewBag.CartItemSelectionLink as string;
+}
+
+<widget target-zone="order_progress">
+    @await Component.InvokeAsync("CheckoutProgress", new { action = nameof(ShoppingCartController.Cart), controller = "ShoppingCart" })
+</widget>
+
+<div class="page shopping-cart-page">
+    <div class="page-title">
+        <h1 class="h3 mb-0">@T("ShoppingCart")</h1>
+        <div sm-if="cartItemSelectionLink.HasValue()" id="SelectAllCartItems" class="mt-1">
+            @Html.Raw(cartItemSelectionLink)
+        </div>
+    </div>
+    <div class="page-body">
+        @await Component.InvokeAsync("OrderSummary", new { model = Model })
+
+        <div class="motor-cart-empty">
+            <div class="motor-empty-actions">
+                <a asp-route="Homepage" class="btn btn-primary btn-motor">
+                    <span>@T("ShoppingCart.ContinueShopping")</span>
+                    <svg class="motor-btn-arrow" aria-hidden="true"><use href="#mi-arrow" /></svg>
+                </a>
+                <a asp-route="ContactUs" class="btn btn-motor btn-motor-ghost">@T("Themes.MotorDark.Story.AskForPart")</a>
+            </div>
+        </div>
+    </div>
+</div>

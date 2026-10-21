@@ -53,7 +53,7 @@ public partial class PermissionTree
             return null;
         }
 
-        var token = systemName.Substring(systemName.LastIndexOf('.') + 1).ToLower();
+        var token = systemName.Substring(systemName.LastIndexOf('.') + 1).ToLowerInvariant();
         var displayName = PermissionService.GetDisplayName(token, DisplayNames);
 
         return displayName ?? token ?? systemName;

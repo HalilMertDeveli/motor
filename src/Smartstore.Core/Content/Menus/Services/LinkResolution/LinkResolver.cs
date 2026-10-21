@@ -126,7 +126,7 @@ public partial class LinkResolver : ILinkResolver
         }
 
         var cacheKey = LinkCacheKey.FormatInvariant(
-            expression.SchemaAndTarget.ToLower(),
+            expression.SchemaAndTarget.ToLowerInvariant(),
             languageId,
             storeId,
             string.Join(',', roles.Where(x => x.Active).Select(x => x.Id)));

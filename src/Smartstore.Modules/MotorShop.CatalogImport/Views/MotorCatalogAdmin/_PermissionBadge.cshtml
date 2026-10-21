@@ -1,0 +1,11 @@
+@model SourcePermissionStatus
+@{
+    var css = Model switch
+    {
+        SourcePermissionStatus.Authorized => "success",
+        SourcePermissionStatus.PublicFactualReferenceOnly => "info",
+        SourcePermissionStatus.PermissionRequired => "warning",
+        _ => "danger"
+    };
+}
+<span class="badge badge-@css bg-@css">@T("Plugins.MotorShop.CatalogImport.Permission." + Model)</span>

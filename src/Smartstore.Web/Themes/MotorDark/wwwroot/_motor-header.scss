@@ -9,14 +9,16 @@ $motor-menubar-height: 38px;
     // The utility strip (menubar) scrolls away, shopbar + navigation stay pinned.
     top: 0;
     z-index: $zindex-sticky;
-    background-color: rgba($motor-bg, 0.86);
-    -webkit-backdrop-filter: saturate(140%) blur(16px);
-    backdrop-filter: saturate(140%) blur(16px);
+    // Phones/tablets: opaque bar, no backdrop blur (expensive to repaint while scrolling)
+    background-color: rgba($motor-bg, 0.97);
     border-bottom: 1px solid $motor-line;
     transition: background-color .3s ease, box-shadow .3s ease, border-color .3s ease;
 
     @include media-breakpoint-up(lg) {
         top: -$motor-menubar-height;
+        background-color: rgba($motor-bg, 0.86);
+        -webkit-backdrop-filter: saturate(140%) blur(16px);
+        backdrop-filter: saturate(140%) blur(16px);
     }
 
     .motor-scrolled & {
@@ -67,7 +69,7 @@ $motor-menubar-height: 38px;
     }
 
     .menubar-group--special .menubar-link {
-        color: $motor-accent !important;
+        color: $motor-accent-text !important;
     }
 }
 
@@ -148,7 +150,7 @@ $motor-menubar-height: 38px;
 
     .motor-wordmark-mark {
         display: inline-flex;
-        color: $motor-accent;
+        color: $motor-accent-text;
         transition: transform .35s var(--motor-ease-out);
 
         svg {
@@ -342,7 +344,7 @@ $motor-menubar-height: 38px;
         color: $motor-text;
 
         &:hover {
-            color: $motor-accent;
+            color: $motor-accent-text;
         }
     }
 
@@ -402,7 +404,9 @@ $motor-menubar-height: 38px;
         padding-top: 0.25rem;
 
         .instasearch-term {
-            height: 42px;
+            height: 44px;
+            // 16px prevents iOS Safari from zooming into the field on focus
+            font-size: 1rem;
         }
     }
 
@@ -412,7 +416,8 @@ $motor-menubar-height: 38px;
     }
 
     .shopbar-button {
-        min-width: 42px;
+        min-width: 44px;
+        min-height: 44px;
         padding: 0.5rem;
 
         .shopbar-button-icon {

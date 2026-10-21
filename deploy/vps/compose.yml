@@ -1,0 +1,116 @@
+# MOTOR production stack for a Linux VPS.
+#
+#   web    MOTOR image (built from this repository, pulled by tag, never built here)
+#   caddy  HTTPS reverse proxy with automatic Let's Encrypt certificates
+#
+# The database is external: Supabase PostgreSQL (docs/motor/supabase.md).
+# No database container runs on the VPS.
+#
+# Usage on the server (from this directory, with .env next to this file):
+#   docker compose config --quiet        # validate .env
+#   docker compose pull && docker compose up -d
+# Operations: docs/motor/vps-operations.md
+
+name: ${MOTOR_PROJECT_NAME:-motor}
+
+services:
+  web:
+    image: ${MOTOR_IMAGE:?Set MOTOR_IMAGE in .env}:${MOTOR_IMAGE_TAG:?Set MOTOR_IMAGE_TAG in .env (an immutable tag, not latest)}
+    restart: unless-stopped
+    # No published ports: only Caddy reaches the app, over the private edge network.
+    expose:
+      - "8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      TZ: ${MOTOR_TZ:-Europe/Istanbul}
+      # Database: always from the environment, never stored on the volume.
+      MOTOR_DB_PROVIDER: postgresql
+      MOTOR_DB_CONNECTION_STRING: ${MOTOR_DB_CONNECTION_STRING:?Set MOTOR_DB_CONNECTION_STRING in .env}
+      # Host filtering: only the store's domains are answered.
+      AllowedHosts: ${MOTOR_DOMAIN:?Set MOTOR_DOMAIN in .env}
+      # Trust X-Forwarded-* only from Caddy's network, so links, redirects and
+      # secure cookies use https://<domain>.
+      Smartstore__ReverseProxy__Enabled: "true"
+      Smartstore__ReverseProxy__KnownNetworks__0: ${MOTOR_EDGE_SUBNET:-10.203.40.0/24}
+      Smartstore__ReverseProxy__AllowedHosts__0: ${MOTOR_DOMAIN}
+      Smartstore__ReverseProxy__ForwardPrefixHeader: "false"
+      # Request body limit in the app (Smartstore's default is 2 GB); Caddy enforces the same value.
+      Smartstore__MaxRequestBodySize: ${MOTOR_MAX_UPLOAD_BYTES:-67108864}
+    volumes:
+      # Settings.txt (placeholder only), media, data protection keys, installed modules
+      - tenants:/app/App_Data/Tenants
+      - logs:/app/App_Data/Logs
+      # Supabase CA certificate for SSL Mode=VerifyFull (see .env.example)
+      - ./secrets/supabase-ca.crt:/run/secrets/supabase-ca.crt:ro
+    networks:
+      - edge
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      # Host header must match AllowedHosts, otherwise host filtering answers 400.
+      test: ["CMD-SHELL", "wget -q -O /dev/null --header \"Host: $${AllowedHosts%%;*}\" http://127.0.0.1:8080${MOTOR_HEALTH_PATH:-/healthz/ready} || exit 1"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          cpus: "${MOTOR_WEB_CPUS:-2.0}"
+          memory: ${MOTOR_WEB_MEMORY:-3g}
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  caddy:
+    image: caddy:${MOTOR_CADDY_TAG:-2.10-alpine}
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      MOTOR_DOMAIN: ${MOTOR_DOMAIN}
+      MOTOR_ACME_EMAIL: ${MOTOR_ACME_EMAIL:?Set MOTOR_ACME_EMAIL in .env}
+      # First installation only (see Caddyfile); empty = installer blocked for everyone.
+      MOTOR_INSTALL_ALLOW_IP: ${MOTOR_INSTALL_ALLOW_IP:-255.255.255.255/32}
+      MOTOR_MAX_UPLOAD_BYTES: ${MOTOR_MAX_UPLOAD_BYTES:-67108864}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - edge
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:2019/config/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+networks:
+  edge:
+    ipam:
+      config:
+        - subnet: ${MOTOR_EDGE_SUBNET:-10.203.40.0/24}
+
+volumes:
+  tenants:
+  logs:
+  caddy-data:
+  caddy-config:

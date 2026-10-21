@@ -1,0 +1,17 @@
+# One-time installation overlay. Never leave it running.
+#
+#   docker compose -f compose.yml -f compose.install.yml up -d web
+#   ssh -L 8080:127.0.0.1:8080 <user>@<vps>      # from the owner's computer
+#   open http://localhost:8080/install           # then remove the overlay:
+#   docker compose up -d                         # back to compose.yml only
+#
+# The installer is blocked in Caddy, so it is reachable only through this
+# loopback port on the VPS, i.e. through the SSH tunnel.
+
+services:
+  web:
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      # The tunnel uses Host: localhost:8080
+      AllowedHosts: "*"

@@ -1,0 +1,28 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.SupplierCatalog" AppendRootKey="false"><Value>Tedarikçi kataloğu içe aktarma</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.SupplierCatalog" AppendRootKey="false"><Value>Tedarikçi katalog paketini (products.json + görseller) kategori, marka, beden ve görselleriyle içe aktarır.</Value></LocaleResource>
+    <LocaleResource Name="AdminInstruction"><Value>Yetkili bir tedarikçinin katalog paketini yükleyin (.zip: products.json ve images klasörü). Ürünler stok koduna (SKU) göre eşleştirilir. Yeni ürünler, kategoriler ve markalar yayında değil olarak oluşturulur: fiyatları, metinleri ve görselleri kontrol edip katalogda yayınlayın. Sonraki içe aktarmalar yalnızca bu tedarikçinin içe aktarmalarıyla oluşturulan ürünleri günceller; aynı SKU'ya sahip diğer ürünler raporlanır ve değiştirilmez. Görseller yalnızca hiç görseli olmayan ürünlere eklenir.</Value></LocaleResource>
+    <LocaleResource Name="ImportPackage"><Value>Katalog paketini içe aktar</Value></LocaleResource>
+    <LocaleResource Name="Package"><Value>Katalog paketi (.zip)</Value></LocaleResource>
+    <LocaleResource Name="Package.Hint"><Value>products.json ve images/*.jpg|png|webp içerir. En fazla 512 MB (sunucu veya proxy sınırı daha düşük olabilir).</Value></LocaleResource>
+    <LocaleResource Name="PackageRequired"><Value>Lütfen bir katalog paketi (.zip) seçin.</Value></LocaleResource>
+    <LocaleResource Name="UpdateExistingProducts"><Value>Bu tedarikçinin önceki içe aktarmalarıyla oluşturulan ürünlerin adını, açıklamasını ve fiyatını güncelle (yayın durumu korunur)</Value></LocaleResource>
+    
+    <LocaleResource Name="StartImport"><Value>İçe aktarmayı başlat</Value></LocaleResource>
+    <LocaleResource Name="ImportCompleted"><Value>Katalog içe aktarıldı.</Value></LocaleResource>
+    <LocaleResource Name="ImportFailed"><Value>Katalog içe aktarılamadı. Ayrıntılar için günlüğe bakın.</Value></LocaleResource>
+    <LocaleResource Name="LastResult"><Value>İçe aktarma sonucu</Value></LocaleResource>
+    <LocaleResource Name="Result.Products"><Value>Ürünler: {0} yeni, {1} güncellendi</Value></LocaleResource>
+    <LocaleResource Name="Result.Unpublished"><Value>Yayında değil (kontrol bekliyor): {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Categories"><Value>Yeni kategori: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Brands"><Value>Yeni marka: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Pictures"><Value>Eklenen görsel: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Duration"><Value>Süre: {0}</Value></LocaleResource>
+    <LocaleResource Name="Result.Warnings"><Value>{0} uyarı</Value></LocaleResource>
+    <LocaleResource Name="SupplierName"><Value>Tedarikçi</Value></LocaleResource>
+    <LocaleResource Name="SupplierName.Hint"><Value>Paketin geldiği tedarikçinin adı, ör. Motosev. İçe aktarılan ürünler bununla işaretlenir.</Value></LocaleResource>
+    <LocaleResource Name="SupplierRequired"><Value>Lütfen tedarikçiyi girin.</Value></LocaleResource>
+    <LocaleResource Name="TaxCategory"><Value>Yeni ürünlerin vergi sınıfı</Value></LocaleResource>
+    <LocaleResource Name="TaxCategory.Hint"><Value>Katalogdaki perakende fiyatlar KDV dahildir. Yeni ürünlere bu vergi sınıfı atanır.</Value></LocaleResource>
+    <LocaleResource Name="Result.Conflicts"><Value>Atlandı, SKU başka bir ürüne ait: {0}</Value></LocaleResource>
+</Language>

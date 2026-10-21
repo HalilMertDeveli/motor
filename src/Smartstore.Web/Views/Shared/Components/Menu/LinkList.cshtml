@@ -15,7 +15,7 @@
     var hasImages = root.Children.Any(x => x.Value.ImageUrl.HasValue());
 }
 
-<div class="cms-menu cms-menu-linklist" data-menu-name="@(Model.Name?.ToLower())">
+<div class="cms-menu cms-menu-linklist" data-menu-name="@(Model.Name?.ToLowerInvariant())">
     <ul class="list-unstyled">
         @foreach (var node in root.Children)
         {

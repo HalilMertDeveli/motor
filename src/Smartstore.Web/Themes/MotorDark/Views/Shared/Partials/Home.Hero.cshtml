@@ -1,55 +1,66 @@
 @model string
 
 @*
-    MotorDark homepage hero: full-bleed photograph with a cinematic, restrained motion layer.
+    MotorDark homepage hero: full-bleed photograph with a restrained motion layer.
     Photos live in Themes/MotorDark/wwwroot/images (see CREDITS.txt) and can be replaced
     with the store's own photography using the same file names.
+
+    Performance: the photo is the LCP candidate, so it is never hidden by an entrance effect,
+    is fetched with high priority and comes as WebP in several widths (JPEG fallback).
 *@
 
 @{
     var primaryCtaUrl = Model.NullEmpty() ?? "#motor-categories";
 }
 
-<section lang="tr" class="motor-hero" aria-labelledby="motor-hero-title" data-motor-hero>
+<section class="motor-hero" aria-labelledby="motor-hero-title" data-motor-hero>
     <div class="motor-hero-media" aria-hidden="true">
         <picture>
+            <source media="(max-width: 767.98px)"
+                    type="image/webp"
+                    srcset="@Url.Content("~/themes/motordark/images/hero-mobile-600.webp") 600w, @Url.Content("~/themes/motordark/images/hero-mobile-900.webp") 900w"
+                    sizes="100vw" />
             <source media="(max-width: 767.98px)" srcset="~/themes/motordark/images/hero-mobile.jpg" />
+            <source type="image/webp"
+                    srcset="@Url.Content("~/themes/motordark/images/hero-1280.webp") 1280w, @Url.Content("~/themes/motordark/images/hero-1600.webp") 1600w, @Url.Content("~/themes/motordark/images/hero-2000.webp") 2000w"
+                    sizes="(min-width: 992px) 72vw, 100vw" />
             <img class="motor-hero-photo"
                  src="~/themes/motordark/images/hero.jpg"
                  alt=""
                  width="2000"
                  height="2667"
                  fetchpriority="high"
-                 decoding="async"
                  data-motor-parallax="0.18" />
         </picture>
         <div class="motor-hero-sweep"></div>
         <div class="motor-hero-shade"></div>
-        <div class="motor-hero-grain"></div>
     </div>
 
     <div class="container motor-hero-container">
         <div class="motor-hero-content">
-            <span class="motor-eyebrow motor-hero-eyebrow">Parça · Bakım · Ekipman</span>
+            <span class="motor-eyebrow motor-hero-eyebrow">@T("Themes.MotorDark.Hero.Eyebrow")</span>
             <h1 id="motor-hero-title" class="motor-hero-title">
-                <span class="motor-hero-line"><span>Yola</span></span>
-                <span class="motor-hero-line"><span>hakim <em>ol.</em></span></span>
+                <span class="motor-hero-line"><span>@T("Themes.MotorDark.Hero.TitleLine1")</span></span>
+                <span class="motor-hero-line"><span>@T("Themes.MotorDark.Hero.TitleLine2") <em>@T("Themes.MotorDark.Hero.TitleAccent")</em></span></span>
             </h1>
-            <p class="motor-hero-subtitle">Motorunun performansını tamamlayan parçalar ve ekipmanlar.</p>
+            <p class="motor-hero-subtitle">@T("Themes.MotorDark.Hero.Subtitle")</p>
+            @* Prosev catalog, page 1: "Tüm kredi kartlarına 3 taksit imkanı". *@
+            <p class="motor-hero-installments"><strong>3</strong><span>@T("Themes.MotorDark.Hero.Installments")</span></p>
             <div class="motor-hero-actions">
                 <a href="@primaryCtaUrl" class="btn btn-primary btn-motor">
-                    <span>Ürünleri Keşfet</span>
+                    <span>@T("Themes.MotorDark.Hero.ExploreProducts")</span>
                     <svg class="motor-btn-arrow" aria-hidden="true"><use href="#mi-arrow" /></svg>
                 </a>
                 <a href="#motor-categories" class="btn btn-motor btn-motor-ghost">
-                    <span>Kategorilere Göz At</span>
+                    <span>@T("Themes.MotorDark.Hero.BrowseCategories")</span>
                 </a>
             </div>
         </div>
     </div>
 
-    <a href="#motor-categories" class="motor-hero-scroll" aria-label="Kategorilere in">
+    <a href="#motor-categories" class="motor-hero-scroll">
         <span class="motor-hero-scroll-line" aria-hidden="true"></span>
-        <span class="motor-hero-scroll-label" aria-hidden="true">Kaydır</span>
+        <span class="motor-hero-scroll-label">@T("Themes.MotorDark.Hero.Scroll")</span>
+        <span class="sr-only">@T("Themes.MotorDark.Hero.ScrollToCategories")</span>
     </a>
 </section>

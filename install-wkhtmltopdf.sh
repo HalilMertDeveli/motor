@@ -17,13 +17,14 @@ apt-get -y install --no-install-recommends \
     xfonts-75dpi \
     xfonts-base
 
-# Download and install wkhtmltopdf
-wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb
-dpkg --force-depends -i ./wkhtmltox_0.12.6.1-3.bookworm_amd64.deb
+# Download and install wkhtmltopdf for the image's architecture (amd64 or arm64)
+pkg="wkhtmltox_0.12.6.1-3.bookworm_$(dpkg --print-architecture).deb"
+wget "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/$pkg"
+dpkg --force-depends -i "./$pkg"
 apt-get -y --fix-broken install
 
 # Cleanup
-rm ./wkhtmltox_0.12.6.1-3.bookworm_amd64.deb
+rm "./$pkg"
 rm /etc/apt/sources.list.d/bookworm.list
 apt-get update
 apt-get clean

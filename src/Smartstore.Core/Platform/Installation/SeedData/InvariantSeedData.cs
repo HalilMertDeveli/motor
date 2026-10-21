@@ -34,6 +34,7 @@ using Smartstore.Core.Rules;
 using Smartstore.Core.Security;
 using Smartstore.Core.Seo;
 using Smartstore.Core.Stores;
+using Smartstore.Core.Theming;
 using Smartstore.Net.Mail;
 using Smartstore.Scheduling;
 
@@ -41,6 +42,11 @@ namespace Smartstore.Core.Installation;
 
 public abstract partial class InvariantSeedData
 {
+    /// <summary>
+    /// MOTOR: storefront theme activated on fresh installs (see also the MotorTurkishLocalization migration).
+    /// </summary>
+    internal const string MotorDefaultTheme = "MotorDark";
+
     private SmartDbContext _db;
     private Language _language;
     private IApplicationContext _appContext;
@@ -234,6 +240,12 @@ public abstract partial class InvariantSeedData
     protected virtual string TaxNameElectronics => "Electronics & Software";
     protected virtual string TaxNameTaxFree => "Tax free";
     public virtual decimal[] FixedTaxRates => new decimal[] { 0, 0, 0, 0, 0 };
+
+    /// <summary>
+    /// MOTOR: seeds the store's own catalog structure (independent of sample data). Nothing by default.
+    /// </summary>
+    public virtual Task SeedStoreCatalogAsync()
+        => Task.CompletedTask;
 
     public IList<TaxCategory> TaxCategories()
     {
@@ -656,6 +668,21 @@ public abstract partial class InvariantSeedData
                 currencySettings.PrimaryCurrencyId = currency.Id;
                 currencySettings.PrimaryExchangeCurrencyId = currency.Id;
             }
+        }
+
+        // MOTOR: the MotorDark storefront theme is the default for every install language.
+        var themeSettings = settings.OfType<ThemeSettings>().FirstOrDefault();
+        if (themeSettings != null && _appContext.ContentRoot.FileExists($"Themes/{MotorDefaultTheme}/theme.config"))
+        {
+            themeSettings.DefaultTheme = MotorDefaultTheme;
+            themeSettings.AllowCustomerToSelectTheme = false;
+        }
+
+        // MOTOR: larger, sharper product pictures (see MotorMediaDefaults).
+        var mediaSettings = settings.OfType<MediaSettings>().FirstOrDefault();
+        if (mediaSettings != null)
+        {
+            MotorMediaDefaults.Apply(mediaSettings);
         }
 
         var priceSettings = settings.OfType<PriceSettings>().FirstOrDefault();

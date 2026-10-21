@@ -37,12 +37,12 @@
         <zone name="home_page_after_intro" />
 
         <section id="motor-categories" class="motor-section" aria-labelledby="motor-categories-title">
-            <div lang="tr" class="motor-section-head" data-motor-reveal>
+            <div class="motor-section-head" data-motor-reveal>
                 <div>
-                    <span class="motor-eyebrow">Kategoriler</span>
-                    <h2 id="motor-categories-title" class="motor-section-title">Sürüşüne göre seç</h2>
+                    <span class="motor-eyebrow">@T("Themes.MotorDark.Categories.Eyebrow")</span>
+                    <h2 id="motor-categories-title" class="motor-section-title">@T("Themes.MotorDark.Categories.Title")</h2>
                 </div>
-                <p class="motor-section-lead">Motor parçasından sürücü ekipmanına, ihtiyacın olan her şey tek bir garajda.</p>
+                <p class="motor-section-lead">@T("Themes.MotorDark.Categories.Lead")</p>
             </div>
 
             @if (hasCategories)
@@ -51,10 +51,10 @@
             }
             else
             {
-                <div lang="tr" class="motor-empty" data-motor-reveal>
+                <div class="motor-empty" data-motor-reveal>
                     <svg class="motor-empty-icon" aria-hidden="true"><use href="#mi-grid" /></svg>
-                    <p class="motor-empty-title">Kategoriler hazırlanıyor</p>
-                    <p class="motor-empty-text">Katalog yayına alındığında kategoriler burada görünecek.</p>
+                    <p class="motor-empty-title">@T("Themes.MotorDark.Categories.EmptyTitle")</p>
+                    <p class="motor-empty-text">@T("Themes.MotorDark.Categories.EmptyText")</p>
                 </div>
             }
         </section>
@@ -88,13 +88,13 @@
         @if (!hasProducts)
         {
             <section class="motor-section">
-                <div lang="tr" class="motor-empty motor-empty--wide" data-motor-reveal>
+                <div class="motor-empty motor-empty--wide" data-motor-reveal>
                     <svg class="motor-empty-icon" aria-hidden="true"><use href="#mi-engine" /></svg>
-                    <p class="motor-empty-title">Ürünler çok yakında</p>
-                    <p class="motor-empty-text">Vitrin şu an hazırlanıyor. Bu sırada kategorilere göz atabilir ya da aradığın parçayı bize sorabilirsin.</p>
-                    <div lang="tr" class="motor-empty-actions">
-                        <a href="#motor-categories" class="btn btn-secondary">Kategorilere göz at</a>
-                        <a asp-route="ContactUs" class="btn btn-outline-primary">Bize ulaş</a>
+                    <p class="motor-empty-title">@T("Themes.MotorDark.Products.EmptyTitle")</p>
+                    <p class="motor-empty-text">@T("Themes.MotorDark.Products.EmptyText")</p>
+                    <div class="motor-empty-actions">
+                        <a href="#motor-categories" class="btn btn-secondary">@T("Themes.MotorDark.Products.BrowseCategories")</a>
+                        <a asp-route="ContactUs" class="btn btn-outline-primary">@T("Themes.MotorDark.ContactUs")</a>
                     </div>
                 </div>
             </section>

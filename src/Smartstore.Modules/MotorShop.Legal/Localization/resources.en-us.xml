@@ -1,0 +1,14 @@
+<Language Name="English" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Legal" AppendRootKey="false"><Value>Distance sales legal checkout (TR)</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Legal" AppendRootKey="false"><Value>Shows the pre-contractual information form and the distance sales agreement with the order data at the confirm step, links the right of withdrawal and the KVKK privacy notice, and stores an acknowledgment record and a text snapshot per order.</Value></LocaleResource>
+    <LocaleResource Name="Heading"><Value>Contracts and legal information</Value></LocaleResource>
+    <LocaleResource Name="AcceptLabel"><Value>I have read and accept the pre-contractual information form and the distance sales agreement.</Value></LocaleResource>
+    <LocaleResource Name="PleaseAccept"><Value>Please accept the pre-contractual information form and the distance sales agreement to place the order.</Value></LocaleResource>
+    <LocaleResource Name="WithdrawalLink"><Value>Right of withdrawal and returns</Value></LocaleResource>
+    <LocaleResource Name="PrivacyNoticeLink"><Value>KVKK privacy notice</Value></LocaleResource>
+    <LocaleResource Name="OrderDocuments"><Value>Order contracts</Value></LocaleResource>
+    <LocaleResource Name="SnapshotOfOrder"><Value>Copy of the text accepted with order {0}.</Value></LocaleResource>
+    <LocaleResource Name="BackToOrder"><Value>Back to order</Value></LocaleResource>
+    <LocaleResource Name="OrderNote"><Value>Legal acknowledgment record. Checkbox ticked: {0}. Time (UTC): {1}. Texts (version hash): {2}. The IP address is in the order's customer IP field.</Value></LocaleResource>
+    <LocaleResource Name="PaymentObligationHint"><Value>By clicking "Confirm" you place an order that obliges you to pay.</Value></LocaleResource>
+</Language>

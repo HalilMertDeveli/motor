@@ -1,0 +1,4 @@
+<Language Name="English" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.Security" AppendRootKey="false"><Value>Motor security hardening</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.Security" AppendRootKey="false"><Value>Adds security response headers, hides the platform version header, exposes /healthz (liveness) and /healthz/ready (database, task scheduler) and warns about unsafe production settings.</Value></LocaleResource>
+</Language>

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
+using Smartstore.Core.Localization;
 using Smartstore.Core.Security;
 using Smartstore.Core.Seo.Routing;
 using Smartstore.IO;
@@ -12,8 +13,10 @@ using Smartstore.Web.Models.Diagnostics;
 
 namespace Smartstore.Web.Controllers;
 
-public class ErrorController : Controller
+public class ErrorController(IApplicationContext appContext, Lazy<ILocalizationService> localizationService) : Controller
 {
+    const string GenericErrorMessage = "An unknown error has occurred.";
+
     [Route("/error/{status?}")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error(int? status)
@@ -48,6 +51,12 @@ public class ErrorController : Controller
                 return Content(json, MediaTypeNames.Application.Json);
             }
 
+            if (!appContext.AppConfiguration.ShowCustomErrors && model.Exception != null && !IsUserFacingException(model.Exception))
+            {
+                // Do not expose internal exception details (e.g. database errors) to clients.
+                model.ErrorMessage = GetGenericErrorMessage();
+            }
+
             return Json(model);
         }
 
@@ -71,6 +80,25 @@ public class ErrorController : Controller
                 return View("NotFound", model);
             default:
                 return View("Error", model);
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the exception message is intended to be shown to the user.
+    /// </summary>
+    internal static bool IsUserFacingException(Exception exception)
+        => exception is AccessDeniedException or HttpResponseException;
+
+    private string GetGenericErrorMessage()
+    {
+        try
+        {
+            return localizationService.Value.GetResource("Admin.Common.UnknownError", logIfNotFound: false, defaultValue: GenericErrorMessage);
+        }
+        catch
+        {
+            // Localization may not be available, e.g. during installation.
+            return GenericErrorMessage;
         }
     }
 

@@ -1,0 +1,43 @@
+@model BlogPost
+@inject Smartstore.Core.Common.Services.IDateTimeHelper DateTimeHelper
+
+@{
+    var url = Url.BlogPostUrl(Model);
+    var published = DateTimeHelper.ConvertToUserTime(Model.PublishedUtc, DateTimeKind.Utc);
+    var label = Model.Section == BlogSection.Guides
+        ? T("Plugins.MotorShop.WordPress.Guide").ToString()
+        : Model.Categories.FirstOrDefault()?.Name;
+}
+
+<article class="motor-blog-card" role="listitem">
+    <a class="motor-blog-card-link" href="@url">
+        <span class="motor-blog-card-media" aria-hidden="true">
+            @if (Model.Image != null)
+            {
+                <img src="@Model.Image.CardUrl" alt="" loading="lazy" decoding="async"
+                     attr-width='(Model.Image.Width > 0, Model.Image.Width.ToString(CultureInfo.InvariantCulture))'
+                     attr-height='(Model.Image.Height > 0, Model.Image.Height.ToString(CultureInfo.InvariantCulture))' />
+            }
+            else
+            {
+                <span class="motor-blog-card-placeholder"></span>
+            }
+        </span>
+        <span class="motor-blog-card-body">
+            @if (label.HasValue())
+            {
+                <span class="motor-eyebrow motor-blog-card-label">@label</span>
+            }
+            <h2 class="motor-blog-card-title">@Model.Title</h2>
+            @if (Model.Excerpt.HasValue())
+            {
+                <span class="motor-blog-card-excerpt">@Model.Excerpt</span>
+            }
+            <span class="motor-blog-card-meta">
+                <time datetime="@Model.PublishedUtc.ToString("o", CultureInfo.InvariantCulture)">@published.ToString("d MMMM yyyy")</time>
+                <span aria-hidden="true">·</span>
+                <span>@T("Plugins.MotorShop.WordPress.ReadingTime", Model.ReadingMinutes)</span>
+            </span>
+        </span>
+    </a>
+</article>

@@ -1,0 +1,98 @@
+//
+// MotorDark: sticky action bar for phones (created by motor.js on product and cart pages).
+// It only mirrors the page's own primary button while that button is out of view.
+// --------------------------------------------------
+
+.motor-buybar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: $zindex-fixed;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem calc(0.625rem + env(safe-area-inset-bottom, 0px));
+    background: rgba($motor-surface, 0.98);
+    border-top: 1px solid $motor-line-strong;
+    box-shadow: 0 -16px 40px -12px rgba(0, 0, 0, 0.85);
+    transform: translate3d(0, 110%, 0);
+    visibility: hidden;
+    transition: transform .25s var(--motor-ease-out), visibility 0s linear .25s;
+
+    &.is-visible {
+        transform: none;
+        visibility: visible;
+        transition: transform .25s var(--motor-ease-out), visibility 0s;
+    }
+
+    @include media-breakpoint-up(md) {
+        display: none;
+    }
+}
+
+.motor-buybar-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.motor-buybar-label {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.8125rem;
+    color: $motor-text-muted;
+}
+
+.motor-buybar-amount {
+    font-family: $headings-font-family;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: $motor-text;
+    white-space: nowrap;
+}
+
+.motor-buybar-btn {
+    flex: none;
+    min-height: 48px;
+    padding-inline: 1.25rem;
+    font-family: $headings-font-family;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+// Keep the end of the page reachable above the bar
+@include media-breakpoint-down(sm) {
+    .motor-buybar-shown {
+        .page-main {
+            padding-bottom: 76px;
+        }
+
+        #scroll-top {
+            bottom: 88px;
+        }
+    }
+}
+
+// A required option the bar sent the shopper to (e.g. size not chosen yet)
+.motor-attention {
+    border-radius: $border-radius-lg;
+    outline: 2px solid $motor-accent;
+    outline-offset: 6px;
+    animation: motor-attention 1.6s var(--motor-ease-out) forwards;
+}
+
+@keyframes motor-attention {
+    0%, 60% { outline-color: $motor-accent; }
+    100% { outline-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .motor-attention {
+        animation: none;
+    }
+}

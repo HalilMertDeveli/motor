@@ -1,6 +1,7 @@
 ﻿using System.Linq.Dynamic.Core;
 using Smartstore.Core.Catalog.Categories;
 using Smartstore.Core.Catalog.Discounts;
+using Smartstore.Core.Data;
 using Smartstore.Core.Rules;
 
 namespace Smartstore.Core.Installation;
@@ -172,10 +173,20 @@ public abstract partial class InvariantSeedData
         return entities;
     }
 
+    /// <summary>
+    /// MOTOR: sample categories by alias. Categories without alias, like the store's own catalog tree
+    /// seeded before the sample data (<see cref="SeedStoreCatalogAsync"/>), are skipped.
+    /// </summary>
+    internal static Dictionary<string, Category> GetCategoriesByAlias(SmartDbContext db)
+        => db.Categories
+            .ToList()
+            .Where(x => x.Alias.HasValue())
+            .ToDictionarySafe(x => x.Alias, x => x);
+
     public IList<Category> CategoriesSecondLevel()
     {
         var gridOrLinesTemplate = CategoryTemplates().Where(pt => pt.ViewPath == "CategoryTemplate.ProductsInGridOrLines").FirstOrDefault();
-        var categories = (_db.Categories.ToList()).ToDictionarySafe(x => x.Alias, x => x);
+        var categories = GetCategoriesByAlias(_db);
         var discounts = _db.Discounts.Where(x => x.DiscountTypeId == (int)DiscountType.AssignedToCategories).ToList();
 
         var categoryFashionJackets = new Category

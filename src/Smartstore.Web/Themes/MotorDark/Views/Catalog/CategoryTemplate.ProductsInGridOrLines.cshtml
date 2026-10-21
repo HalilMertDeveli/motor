@@ -28,9 +28,11 @@
                 var image = item.Image;
                 // Only real uploads count; Smartstore otherwise returns its generic placeholder image.
                 var hasImage = image?.File != null && image.HasImage();
+                // Product photos (white background) get a plate; uploaded category pictures fill the tile.
+                var tileClass = !hasImage ? "" : item.IsProductImage ? " motor-cat--product" : " motor-cat--image";
                 var linkTitle = T("Media.Category.ImageLinkTitleFormat", item.Name);
 
-                <div class="motor-cat@(hasImage ? " motor-cat--image" : "")" data-id="@item.Id" role="listitem">
+                <div class="motor-cat@(tileClass)" data-id="@item.Id" role="listitem">
                     <a class="motor-cat-link" href="@item.Url" title="@linkTitle">
                         @if (hasImage)
                         {
@@ -40,8 +42,8 @@
                         }
                         <partial name="Motor.CategoryIcon" model="item.Name.Value" />
                         <span class="motor-cat-name" sm-language-attributes-for="item.Name">@item.Name</span>
-                        <span lang="tr" class="motor-cat-cta" aria-hidden="true">
-                            <span>İncele</span>
+                        <span class="motor-cat-cta" aria-hidden="true">
+                            <span>@T("Themes.MotorDark.Categories.Explore")</span>
                             <svg><use href="#mi-arrow" /></svg>
                         </span>
                     </a>
@@ -116,25 +118,25 @@
             @* MotorDark: explicit empty state instead of a blank area *@
             @if (Model.Products == null || Model.Products.PagedList.TotalCount == 0)
             {
-                <div lang="tr" class="motor-empty">
+                <div class="motor-empty">
                     <partial name="Motor.CategoryIcon" model="Model.Name.Value" />
                     @if (Context.Request.QueryString.HasValue)
                     {
-                        <p class="motor-empty-title">Sonuç bulunamadı</p>
-                        <p class="motor-empty-text">Seçili filtrelere uygun ürün yok. Filtreleri değiştirmeyi ya da kaldırmayı dene.</p>
+                        <p class="motor-empty-title">@T("Themes.MotorDark.Category.NoResultsTitle")</p>
+                        <p class="motor-empty-text">@T("Themes.MotorDark.Category.NoResultsText")</p>
                     }
                     else
                     {
-                        <p class="motor-empty-title">Bu kategoride henüz ürün yok</p>
+                        <p class="motor-empty-title">@T("Themes.MotorDark.Category.EmptyTitle")</p>
                         <p class="motor-empty-text">
                             @(Model.SubCategories.Count > 0
-                                ? "Alt kategorilere göz atabilir ya da aradığın parçayı bize sorabilirsin."
-                                : "Ürünler yayına alındığında burada listelenecek. Aradığın parçayı bize sorabilirsin.")
+                                ? T("Themes.MotorDark.Category.EmptyTextWithSubcategories")
+                                : T("Themes.MotorDark.Category.EmptyText"))
                         </p>
                     }
                     <div class="motor-empty-actions">
-                        <a asp-route="Homepage" class="btn btn-secondary">Ana sayfa</a>
-                        <a asp-route="ContactUs" class="btn btn-outline-primary">Parça sor</a>
+                        <a asp-route="Homepage" class="btn btn-secondary">@T("Themes.MotorDark.Category.Homepage")</a>
+                        <a asp-route="ContactUs" class="btn btn-outline-primary">@T("Themes.MotorDark.Category.AskForPart")</a>
                     </div>
                 </div>
             }

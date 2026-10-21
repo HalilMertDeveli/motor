@@ -5,7 +5,16 @@
 @functions {
     static readonly (string Icon, string[] Keywords)[] IconMap =
     [
+        // Prosev catalog sections first: "Kask Aksesuarları" stays a helmet, "Çanta Yedek Parça" a bag.
+        ("mi-percent", ["kampanya", "campaign", "sale"]),
         ("mi-helmet", ["kask", "sürücü", "surucu", "helmet", "rider"]),
+        ("mi-bag", ["çanta", "canta", "bag", "case", "sissybar", "sırt dayama"]),
+        ("mi-headset", ["nterkom", "intercom"]), // "İ".ToLowerInvariant() is "i̇", so match without the first letter
+        ("mi-lock", ["kilit", "lock"]),
+        ("mi-goggles", ["gözlük", "gozluk", "goggle", "glasses"]),
+        ("mi-shield", ["koruma", "protect", "bandana", "maske", "mask"]),
+        ("mi-fairing", ["siperlik", "branda", "windscreen", "cover"]),
+        ("mi-oil", ["sprey", "spray"]),
         ("mi-jacket", ["mont", "giyim", "eldiven", "bot", "jacket", "apparel", "clothing"]),
         ("mi-brake", ["fren", "balata", "brake"]),
         ("mi-exhaust", ["egzoz", "exhaust", "performans", "performance"]),

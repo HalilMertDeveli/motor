@@ -13,6 +13,7 @@
     --motor-text-muted: #{$motor-text-muted};
     --motor-accent: #{$motor-accent};
     --motor-accent-hover: #{$motor-accent-hover};
+    --motor-accent-text: #{$motor-accent-text};
     --motor-accent-rgb: #{to-rgb($motor-accent)};
     --motor-on-accent: #{$motor-on-accent};
     --motor-font-display: #{$headings-font-family};
@@ -20,6 +21,14 @@
     --motor-ease-in-out: cubic-bezier(.65, 0, .35, 1);
     --motor-radius: #{$border-radius-lg};
     --shadow-intensity: 2.2;
+
+    // Bootstrap's "subtle"/"emphasis" tokens default to light-theme values (dark text on
+    // pale tints). Use Bootstrap's dark-mode formula so status text stays AA on dark surfaces.
+    @each $name, $color in ("primary": $motor-accent, "success": $success, "info": $info, "warning": $warning, "danger": $danger) {
+        --#{$name}-text-emphasis: #{mix(#fff, $color, 40%)};
+        --#{$name}-bg-subtle: #{mix(#000, $color, 80%)};
+        --#{$name}-border-subtle: #{mix(#000, $color, 40%)};
+    }
 
     color-scheme: dark;
 }
@@ -126,7 +135,7 @@ hr {
     font-weight: 600;
     letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: $motor-accent;
+    color: $motor-accent-text;
 
     &:before {
         content: '';
@@ -204,7 +213,7 @@ hr {
 }
 
 .btn-outline-primary {
-    --btn-color: #{$motor-accent};
+    --btn-color: #{$motor-accent-text};
     --btn-border-color: #{rgba($motor-accent, 0.6)};
     --btn-hover-color: #{$motor-on-accent};
     --btn-hover-bg: #{$motor-accent};
@@ -325,7 +334,7 @@ label.required,
 }
 
 .required:after {
-    color: $motor-accent;
+    color: $motor-accent-text;
 }
 
 .input-group-text,
@@ -451,7 +460,7 @@ label.required,
     &.active,
     &:active {
         background-color: rgba($motor-accent, 0.16);
-        color: $motor-accent;
+        color: $motor-accent-text;
     }
 }
 
@@ -484,7 +493,7 @@ label.required,
 
 .nav-tabs-line {
     --nav-underline-color: #{rgba(#fff, 0.12)};
-    --nav-underline-active-color: #{$motor-accent};
+    --nav-underline-active-color: #{$motor-accent-text};
 }
 
 .nav-tabs {
@@ -526,6 +535,8 @@ label.required,
         --alert-bg: #{rgba($color, 0.1)};
         --alert-border-color: #{rgba($color, 0.3)};
         --alert-link-color: #{lighten($color, 25%)};
+        // Flex paints the icon glyph in --alert-bg; on the dark tint it would be invisible
+        --alert-icon-color: #{$motor-bg};
         color: lighten($color, 18%);
         background-color: rgba($color, 0.1);
         border-color: rgba($color, 0.3);
@@ -545,8 +556,49 @@ label.required,
     color: $motor-text;
 }
 
-.badge-primary {
+.badge-primary,
+.badge-danger,
+.badge-warning,
+.badge-success {
+    // Dark text on the bright brand/status colors (white on #ff4d4f is only 3.3:1)
     color: $motor-on-accent;
+}
+
+// Touch targets (WCAG 2.5.5): at least 44px on coarse pointers
+// --------------------------------------------------
+
+@media (pointer: coarse) {
+    .btn:not(.btn-sm):not(.btn-xs):not(.btn-link),
+    .form-control:not(textarea):not(.form-control-sm),
+    .custom-select,
+    .form-select {
+        min-height: 44px;
+    }
+
+    // 16px avoids the iOS Safari zoom-on-focus
+    .form-control,
+    .custom-select,
+    .form-select {
+        font-size: 1rem;
+    }
+
+    // Taller label hit area for checkboxes/radios without changing their layout
+    .form-check-label,
+    .custom-control-label {
+        padding-block: 0.5rem;
+    }
+
+    .form-check-input {
+        margin-top: 0.75rem;
+    }
+}
+
+// Color swatches in product cards: 24px targets with spacing (WCAG 2.5.8)
+.art-color-opts .art-color-opt,
+.art-color-opt {
+    width: 24px;
+    height: 24px;
+    margin: 2px;
 }
 
 .bg-white {
@@ -611,7 +663,11 @@ label.required,
     background: transparent;
     border-color: $motor-line;
     color: $motor-text;
-    min-width: 42px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
 }
 

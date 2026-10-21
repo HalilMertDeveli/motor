@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MessageTemplate>
+	<To>{{ Email.DisplayName }} &lt;{{ Email.Email }}&gt;</To>
+	<Subject>{{ Store.Name }} - '{{ Product.Name | Truncate:30 }}' ürününün stok miktarı minimum stok miktarının altına düştü.</Subject>
+	<ModelTypes>Product</ModelTypes>
+	<Body><![CDATA[{% extends 'master' %}
+
+{% block 'body' %}
+
+<h1>
+  Stok miktarı minimumun altında,
+</h1>
+<p>
+  Aşağıdaki ürünün stok miktarı minimum stok miktarının altına düştü:
+</p>
+
+<p>
+  <b>Ürün:</b><br />
+  <a href="{{ Product.Url }}">{{ Product.Name }}</a>
+</p>
+
+<p>
+  <b>ID / Stok kodu:</b><br />
+  {{ Product.Id }} / {{ Product.Sku }}
+</p>
+
+<p>
+  <b>Stok adedi:</b><br />
+  {{ Product.StockQuantity }}
+</p>
+
+
+{% endblock %}]]></Body>
+</MessageTemplate>

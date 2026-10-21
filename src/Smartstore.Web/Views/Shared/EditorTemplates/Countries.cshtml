@@ -114,7 +114,7 @@
     {
         <option value="@item.Value"
                 attr-selected='(item.Selected, "selected")'
-                data-imageurl="@Url.Content(flagsPath + item.TwoLetterIsoCode.ToLower() + ".png")">
+                data-imageurl="@Url.Content(flagsPath + item.TwoLetterIsoCode.ToLowerInvariant() + ".png")">
             @item.Text
         </option>
     }

@@ -1,0 +1,93 @@
+@model TrackingConfigurationModel
+
+@{
+    Layout = "_ConfigureModule";
+}
+
+@await Component.InvokeAsync("StoreScope")
+
+<widget target-zone="admin_button_toolbar_before">
+    <button id="SaveConfigButton" type="submit" name="save" class="btn btn-warning" value="save">
+        <i class="fa fa-check"></i>
+        <span>@T("Admin.Common.Save")</span>
+    </button>
+</widget>
+
+<div class="alert alert-info">
+    @Html.Raw(T("Plugins.MotorShop.Tracking.AdminInstruction"))
+</div>
+
+<form asp-action="Configure" asp-controller="MotorTrackingAdmin" asp-area="Admin" method="post">
+    <div asp-validation-summary="All"></div>
+
+    <div class="adminContent">
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="Carriers" />
+            </div>
+            <div class="adminData">
+                <textarea asp-for="Carriers" class="form-control font-monospace" rows="6"
+                          placeholder="Kargo firması | https://kargo.example/takip?no={0}"></textarea>
+                <span asp-validation-for="Carriers"></span>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="DefaultCarrier" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="DefaultCarrier"></setting-editor>
+                <span asp-validation-for="DefaultCarrier"></span>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="ShowOnOrderDetails" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="ShowOnOrderDetails"></setting-editor>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="card mt-4">
+    <div class="card-header"><strong>@T("Plugins.MotorShop.Tracking.ActiveCarriers")</strong></div>
+    <div class="card-body">
+        @if (Model.ValidCarriers.Count == 0)
+        {
+            <p class="text-muted mb-0">@T("Plugins.MotorShop.Tracking.NoCarriers")</p>
+        }
+        else
+        {
+            <ul class="mb-0">
+                @foreach (var carrier in Model.ValidCarriers)
+                {
+                    <li><code>@carrier</code></li>
+                }
+            </ul>
+        }
+        @if (Model.InvalidLines.Count > 0)
+        {
+            <div class="alert alert-warning mt-3 mb-0">
+                <strong>@T("Plugins.MotorShop.Tracking.InvalidLines")</strong>
+                <ul class="mb-0">
+                    @foreach (var line in Model.InvalidLines)
+                    {
+                        <li><code>@line</code></li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header"><strong>@T("Plugins.MotorShop.Tracking.TurkishTemplates")</strong></div>
+    <div class="card-body">
+        <p>@T("Plugins.MotorShop.Tracking.TurkishTemplates.Hint")</p>
+        <form asp-action="ApplyTurkishTemplates" asp-controller="MotorTrackingAdmin" asp-area="Admin" method="post">
+            <button type="submit" class="btn btn-secondary">@T("Plugins.MotorShop.Tracking.TurkishTemplates.Apply")</button>
+        </form>
+    </div>
+</div>

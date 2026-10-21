@@ -1,0 +1,131 @@
+@model BlogPostModel
+@inject Smartstore.Core.Common.Services.IDateTimeHelper DateTimeHelper
+
+@{
+    Layout = "_Layout";
+
+    var post = Model.Post;
+    var isPage = post.Section == BlogSection.Page;
+    var published = DateTimeHelper.ConvertToUserTime(post.PublishedUtc, DateTimeKind.Utc);
+    var modified = DateTimeHelper.ConvertToUserTime(post.ModifiedUtc, DateTimeKind.Utc);
+    var label = post.Section == BlogSection.Guides ? T("Plugins.MotorShop.WordPress.Guide").ToString() : post.Categories.FirstOrDefault()?.Name;
+
+    Assets.AppendTitleParts(post.MetaTitle ?? post.Title);
+    Assets.AppendMetaDescriptionParts(post.MetaDescription ?? post.Excerpt);
+    Assets.AppendCanonicalUrlParts(Model.CanonicalUrl.HtmlEncode()!);
+
+    if (!isPage)
+    {
+        var store = CommonServices.StoreContext.CurrentStore;
+        Assets.JsonLd.BlogPosting.Merge(new
+        {
+            headline = post.Title.Truncate(110),
+            description = post.MetaDescription ?? post.Excerpt,
+            datePublished = post.PublishedUtc.ToString("o", CultureInfo.InvariantCulture),
+            dateModified = post.ModifiedUtc.ToString("o", CultureInfo.InvariantCulture),
+            url = Model.CanonicalUrl,
+            inLanguage = CommonServices.WorkContext.WorkingLanguage.LanguageCulture
+        });
+        Assets.JsonLd.BlogPosting.Obj("mainEntityOfPage", "WebPage", new Dictionary<string, object> { ["@id"] = Model.CanonicalUrl });
+        Assets.JsonLd.BlogPosting.Obj("publisher", "Organization", new { name = store.Name, url = store.GetBaseUrl() });
+        if (post.AuthorName.HasValue())
+        {
+            Assets.JsonLd.BlogPosting.Obj("author", "Person", new { name = post.AuthorName });
+        }
+        if (post.Image != null)
+        {
+            Assets.JsonLd.BlogPosting.Prop("image", post.Image.Url);
+        }
+        if (post.Tags.Count > 0)
+        {
+            Assets.JsonLd.BlogPosting.Prop("keywords", string.Join(", ", post.Tags.Select(x => x.Name)));
+        }
+    }
+}
+
+<partial name="MetaProperties" model="Model.MetaProperties" />
+
+<article class="page blog-page motor-blog motor-blog-post">
+    <header class="motor-blog-post-head">
+        @if (label.HasValue())
+        {
+            <span class="motor-eyebrow">@label</span>
+        }
+        <div class="page-title">
+            <h1>@post.Title</h1>
+        </div>
+        @if (!isPage)
+        {
+            <p class="motor-blog-post-meta">
+                <time datetime="@post.PublishedUtc.ToString("o", CultureInfo.InvariantCulture)">@published.ToString("d MMMM yyyy")</time>
+                @if (modified.Date > published.Date)
+                {
+                    <span aria-hidden="true">·</span>
+                    <span>@T("Plugins.MotorShop.WordPress.Updated", modified.ToString("d MMMM yyyy"))</span>
+                }
+                <span aria-hidden="true">·</span>
+                <span>@T("Plugins.MotorShop.WordPress.ReadingTime", post.ReadingMinutes)</span>
+                @if (post.AuthorName.HasValue())
+                {
+                    <span aria-hidden="true">·</span>
+                    <span>@post.AuthorName</span>
+                }
+            </p>
+        }
+    </header>
+
+    @if (post.Image != null)
+    {
+        <figure class="motor-blog-cover">
+            <img src="@post.Image.Url" alt="@post.Image.Alt" fetchpriority="high" decoding="async"
+                 attr-srcset='(post.Image.SrcSet.HasValue(), post.Image.SrcSet)'
+                 attr-sizes='(post.Image.SrcSet.HasValue(), "(min-width: 1200px) 1100px, 100vw")'
+                 attr-width='(post.Image.Width > 0, post.Image.Width.ToString(CultureInfo.InvariantCulture))'
+                 attr-height='(post.Image.Height > 0, post.Image.Height.ToString(CultureInfo.InvariantCulture))' />
+        </figure>
+    }
+
+    @* Sanitized by WordPressHtmlSanitizer before it was cached. *@
+    <div class="page-body prose html-editor-content motor-blog-content">
+        @Html.Raw(post.ContentHtml)
+    </div>
+
+    @if (post.Tags.Count > 0)
+    {
+        <nav class="motor-blog-tags" aria-label="@T("Plugins.MotorShop.WordPress.Tags")">
+            @foreach (var tag in post.Tags)
+            {
+                <a class="motor-blog-chip" href="@Url.BlogTagUrl(tag)" rel="tag">#@tag.Name</a>
+            }
+        </nav>
+    }
+</article>
+
+@if (Model.Products != null && Model.Products.Items.Count > 0)
+{
+    <section class="motor-blog-section motor-blog-products" aria-labelledby="blog-products-title">
+        <h2 id="blog-products-title" class="motor-blog-section-title">@T("Plugins.MotorShop.WordPress.RelatedProducts")</h2>
+        <div class="product-list-container">
+            <partial name="Product.List" model="Model.Products" />
+        </div>
+    </section>
+}
+
+@if (Model.Related.Count > 0)
+{
+    <section class="motor-blog-section" aria-labelledby="blog-related-title">
+        <h2 id="blog-related-title" class="motor-blog-section-title">@T("Plugins.MotorShop.WordPress.RelatedPosts")</h2>
+        <div class="motor-blog-grid" role="list" data-motor-stagger>
+            @foreach (var related in Model.Related)
+            {
+                <partial name="_PostCard" model="related" />
+            }
+        </div>
+    </section>
+}
+
+<p class="motor-blog-back">
+    <a class="motor-section-link" href="@Model.SectionUrl">
+        <span>@T("Plugins.MotorShop.WordPress.BackTo", Model.SectionTitle)</span>
+    </a>
+</p>

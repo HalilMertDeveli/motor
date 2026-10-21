@@ -553,7 +553,10 @@ public abstract class SmartODataController<TEntity> : ODataController
             return ODataErrorResult(oex.Error);
         }
 
-        return ODataErrorResult(ODataHelper.CreateError(message ?? ex.Message, statusCode, ex, details));
+        // Only expose the stack trace of the exception if configured.
+        var showDetails = HttpContext.RequestServices.GetRequiredService<IApplicationContext>().AppConfiguration.ShowCustomErrors;
+
+        return ODataErrorResult(ODataHelper.CreateError(message ?? ex.Message, statusCode, showDetails ? ex : null, details));
     }
 
     protected NotFoundODataResult NotFound(int id, string entityName = null)

@@ -76,7 +76,7 @@
         &.active {
             background: rgba($motor-accent, 0.1);
             border-color: $motor-line;
-            color: $motor-accent;
+            color: $motor-accent-text;
             font-weight: 600;
         }
     }
@@ -158,4 +158,13 @@
     background-color: rgba($motor-surface-2, 0.98);
     color: $motor-text;
     border-top: 1px solid $motor-line;
+}
+
+// Login during checkout: on phones and tablets show the guest/register options first,
+// so "continue as guest" is not hidden below the sign-in form.
+@include media-breakpoint-down(md) {
+    .register-box:has(.checkout-as-guest-button) {
+        order: -1;
+        border-bottom: 1px solid $motor-line;
+    }
 }

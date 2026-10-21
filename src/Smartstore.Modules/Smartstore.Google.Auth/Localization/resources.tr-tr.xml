@@ -1,0 +1,44 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.Smartstore.Google.Auth" AppendRootKey="false">
+        <Value>Google ile giriş</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.Smartstore.Google.Auth" AppendRootKey="false">
+        <Value>Mağazaya Google ile kimlik doğrulama ekler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[
+			<p>Google ile kimlik doğrulamayı ayarlamak için: </p>
+				<ul>
+					<li><a href="https://console.developers.google.com/apis/credentials">Google</a> üzerinde yeni kimlik bilgileri oluşturun.
+							Henüz yapmadıysanız önce <a href="https://console.cloud.google.com/">Google Cloud Platform</a> üzerinde yeni bir proje oluşturmanız gerekir.
+					</li>
+					<li><b>Create credentials &gt; OAuth client ID</b> seçeneğine tıklayın.</li>
+					<li>Kimlik bilgilerini bu formun alt kısmına girin.</li>.
+					<li>Aşağıda listelenen URL, <b>Sign-in credentials &gt; Authorized forwarding URIs</b> alanına girilmelidir.</li>.
+				</ul>
+			]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="Login">
+        <Value>Google ile giriş yap</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsumerKey">
+        <Value>API anahtarı</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsumerKey.Hint">
+        <Value>API anahtarınızı buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsumerSecret">
+        <Value>Gizli anahtar</Value>
+    </LocaleResource>
+    <LocaleResource Name="ConsumerSecret.Hint">
+        <Value>Gizli anahtarınızı (client secret) buraya girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri">
+        <Value>OAuth yönlendirme URI'si</Value>
+    </LocaleResource>
+    <LocaleResource Name="RedirectUri.Hint">
+        <Value>Google'da girilmesi gereken OAuth yönlendirme URI'si.</Value>
+    </LocaleResource>
+</Language>

@@ -25,7 +25,7 @@ internal class EcbExchangeRateProvider : IExchangeRateProvider
         Guard.NotEmpty(exchangeRateCurrencyCode);
 
         var result = new Dictionary<string, ExchangeRate>();
-        var targetCurrency = exchangeRateCurrencyCode.ToUpper();
+        var targetCurrency = exchangeRateCurrencyCode.ToUpperInvariant();
         var updateDate = DateTime.UtcNow;
 
         var client = _httpClientFactory.CreateClient();
@@ -57,7 +57,7 @@ internal class EcbExchangeRateProvider : IExchangeRateProvider
                 // Parse ECB rate.
                 var rate = new ExchangeRate
                 {
-                    CurrencyCode = childNode.Attributes["currency"].Value.EmptyNull().ToUpper(),
+                    CurrencyCode = childNode.Attributes["currency"].Value.EmptyNull().ToUpperInvariant(),
                     Rate = decimal.Parse(childNode.Attributes["rate"].Value, provider),
                     UpdatedOn = updateDate
                 };

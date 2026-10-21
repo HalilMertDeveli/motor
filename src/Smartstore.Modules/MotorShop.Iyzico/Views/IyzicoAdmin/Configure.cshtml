@@ -1,0 +1,352 @@
+@model ConfigurationModel
+
+@{
+    Layout = "_ConfigureProvider";
+}
+
+@await Component.InvokeAsync("StoreScope")
+
+<widget target-zone="admin_button_toolbar_before">
+    <button id="SaveConfigButton" type="submit" name="save" class="btn btn-warning" value="save">
+        <i class="fa fa-check"></i>
+        <span>@T("Admin.Common.Save")</span>
+    </button>
+</widget>
+
+<div class="alert alert-info">
+    @Html.Raw(T("Plugins.MotorShop.Iyzico.AdminInstruction"))
+</div>
+
+@if (Model.UseSandbox)
+{
+    <div class="alert alert-warning">@T("Plugins.MotorShop.Iyzico.SandboxActive")</div>
+}
+
+@if (Model.SkipResponseSignatureVerification)
+{
+    <div class="alert alert-danger">@Html.Raw(T("Plugins.MotorShop.Iyzico.ResponseSignatureOffWarning"))</div>
+}
+
+@if (Model.AllowUnsignedWebhooks)
+{
+    <div class="alert alert-danger">@Html.Raw(T("Plugins.MotorShop.Iyzico.UnsignedWebhooksWarning"))</div>
+}
+
+@if (Model.PendingRefunds.Count > 0)
+{
+    <div class="alert alert-danger">@T("Plugins.MotorShop.Iyzico.PendingRefunds.Alert", Model.PendingRefunds.Count)</div>
+}
+
+<form asp-action="Configure" autocomplete="off">
+    <div asp-validation-summary="All"></div>
+    <div class="adminContent">
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="UseSandbox" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="UseSandbox"></setting-editor>
+                <div class="form-text text-muted">@T("Plugins.MotorShop.Iyzico.EffectiveEndpoint"): <code>@Model.EffectiveEndpoint</code></div>
+            </div>
+        </div>
+
+        @if (Model.HasConfigurationOverride)
+        {
+            <div class="adminRow">
+                <div class="adminTitle"></div>
+                <div class="adminData wide">
+                    <div class="alert alert-success mb-0">@T("Plugins.MotorShop.Iyzico.KeysFromConfiguration")</div>
+                </div>
+            </div>
+        }
+
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="ApiKey" />
+            </div>
+            <div class="adminData wide">
+                <input type="password" asp-for="ApiKey" value="" class="form-control" autocomplete="new-password"
+                       placeholder="@(Model.HasApiKey ? T("Plugins.MotorShop.Iyzico.KeyStored") : T("Plugins.MotorShop.Iyzico.KeyNotSet"))" />
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="SecretKey" />
+            </div>
+            <div class="adminData wide">
+                <input type="password" asp-for="SecretKey" value="" class="form-control" autocomplete="new-password"
+                       placeholder="@(Model.HasSecretKey ? T("Plugins.MotorShop.Iyzico.KeyStored") : T("Plugins.MotorShop.Iyzico.KeyNotSet"))" />
+                <div class="form-text text-muted">@T("Plugins.MotorShop.Iyzico.KeysHint")</div>
+                @if (Model.HasApiKey || Model.HasSecretKey)
+                {
+                    <button type="submit" name="clearkeys" value="clearkeys" class="btn btn-sm btn-outline-danger mt-2">
+                        <span>@T("Plugins.MotorShop.Iyzico.ClearKeys")</span>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="CallbackUrl" />
+            </div>
+            <div class="adminData wide">
+                <input asp-for="CallbackUrl" readonly class="form-control" />
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="WebhookUrl" />
+            </div>
+            <div class="adminData wide">
+                <input asp-for="WebhookUrl" readonly class="form-control" />
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <label class="col-form-label">@T("Plugins.MotorShop.Iyzico.SignatureChecks")</label>
+            </div>
+            <div class="adminData wide">
+                <div>
+                    @T("Plugins.MotorShop.Iyzico.VerifyResponseSignature"):
+                    @if (Model.SkipResponseSignatureVerification)
+                    {
+                        <span class="badge badge-danger">@T("Plugins.MotorShop.Iyzico.SignatureOff")</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-success">@T("Plugins.MotorShop.Iyzico.SignatureOn")</span>
+                    }
+                </div>
+                <div>
+                    @T("Plugins.MotorShop.Iyzico.RequireWebhookSignature"):
+                    @if (Model.AllowUnsignedWebhooks)
+                    {
+                        <span class="badge badge-danger">@T("Plugins.MotorShop.Iyzico.SignatureOff")</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-success">@T("Plugins.MotorShop.Iyzico.SignatureOn")</span>
+                    }
+                </div>
+                <div class="form-text text-muted">@T("Plugins.MotorShop.Iyzico.SignatureChecks.Hint")</div>
+            </div>
+        </div>
+
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="AllowedCurrencies" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="AllowedCurrencies"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="MaxInstallmentSurchargePercent" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="MaxInstallmentSurchargePercent"></setting-editor>
+                <span asp-validation-for="MaxInstallmentSurchargePercent"></span>
+            </div>
+        </div>
+
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="EnableInstallments" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="EnableInstallments"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="EnabledInstallments" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="EnabledInstallments"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="MinOrderTotal" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="MinOrderTotal"></setting-editor>
+                <span asp-validation-for="MinOrderTotal"></span>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="MinInstallmentOrderTotal" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="MinInstallmentOrderTotal"></setting-editor>
+                <span asp-validation-for="MinInstallmentOrderTotal"></span>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="OrderMinimumsCustomerRoles" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="OrderMinimumsCustomerRoles"></setting-editor>
+            </div>
+        </div>
+
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="PlaceholderIdentityNumber" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="PlaceholderIdentityNumber"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="ItemizeBasket" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="ItemizeBasket"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="BasketItemCategory" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="BasketItemCategory"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="TryCancelOnSameDayFullRefund" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="TryCancelOnSameDayFullRefund"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="CancelUnpaidOrdersAfterHours" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="CancelUnpaidOrdersAfterHours"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="AdditionalFee" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="AdditionalFee"></setting-editor>
+            </div>
+        </div>
+        <div class="adminRow">
+            <div class="adminTitle">
+                <smart-label asp-for="AdditionalFeePercentage" />
+            </div>
+            <div class="adminData">
+                <setting-editor asp-for="AdditionalFeePercentage"></setting-editor>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (Model.PendingRefunds.Count > 0)
+{
+    <h4 class="mt-4">@T("Plugins.MotorShop.Iyzico.PendingRefunds")</h4>
+    <p class="text-muted">@T("Plugins.MotorShop.Iyzico.PendingRefunds.Hint")</p>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>@T("Admin.Orders.Fields.ID")</th>
+                    <th>@T("Plugins.MotorShop.Iyzico.PendingRefunds.Kind")</th>
+                    <th class="text-right">@T("Plugins.MotorShop.Iyzico.Amount")</th>
+                    <th>paymentId / paymentTransactionId</th>
+                    <th>conversationId</th>
+                    <th>@T("Plugins.MotorShop.Iyzico.Updated")</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.PendingRefunds)
+                {
+                    <tr>
+                        <td><a href="@Url.Action("Edit", "Order", new { area = "Admin", id = row.OrderId })">@row.OrderId</a></td>
+                        <td>@(row.IsCancel ? "cancel" : "refund")</td>
+                        <td class="text-right">@row.Amount.ToString("0.00", CultureInfo.InvariantCulture) @row.Currency</td>
+                        <td>@row.PaymentId / @row.PaymentTransactionIds</td>
+                        <td><code>@row.ConversationId</code></td>
+                        <td>@(row.SinceUtc?.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture)) UTC</td>
+                        <td class="text-nowrap">
+                            <form asp-action="CheckRefunds" method="post" class="d-inline">
+                                <input type="hidden" name="transactionId" value="@row.TransactionId" />
+                                <button type="submit" class="btn btn-sm btn-secondary">@T("Plugins.MotorShop.Iyzico.PendingRefunds.Check")</button>
+                            </form>
+                            <form asp-action="ResolveRefund" method="post" class="d-inline">
+                                <input type="hidden" name="transactionId" value="@row.TransactionId" />
+                                <input type="hidden" name="conversationId" value="@row.ConversationId" />
+                                <input type="hidden" name="processed" value="true" />
+                                <button type="submit" class="btn btn-sm btn-warning" data-confirm="@T("Plugins.MotorShop.Iyzico.PendingRefunds.ConfirmProcessed")" onclick="return confirm(this.dataset.confirm)">
+                                    @T("Plugins.MotorShop.Iyzico.PendingRefunds.MarkProcessed")
+                                </button>
+                            </form>
+                            <form asp-action="ResolveRefund" method="post" class="d-inline">
+                                <input type="hidden" name="transactionId" value="@row.TransactionId" />
+                                <input type="hidden" name="conversationId" value="@row.ConversationId" />
+                                <input type="hidden" name="processed" value="false" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="@T("Plugins.MotorShop.Iyzico.PendingRefunds.ConfirmNotProcessed")" onclick="return confirm(this.dataset.confirm)">
+                                    @T("Plugins.MotorShop.Iyzico.PendingRefunds.MarkNotProcessed")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<h4 class="mt-4">@T("Plugins.MotorShop.Iyzico.RecentTransactions")</h4>
+@if (Model.RecentTransactions.Count == 0)
+{
+    <p class="text-muted">@T("Plugins.MotorShop.Iyzico.NoTransactions")</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>@T("Admin.Orders.Fields.ID")</th>
+                    <th>@T("Plugins.MotorShop.Iyzico.Status")</th>
+                    <th class="text-right">@T("Plugins.MotorShop.Iyzico.Amount")</th>
+                    <th class="text-right">@T("Plugins.MotorShop.Iyzico.PaidPrice")</th>
+                    <th class="text-right">@T("Plugins.MotorShop.Iyzico.Refunded")</th>
+                    <th>@T("Plugins.MotorShop.Iyzico.Installment")</th>
+                    <th>paymentId</th>
+                    <th>@T("Plugins.MotorShop.Iyzico.LastError")</th>
+                    <th>@T("Plugins.MotorShop.Iyzico.Updated")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Model.RecentTransactions)
+                {
+                    <tr>
+                        <td><a href="@Url.Action("Edit", "Order", new { area = "Admin", id = row.OrderId })">@row.OrderId</a></td>
+                        <td>@row.Status</td>
+                        <td class="text-right">@row.Amount.ToString("0.00", CultureInfo.InvariantCulture) @row.Currency</td>
+                        <td class="text-right">@(row.PaidPrice?.ToString("0.00", CultureInfo.InvariantCulture))</td>
+                        <td class="text-right">@row.RefundedAmount.ToString("0.00", CultureInfo.InvariantCulture)</td>
+                        <td>@row.Installment</td>
+                        <td>@row.PaymentId</td>
+                        <td>@row.LastErrorCode</td>
+                        <td>@row.UpdatedOnUtc.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture) UTC</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
