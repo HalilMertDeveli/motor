@@ -115,6 +115,22 @@ grants:
 * Smartstore installs and runs as `motor_app`, using only `MOTOR_DB_CONNECTION_STRING`
   (see the PR for the exact commands and results).
 
-Not verified without a real project: the pooler's TLS certificate under `VerifyFull`, pool
-limits per compute size, the Data API toggle, and backup/PITR behaviour. Repeat section 4
-on the preview project before production.
+Verified on the real project `prosev-prod` (eu-central-1, 2026-10-20):
+
+* On Supabase, `postgres` is not a superuser. `01-motor-app-role.sql` therefore grants
+  `motor_app` to `postgres`; without it the default-privilege statements fail with
+  "permission denied to change default privileges". The local emulation did not show this.
+* The session pooler of this project is `aws-1-eu-central-1.pooler.supabase.com:5432`
+  (the `aws-0-...` host answers "tenant/user not found"). Always take the host from the
+  Connect dialog.
+* `motor_app` logs in through the pooler with `SSL Mode=VerifyFull` against
+  "Supabase Root 2021 CA" (`prod-ca-2021.crt`, also at `deploy/fly/supabase-ca.crt`);
+  `search_path` and `citext` resolve as intended.
+* The password never has to leave the owner's machine: compute the
+  `SCRAM-SHA-256$4096:...` verifier locally and run `ALTER ROLE motor_app PASSWORD
+  '<verifier>'`. PostgreSQL stores a pre-hashed verifier as is.
+
+Not verified yet: pool limits per compute size, the Data API toggle, and backup/PITR
+behaviour.
+
+Hosting on Fly.io: [fly.md](fly.md).

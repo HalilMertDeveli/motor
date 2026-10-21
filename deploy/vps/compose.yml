@@ -76,6 +76,8 @@ services:
     environment:
       MOTOR_DOMAIN: ${MOTOR_DOMAIN}
       MOTOR_ACME_EMAIL: ${MOTOR_ACME_EMAIL:?Set MOTOR_ACME_EMAIL in .env}
+      # First installation only (see Caddyfile); empty = installer blocked for everyone.
+      MOTOR_INSTALL_ALLOW_IP: ${MOTOR_INSTALL_ALLOW_IP:-255.255.255.255/32}
       MOTOR_MAX_UPLOAD_BYTES: ${MOTOR_MAX_UPLOAD_BYTES:-67108864}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro

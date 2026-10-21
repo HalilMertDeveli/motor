@@ -1,0 +1,14 @@
+# DEMO ONLY: run the stack against a SQLite database inside the tenants volume
+# (App_Data/Tenants/<tenant>/Settings.txt) instead of Supabase. Used for the
+# customer demo on the Oracle Always Free VM; not for real orders (no off-site
+# database backup, single file).
+#
+#   docker compose -f compose.yml -f compose.sqlite-demo.yml up -d
+#
+# .env still needs a non-empty placeholder MOTOR_DB_CONNECTION_STRING (compose.yml
+# requires it); it is cleared here, so the app uses Settings.txt.
+services:
+  web:
+    environment:
+      MOTOR_DB_PROVIDER: ""
+      MOTOR_DB_CONNECTION_STRING: ""

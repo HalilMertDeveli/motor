@@ -22,6 +22,10 @@ begin
 end
 $$;
 
+-- On Supabase "postgres" is not a superuser: it may change motor_app's default
+-- privileges (below) only as a member of motor_app.
+grant motor_app to postgres;
+
 grant connect, temporary on database postgres to motor_app;
 grant usage, create on schema public to motor_app;
 
