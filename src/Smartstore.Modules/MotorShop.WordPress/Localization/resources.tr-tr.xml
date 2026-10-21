@@ -1,0 +1,78 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+  <LocaleResource Name="Plugins.FriendlyName.MotorShop.WordPress" AppendRootKey="false"><Value>WordPress Blog</Value></LocaleResource>
+  <LocaleResource Name="Plugins.Description.MotorShop.WordPress" AppendRootKey="false"><Value>WordPress'te yayımlanan yazıları, rehberleri ve sayfaları /blog ve /rehberler altında MOTOR vitrininde gösterir. Ürün, stok, sipariş ve ödeme MOTOR'da kalır.</Value></LocaleResource>
+  <LocaleResource Name="Plugins.Permissions.DisplayName.WordPress" AppendRootKey="false"><Value>WordPress blog</Value></LocaleResource>
+
+  <LocaleResource Name="Blog"><Value>Blog</Value></LocaleResource>
+  <LocaleResource Name="Blog.Eyebrow"><Value>Sürüş notları</Value></LocaleResource>
+  <LocaleResource Name="Blog.Intro"><Value>Motosiklet bakımı, ekipman seçimi ve sürüş üzerine yazılar.</Value></LocaleResource>
+  <LocaleResource Name="Guides"><Value>Rehberler</Value></LocaleResource>
+  <LocaleResource Name="Guides.Eyebrow"><Value>Adım adım</Value></LocaleResource>
+  <LocaleResource Name="Guides.Intro"><Value>Bakım, montaj ve doğru parça seçimi için teknik rehberler.</Value></LocaleResource>
+  <LocaleResource Name="Guide"><Value>Rehber</Value></LocaleResource>
+  <LocaleResource Name="PageNumber"><Value>Sayfa {0}</Value></LocaleResource>
+  <LocaleResource Name="Categories"><Value>Kategoriler</Value></LocaleResource>
+  <LocaleResource Name="AllPosts"><Value>Tümü</Value></LocaleResource>
+  <LocaleResource Name="Search"><Value>Ara</Value></LocaleResource>
+  <LocaleResource Name="Search.Placeholder"><Value>Blogda ara</Value></LocaleResource>
+  <LocaleResource Name="SearchResults"><Value>"{1}" için {0} sonuç</Value></LocaleResource>
+  <LocaleResource Name="NoSearchResults"><Value>Aramanızla eşleşen yazı bulunamadı.</Value></LocaleResource>
+  <LocaleResource Name="NoPosts"><Value>Burada henüz yayımlanmış yazı yok.</Value></LocaleResource>
+  <LocaleResource Name="StaleNotice"><Value>İçerik şu an güncellenemiyor; son kaydedilen sürüm gösteriliyor.</Value></LocaleResource>
+  <LocaleResource Name="Unavailable"><Value>Blog şu anda kullanılamıyor. Mağaza, sepet ve ödeme normal çalışıyor.</Value></LocaleResource>
+  <LocaleResource Name="BackToShop"><Value>Mağazaya dön</Value></LocaleResource>
+  <LocaleResource Name="Pagination"><Value>Sayfalar</Value></LocaleResource>
+  <LocaleResource Name="Previous"><Value>Önceki</Value></LocaleResource>
+  <LocaleResource Name="Next"><Value>Sonraki</Value></LocaleResource>
+  <LocaleResource Name="PageOf"><Value>Sayfa {0} / {1}</Value></LocaleResource>
+  <LocaleResource Name="ReadingTime"><Value>{0} dk okuma</Value></LocaleResource>
+  <LocaleResource Name="Updated"><Value>Güncellendi: {0}</Value></LocaleResource>
+  <LocaleResource Name="Tags"><Value>Etiketler</Value></LocaleResource>
+  <LocaleResource Name="RelatedProducts"><Value>Yazıda geçen ürünler</Value></LocaleResource>
+  <LocaleResource Name="RelatedPosts"><Value>İlgili yazılar</Value></LocaleResource>
+  <LocaleResource Name="BackTo"><Value>Tüm yazılar: {0}</Value></LocaleResource>
+
+  <LocaleResource Name="Admin.Instruction"><Value><![CDATA[WordPress içerik kaynağı olarak bağlanır (headless). Bağlantı ayarları güvenlik nedeniyle burada düzenlenmez; ortam değişkenleri ile verilir: <code>MotorShop__WordPress__Enabled</code>, <code>MotorShop__WordPress__BaseUrl</code>, isteğe bağlı <code>MotorShop__WordPress__UserName</code> ve <code>MotorShop__WordPress__ApplicationPassword</code> (yönetici parolası değil, WordPress uygulama parolası). Ayrıntılar: <code>docs/motor/wordpress.md</code>.]]></Value></LocaleResource>
+  <LocaleResource Name="Admin.Connection"><Value>Bağlantı</Value></LocaleResource>
+  <LocaleResource Name="Admin.Status"><Value>Durum</Value></LocaleResource>
+  <LocaleResource Name="Admin.Disabled"><Value>Kapalı</Value></LocaleResource>
+  <LocaleResource Name="Admin.Misconfigured"><Value>Yapılandırma hatalı</Value></LocaleResource>
+  <LocaleResource Name="Admin.Connected"><Value>Bağlı</Value></LocaleResource>
+  <LocaleResource Name="Admin.NotConnected"><Value>Bağlantı yok</Value></LocaleResource>
+  <LocaleResource Name="Admin.Host"><Value>WordPress adresi</Value></LocaleResource>
+  <LocaleResource Name="Admin.Authentication"><Value>Kimlik doğrulama</Value></LocaleResource>
+  <LocaleResource Name="Admin.AuthAppPassword"><Value>Uygulama parolası (tanımlı, gösterilmez)</Value></LocaleResource>
+  <LocaleResource Name="Admin.AuthPublic"><Value>Yok (herkese açık REST API)</Value></LocaleResource>
+  <LocaleResource Name="Admin.Webhook"><Value>Önbellek webhook'u</Value></LocaleResource>
+  <LocaleResource Name="Admin.CacheDuration"><Value>Önbellek süresi</Value></LocaleResource>
+  <LocaleResource Name="Admin.Minutes"><Value>{0} dakika</Value></LocaleResource>
+  <LocaleResource Name="Admin.GuideCategory"><Value>Rehber kategorisi (slug)</Value></LocaleResource>
+  <LocaleResource Name="Admin.ProductTagPrefix"><Value>Ürün etiketi öneki</Value></LocaleResource>
+  <LocaleResource Name="Admin.OpenWordPress"><Value>WordPress yönetimini aç</Value></LocaleResource>
+  <LocaleResource Name="Admin.OpenWordPressHint"><Value>Yeni sekmede açılır. WordPress'e kendi kullanıcınızla giriş yapılır; MOTOR oturumu paylaşılmaz.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Sync"><Value>İçerik ve senkronizasyon</Value></LocaleResource>
+  <LocaleResource Name="Admin.PublishedPosts"><Value>Yayımlanmış yazı</Value></LocaleResource>
+  <LocaleResource Name="Admin.PublishedPages"><Value>Yayımlanmış sayfa</Value></LocaleResource>
+  <LocaleResource Name="Admin.Categories"><Value>Kategori</Value></LocaleResource>
+  <LocaleResource Name="Admin.LastSuccess"><Value>Son başarılı istek</Value></LocaleResource>
+  <LocaleResource Name="Admin.LastFailure"><Value>Son hata</Value></LocaleResource>
+  <LocaleResource Name="Admin.ConsecutiveFailures"><Value>Art arda hata</Value></LocaleResource>
+  <LocaleResource Name="Admin.LastCacheClear"><Value>Son önbellek yenileme</Value></LocaleResource>
+  <LocaleResource Name="Admin.PerInstance"><Value>Bu değerler uygulama örneği başınadır ve yeniden başlatmada sıfırlanır.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Never"><Value>Hiç</Value></LocaleResource>
+  <LocaleResource Name="Admin.RecentPosts"><Value>Son yazılar</Value></LocaleResource>
+  <LocaleResource Name="Admin.NoPosts"><Value>Gösterilecek yazı yok.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Title"><Value>Başlık</Value></LocaleResource>
+  <LocaleResource Name="Admin.Section"><Value>Bölüm</Value></LocaleResource>
+  <LocaleResource Name="Admin.Published"><Value>Yayın tarihi</Value></LocaleResource>
+  <LocaleResource Name="Admin.Errors"><Value>Entegrasyon hataları</Value></LocaleResource>
+  <LocaleResource Name="Admin.NoErrors"><Value>Kayıtlı hata yok.</Value></LocaleResource>
+  <LocaleResource Name="Admin.ClearCache"><Value>Önbelleği yenile</Value></LocaleResource>
+  <LocaleResource Name="Admin.CacheCleared"><Value>Blog önbelleği yenilendi ({0} kayıt). Sonraki ziyaret güncel içeriği WordPress'ten alır.</Value></LocaleResource>
+  <LocaleResource Name="Admin.RebuildSitemap"><Value>Site haritasını yenile</Value></LocaleResource>
+  <LocaleResource Name="Admin.SitemapInvalidated"><Value>XML site haritası bir sonraki istekte güncel yazılarla yeniden oluşturulacak.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Warning.DevFlags"><Value>Canlı ortamda AllowInsecureHttp veya AllowPrivateNetwork açık. Bunlar yalnızca yerel geliştirme içindir; kapatın.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Warning.ShortSecret"><Value>WebhookSecret en az {0} karakter olmalı; webhook kapalı.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Warning.NoGuideCategory"><Value>WordPress'te "{0}" slug'lı kategori yok; /rehberler boş görünür.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Warning.SlugCollision"><Value>"{0}" adresi bir {1} kaydına (#{2}) ait ve blog adresiyle çakışıyor. Bu kaydın SEO adını değiştirin.</Value></LocaleResource>
+</Language>
