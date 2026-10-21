@@ -1,0 +1,27 @@
+@{
+    var activeTab = ViewData["PanelTab"] as string ?? "products";
+    var language = WorkContext.WorkingLanguage;
+}
+<!DOCTYPE html>
+<html lang="@language.LanguageCulture" dir="@(language.Rtl ? "rtl" : "ltr")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="@Url.Content("~/Modules/MotorShop.AdminPanel/css/motor-panel.css")" asp-append-version="true" />
+</head>
+<body class="mp">
+    <a class="mp-skip" href="#mp-main">@T("Plugins.MotorShop.AdminPanel.SkipToContent")</a>
+
+    @await Component.InvokeAsync("MotorPanelHeader", new { activeTab })
+
+    <main id="mp-main" class="mp-main" tabindex="-1">
+        @RenderBody()
+    </main>
+
+    <div class="mp-toasts" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="@Url.Content("~/Modules/MotorShop.AdminPanel/js/motor-panel.js")" asp-append-version="true" defer></script>
+</body>
+</html>

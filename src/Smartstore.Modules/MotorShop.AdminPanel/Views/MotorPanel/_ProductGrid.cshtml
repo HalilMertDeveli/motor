@@ -1,0 +1,184 @@
+@model ProductListModel
+@{
+    var f = Model.Filter;
+
+    string SortUrl(ProductSort asc, ProductSort desc)
+        => Url.Action("Index", "MotorPanel", f.ToRouteValues(1, f.Sort == asc ? desc : asc)) + "#mp-products";
+
+    string AriaSort(ProductSort asc, ProductSort desc)
+        => f.Sort == asc ? "ascending" : f.Sort == desc ? "descending" : null;
+}
+
+<div class="mp-grid__meta">
+    <span>@T("Plugins.MotorShop.AdminPanel.ResultCount", Model.TotalCount.ToString("N0"))</span>
+    <span class="mp-muted">@T("Plugins.MotorShop.AdminPanel.PricesIn", Model.CurrencyCode)</span>
+</div>
+
+@if (Model.Rows.Count == 0)
+{
+    <div class="mp-empty">
+        <p>@T("Plugins.MotorShop.AdminPanel.NoProducts")</p>
+        <a class="mp-link" href="@Url.Action("Index", "MotorPanel", new { area = "Admin" })#mp-products">@T("Plugins.MotorShop.AdminPanel.ResetFilters")</a>
+    </div>
+}
+else
+{
+    <div class="mp-table-wrap">
+        <table class="mp-table mp-table--products">
+            <thead>
+                <tr>
+                    <th scope="col" class="mp-col-thumb"><span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Col.Image")</span></th>
+                    <th scope="col" aria-sort="@AriaSort(ProductSort.NameAsc, ProductSort.NameDesc)">
+                        <a class="mp-sort" href="@SortUrl(ProductSort.NameAsc, ProductSort.NameDesc)">@T("Plugins.MotorShop.AdminPanel.Col.Name")</a>
+                    </th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Sku")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Categories")</th>
+                    <th scope="col" class="mp-num" aria-sort="@AriaSort(ProductSort.PriceAsc, ProductSort.PriceDesc)">
+                        <a class="mp-sort" href="@SortUrl(ProductSort.PriceAsc, ProductSort.PriceDesc)">@T("Plugins.MotorShop.AdminPanel.Col.Price")</a>
+                    </th>
+                    <th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Col.SpecialPrice")</th>
+                    <th scope="col" class="mp-num" aria-sort="@AriaSort(ProductSort.StockAsc, ProductSort.StockDesc)">
+                        <a class="mp-sort" href="@SortUrl(ProductSort.StockAsc, ProductSort.StockDesc)">@T("Plugins.MotorShop.AdminPanel.Col.Stock")</a>
+                    </th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.PriceVisibility")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Status")</th>
+                    <th scope="col" class="mp-col-actions"><span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Col.Actions")</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Rows)
+                {
+                    var editUrl = Url.Action("Edit", "Product", new { area = "Admin", id = p.Id });
+                    <tr>
+                        <td class="mp-col-thumb">
+                            @if (p.ThumbnailUrl.HasValue())
+                            {
+                                <img class="mp-thumb" src="@p.ThumbnailUrl" alt="" loading="lazy" width="40" height="40" />
+                            }
+                            else
+                            {
+                                <span class="mp-thumb mp-thumb--empty" aria-hidden="true"></span>
+                            }
+                        </td>
+                        <td class="mp-col-name"><a class="mp-link mp-link--plain" href="@editUrl">@p.Name</a></td>
+                        <td class="mp-mono">@(p.Sku.NullEmpty() ?? "-")</td>
+                        <td class="mp-col-cats">
+                            @if (p.Categories.Count == 0)
+                            {
+                                <span class="mp-muted">-</span>
+                            }
+                            else
+                            {
+                                <span class="mp-truncate" title="@string.Join(", ", p.Categories)">@string.Join(", ", p.Categories)</span>
+                            }
+                        </td>
+                        <td class="mp-num mp-nowrap">
+                            @p.Price
+                            @if (p.Price.Amount <= 0 && !p.CallForPrice)
+                            {
+                                <span class="mp-badge mp-badge--red" title="@T("Plugins.MotorShop.AdminPanel.ZeroPrice.Hint")">@T("Plugins.MotorShop.AdminPanel.ZeroPrice")</span>
+                            }
+                        </td>
+                        <td class="mp-num mp-nowrap">
+                            @if (p.SpecialPrice.HasValue)
+                            {
+                                <span class="@(p.SpecialPriceActive ? "" : "mp-muted mp-strike")" title="@(p.SpecialPriceActive ? null : T("Plugins.MotorShop.AdminPanel.SpecialPriceInactive").Value)">@p.SpecialPrice.Value</span>
+                            }
+                            else
+                            {
+                                <span class="mp-muted">-</span>
+                            }
+                        </td>
+                        <td class="mp-num mp-nowrap">
+                            @switch (p.Stock)
+                            {
+                                case StockState.InStock:
+                                    <span class="mp-badge mp-badge--green">@p.StockQuantity.ToString("N0")</span>
+                                    break;
+                                case StockState.OutOfStock:
+                                    <span class="mp-badge mp-badge--red">@p.StockQuantity.ToString("N0")</span>
+                                    break;
+                                case StockState.ByAttributes:
+                                    <span class="mp-badge mp-badge--gray">@T("Plugins.MotorShop.AdminPanel.Stock.ByAttributes")</span>
+                                    break;
+                                default:
+                                    <span class="mp-badge mp-badge--gray">@T("Plugins.MotorShop.AdminPanel.Stock.NotTracked")</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            @if (p.CallForPrice)
+                            {
+                                <span class="mp-badge mp-badge--amber">@T("Plugins.MotorShop.AdminPanel.Price.CallForPrice")</span>
+                            }
+                            else
+                            {
+                                <span class="mp-badge mp-badge--green">@T("Plugins.MotorShop.AdminPanel.Price.Visible")</span>
+                            }
+                        </td>
+                        <td>
+                            @if (p.Published)
+                            {
+                                <span class="mp-badge mp-badge--blue">@T("Plugins.MotorShop.AdminPanel.Status.Published")</span>
+                            }
+                            else
+                            {
+                                <span class="mp-badge mp-badge--gray">@T("Plugins.MotorShop.AdminPanel.Status.Unpublished")</span>
+                            }
+                        </td>
+                        <td class="mp-col-actions">
+                            <a class="mp-icon-btn" href="@editUrl" title="@T("Plugins.MotorShop.AdminPanel.Action.Edit")">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Zm9-13 4 4" /></svg>
+                                <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.Edit"): @p.Name</span>
+                            </a>
+                            @if (p.Slug.HasValue())
+                            {
+                                <a class="mp-icon-btn" href="@Url.RouteUrl("Product", new { SeName = p.Slug, area = "" })" target="_blank" rel="noopener" title="@T("Plugins.MotorShop.AdminPanel.Action.View")">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>
+                                    <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.View"): @p.Name</span>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        var first = Math.Max(1, f.Page - 2);
+        var last = Math.Min(Model.TotalPages, f.Page + 2);
+        <nav class="mp-pager" aria-label="@T("Plugins.MotorShop.AdminPanel.Pagination")">
+            @if (f.Page > 1)
+            {
+                <a class="mp-pager__link" href="@Url.Action("Index", "MotorPanel", f.ToRouteValues(f.Page - 1))#mp-products" rel="prev">‹ @T("Plugins.MotorShop.AdminPanel.Prev")</a>
+            }
+            @if (first > 1)
+            {
+                <a class="mp-pager__link" href="@Url.Action("Index", "MotorPanel", f.ToRouteValues(1))#mp-products">1</a>
+                @if (first > 2) { <span class="mp-pager__gap">…</span> }
+            }
+            @for (var i = first; i <= last; i++)
+            {
+                if (i == f.Page)
+                {
+                    <span class="mp-pager__link is-current" aria-current="page">@i</span>
+                }
+                else
+                {
+                    <a class="mp-pager__link" href="@Url.Action("Index", "MotorPanel", f.ToRouteValues(i))#mp-products">@i</a>
+                }
+            }
+            @if (last < Model.TotalPages)
+            {
+                @if (last < Model.TotalPages - 1) { <span class="mp-pager__gap">…</span> }
+                <a class="mp-pager__link" href="@Url.Action("Index", "MotorPanel", f.ToRouteValues(Model.TotalPages))#mp-products">@Model.TotalPages</a>
+            }
+            @if (f.Page < Model.TotalPages)
+            {
+                <a class="mp-pager__link" href="@Url.Action("Index", "MotorPanel", f.ToRouteValues(f.Page + 1))#mp-products" rel="next">@T("Plugins.MotorShop.AdminPanel.Next") ›</a>
+            }
+        </nav>
+    }
+}
