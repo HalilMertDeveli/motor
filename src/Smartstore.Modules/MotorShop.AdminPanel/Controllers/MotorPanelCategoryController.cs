@@ -55,14 +55,7 @@ public class MotorPanelCategoryController : AdminController
             return Json(new { success = false, errors = new Dictionary<string, string> { [""] = await Services.Permissions.GetUnauthorizedMessageAsync(permission) } });
         }
 
-        var errors = new Dictionary<string, string>();
-        foreach (var (key, entry) in ModelState)
-        {
-            if (entry.Errors.Count > 0)
-            {
-                errors[key] = entry.Errors[0].ErrorMessage.NullEmpty() ?? T("Plugins.MotorShop.AdminPanel.InvalidValue");
-            }
-        }
+        var errors = PanelForms.Errors(ModelState, T);
 
         if (errors.Count == 0)
         {

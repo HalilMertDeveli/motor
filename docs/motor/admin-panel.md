@@ -15,20 +15,35 @@ Storefront (MotorDark) ─┐
 /motor-panel (this) ────┘
 ```
 
-## Phase 1 (this module version)
+## Status per module
+
+| Module | Route | State | Not in the panel (and why) |
+| --- | --- | --- | --- |
+| Dashboard | `/motor-panel` | Fully functional | — |
+| Products | `/motor-panel` (list), drawer | Fully functional | Variant matrices, images, tax class, other languages: classic editor (linked), to avoid duplicating Smartstore's editors |
+| Categories | `/motor-panel/categories` | Fully functional | ACL/store mappings, localized names: classic editor |
+| Orders | `/motor-panel/orders` | Partially functional | Refunds, captures, voids and editing order items: payment module / classic admin. iyzico payments are excluded on purpose |
+| Shipments | `/motor-panel/shipments`, order drawer | Fully functional | Live courier API: none selected (tracking links come from MotorShop.Tracking templates) |
+| Customers | `/motor-panel/customers` | Read + details | Editing customers, roles, passwords: classic admin |
+| Invoices | `/motor-panel/invoices` | Requires external credentials | No certified e-Arşiv/e-Fatura integrator; status only |
+| Reports | `/motor-panel/reports` | Fully functional | Profit (product costs) and exports: classic reports |
+| Pages & blog | `/motor-panel/content` | Fully functional for pages | Blog posts are edited in WordPress (MotorShop.WordPress), the panel links to it |
+| Coupons | `/motor-panel/coupons` | Fully functional | Rule sets, manufacturer discounts, badge texts: classic editor |
+| Settings | `/motor-panel/settings` | Partially functional | Currency, tax, payment methods and e-mail accounts are shown read-only and linked (they change prices and payments directly) |
+| Hide all prices | dashboard card 4 | Fully functional | — |
+
+## Phase 1: shell and dashboard
 
 | Area | State | Notes |
 | --- | --- | --- |
-| Entry route, layout, header, tabs | Done | Light theme, independent of MotorDark CSS. Store name and logo come from the current `Store`; title and accent color from `MotorPanelSettings` (empty = store name / MotorDark accent `#ff5a1f`). |
+| Entry route, layout, header, tabs | Done | Light theme, independent of MotorDark CSS. Store name and logo come from the current `Store`; title and accent color from `MotorPanelSettings` (empty = store name / MotorDark accent `#ff5a1f`). Every tab is a panel page; each is shown only with its read permission. |
 | Card "Toplam ürün" | Done | Opens the product list. |
 | Card "Stokta yok" | Done | Opens the list filtered by `stock=OutOfStock`. |
 | Card "Gizli fiyatlı ürünler" | Done | `CallForPrice` products; opens the list filtered by `price=CallForPrice`. Unpublished ≠ hidden price. |
-| Card "Fiyat görünürlüğü" | Read-only | Shows Smartstore's native "Display prices" permission for the Guests and Registered roles and links to the customer roles. The global "hide all prices" switch is **not** in this phase, see below. |
-| Recent orders (5) | Done | Number links to the classic order editor; "Tüm siparişler" to the classic order list. Store-scoped like the classic dashboard (`ApplyCustomerFilter`). |
+| Card "Tüm fiyatları gizle" | Done (phase 2) | See phase 2. |
+| Recent orders (5) | Done | Store-scoped like the classic dashboard (`ApplyCustomerFilter`). |
 | Currency strip | Done | Configured rates only (`Currency.Rate`, `UpdatedOnUtc`). No external rate API. A TRY-only store shows a single-currency notice. |
-| Product list | Done (read-only) | Search by name or SKU (Smartstore's LINQ catalog search, same as the classic grid), category, stock, price visibility (incl. **"Fiyatsız"**: price 0 and not call-for-price), publication, sort by name/price/stock/newest, server-side paging (25/50/100). Deep links, back/forward, debounced search; works without JavaScript too. |
-| Product actions | Links | "Düzenle" opens the classic product editor, "Mağazada görüntüle" the published product page, "Yeni ürün" the classic create page. |
-| Other tabs | Links | Orders, customers, reports (bestsellers), pages, settings, coupons, categories and shipments open the classic admin page; each tab is shown only with the matching read permission and marked with an "opens classic" icon. |
+| Product list | Done | Search by name or SKU (Smartstore's LINQ catalog search, same as the classic grid), category, stock, price visibility (incl. **"Fiyatsız"**: price 0 and not call-for-price), publication, sort by name/price/stock/newest, server-side paging (25/50/100). Deep links, back/forward, debounced search; works without JavaScript too. |
 
 ### Counting rules
 
@@ -70,20 +85,28 @@ Verified locally with the lock on: product page without price and buy button; `P
 
 Verified locally on order #8 (bank transfer): note, shipment, deliver-before-ship refused, ship, ship again refused, complete-unpaid refused, mark paid, cancel-paid refused, deliver → Smartstore completed the order. Order #7 (unpaid) cancelled, second cancel refused. Not verified: a real partial shipment, because every QA order has quantity 1.
 
-### Brand settings
+## Phase 5: reports, pages, coupons, settings
 
-There is no settings page yet. Until phase 5, set them under Admin →
-Configuration → Settings → All settings: `MotorPanelSettings.PanelTitle`
-(empty = store name) and `MotorPanelSettings.AccentColor` (`#rrggbb`, empty =
-`#ff5a1f`). The logo is the store logo (Admin → Configuration → Stores).
+| Area | State | Notes |
+| --- | --- | --- |
+| Reports | Done | 7 / 30 / 90 days, 12 months or a custom range (max. two years), by order date in the admin time zone. **Gross revenue** = order totals of orders whose money was collected (Paid, PartiallyRefunded, Refunded); **refunds** are shown and deducted for **net revenue**; unpaid, failed and voided orders are never revenue and appear separately as "awaiting payment" (cancelled excluded). Also: paid orders, average order, units sold, shipping and VAT inside gross, orders by status (linked to the filtered order list), top 10 products, stock alerts (published, tracked, stock ≤ minimum). Revenue chart: one bar per day (≤ 92 days) or month, hover/focus tooltip, table view. |
+| Pages | Done | Topics list with publish toggle; editor for title, short title, intro, body (HTML), SEO and slug. System topics carry a warning (legal texts). |
+| Blog | Link | Posts are written in WordPress and shown by MotorShop.WordPress; the panel links to its admin page when installed. |
+| Coupons | Done | List with state (active, scheduled, expired, used up), usage and limits. Create/edit: order total, subtotal, shipping, categories or SKUs; percent (0–100] or amount; coupon code (unique) or automatic; validity dates; usage limit total or per customer. End/restart sets or clears the end date (Smartstore has no active flag). Assignments update `HasDiscountsApplied` so Smartstore's price calculator sees them. Discount arithmetic stays in Smartstore. |
+| Settings | Done | Store name, company data (name, address, VKN, trade register), contact e-mails, free shipping threshold, panel title and accent. Saved for all stores through `ISettingFactory`; a note appears when store-specific values exist. Currency, tax, payment methods (API keys only in their own modules) and e-mail accounts are read-only with links. There is no field for the tax office (vergi dairesi) because Smartstore has none and reusing another field would mislabel legal documents. |
+
+Verified locally: report figures match the orders (1 paid, 6 awaiting, 1 cancelled); topic save, empty title refused; coupon percent 150 refused, duplicate code refused, category coupon without categories refused, unknown SKU listed, end → expired, restart → active, delete; settings with invalid e-mail, accent or free-shipping amount refused with Turkish messages; all ten panel pages without horizontal overflow at 375 px.
 
 ## Security
 
-* `MotorPanelController` derives from `AdminController`: `[AuthorizeAdmin]` (backend access permission), `[ValidateAdminIpAddress]`, `[AutoValidateAntiforgeryToken]`. Phase 1 has GET actions only.
-* Each data block checks its own permission: `Catalog.Product.Read` (cards, list, `/motor-panel/products`), `Order.Read` (recent orders), `Customer.Role.Read` (price visibility card). Tabs check the permission of the target page.
+* Every panel controller derives from `AdminController`: `[AuthorizeAdmin]` (backend access), `[ValidateAdminIpAddress]`, `[AutoValidateAntiforgeryToken]`. Scripts send the token in the `X-XSRF-Token` header.
+* Every action checks the permission the classic admin uses for the same data (product, category, order, shipment, customer, topic, discount, setting, store). `PanelContractTests` fails if a new POST has no permission or opts out of antiforgery, or a GET has no permission (only the dashboard checks per block).
+* Orders and shipments are limited to the admin's authorized stores, like the classic lists.
 * `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store`, `<meta name="robots">`.
-* All output is Razor-encoded. The accent color is accepted only as `#rrggbb`.
-* Verified locally (SQLite QA tenant): anonymous `GET /motor-panel` → 302 to login, anonymous XHR → 401, a signed-in customer without backend access → 302 to login, admin → 200.
+* Output is Razor-encoded; only http(s) tracking links are rendered; the accent color is accepted only as `#rrggbb`; category images are limited to image types and 5 MB and stored through `IMediaService`.
+* No payment secret is shown or edited. No card data is stored.
+* Activity log entries for product edits, bulk runs, duplicates, deletes, categories, coupons, settings, order changes and the price lock.
+* Verified locally: anonymous `GET /motor-panel` → 302 to login, anonymous XHR → 401, a signed-in customer without backend access → 302 to login, POST without token → 400, admin → 200.
 
 ## Installation
 
@@ -93,11 +116,11 @@ Admin → Plugins → Install → "Run tasks"; the app restarts. No migration, n
 new table. Uninstall removes only the module's settings and language
 resources.
 
-## Audit: what exists and what the next phases reuse
+## Audit: what exists and what the panel reuses
 
 | Feature | Exists | Reuse in the panel | Files |
 | --- | --- | --- | --- |
-| Product CRUD, copy, soft delete | Yes | Classic editor now; later inline edits through `SmartDbContext` + hooks like `ProductController.ProductUpdate`, copy via `IProductCloner`, soft delete via `Deleted` | `Areas/Admin/Controllers/ProductController*.cs`, `Catalog/Products/Services/ProductCloner.cs`, `Common/Hooks/SoftDeletableHook.cs` |
+| Product CRUD, copy, soft delete | Yes | Inline and drawer edits through the tracked `SmartDbContext` (hooks run, like `ProductController.ProductUpdate`), copy via `IProductCloner`, soft delete via `Deleted` | `Areas/Admin/Controllers/ProductController*.cs`, `Catalog/Products/Services/ProductCloner.cs`, `Common/Hooks/SoftDeletableHook.cs` |
 | Stock | Yes | `ProductHook` re-applies low-stock activity and back-in-stock mails on save; grid stock edits need the optimistic check of `CheckStockQuantityUpdate` | `Catalog/Products/Hooks/ProductHook.cs`, `ProductService.AdjustInventoryAsync` |
 | Variants | Yes | Stock per `ProductVariantAttributeCombination`; complex matrices stay in the classic editor | `ProductController.Attributes.cs` |
 | Categories | Yes | `ICategoryService`; circular parents are silently reset by `CategoryHook`, so the panel must validate first | `Catalog/Categories/Hooks/CategoryHook.cs` |
@@ -115,21 +138,13 @@ resources.
 | e-Arşiv / e-Fatura | No | Provider-neutral design only, no integrator chosen | `docs/motor/invoicing.md` |
 | Audit log | Yes | `IActivityLogger` (needs an `ActivityLogType` row per keyword) | `Platform/Logging/Services/IActivityLogger.cs` |
 
-## Next phases (each its own branch and PR to `preview`)
+## Remaining work (needs the owner or external services)
 
-1. **Global price hiding** (card 4 switch): needs a server-side cart/checkout guard
-   (decorated `IShoppingCartValidator`) next to the display permission, an
-   admin-only confirmation, an activity log entry and a test that a direct
-   add-to-cart POST is refused. Kept out of phase 1 because it changes the storefront.
-2. **Products and categories**: inline price/stock/visibility edits with
-   Turkish number input and decimal parsing on the server, optimistic stock check,
-   bulk actions in batches with a partial-failure report and activity log,
-   category tree with cycle check.
-3. **Orders, payments, shipments, customers**: order drawer over
-   `IOrderProcessingService`, iyzico state, partial shipments.
-4. **Invoices**: status view and provider-neutral contract; "Entegratör yapılandırılmadı" until the owner picks a certified provider.
-5. **Reports, pages, coupons, settings**.
-6. **QA**: Playwright journeys on the preview environment.
+1. **e-Arşiv / e-Fatura**: choose a certified integrator; then implement the provider-neutral contract from `docs/motor/invoicing.md` and replace the status page.
+2. **Courier API**: only if a carrier with an API is chosen; until then tracking links come from templates.
+3. **Refunds in the panel**: deliberately not built (iyzico excluded); refunds stay in the iyzico module.
+4. **Preview QA**: run the panel on the preview environment with real data, two devices; Playwright journeys once a stable test environment exists.
+5. **Partial shipment with quantity > 1**: not exercised locally (all QA orders have quantity 1).
 
 ## Known gaps
 

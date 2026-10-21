@@ -1,0 +1,79 @@
+@model ContentListModel
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Content").Value;
+    ViewData["PanelTab"] = "content";
+    var canUpdate = ViewBag.CanUpdate == true;
+}
+
+<section class="mp-panel" aria-labelledby="mp-content-title">
+    <div class="mp-panel__head">
+        <div>
+            <h1 id="mp-content-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Content.Pages")</h1>
+            <p class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Content.PagesHint")</p>
+        </div>
+        <a class="mp-btn mp-btn--ghost" href="@Url.Action("List", "Topic", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.ClassicList")</a>
+    </div>
+
+    <div class="mp-table-wrap">
+        <table class="mp-table">
+            <thead>
+                <tr>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Content.Title")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Content.SystemName")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Content.Kind")</th>
+                    <th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Status")</th>
+                    <th scope="col" class="mp-col-actions"><span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Col.Actions")</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model.Topics)
+                {
+                    <tr>
+                        <td><button type="button" class="mp-link mp-link--plain mp-link-btn" data-open-editor="@Url.Action("Edit", "MotorPanelContent", new { area = "Admin", id = t.Id })">@t.Title</button></td>
+                        <td class="mp-mono mp-muted">@t.SystemName</td>
+                        <td>@(t.RenderAsWidget ? T("Plugins.MotorShop.AdminPanel.Content.Widget") : T("Plugins.MotorShop.AdminPanel.Content.Page"))</td>
+                        <td>
+                            @if (canUpdate)
+                            {
+                                <form method="post" class="mp-inline-form" action="@Url.Action("Publish", "MotorPanelContent", new { area = "Admin", id = t.Id })" data-page-action>
+                                    <input type="hidden" name="published" value="@(t.IsPublished ? "false" : "true")" />
+                                    <button type="submit" class="mp-badge mp-badge-btn @(t.IsPublished ? "mp-badge--blue" : "mp-badge--gray")" title="@T("Plugins.MotorShop.AdminPanel.Toggle.Hint")">
+                                        @(t.IsPublished ? T("Plugins.MotorShop.AdminPanel.Status.Published") : T("Plugins.MotorShop.AdminPanel.Status.Unpublished"))
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="mp-badge @(t.IsPublished ? "mp-badge--blue" : "mp-badge--gray")">@(t.IsPublished ? T("Plugins.MotorShop.AdminPanel.Status.Published") : T("Plugins.MotorShop.AdminPanel.Status.Unpublished"))</span>
+                            }
+                        </td>
+                        <td class="mp-col-actions">
+                            @if (t.Slug.HasValue())
+                            {
+                                <a class="mp-icon-btn" href="@Url.RouteUrl("Topic", new { SeName = t.Slug, area = "" })" target="_blank" rel="noopener" title="@T("Plugins.MotorShop.AdminPanel.Action.View")">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>
+                                    <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Action.View"): @t.Title</span>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="mp-panel mp-section-gap" aria-labelledby="mp-blog-title">
+    <div class="mp-panel__head">
+        <h2 id="mp-blog-title" class="mp-panel__title">Blog</h2>
+    </div>
+    @if (Model.BlogInstalled)
+    {
+        <p>@T("Plugins.MotorShop.AdminPanel.Content.BlogWordPress")</p>
+        <a class="mp-btn mp-btn--outline" href="@Model.BlogConfigureUrl">@T("Plugins.MotorShop.AdminPanel.Content.BlogOpen")</a>
+    }
+    else
+    {
+        <p class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Content.BlogNotInstalled")</p>
+    }
+</section>

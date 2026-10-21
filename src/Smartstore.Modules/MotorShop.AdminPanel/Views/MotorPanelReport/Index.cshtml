@@ -1,0 +1,203 @@
+@model ReportModel
+@{
+    ViewBag.Title = T("Plugins.MotorShop.AdminPanel.Tab.Reports").Value;
+    ViewData["PanelTab"] = "reports";
+    var f = Model.Filter;
+    var loc = CommonServices.Localization;
+    var max = Model.Revenue.Count > 0 ? Model.Revenue.Max(x => x.Amount) : 0;
+    string BucketLabel(ReportBucket b) => Model.MonthlyBuckets ? b.Start.ToString("MMM yyyy") : b.Start.ToString("dd.MM");
+    // Label every bar when there are few, otherwise about eight evenly spaced labels.
+    var labelEvery = Math.Max(1, (int)Math.Ceiling(Model.Revenue.Count / 8d));
+}
+
+<section class="mp-panel" aria-labelledby="mp-report-title">
+    <div class="mp-panel__head">
+        <div>
+            <h1 id="mp-report-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Tab.Reports")</h1>
+            <p class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Report.Period", f.From.Value.ToString("d"), f.To.Value.ToString("d")) · @T("Plugins.MotorShop.AdminPanel.PricesIn", Model.CurrencyCode)</p>
+        </div>
+        <a class="mp-btn mp-btn--ghost" href="@Url.Action("BestsellersReport", "Order", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Report.Classic")</a>
+    </div>
+
+    <form class="mp-toolbar" method="get" action="@Url.Action("Index", "MotorPanelReport", new { area = "Admin" })">
+        <div class="mp-segmented" role="group" aria-label="@T("Plugins.MotorShop.AdminPanel.Report.Range")">
+            @foreach (var days in new[] { 7, 30, 90, 365 })
+            {
+                <a class="mp-segmented__item@(f.Days == days ? " is-active" : "")" aria-current="@(f.Days == days ? "true" : null)"
+                   href="@Url.Action("Index", "MotorPanelReport", new { area = "Admin", days })">@T("Plugins.MotorShop.AdminPanel.Report.Days" + days)</a>
+            }
+        </div>
+        <input type="hidden" name="days" value="0" />
+        <label class="mp-field">
+            <span class="mp-field-label">@T("Plugins.MotorShop.AdminPanel.Order.From")</span>
+            <input type="date" name="from" value="@f.From?.ToString("yyyy-MM-dd")" required />
+        </label>
+        <label class="mp-field">
+            <span class="mp-field-label">@T("Plugins.MotorShop.AdminPanel.Order.To")</span>
+            <input type="date" name="to" value="@f.To?.ToString("yyyy-MM-dd")" required />
+        </label>
+        <button type="submit" class="mp-btn mp-btn--outline">@T("Plugins.MotorShop.AdminPanel.Apply")</button>
+    </form>
+
+    <div class="mp-kpis">
+        <div class="mp-kpi">
+            <span class="mp-kpi__label">@T("Plugins.MotorShop.AdminPanel.Report.Gross")</span>
+            <span class="mp-kpi__value">@Model.GrossRevenue</span>
+            <span class="mp-kpi__hint">@T("Plugins.MotorShop.AdminPanel.Report.GrossHint", Model.PaidOrders)</span>
+        </div>
+        <div class="mp-kpi">
+            <span class="mp-kpi__label">@T("Plugins.MotorShop.AdminPanel.Report.Net")</span>
+            <span class="mp-kpi__value">@Model.NetRevenue</span>
+            <span class="mp-kpi__hint">@T("Plugins.MotorShop.AdminPanel.Report.Refunds"): @Model.Refunds</span>
+        </div>
+        <div class="mp-kpi">
+            <span class="mp-kpi__label">@T("Plugins.MotorShop.AdminPanel.Customer.AverageOrder")</span>
+            <span class="mp-kpi__value">@Model.AverageOrder</span>
+            <span class="mp-kpi__hint">@T("Plugins.MotorShop.AdminPanel.Report.Units", Model.UnitsSold.ToString("N0"))</span>
+        </div>
+        <div class="mp-kpi">
+            <span class="mp-kpi__label">@T("Plugins.MotorShop.AdminPanel.Report.Awaiting")</span>
+            <span class="mp-kpi__value">@Model.AwaitingPayment</span>
+            <span class="mp-kpi__hint">@T("Plugins.MotorShop.AdminPanel.Report.AwaitingHint", Model.AwaitingPaymentOrders)</span>
+        </div>
+    </div>
+
+    <p class="mp-small mp-muted">
+        @T("Plugins.MotorShop.AdminPanel.Report.Breakdown", Model.ShippingFees, Model.Taxes, Model.OrdersPlaced, Model.OrdersCancelled)
+    </p>
+</section>
+
+<div class="mp-report-grid">
+    <section class="mp-panel" aria-labelledby="mp-rev-title">
+        <div class="mp-panel__head">
+            <h2 id="mp-rev-title" class="mp-panel__title">@(Model.MonthlyBuckets ? T("Plugins.MotorShop.AdminPanel.Report.RevenueMonthly") : T("Plugins.MotorShop.AdminPanel.Report.RevenueDaily"))</h2>
+        </div>
+        @if (max <= 0)
+        {
+            <p class="mp-empty">@T("Plugins.MotorShop.AdminPanel.Report.NoRevenue")</p>
+        }
+        else
+        {
+            <div class="mp-chart" role="img" aria-label="@T("Plugins.MotorShop.AdminPanel.Report.ChartLabel", f.From.Value.ToString("d"), f.To.Value.ToString("d"))">
+                <div class="mp-chart__grid" aria-hidden="true">
+                    <span>@Model.Revenue.First(x => x.Amount == max).Money</span>
+                    <span></span>
+                    <span>0</span>
+                </div>
+                <div class="mp-chart__bars">
+                    @for (var i = 0; i < Model.Revenue.Count; i++)
+                    {
+                        var b = Model.Revenue[i];
+                        var height = b.Amount <= 0 ? 0 : Math.Max(2, (double)(b.Amount / max) * 100);
+                        <div class="mp-chart__col" tabindex="0" aria-label="@BucketLabel(b): @b.Money, @T("Plugins.MotorShop.AdminPanel.Order.Count", b.Orders)">
+                            <span class="mp-chart__bar" style="height: @height.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%"></span>
+                            <span class="mp-chart__tip" aria-hidden="true"><strong>@BucketLabel(b)</strong><br />@b.Money · @T("Plugins.MotorShop.AdminPanel.Order.Count", b.Orders)</span>
+                            @if (i % labelEvery == 0)
+                            {
+                                <span class="mp-chart__x" aria-hidden="true">@BucketLabel(b)</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            <details class="mp-details">
+                <summary>@T("Plugins.MotorShop.AdminPanel.Report.ShowTable")</summary>
+                <div class="mp-table-wrap">
+                    <table class="mp-table mp-table--compact">
+                        <thead><tr><th scope="col">@T("Plugins.MotorShop.AdminPanel.Order.Date")</th><th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Customer.Orders")</th><th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Report.Gross")</th></tr></thead>
+                        <tbody>
+                            @foreach (var b in Model.Revenue.Where(x => x.Orders > 0))
+                            {
+                                <tr><td>@BucketLabel(b)</td><td class="mp-num">@b.Orders</td><td class="mp-num">@b.Money</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        }
+    </section>
+
+    <section class="mp-panel" aria-labelledby="mp-status-title">
+        <div class="mp-panel__head">
+            <h2 id="mp-status-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Report.ByStatus")</h2>
+        </div>
+        @if (Model.OrdersByStatus.Count == 0)
+        {
+            <p class="mp-empty">@T("Plugins.MotorShop.AdminPanel.Order.None")</p>
+        }
+        else
+        {
+            <ul class="mp-statuslist">
+                @foreach (var (status, count) in Model.OrdersByStatus)
+                {
+                    <li>
+                        <a href="@Url.Action("Index", "MotorPanelOrder", new { area = "Admin", orderStatus = status.ToString(), from = f.From.Value.ToString("yyyy-MM-dd"), to = f.To.Value.ToString("yyyy-MM-dd") })">
+                            <span class="mp-badge @PanelBadges.Order(status)">@loc.GetLocalizedEnum(status)</span>
+                            <strong>@count</strong>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>
+
+<div class="mp-report-grid">
+    <section class="mp-panel" aria-labelledby="mp-top-title">
+        <div class="mp-panel__head">
+            <h2 id="mp-top-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Report.TopProducts")</h2>
+        </div>
+        @if (Model.TopProducts.Count == 0)
+        {
+            <p class="mp-empty">@T("Plugins.MotorShop.AdminPanel.Report.NoSales")</p>
+        }
+        else
+        {
+            <div class="mp-table-wrap">
+                <table class="mp-table mp-table--compact">
+                    <thead><tr><th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Name")</th><th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Order.Qty")</th><th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Report.Gross")</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in Model.TopProducts)
+                        {
+                            <tr>
+                                <td><button type="button" class="mp-link mp-link--plain mp-link-btn" data-open-editor="@Url.Action("Edit", "MotorPanelProduct", new { area = "Admin", id = p.ProductId })">@p.Name</button></td>
+                                <td class="mp-num">@p.Quantity</td>
+                                <td class="mp-num mp-nowrap">@p.Revenue</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    <section class="mp-panel" aria-labelledby="mp-stock-title">
+        <div class="mp-panel__head">
+            <h2 id="mp-stock-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Report.StockAlerts")</h2>
+            <span class="mp-badge @(Model.StockAlertCount > 0 ? "mp-badge--red" : "mp-badge--green")">@Model.StockAlertCount</span>
+        </div>
+        <p class="mp-small mp-muted">@T("Plugins.MotorShop.AdminPanel.Report.StockAlertsHint")</p>
+        @if (Model.StockAlerts.Count == 0)
+        {
+            <p class="mp-empty mp-empty--small">@T("Plugins.MotorShop.AdminPanel.Report.NoStockAlerts")</p>
+        }
+        else
+        {
+            <div class="mp-table-wrap">
+                <table class="mp-table mp-table--compact">
+                    <thead><tr><th scope="col">@T("Plugins.MotorShop.AdminPanel.Col.Name")</th><th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Col.Stock")</th><th scope="col" class="mp-num">@T("Plugins.MotorShop.AdminPanel.Editor.MinStock")</th></tr></thead>
+                    <tbody>
+                        @foreach (var s in Model.StockAlerts)
+                        {
+                            <tr>
+                                <td><button type="button" class="mp-link mp-link--plain mp-link-btn" data-open-editor="@Url.Action("Edit", "MotorPanelProduct", new { area = "Admin", id = s.ProductId })">@s.Name</button> <span class="mp-mono mp-muted">@s.Sku</span></td>
+                                <td class="mp-num"><span class="mp-badge mp-badge--red">@s.StockQuantity</span></td>
+                                <td class="mp-num">@s.MinStockQuantity</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>

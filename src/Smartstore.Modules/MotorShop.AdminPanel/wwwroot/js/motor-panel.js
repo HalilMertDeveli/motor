@@ -105,6 +105,48 @@
         });
     }
 
+    // Field errors go next to their input ([data-error-for]); the rest into the form's error box.
+    function clearFormErrors(form) {
+        form.querySelectorAll('[data-error-for]').forEach(x => (x.textContent = ''));
+        form.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
+        const formError = form.querySelector('[data-form-error]');
+        if (formError) formError.hidden = true;
+    }
+
+    function showFormErrors(form, data) {
+        const errors = data.errors || { '': data.error || strings.error };
+        const formError = form.querySelector('[data-form-error]');
+        let firstField = null;
+        for (const [key, message] of Object.entries(errors)) {
+            const slot = key ? form.querySelector(`[data-error-for="${CSS.escape(key)}"]`) : null;
+            const input = key ? form.querySelector(`[name="${CSS.escape(key)}"]`) : null;
+            if (slot) {
+                slot.textContent = message;
+                input?.setAttribute('aria-invalid', 'true');
+                firstField ??= input;
+            } else if (formError) {
+                formError.textContent = message;
+                formError.hidden = false;
+            } else {
+                toast(message, true);
+            }
+        }
+        (firstField || formError)?.scrollIntoView?.({ block: 'center' });
+        firstField?.focus();
+    }
+
+    // Coupon editor: show the fields that belong to the chosen discount type.
+    function syncCoupon(root) {
+        const form = root.querySelector('form[data-coupon]');
+        if (!form) return;
+        const type = form.querySelector('[data-coupon-type]').value;
+        const percent = form.querySelector('[data-coupon-percent]').checked;
+        form.querySelector('[data-show-percent]').hidden = !percent;
+        form.querySelector('[data-show-amount]').hidden = percent;
+        form.querySelector('[data-show-categories]').hidden = type !== 'AssignedToCategories';
+        form.querySelector('[data-show-skus]').hidden = type !== 'AssignedToSkus';
+    }
+
     // ---------- Drawer (editors) ----------
 
     const drawer = document.getElementById('mp-drawer');
@@ -134,6 +176,7 @@
         }
 
         drawerDirty = false;
+        syncCoupon(content);
         if (!drawer.open) drawer.showModal();
         // Editors focus their first field; detail views focus the title so they open at the top.
         const first = content.querySelector('form[data-editor] :is(input:not([type=hidden]), select, textarea):not([disabled])');
@@ -170,6 +213,8 @@
                 closeDrawer(false);
             }
         });
+
+        drawer.addEventListener('change', () => syncCoupon(drawer));
 
         drawer.addEventListener('input', e => {
             if (e.target.closest('form[data-editor]')) drawerDirty = true;
@@ -216,10 +261,7 @@
 
             const submit = form.querySelector('button[type=submit]');
             submit?.setAttribute('disabled', '');
-            form.querySelectorAll('[data-error-for]').forEach(x => (x.textContent = ''));
-            form.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
-            const formError = form.querySelector('[data-form-error]');
-            if (formError) formError.hidden = true;
+            clearFormErrors(form);
 
             const result = await post(form.action, new FormData(form));
             submit?.removeAttribute('disabled');
@@ -241,22 +283,7 @@
                 return;
             }
 
-            const errors = result.data.errors || { '': result.data.error || strings.error };
-            let firstField = null;
-            for (const [key, message] of Object.entries(errors)) {
-                const slot = key ? form.querySelector(`[data-error-for="${CSS.escape(key)}"]`) : null;
-                const input = key ? form.querySelector(`[name="${CSS.escape(key)}"]`) : null;
-                if (slot) {
-                    slot.textContent = message;
-                    input?.setAttribute('aria-invalid', 'true');
-                    firstField ??= input;
-                } else if (formError) {
-                    formError.textContent = message;
-                    formError.hidden = false;
-                }
-            }
-            (firstField || formError)?.scrollIntoView?.({ block: 'center' });
-            firstField?.focus();
+            showFormErrors(form, result.data);
         });
     }
 
@@ -279,6 +306,26 @@
             openDrawer(opener.dataset.openEditor);
         } else {
             openDrawer(opener.dataset.openEditor, () => refreshGrid?.());
+        }
+    });
+
+    // Settings cards: post, show field errors, keep the page (or reload to show a new title/color).
+    document.addEventListener('submit', async e => {
+        const form = e.target.closest('form[data-settings-form]');
+        if (!form) return;
+        e.preventDefault();
+
+        clearFormErrors(form);
+        const submit = form.querySelector('button[type=submit]');
+        submit?.setAttribute('disabled', '');
+        const result = await post(form.action, new FormData(form));
+        submit?.removeAttribute('disabled');
+
+        if (result.ok && result.data.success !== false) {
+            toast(result.data.message || strings.saved);
+            if (form.hasAttribute('data-reload')) setTimeout(() => window.location.reload(), 600);
+        } else {
+            showFormErrors(form, result.data);
         }
     });
 
