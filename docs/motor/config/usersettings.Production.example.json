@@ -34,6 +34,15 @@
       // Optional: trial a stricter policy without enforcing it; violations show in the browser console.
       // "ContentSecurityPolicyReportOnly": "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; frame-src 'self' https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self' https:",
       "ReadinessTimeoutSeconds": 5
+    },
+    // Headless WordPress blog (docs/motor/wordpress.md). Off until WordPress exists.
+    // UserName/ApplicationPassword and WebhookSecret are secrets: set them as environment variables
+    // (MotorShop__WordPress__ApplicationPassword, MotorShop__WordPress__WebhookSecret), not here.
+    "WordPress": {
+      "Enabled": false,
+      "BaseUrl": "https://cms.motor.example.com",
+      "CacheMinutes": 10,
+      "GuideCategorySlug": "rehberler"
     }
   }
 }

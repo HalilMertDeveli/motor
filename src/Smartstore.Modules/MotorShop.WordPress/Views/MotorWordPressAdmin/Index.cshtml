@@ -1,0 +1,176 @@
+@model WordPressAdminModel
+@inject Smartstore.Core.Common.Services.IDateTimeHelper DateTimeHelper
+
+@{
+    Layout = "_ConfigureModule";
+
+    string When(DateTime? utc) => utc.HasValue
+        ? DateTimeHelper.ConvertToUserTime(utc.Value, DateTimeKind.Utc).ToString("g")
+        : T("Plugins.MotorShop.WordPress.Admin.Never").ToString();
+
+    string Count(int value) => Model.Connected == true ? value.ToString("N0") : "–";
+}
+
+@if (Model.CanUpdate)
+{
+    <widget target-zone="admin_button_toolbar_before">
+        <form asp-action="ClearCache" asp-controller="MotorWordPressAdmin" asp-area="Admin" method="post" class="d-inline">
+            <button type="submit" class="btn btn-warning">
+                <i class="fa fa-rotate"></i>
+                <span>@T("Plugins.MotorShop.WordPress.Admin.ClearCache")</span>
+            </button>
+        </form>
+        <form asp-action="RebuildSitemap" asp-controller="MotorWordPressAdmin" asp-area="Admin" method="post" class="d-inline">
+            <button type="submit" class="btn btn-secondary">
+                <i class="fa fa-sitemap"></i>
+                <span>@T("Plugins.MotorShop.WordPress.Admin.RebuildSitemap")</span>
+            </button>
+        </form>
+    </widget>
+}
+
+<div class="alert alert-info">
+    @Html.Raw(T("Plugins.MotorShop.WordPress.Admin.Instruction"))
+</div>
+
+@foreach (var warning in Model.Warnings)
+{
+    <div class="alert alert-warning">@warning</div>
+}
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header"><strong>@T("Plugins.MotorShop.WordPress.Admin.Connection")</strong></div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.Status")</th>
+                        <td>
+                            @if (!Model.Enabled)
+                            {
+                                <span class="badge badge-secondary">@T("Plugins.MotorShop.WordPress.Admin.Disabled")</span>
+                            }
+                            else if (Model.ConfigurationError.HasValue())
+                            {
+                                <span class="badge badge-danger">@T("Plugins.MotorShop.WordPress.Admin.Misconfigured")</span>
+                                <div class="text-danger small mt-1">@Model.ConfigurationError</div>
+                            }
+                            else if (Model.Connected == true)
+                            {
+                                <span class="badge badge-success">@T("Plugins.MotorShop.WordPress.Admin.Connected")</span>
+                                <span class="text-muted small">@Model.ResponseMilliseconds ms</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">@T("Plugins.MotorShop.WordPress.Admin.NotConnected")</span>
+                                <div class="text-danger small mt-1">@Model.ConnectionError</div>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.Host")</th>
+                        <td><code>@(Model.Host ?? "–")</code></td>
+                    </tr>
+                    <tr>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.Authentication")</th>
+                        <td>@T(Model.UsesApplicationPassword ? "Plugins.MotorShop.WordPress.Admin.AuthAppPassword" : "Plugins.MotorShop.WordPress.Admin.AuthPublic")</td>
+                    </tr>
+                    <tr>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.Webhook")</th>
+                        <td>@T(Model.WebhookEnabled ? "Admin.Common.Yes" : "Admin.Common.No")</td>
+                    </tr>
+                    <tr>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.CacheDuration")</th>
+                        <td>@T("Plugins.MotorShop.WordPress.Admin.Minutes", Model.CacheMinutes)</td>
+                    </tr>
+                    <tr>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.GuideCategory")</th>
+                        <td><code>@Model.GuideCategorySlug</code></td>
+                    </tr>
+                    <tr>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.ProductTagPrefix")</th>
+                        <td><code>@Model.ProductTagPrefix</code></td>
+                    </tr>
+                </table>
+                @if (Model.AdminUrl.HasValue())
+                {
+                    <a class="btn btn-outline-primary mt-3" href="@Model.AdminUrl" target="_blank" rel="noopener noreferrer">
+                        <i class="fa fa-arrow-up-right-from-square"></i>
+                        <span>@T("Plugins.MotorShop.WordPress.Admin.OpenWordPress")</span>
+                    </a>
+                    <div class="form-text text-muted">@T("Plugins.MotorShop.WordPress.Admin.OpenWordPressHint")</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header"><strong>@T("Plugins.MotorShop.WordPress.Admin.Sync")</strong></div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><th>@T("Plugins.MotorShop.WordPress.Admin.PublishedPosts")</th><td>@Count(Model.PublishedPosts)</td></tr>
+                    <tr><th>@T("Plugins.MotorShop.WordPress.Admin.PublishedPages")</th><td>@Count(Model.PublishedPages)</td></tr>
+                    <tr><th>@T("Plugins.MotorShop.WordPress.Admin.Categories")</th><td>@Count(Model.Categories)</td></tr>
+                    <tr><th>@T("Plugins.MotorShop.WordPress.Admin.LastSuccess")</th><td>@When(Model.LastSuccessUtc)</td></tr>
+                    <tr><th>@T("Plugins.MotorShop.WordPress.Admin.LastFailure")</th><td>@When(Model.LastFailureUtc)</td></tr>
+                    <tr><th>@T("Plugins.MotorShop.WordPress.Admin.ConsecutiveFailures")</th><td>@Model.ConsecutiveFailures</td></tr>
+                    <tr><th>@T("Plugins.MotorShop.WordPress.Admin.LastCacheClear")</th><td>@When(Model.LastCacheClearUtc)</td></tr>
+                </table>
+                <div class="form-text text-muted">@T("Plugins.MotorShop.WordPress.Admin.PerInstance")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><strong>@T("Plugins.MotorShop.WordPress.Admin.RecentPosts")</strong></div>
+    <div class="card-body">
+        @if (Model.RecentPosts.Count == 0)
+        {
+            <p class="text-muted mb-0">@T("Plugins.MotorShop.WordPress.Admin.NoPosts")</p>
+        }
+        else
+        {
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.Title")</th>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.Section")</th>
+                        <th>@T("Plugins.MotorShop.WordPress.Admin.Published")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var post in Model.RecentPosts)
+                    {
+                        <tr>
+                            <td><a href="@Url.BlogPostUrl(post)" target="_blank" rel="noopener">@post.Title</a></td>
+                            <td>@T(post.Section == BlogSection.Guides ? "Plugins.MotorShop.WordPress.Guides" : "Plugins.MotorShop.WordPress.Blog")</td>
+                            <td>@When(post.PublishedUtc)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><strong>@T("Plugins.MotorShop.WordPress.Admin.Errors")</strong></div>
+    <div class="card-body">
+        @if (Model.RecentErrors.Count == 0)
+        {
+            <p class="text-muted mb-0">@T("Plugins.MotorShop.WordPress.Admin.NoErrors")</p>
+        }
+        else
+        {
+            <ul class="mb-0">
+                @foreach (var error in Model.RecentErrors)
+                {
+                    <li><span class="text-muted">@When(error.Utc)</span> – @error.Message</li>
+                }
+            </ul>
+        }
+    </div>
+</div>
