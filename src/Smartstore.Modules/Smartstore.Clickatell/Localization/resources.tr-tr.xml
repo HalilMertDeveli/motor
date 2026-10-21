@@ -1,0 +1,67 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.SmartStore.Clickatell" AppendRootKey="false">
+        <Value>Clickatell SMS sağlayıcısı</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.SmartStore.Clickatell" AppendRootKey="false">
+        <Value>Sipariş bildirimlerini mağaza yöneticisine SMS ile gönderir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[
+        <p>Mağazanızda sipariş verildiğinde SMS bildirimi almak için aşağıdaki adımları izleyin:</p>
+        <ul>
+            <li><a href="https://www.clickatell.com/" target='_blank'>Bir Clickatell hesabı oluşturun</a>.</li>
+            <li><b>SMS Integration</b> seçeneğiyle yeni bir entegrasyon oluşturun.</li>
+            <li>Aşağıdaki formu oluşturduğunuz API Key ve bildirim mesajlarının gönderileceği telefon numarasıyla doldurun.</li>
+            <li><b>Kaydet</b> düğmesine tıklayın.</li>
+            <li>Artık yeni bir sipariş aldığınızda aşağıda girdiğiniz telefon numarasına bir SMS gönderilir.</li>
+        </ul>
+      ]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="EnterMessage">
+        <Value>Lütfen bir mesaj girin.</Value>
+    </LocaleResource>
+    <LocaleResource Name="OrderPlacedMessage">
+        <Value>{0} numaralı yeni sipariş oluşturuldu.</Value>
+    </LocaleResource>
+    <LocaleResource Name="SmsSentNote">
+        <Value>Yeni sipariş hakkında SMS gönderildi.</Value>
+    </LocaleResource>
+    <LocaleResource Name="TestFailed">
+        <Value>Test mesajı gönderilemedi.</Value>
+    </LocaleResource>
+    <LocaleResource Name="TestSuccess">
+        <Value>Test mesajı gönderildi.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.Enabled">
+        <Value>Etkin</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.Enabled.Hint">
+        <Value>Yeni bir sipariş oluşturulduğunda SMS gönderilip gönderilmeyeceğini belirler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.ApiId">
+        <Value>API Key</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.ApiId.Hint">
+        <Value>Clickatell API Key</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.PhoneNumber">
+        <Value>Telefon numarası</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.PhoneNumber.Hint">
+        <Value>SMS'in gönderileceği telefon numarası. Noktalı virgülle ayırarak birden fazla numara girebilirsiniz. +49231987654 gibi uluslararası biçimi kullanın.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.TestMessage">
+        <Value>Mesaj metni</Value>
+    </LocaleResource>
+    <LocaleResource Name="Fields.TestMessage.Hint">
+        <Value>Test mesajının metni</Value>
+    </LocaleResource>
+    <LocaleResource Name="SendTest">
+        <Value>Gönder</Value>
+    </LocaleResource>
+    <LocaleResource Name="SendTest.Hint">
+        <Value>Test mesajı gönder</Value>
+    </LocaleResource>
+</Language>

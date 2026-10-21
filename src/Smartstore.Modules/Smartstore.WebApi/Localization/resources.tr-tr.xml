@@ -1,0 +1,131 @@
+﻿<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.SmartStore.WebApi" AppendRootKey="false">
+        <Value>Web API</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Description.SmartStore.WebApi" AppendRootKey="false">
+        <Value>Smartstore ile veri alışverişi sağlar.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Plugins.Permissions.DisplayName.WebApi" AppendRootKey="false">
+        <Value>Web API</Value>
+    </LocaleResource>
+
+    <LocaleResource Name="AdminInstruction">
+        <Value>
+            <![CDATA[<ul>
+			<li>API'ye yalnızca API için bir Public Key ve Secret Key'e sahip kayıtlı müşteriler (aşağıdaki listeye bakın) erişebilir.</li>
+            <li>Kimlik doğrulama <a href="https://dev.smartstore.com/framework/web-api/authentication" class="alert-link">Basic Authentication</a> ile yapılır;
+            burada Public Key kullanıcı adı, Secret Key ise şifre olarak kullanılır.</li>
+			<li>Bir müşterinin erişimini anahtarları silerek kalıcı olarak veya erişime izin vermeyerek geçici olarak kaldırabilirsiniz.</li>
+			<li>İlgili müşteri grubunun yetkileri API için de geçerlidir.</li>
+			</ul>]]>
+        </Value>
+    </LocaleResource>
+    <LocaleResource Name="UserGridTabTitle">
+        <Value>API kullanıcıları</Value>
+    </LocaleResource>
+    <LocaleResource Name="ApiOdataUrl">
+        <Value>OData API URL'si</Value>
+    </LocaleResource>
+    <LocaleResource Name="ApiOdataUrl.Hint">
+        <Value>OData Web API'nin URL'si.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ApiOdataEndpointsUrl">
+        <Value>OData uç noktaları</Value>
+    </LocaleResource>
+    <LocaleResource Name="ApiOdataEndpointsUrl.Hint">
+        <Value>Tüm OData uç noktalarının URL'si.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ApiOdataMetadataUrl">
+        <Value>OData meta verileri</Value>
+    </LocaleResource>
+    <LocaleResource Name="ApiOdataMetadataUrl.Hint">
+        <Value>OData meta verilerinin URL'si. Web API'nin dayandığı varlık veri modelinin (EDM) tamamını tanımlar.</Value>
+    </LocaleResource>
+    <LocaleResource Name="SwaggerUrl">
+        <Value>API dokümantasyonu</Value>
+    </LocaleResource>
+    <LocaleResource Name="SwaggerUrl.Hint">
+        <Value>Web API'nin Swagger dokümantasyonunun URL'si.</Value>
+    </LocaleResource>
+    <LocaleResource Name="IsActive">
+        <Value>Etkin</Value>
+    </LocaleResource>
+    <LocaleResource Name="IsActive.Hint">
+        <Value>Web API'nin etkin olup olmadığını ve istekleri kabul edip etmediğini belirtir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxTop">
+        <Value>Maksimum sayfa boyutu</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxTop.Hint">
+        <Value>Maksimum sayfa boyutunu belirtir. Sayfa boyutu ($top seçeneği) için daha büyük bir değer içeren istekler reddedilir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxExpansionDepth">
+        <Value>Maksimum genişletme derinliği</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxExpansionDepth.Hint">
+        <Value>$expand seçeneği için maksimum genişletme derinliğini belirtir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="PublicKey">
+        <Value>Public Key</Value>
+    </LocaleResource>
+    <LocaleResource Name="SecretKey">
+        <Value>Secret Key</Value>
+    </LocaleResource>
+    <LocaleResource Name="LastRequest">
+        <Value>Son erişim</Value>
+    </LocaleResource>
+    <LocaleResource Name="ApiEnabled">
+        <Value>Erişime izin verildi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Activate">
+        <Value>İzin ver</Value>
+    </LocaleResource>
+    <LocaleResource Name="Activate.Hint">
+        <Value>Bu müşteri için API erişimini etkinleştirir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="Deactivate">
+        <Value>İzin verme</Value>
+    </LocaleResource>
+    <LocaleResource Name="Deactivate.Hint">
+        <Value>Bu müşteri için API erişimini devre dışı bırakır.</Value>
+    </LocaleResource>
+    <LocaleResource Name="RemoveKeys">
+        <Value>Anahtarları sil</Value>
+    </LocaleResource>
+    <LocaleResource Name="RemoveKeys.Hint">
+        <Value>Bu müşterinin API erişim anahtarlarını siler.</Value>
+    </LocaleResource>
+    <LocaleResource Name="CreateKeys">
+        <Value>Anahtar oluştur</Value>
+    </LocaleResource>
+    <LocaleResource Name="CreateKeys.Hint">
+        <Value>Bu müşteri için API erişim anahtarları oluşturur.</Value>
+    </LocaleResource>
+    <LocaleResource Name="ShowKeys">
+        <Value>Anahtarları göster</Value>
+    </LocaleResource>
+    <LocaleResource Name="ApiAccess">
+        <Value>API erişimi</Value>
+    </LocaleResource>
+    <LocaleResource Name="Batch">
+        <Value>Toplu işlem (batch)</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxBatchNestingDepth">
+        <Value>Maksimum iç içe geçme derinliği</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxBatchNestingDepth.Hint">
+        <Value>Özyinelemeli toplu işlem (batch) yüklerini okurken veya yazarken izin verilen maksimum iç içe geçme derinliğini belirtir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxBatchOperationsPerChangeset">
+        <Value>Değişiklik kümesi başına maksimum işlem</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxBatchOperationsPerChangeset.Hint">
+        <Value>Tek bir toplu işlem değişiklik kümesinde (changeset) izin verilen maksimum işlem sayısını belirtir.</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxBatchReceivedMessageSize">
+        <Value>Maksimum alınan mesaj boyutu</Value>
+    </LocaleResource>
+    <LocaleResource Name="MaxBatchReceivedMessageSize.Hint">
+        <Value>Bir toplu işlem mesajından okunacak maksimum veri miktarını (KB cinsinden) belirtir.</Value>
+    </LocaleResource>
+</Language>
