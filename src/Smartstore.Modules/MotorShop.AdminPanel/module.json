@@ -1,0 +1,12 @@
+{
+  "$schema": "../module.schema.json",
+  "Author": "MotorShop",
+  "Group": "Admin",
+  "SystemName": "MotorShop.AdminPanel",
+  "FriendlyName": "MOTOR premium admin panel",
+  "Description": "A light, task-focused administration panel at /motor-panel on top of the existing Smartstore services, permissions and data. The classic /admin stays available.",
+  "Version": "1.0.0",
+  "MinAppVersion": "6.4.0",
+  "Order": 1,
+  "ResourceRootKey": "Plugins.MotorShop.AdminPanel"
+}

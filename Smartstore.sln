@@ -95,6 +95,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.Security", "src\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.Tracking", "src\Smartstore.Modules\MotorShop.Tracking\MotorShop.Tracking.csproj", "{023F2553-DDC3-4364-AAAD-78934CB9D297}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.AdminPanel", "src\Smartstore.Modules\MotorShop.AdminPanel\MotorShop.AdminPanel.csproj", "{7D3C2A10-5E4B-4F0A-9C61-2B8E1A4D6F01}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MotorShop.AdminPanel.Tests", "test\MotorShop.AdminPanel.Tests\MotorShop.AdminPanel.Tests.csproj", "{A6E1F2C3-8B47-4D5E-9F10-3C2B7A8E9D02}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotorShop.WordPress", "src\Smartstore.Modules\MotorShop.WordPress\MotorShop.WordPress.csproj", "{4D1A8E35-2C6B-4F0A-9E57-8B3C1F6A2D91}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MotorShop.WordPress.Tests", "test\MotorShop.WordPress.Tests\MotorShop.WordPress.Tests.csproj", "{9E2F6B14-7A3C-4D58-B1E9-3C5A7D8F0B26}"
@@ -340,6 +344,18 @@ Global
 		{023F2553-DDC3-4364-AAAD-78934CB9D297}.DebugNoRazorCompile|Any CPU.Build.0 = DebugNoRazorCompile|Any CPU
 		{023F2553-DDC3-4364-AAAD-78934CB9D297}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{023F2553-DDC3-4364-AAAD-78934CB9D297}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D3C2A10-5E4B-4F0A-9C61-2B8E1A4D6F01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D3C2A10-5E4B-4F0A-9C61-2B8E1A4D6F01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D3C2A10-5E4B-4F0A-9C61-2B8E1A4D6F01}.DebugNoRazorCompile|Any CPU.ActiveCfg = DebugNoRazorCompile|Any CPU
+		{7D3C2A10-5E4B-4F0A-9C61-2B8E1A4D6F01}.DebugNoRazorCompile|Any CPU.Build.0 = DebugNoRazorCompile|Any CPU
+		{7D3C2A10-5E4B-4F0A-9C61-2B8E1A4D6F01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D3C2A10-5E4B-4F0A-9C61-2B8E1A4D6F01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6E1F2C3-8B47-4D5E-9F10-3C2B7A8E9D02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6E1F2C3-8B47-4D5E-9F10-3C2B7A8E9D02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6E1F2C3-8B47-4D5E-9F10-3C2B7A8E9D02}.DebugNoRazorCompile|Any CPU.ActiveCfg = DebugNoRazorCompile|Any CPU
+		{A6E1F2C3-8B47-4D5E-9F10-3C2B7A8E9D02}.DebugNoRazorCompile|Any CPU.Build.0 = DebugNoRazorCompile|Any CPU
+		{A6E1F2C3-8B47-4D5E-9F10-3C2B7A8E9D02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6E1F2C3-8B47-4D5E-9F10-3C2B7A8E9D02}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4D1A8E35-2C6B-4F0A-9E57-8B3C1F6A2D91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4D1A8E35-2C6B-4F0A-9E57-8B3C1F6A2D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D1A8E35-2C6B-4F0A-9E57-8B3C1F6A2D91}.DebugNoRazorCompile|Any CPU.ActiveCfg = DebugNoRazorCompile|Any CPU
@@ -454,6 +470,8 @@ Global
 		{02E1B567-A6FB-4A1D-AF46-448BE45812AA} = {E5C1AA43-6B44-4EFA-8DE9-6070EE007CE3}
 		{7B0C1E52-3F4A-4D7B-9C21-5E8A6D4F2B91} = {B3391994-AE0F-4C8C-AE8E-968F6013B4B6}
 		{6C2A3E5B-9F14-4D27-8B61-0A7E3C9D5F12} = {B3391994-AE0F-4C8C-AE8E-968F6013B4B6}
+		{7D3C2A10-5E4B-4F0A-9C61-2B8E1A4D6F01} = {E5C1AA43-6B44-4EFA-8DE9-6070EE007CE3}
+		{A6E1F2C3-8B47-4D5E-9F10-3C2B7A8E9D02} = {B3391994-AE0F-4C8C-AE8E-968F6013B4B6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A0A0B995-5D0B-458E-BCC0-1071B76949D1}

@@ -1,0 +1,53 @@
+@model PanelHeaderModel
+
+<style>:root { --mp-accent: @Model.AccentColor; }</style>
+
+<header class="mp-header">
+    <div class="mp-header__inner">
+        <a class="mp-brand" href="@Url.Action("Index", "MotorPanel", new { area = "Admin" })">
+            @if (Model.LogoUrl.HasValue())
+            {
+                <img class="mp-brand__logo" src="@Model.LogoUrl" alt="@Model.StoreName" />
+            }
+            else
+            {
+                <span class="mp-brand__mark" aria-hidden="true">@(Model.StoreName?.Length > 0 ? Model.StoreName[..1] : "M")</span>
+            }
+            <span class="mp-brand__text">
+                <span class="mp-brand__title">@Model.Title</span>
+                <span class="mp-brand__subtitle">@T("Plugins.MotorShop.AdminPanel.Subtitle")</span>
+            </span>
+        </a>
+
+        <nav class="mp-header__actions" aria-label="@T("Plugins.MotorShop.AdminPanel.AccountNav")">
+            <span class="mp-user" title="@T("Plugins.MotorShop.AdminPanel.SignedInAs"): @Model.UserName">
+                <span class="mp-user__avatar" aria-hidden="true">@(Model.UserName?.Length > 0 ? Model.UserName[..1].ToUpperInvariant() : "?")</span>
+                <span class="mp-user__name">@Model.UserName</span>
+            </span>
+            <a class="mp-btn mp-btn--ghost" href="@Url.Content("~/")" target="_blank" rel="noopener">@T("Plugins.MotorShop.AdminPanel.ViewSite")</a>
+            <a class="mp-btn mp-btn--ghost" href="@Url.Action("Index", "Home", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.ClassicAdmin")</a>
+            <a class="mp-btn mp-btn--outline" href="@Url.RouteUrl("Logout")">@T("Plugins.MotorShop.AdminPanel.Logout")</a>
+        </nav>
+    </div>
+</header>
+
+<nav class="mp-tabs" aria-label="@T("Plugins.MotorShop.AdminPanel.ModuleNav")">
+    <ul class="mp-tabs__list">
+        @foreach (var tab in Model.Tabs)
+        {
+            var active = tab.Key == Model.ActiveTab;
+            <li>
+                <a class="mp-tabs__link@(active ? " is-active" : "")" href="@tab.Url" aria-current="@(active ? "page" : null)">
+                    @tab.Title
+                    @if (tab.Classic)
+                    {
+                        <span class="mp-tabs__classic" title="@T("Plugins.MotorShop.AdminPanel.OpensClassic")">
+                            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M6 3h7v7M13 3 6 10M11 13H3V5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.OpensClassic")</span>
+                        </span>
+                    }
+                </a>
+            </li>
+        }
+    </ul>
+</nav>
