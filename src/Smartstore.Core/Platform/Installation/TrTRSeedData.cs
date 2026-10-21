@@ -35,6 +35,12 @@ public class TrTRSeedData : InvariantSeedData
     // Applied to the fixed-rate tax provider in tax category display order.
     public override decimal[] FixedTaxRates => TurkishStoreDefaults.TaxCategories.Select(x => x.Rate).ToArray();
 
+    /// <summary>
+    /// Category tree of the 2026 catalog. Published, without products (products are imported unpublished).
+    /// </summary>
+    public override Task SeedStoreCatalogAsync()
+        => ProsevStoreDefaults.EnsureCategoriesAsync(DbContext);
+
     protected override void Alter(IList<TaxCategory> entities)
     {
         base.Alter(entities);
@@ -86,7 +92,7 @@ public class TrTRSeedData : InvariantSeedData
         entities.WithKey(x => x.DisplayOrder)
             .Alter(1, x =>
             {
-                x.Name = "Mağaza adınız";
+                x.Name = ProsevStoreDefaults.StoreName;
                 if (liraId.HasValue)
                 {
                     x.DefaultCurrencyId = liraId.Value;
@@ -126,7 +132,8 @@ public class TrTRSeedData : InvariantSeedData
 
         entity.FirstName = "Mağaza";
         entity.LastName = "Yöneticisi";
-        entity.Company = "Mağaza adınız";
+        // Legal company title is not known yet: placeholder until the owner enters it in the admin.
+        entity.Company = ProsevStoreDefaults.StoreName + " [firma unvanı]";
         entity.Address1 = "Örnek Mah. Örnek Sok. No: 1";
         entity.City = "Kadıköy";
         entity.ZipPostalCode = "34710";
@@ -244,7 +251,7 @@ public class TrTRSeedData : InvariantSeedData
         base.Alter(entities);
 
         entities.WithKey(x => x.DisplayName)
-            .Alter("Store name", x => x.DisplayName = "Mağaza adınız");
+            .Alter("Store name", x => x.DisplayName = ProsevStoreDefaults.StoreName);
     }
 
     protected override void Alter(IList<PriceLabel> entities)
@@ -343,8 +350,9 @@ public class TrTRSeedData : InvariantSeedData
             })
             .Alter("PaymentInfo", x =>
             {
-                x.Title = "Ödeme seçenekleri";
-                x.Body = "<p>Ödeme seçenekleri hakkındaki bilgileri buraya ekleyin." + editHint;
+                // Terms as printed in the Prosev/Motosev 2026 catalog.
+                x.Title = ProsevStoreDefaults.PaymentInfoTitle;
+                x.Body = ProsevStoreDefaults.PaymentInfoBody;
             });
     }
 
@@ -395,7 +403,7 @@ public class TrTRSeedData : InvariantSeedData
                 }
             })
             .Alter<DateTimeSettings>(x => x.DefaultStoreTimeZoneId = TurkishStoreDefaults.TimeZoneId)
-            .Alter<SeoSettings>(x => x.MetaTitle = "Mağazam")
+            .Alter<SeoSettings>(x => x.MetaTitle = ProsevStoreDefaults.StoreName)
             .Alter<OrderSettings>(x =>
             {
                 x.ReturnRequestActions = "Ödeme yöntemine iade,Ürün değişimi,Başka bir ürünle değişim,Onarım,Hediye kartı / kupon,Diğer";

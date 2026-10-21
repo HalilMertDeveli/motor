@@ -141,6 +141,45 @@ public class IyzicoRequestBuilderTests
         Assert.That(request.EnabledInstallments, Is.EqualTo(new List<int> { 1, 2, 3, 6, 9 }));
     }
 
+    [Test]
+    public void Catalog_defaults_offer_single_payment_or_three_installments()
+    {
+        var order = CreateOrder(100m, 100m);
+
+        Assert.That(IyzicoRequestBuilder.Build(order, new IyzicoSettings(), "c", "https://x/cb", "tr").EnabledInstallments, Is.EqualTo(new List<int> { 1, 3 }));
+        Assert.That(IyzicoRequestBuilder.Build(order, new IyzicoSettings(), "c", "https://x/cb", "tr", singlePaymentOnly: true).EnabledInstallments, Is.EqualTo(new List<int> { 1 }));
+    }
+
+    [TestCase(4999.99, false, false)]
+    [TestCase(5000, true, false)]
+    [TestCase(9999.99, true, false)]
+    [TestCase(10000, true, true)]
+    public void Dealer_minimums_follow_the_catalog(decimal total, bool cardAllowed, bool installmentsAllowed)
+    {
+        var settings = new IyzicoSettings();
+        string[] dealer = ["Registered", "Dealer"];
+
+        Assert.That(IyzicoRequestBuilder.IsBelowMinOrderTotal(settings, total, dealer), Is.EqualTo(!cardAllowed));
+        Assert.That(IyzicoRequestBuilder.AreInstallmentsAllowed(settings, total, dealer), Is.EqualTo(installmentsAllowed));
+    }
+
+    [Test]
+    public void Minimums_do_not_apply_to_retail_customers_unless_no_role_is_configured()
+    {
+        string[] retail = ["Registered"];
+
+        Assert.That(IyzicoRequestBuilder.IsBelowMinOrderTotal(new IyzicoSettings(), 100m, retail), Is.False);
+        Assert.That(IyzicoRequestBuilder.AreInstallmentsAllowed(new IyzicoSettings(), 100m, retail), Is.True);
+        Assert.That(IyzicoRequestBuilder.AreInstallmentsAllowed(new IyzicoSettings(), 100m, ["dealer"]), Is.False, "role names are case-insensitive");
+
+        var everyone = new IyzicoSettings { OrderMinimumsCustomerRoles = " " };
+        Assert.That(IyzicoRequestBuilder.IsBelowMinOrderTotal(everyone, 100m, retail), Is.True);
+
+        var off = new IyzicoSettings { MinOrderTotal = 0m, MinInstallmentOrderTotal = 0m };
+        Assert.That(IyzicoRequestBuilder.IsBelowMinOrderTotal(off, 1m, ["Dealer"]), Is.False);
+        Assert.That(IyzicoRequestBuilder.AreInstallmentsAllowed(off, 1m, ["Dealer"]), Is.True);
+    }
+
     [TestCase("tr-TR", "tr")]
     [TestCase("en-US", "en")]
     [TestCase(null, "en")]

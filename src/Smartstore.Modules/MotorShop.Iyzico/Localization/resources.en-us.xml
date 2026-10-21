@@ -36,6 +36,12 @@
     <LocaleResource Name="EnableInstallments.Hint"><Value>Offers installments on the iyzico payment page. Installment commission passed on to the customer is charged by iyzico on top of the order total.</Value></LocaleResource>
     <LocaleResource Name="EnabledInstallments"><Value>Installment options</Value></LocaleResource>
     <LocaleResource Name="EnabledInstallments.Hint"><Value>Comma separated, e.g. 1,2,3,6,9. Single payment (1) is always offered.</Value></LocaleResource>
+    <LocaleResource Name="MinOrderTotal"><Value>Minimum order total for card payment</Value></LocaleResource>
+    <LocaleResource Name="MinOrderTotal.Hint"><Value>Card payment is not offered below this order total. Applies only to the customer roles below. 0 = off. Catalog: single card charges of dealers at least 5,000 TL.</Value></LocaleResource>
+    <LocaleResource Name="MinInstallmentOrderTotal"><Value>Minimum order total for installments</Value></LocaleResource>
+    <LocaleResource Name="MinInstallmentOrderTotal.Hint"><Value>Only single payment is offered below this order total. Applies only to the customer roles below. 0 = off. Catalog: installment charges of dealers at least 10,000 TL.</Value></LocaleResource>
+    <LocaleResource Name="OrderMinimumsCustomerRoles"><Value>Customer roles the minimums apply to</Value></LocaleResource>
+    <LocaleResource Name="OrderMinimumsCustomerRoles.Hint"><Value>Comma separated role system names, e.g. Dealer. Empty: all customers.</Value></LocaleResource>
     <LocaleResource Name="RequireWebhookSignature"><Value>Require webhook signature</Value></LocaleResource>
     <LocaleResource Name="VerifyResponseSignature"><Value>Verify response signatures</Value></LocaleResource>
     <LocaleResource Name="SignatureChecks"><Value>Signature checks</Value></LocaleResource>

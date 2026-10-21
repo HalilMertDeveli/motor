@@ -1,0 +1,23 @@
+<Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
+    <LocaleResource Name="Plugins.FriendlyName.MotorShop.PaymentTerms" AppendRootKey="false"><Value>Prosev ödeme koşulları (bayi vadeli ödeme)</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.PaymentTerms" AppendRootKey="false"><Value>Prosev 2026 kataloğunun ödeme koşulları: Bayi müşteri rolü, bayiler için vadeli ödeme (peşin 10 gün veya 30/60/90 gün), ödeme adımında taksit ve bayi koşulları kutusu, havale/EFT ve kapıda ödeme açıklamaları.</Value></LocaleResource>
+    <LocaleResource Name="Plugins.FriendlyName.Payments.DealerTerm" AppendRootKey="false"><Value>Vadeli ödeme (bayi)</Value></LocaleResource>
+    <LocaleResource Name="Plugins.PaymentInfo.Payments.DealerTerm" AppendRootKey="false"><Value>Siparişiniz seçtiğiniz ödeme planıyla oluşturulur. Ödeme, bayi cari hesabınız üzerinden vadesinde tahsil edilir.</Value></LocaleResource>
+
+    <LocaleResource Name="ChooseTerm"><Value>Ödeme planı</Value></LocaleResource>
+    <LocaleResource Name="TermRequired"><Value>Lütfen bir ödeme planı seçin.</Value></LocaleResource>
+    <LocaleResource Name="Term.Cash"><Value>Peşin ({0} gün içinde ödeme)</Value></LocaleResource>
+    <LocaleResource Name="Term.Deferred"><Value>{0} gün vade</Value></LocaleResource>
+    <LocaleResource Name="TermHint"><Value>Vadesinde ödenmeyen faturalara aylık %{0} vade farkı uygulanır. Ödeme planına uyulmasını rica ederiz.</Value></LocaleResource>
+    <LocaleResource Name="OrderNote"><Value>Ödeme planı: {0} (bayi vadeli ödeme). Vadesinde ödenmeyen faturalara aylık %{1} vade farkı uygulanır.</Value></LocaleResource>
+
+    <LocaleResource Name="Installments.Title"><Value>Tüm kredi kartlarına 3 taksit</Value></LocaleResource>
+    <LocaleResource Name="Installments.Text"><Value>Kartla ödemede tek çekim veya vade farksız 3 taksit seçeneği iyzico güvenli ödeme sayfasında sunulur.</Value></LocaleResource>
+    <LocaleResource Name="Installments.Programs"><Value>Sağlam Kart · Bankkart Combo · Paraf · Advantage · CardFinans · Bonus · Axess · World · Maximum</Value></LocaleResource>
+
+    <LocaleResource Name="Dealer.Title"><Value>Bayi ödeme koşulları</Value></LocaleResource>
+    <LocaleResource Name="Dealer.Terms"><Value>Satışlarımız {0} gün vadelidir; peşin ödeme vadesi {1} gündür.</Value></LocaleResource>
+    <LocaleResource Name="Dealer.LateFee"><Value>Vadesinde ödenmeyen faturalara aylık %{0} vade farkı uygulanır.</Value></LocaleResource>
+    <LocaleResource Name="Dealer.CardMinimums"><Value>Kartla taksitli çekimlerde en az {0}, tek çekimlerde en az {1} çekim yapılır.</Value></LocaleResource>
+    <LocaleResource Name="AllTerms"><Value>Tüm ödeme koşulları</Value></LocaleResource>
+</Language>

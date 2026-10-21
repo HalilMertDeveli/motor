@@ -11,6 +11,7 @@ using Smartstore.Core.Content.Media;
 using Smartstore.Core.Content.Media.Storage;
 using Smartstore.Core.Data;
 using Smartstore.Core.DataExchange.Import;
+using Smartstore.Core.Installation;
 using Smartstore.Core.Seo;
 using Smartstore.IO;
 using Smartstore.Utilities.Html;
@@ -304,6 +305,14 @@ public class SupplierCatalogImporter
             product.ProductCategories.Add(new ProductCategory { CategoryId = categoryId, DisplayOrder = item.DisplayOrder });
         }
 
+        // Catalog campaign pages: campaign products are also listed in the campaign category.
+        if (item.Campaign
+            && categoryIds.TryGetValue(ProsevStoreDefaults.CampaignCategoryName, out var campaignCategoryId)
+            && !product.ProductCategories.Any(x => x.CategoryId == campaignCategoryId))
+        {
+            product.ProductCategories.Add(new ProductCategory { CategoryId = campaignCategoryId, DisplayOrder = item.DisplayOrder });
+        }
+
         if (item.Brand.HasValue()
             && brandIds.TryGetValue(item.Brand.Trim(), out var brandId)
             && !product.ProductManufacturers.Any(x => x.ManufacturerId == brandId))
@@ -437,6 +446,11 @@ public class SupplierCatalogImporter
             .Select(x => NormalizeCategoryPath(x.Category))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        if (items.Any(x => x.Campaign) && !paths.Contains(ProsevStoreDefaults.CampaignCategoryName, StringComparer.OrdinalIgnoreCase))
+        {
+            paths.Insert(0, ProsevStoreDefaults.CampaignCategoryName);
+        }
 
         foreach (var path in paths)
         {

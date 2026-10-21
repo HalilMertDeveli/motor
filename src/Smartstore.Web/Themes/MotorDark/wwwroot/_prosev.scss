@@ -1,0 +1,186 @@
+//
+// Prosev: the look of the 2026 catalog on top of MotorDark.
+// Catalog pages have a red header band with an italic, uppercase white title and a slanted end,
+// thin rules between products and red price labels. Colors come from _variables-custom.scss.
+// --------------------------------------------------
+
+$prosev-slant: 0.7em;
+
+@mixin prosev-band($slant: $prosev-slant) {
+    background: $motor-accent;
+    color: $motor-on-accent;
+    clip-path: polygon(0 0, 100% 0, calc(100% - #{$slant}) 100%, 0 100%);
+}
+
+// Section labels ("eyebrows") as small red catalog tags
+// --------------------------------------------------
+
+.motor-eyebrow {
+    @include prosev-band(0.55em);
+    gap: 0;
+    padding: 0.32rem 1.15rem 0.3rem 0.7rem;
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: $motor-on-accent;
+
+    &:before {
+        display: none;
+    }
+}
+
+.motor-section-head {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid $motor-line-strong;
+}
+
+// Wordmark: hexagon badge + PROSEV, tighter like the catalog logo
+// --------------------------------------------------
+
+.shop-logo .brand.motor-wordmark {
+    gap: 0.5rem;
+
+    .motor-wordmark-mark svg {
+        width: 30px;
+    }
+
+    .motor-wordmark-text {
+        letter-spacing: 0.02em;
+    }
+
+    &:hover .motor-wordmark-mark {
+        transform: none;
+    }
+}
+
+// Category, brand and search pages: catalog header band
+// --------------------------------------------------
+
+:is(.category-page, .manufacturer-page, .search-page, .product-tag-page, .recently-added-products-page) .page-title {
+    border-bottom-color: $motor-line-strong;
+
+    &:after {
+        display: none;
+    }
+
+    h1 {
+        @include prosev-band;
+        display: inline-block;
+        padding: 0.3em 1.6em 0.22em 0.55em;
+        @include rfs(2.25rem);
+    }
+}
+
+// Hero: catalog installment tag
+// --------------------------------------------------
+
+.motor-hero-installments {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: -0.75rem 0 1.75rem;
+    font-family: $headings-font-family;
+    font-style: italic;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $motor-text;
+
+    strong {
+        @include prosev-band(0.35em);
+        display: inline-block;
+        padding: 0.05em 0.6em 0 0.35em;
+        font-size: 1.6em;
+        line-height: 1.1;
+    }
+}
+
+// Product cards and detail: catalog price style
+// --------------------------------------------------
+
+.art-price-value,
+.pd-finalprice-amount {
+    font-family: $headings-font-family;
+    font-style: italic;
+    font-weight: 700;
+}
+
+// Payment step (MotorShop.PaymentTerms)
+// --------------------------------------------------
+
+.prosev-payment-terms {
+    display: grid;
+    gap: 0.75rem;
+
+    p {
+        margin: 0;
+    }
+}
+
+.prosev-installments {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: $motor-surface;
+    border: 1px solid $motor-line;
+    border-inline-start: 4px solid $motor-accent;
+    border-radius: $border-radius-lg;
+}
+
+.prosev-installments-badge {
+    @include prosev-band(0.3em);
+    flex: 0 0 auto;
+    padding: 0 0.55em 0 0.3em;
+    font-family: $headings-font-family;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 2.25rem;
+    line-height: 1.15;
+}
+
+.prosev-installments-title,
+.prosev-dealer-title {
+    font-family: $headings-font-family;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    color: $motor-text;
+}
+
+.prosev-installments-text {
+    color: $gray-800;
+}
+
+.prosev-installments-programs {
+    margin-top: 0.25rem !important;
+    font-size: $font-size-xs;
+    color: $motor-text-muted;
+}
+
+.prosev-dealer-box {
+    padding: 1rem 1.25rem;
+    background: $motor-surface;
+    border: 1px solid $motor-line;
+    border-radius: $border-radius-lg;
+}
+
+.prosev-dealer-list {
+    margin: 0.5rem 0 0;
+    padding-inline-start: 1.1rem;
+    color: $gray-800;
+
+    li + li {
+        margin-top: 0.25rem;
+    }
+}
+
+.prosev-payment-terms-link {
+    justify-self: start;
+    font-size: $font-size-sm;
+}
+
+.prosev-dealer-terms .form-check + .form-check {
+    margin-top: 0.35rem;
+}

@@ -17,9 +17,11 @@ using MotorShop.Iyzico.Services;
 using NUnit.Framework;
 using Smartstore;
 using Smartstore.Core;
+using Smartstore.Core.Checkout.Orders;
 using Smartstore.Core.Checkout.Payment;
 using Smartstore.Core.Common;
 using Smartstore.Core.Configuration;
+using Smartstore.Core.Data;
 using Smartstore.Core.Data.Migrations;
 using Smartstore.Engine;
 using Smartstore.Engine.Modularity;
@@ -368,7 +370,13 @@ public class IyzicoHardeningTests : IyzicoTestBase
         var credentials = new Mock<IIyzicoCredentialProvider>();
         credentials.Setup(x => x.GetCredentialsAsync(It.IsAny<int>())).ReturnsAsync(new IyzicoCredentials(ApiKey, SecretKey, IyzicoCredentialProvider.SandboxBaseUrl));
 
-        return new IyzicoPaymentFilter(workContext.Object, settingFactory.Object, new Lazy<IIyzicoCredentialProvider>(() => credentials.Object));
+        // FilterRequest has no cart, so the order minimum check needs neither total calculation nor database.
+        return new IyzicoPaymentFilter(
+            workContext.Object,
+            settingFactory.Object,
+            new Lazy<IIyzicoCredentialProvider>(() => credentials.Object),
+            new Lazy<IOrderCalculationService>(() => throw new InvalidOperationException("not expected")),
+            new Lazy<SmartDbContext>(() => throw new InvalidOperationException("not expected")));
     }
 
     private static PaymentFilterRequest FilterRequest(string systemName) => new()
@@ -590,7 +598,7 @@ public class IyzicoHardeningTests : IyzicoTestBase
             .Select(g => string.Join(" / ", g.Select(x => x.Type.FullName)))
             .ToList();
 
-        Assert.That(migrations.Count(x => x.Type.Assembly == typeof(IyzicoTransaction).Assembly), Is.EqualTo(2));
+        Assert.That(migrations.Count(x => x.Type.Assembly == typeof(IyzicoTransaction).Assembly), Is.EqualTo(3));
         Assert.That(duplicates, Is.Empty);
     }
 

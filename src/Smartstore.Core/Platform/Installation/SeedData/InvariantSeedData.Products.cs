@@ -1317,7 +1317,7 @@ public abstract partial class InvariantSeedData
         var thirdDeliveryTime = _db.DeliveryTimes.First(x => x.DisplayOrder == 2);
 
         var manufacturers = _db.Manufacturers.ToList().ToDictionarySafe(x => x.Name, x => x);
-        var categories = _db.Categories.ToList().ToDictionarySafe(x => x.Alias, x => x);
+        var categories = GetCategoriesByAlias(_db);
         var specAttributes = _db.SpecificationAttributes.ToList().ToDictionarySafe(x => x.DisplayOrder, x => x);
         var taxCategories = _db.TaxCategories.ToList().ToDictionarySafe(x => x.Name, x => x);
 

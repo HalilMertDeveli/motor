@@ -111,6 +111,7 @@ public partial class InstallationDataSeeder : DataSeeder<SmartDbContext>
         await PopulateAsync("PopulateScheduleTasks", _data.TaskDescriptors());
         await PopulateAsync("PopulateLocaleResources", async () => await PopulateLocaleResources(_config.Language));
         await PopulateAsync("PopulateMenus", _data.Menus());
+        await PopulateAsync("PopulateStoreCatalog", _data.SeedStoreCatalogAsync);
 
         if (_config.SeedSampleData)
         {

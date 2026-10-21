@@ -167,8 +167,22 @@ public class IyzicoPaymentService
             return new(IyzicoStartStatus.NotConfigured);
         }
 
+        // Order minimums (catalog dealer terms): no card payment below MinOrderTotal, single payment below MinInstallmentOrderTotal.
+        var roleNames = await _db.CustomerRoleMappings
+            .AsNoTracking()
+            .Where(x => x.CustomerId == order.CustomerId && x.CustomerRole.Active)
+            .Select(x => x.CustomerRole.SystemName)
+            .ToListAsync(cancelToken);
+
+        if (IyzicoRequestBuilder.IsBelowMinOrderTotal(settings, order.OrderTotal, roleNames))
+        {
+            return new(IyzicoStartStatus.NotPayable);
+        }
+
+        var singlePaymentOnly = !IyzicoRequestBuilder.AreInstallmentsAllowed(settings, order.OrderTotal, roleNames);
+
         var conversationId = Guid.NewGuid().ToString("N");
-        var request = IyzicoRequestBuilder.Build(order, settings, conversationId, callbackUrl, locale);
+        var request = IyzicoRequestBuilder.Build(order, settings, conversationId, callbackUrl, locale, singlePaymentOnly);
 
         CheckoutFormInitializeResponse response;
         try

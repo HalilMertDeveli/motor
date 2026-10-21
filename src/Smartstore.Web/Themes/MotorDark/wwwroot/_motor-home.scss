@@ -55,7 +55,7 @@
     svg {
         width: 16px;
         height: 16px;
-        color: $motor-accent;
+        color: $motor-accent-text;
         transition: transform .25s var(--motor-ease-out);
     }
 
@@ -181,7 +181,7 @@
 
     em {
         font-style: inherit;
-        color: $motor-accent;
+        color: $motor-accent-text;
     }
 }
 
@@ -313,7 +313,7 @@
     width: 56px;
     height: 56px;
     margin-bottom: 1rem;
-    color: $motor-accent;
+    color: $motor-accent-text;
 }
 
 .motor-cat-link {
@@ -356,12 +356,12 @@
         }
 
         .motor-cat-icon {
-            color: $motor-accent;
+            color: $motor-accent-text;
             transform: translateY(-2px);
         }
 
         .motor-cat-cta {
-            color: $motor-accent;
+            color: $motor-accent-text;
 
             svg {
                 transform: translateX(4px);
@@ -595,7 +595,7 @@
 
     em {
         font-style: inherit;
-        color: $motor-accent;
+        color: $motor-accent-text;
     }
 }
 
@@ -660,7 +660,7 @@
 .motor-story-icon {
     width: 40px;
     height: 40px;
-    color: $motor-accent;
+    color: $motor-accent-text;
 }
 
 // Brands
@@ -777,7 +777,7 @@
     flex: 0 0 auto;
     width: 36px;
     height: 36px;
-    color: $motor-accent;
+    color: $motor-accent-text;
 }
 
 .motor-assurance-title {
@@ -799,7 +799,7 @@
     color: $motor-text;
 
     &:hover {
-        color: $motor-accent;
+        color: $motor-accent-text;
     }
 }
 
@@ -822,7 +822,7 @@
 .motor-empty-icon {
     width: 56px;
     height: 56px;
-    color: $motor-accent;
+    color: $motor-accent-text;
     margin-bottom: 1rem;
 }
 

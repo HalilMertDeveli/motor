@@ -69,7 +69,7 @@ $motor-menubar-height: 38px;
     }
 
     .menubar-group--special .menubar-link {
-        color: $motor-accent !important;
+        color: $motor-accent-text !important;
     }
 }
 
@@ -150,7 +150,7 @@ $motor-menubar-height: 38px;
 
     .motor-wordmark-mark {
         display: inline-flex;
-        color: $motor-accent;
+        color: $motor-accent-text;
         transition: transform .35s var(--motor-ease-out);
 
         svg {
@@ -344,7 +344,7 @@ $motor-menubar-height: 38px;
         color: $motor-text;
 
         &:hover {
-            color: $motor-accent;
+            color: $motor-accent-text;
         }
     }
 
