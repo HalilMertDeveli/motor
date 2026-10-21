@@ -5,6 +5,34 @@
 MOTOR uses genuine, authorized product photographs. Generating product photos with AI is not allowed: no
 pictures of products that were not photographed, no invented variants, colours or accessories.
 
+## Official product photos (preferred source)
+
+**Decision:** the store owner, 2026-10-20: use the original, professional photos from the official product pages
+instead of the pictures cut out of the PDF catalog, wherever a page clearly shows the same product.
+
+**Rights:** product photos are copyrighted by the brands. Using them needs the brand's permission or Motosev's
+distributor rights; the owner is responsible for that agreement. `sources.csv` of every run records where each
+picture came from, so a picture can be removed on request.
+
+**Sources:** only official sites, see `SITES` in `tools/supplier-images/official-images.mjs`:
+
+- `www.motosev.com`: the supplier's own shop (Motosev owns the Prosev brand and distributes the other brands of
+  the catalog: Scoyco, MTS, Free-M, Fazer, Nikko, Pro Helmets, Kinguard, GAFF and more);
+- `www.shad.es`: SHAD, for SHAD products, matched by the SHAD reference.
+
+Never marketplaces, resellers or AI-generated pictures. Requests follow robots.txt, one per second; logins and bot
+protection are never bypassed.
+
+**No guessing:** a picture is replaced only when the model code, the variant (colour, graphic) and the product type
+agree and the official picture agrees with the catalog picture (shape and colour check), or when the name is not
+conclusive but the official page shows the very same photo as the catalog picture. Products without a catalog
+picture only get pictures from an exact manufacturer reference (SHAD). Everything else keeps its catalog picture and
+is listed in `review.html` as "Belirsiz" (uncertain) or "Bulunamadı" (not found). Check the uncertain list before
+publishing; products are imported unpublished.
+
+**Way back:** the previous packages stay on the Desktop; re-import one of them into a store whose picture links of
+the affected products were removed (the importer never replaces existing pictures).
+
 ## Exception: AI upscaling of the Motosev 2026 catalog photos
 
 **Decision:** the store owner, 2026-10-20, after comparing samples (genuine pixels next to AI upscaling).

@@ -76,3 +76,52 @@ node tools/supplier-images/enhance-supplier-images.mjs \
   from `image-report.json` without running the upscaler again.
 - `--only` limits rendering; the assignment always considers all pictures, so variants are not mixed up.
 
+
+## Official product photos (`official-images.mjs`)
+
+Replaces the catalog pictures with the original photos from the official product pages, where a page clearly
+shows the same product. Owner decision and rules: [docs/motor/product-images.md](../../docs/motor/product-images.md).
+
+Sites (`SITES` in the script): `www.motosev.com` (the supplier's own shop, owner of the Prosev brand; it lists the
+products of all brands it distributes) and `www.shad.es` (SHAD, only for SHAD products, matched by the SHAD
+reference). Both are read through their public WooCommerce Store API; robots.txt allows it. No marketplaces,
+no resellers, no generated pictures.
+
+```sh
+node tools/supplier-images/official-images.mjs index    --out=work/web
+node tools/supplier-images/official-images.mjs match    --products=package/products.json --web=work/web --out=work/matches.json
+node tools/supplier-images/official-images.mjs download --matches=work/matches.json --out=work/download
+node tools/supplier-images/official-images.mjs resolve  --products=package/products.json --images=package/images \
+  --matches=work/matches.json --download=work/download --out=work/matches-resolved.json
+node tools/supplier-images/official-images.mjs download --matches=work/matches-resolved.json --out=work/download
+node tools/supplier-images/official-images.mjs build    --products=package/products.json --images=package/images \
+  --matches=work/matches-resolved.json --download=work/download --out=work/official \
+  --fallback-images=improved/images [--reject=SKU1,SKU2]
+```
+
+- `match`: model code (catalog code without its price group, e.g. `869-01780` -> `869`), brand, variant words
+  (Turkish and Spanish colour names mapped to the English ones) and product type (a helmet page never stands in
+  for a visor or spare part). A page is used only when exactly one page fits; when the same article is on both
+  sites, the manufacturer's page wins. A letter prefix on either side (`910` / `M-910`, `FR-965` / `965`) counts as
+  a weaker match. Several pages, a missing or different variant word, or a letter-only code (`MKM`, `DO SPACY`)
+  make the product "uncertain".
+- `download`: pictures of matched products (at most 5, the main picture of every colour page first, the WordPress
+  size of at least 1200 px) plus 500 px pictures of uncertain candidates. One request per second, stops on HTTP
+  429/503, resumable (`download-log.json`).
+- `resolve`: an uncertain product is matched only when exactly one candidate page shows the very same photo as the
+  catalog picture (crop-aware shape score at least 0.88, colour distance at most 15, clearly ahead of the other
+  candidates). Run `download` again afterwards for the full pictures.
+- `build`: compares the catalog picture with the official pictures: crop-aware grey NCC on 96 px thumbnails (the
+  catalog crops are cut and carry labels) plus the mean product colour, which always has to agree (a near-identical
+  shape in another colour is another colour variant). Products that fail keep their catalog picture and are listed
+  as "uncertain"; so are SKUs given in `--reject`. The site's first picture stays the main picture unless it fails
+  the check (some pages show another colour first). Official pictures get the same white square canvas as the
+  catalog pictures (trimmed, product fills 88 %, 800 to 1200 px, at most 1.5× enlargement, JPEG q2 4:4:4);
+  photos with a scene keep their frame.
+- Output: `products.json` (same products, only `images` changed), `images/`, `sources.csv`/`sources.json` (source
+  page, picture URL, owner, download time per picture) and `review.html`/`review.csv` (matched, uncertain,
+  not found, per brand, with catalog and official pictures side by side).
+- Products that keep their catalog picture take it from `--fallback-images` when given (same file names), else
+  from the package.
+- Check the result on contact sheets before importing. On 2026-10-20 the supplier's site had the photos of the
+  JY01 red and black helmet pages swapped; the colour rule catches such cases, but only a person can confirm them.
