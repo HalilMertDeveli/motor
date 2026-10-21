@@ -44,7 +44,7 @@
         color: $motor-text;
 
         .fa {
-            color: $motor-accent;
+            color: $motor-accent-text;
         }
 
         @include media-breakpoint-up(md) {
@@ -309,7 +309,7 @@
     .fa {
         flex: none;
         font-size: 1.125rem;
-        color: $motor-accent;
+        color: $motor-accent-text;
     }
 
     &:hover {

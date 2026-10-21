@@ -1,0 +1,78 @@
+<Language Name="English" IsDefault="false" IsRightToLeft="false">
+  <LocaleResource Name="Plugins.FriendlyName.MotorShop.WordPress" AppendRootKey="false"><Value>WordPress blog</Value></LocaleResource>
+  <LocaleResource Name="Plugins.Description.MotorShop.WordPress" AppendRootKey="false"><Value>Shows published WordPress posts, guides and pages under /blog and /rehberler in the MOTOR storefront. Products, stock, orders and payments stay in MOTOR.</Value></LocaleResource>
+  <LocaleResource Name="Plugins.Permissions.DisplayName.WordPress" AppendRootKey="false"><Value>WordPress blog</Value></LocaleResource>
+
+  <LocaleResource Name="Blog"><Value>Blog</Value></LocaleResource>
+  <LocaleResource Name="Blog.Eyebrow"><Value>Riding notes</Value></LocaleResource>
+  <LocaleResource Name="Blog.Intro"><Value>Articles on motorcycle maintenance, gear and riding.</Value></LocaleResource>
+  <LocaleResource Name="Guides"><Value>Guides</Value></LocaleResource>
+  <LocaleResource Name="Guides.Eyebrow"><Value>Step by step</Value></LocaleResource>
+  <LocaleResource Name="Guides.Intro"><Value>Technical guides for maintenance, fitting and choosing the right part.</Value></LocaleResource>
+  <LocaleResource Name="Guide"><Value>Guide</Value></LocaleResource>
+  <LocaleResource Name="PageNumber"><Value>Page {0}</Value></LocaleResource>
+  <LocaleResource Name="Categories"><Value>Categories</Value></LocaleResource>
+  <LocaleResource Name="AllPosts"><Value>All</Value></LocaleResource>
+  <LocaleResource Name="Search"><Value>Search</Value></LocaleResource>
+  <LocaleResource Name="Search.Placeholder"><Value>Search the blog</Value></LocaleResource>
+  <LocaleResource Name="SearchResults"><Value>{0} results for "{1}"</Value></LocaleResource>
+  <LocaleResource Name="NoSearchResults"><Value>No posts match your search.</Value></LocaleResource>
+  <LocaleResource Name="NoPosts"><Value>Nothing has been published here yet.</Value></LocaleResource>
+  <LocaleResource Name="StaleNotice"><Value>The content cannot be updated right now; the last saved version is shown.</Value></LocaleResource>
+  <LocaleResource Name="Unavailable"><Value>The blog is not available right now. The shop, cart and checkout work as usual.</Value></LocaleResource>
+  <LocaleResource Name="BackToShop"><Value>Back to the shop</Value></LocaleResource>
+  <LocaleResource Name="Pagination"><Value>Pages</Value></LocaleResource>
+  <LocaleResource Name="Previous"><Value>Previous</Value></LocaleResource>
+  <LocaleResource Name="Next"><Value>Next</Value></LocaleResource>
+  <LocaleResource Name="PageOf"><Value>Page {0} of {1}</Value></LocaleResource>
+  <LocaleResource Name="ReadingTime"><Value>{0} min read</Value></LocaleResource>
+  <LocaleResource Name="Updated"><Value>Updated: {0}</Value></LocaleResource>
+  <LocaleResource Name="Tags"><Value>Tags</Value></LocaleResource>
+  <LocaleResource Name="RelatedProducts"><Value>Products in this post</Value></LocaleResource>
+  <LocaleResource Name="RelatedPosts"><Value>Related posts</Value></LocaleResource>
+  <LocaleResource Name="BackTo"><Value>All posts: {0}</Value></LocaleResource>
+
+  <LocaleResource Name="Admin.Instruction"><Value><![CDATA[WordPress is connected as a headless content source. For security the connection is not edited here; it comes from environment variables: <code>MotorShop__WordPress__Enabled</code>, <code>MotorShop__WordPress__BaseUrl</code>, optionally <code>MotorShop__WordPress__UserName</code> and <code>MotorShop__WordPress__ApplicationPassword</code> (a WordPress application password, not the admin password). See <code>docs/motor/wordpress.md</code>.]]></Value></LocaleResource>
+  <LocaleResource Name="Admin.Connection"><Value>Connection</Value></LocaleResource>
+  <LocaleResource Name="Admin.Status"><Value>Status</Value></LocaleResource>
+  <LocaleResource Name="Admin.Disabled"><Value>Disabled</Value></LocaleResource>
+  <LocaleResource Name="Admin.Misconfigured"><Value>Misconfigured</Value></LocaleResource>
+  <LocaleResource Name="Admin.Connected"><Value>Connected</Value></LocaleResource>
+  <LocaleResource Name="Admin.NotConnected"><Value>Not connected</Value></LocaleResource>
+  <LocaleResource Name="Admin.Host"><Value>WordPress address</Value></LocaleResource>
+  <LocaleResource Name="Admin.Authentication"><Value>Authentication</Value></LocaleResource>
+  <LocaleResource Name="Admin.AuthAppPassword"><Value>Application password (set, not shown)</Value></LocaleResource>
+  <LocaleResource Name="Admin.AuthPublic"><Value>None (public REST API)</Value></LocaleResource>
+  <LocaleResource Name="Admin.Webhook"><Value>Cache webhook</Value></LocaleResource>
+  <LocaleResource Name="Admin.CacheDuration"><Value>Cache duration</Value></LocaleResource>
+  <LocaleResource Name="Admin.Minutes"><Value>{0} minutes</Value></LocaleResource>
+  <LocaleResource Name="Admin.GuideCategory"><Value>Guide category (slug)</Value></LocaleResource>
+  <LocaleResource Name="Admin.ProductTagPrefix"><Value>Product tag prefix</Value></LocaleResource>
+  <LocaleResource Name="Admin.OpenWordPress"><Value>Open WordPress admin</Value></LocaleResource>
+  <LocaleResource Name="Admin.OpenWordPressHint"><Value>Opens in a new tab. You sign in to WordPress with your own WordPress user; the MOTOR session is not shared.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Sync"><Value>Content and sync</Value></LocaleResource>
+  <LocaleResource Name="Admin.PublishedPosts"><Value>Published posts</Value></LocaleResource>
+  <LocaleResource Name="Admin.PublishedPages"><Value>Published pages</Value></LocaleResource>
+  <LocaleResource Name="Admin.Categories"><Value>Categories</Value></LocaleResource>
+  <LocaleResource Name="Admin.LastSuccess"><Value>Last successful request</Value></LocaleResource>
+  <LocaleResource Name="Admin.LastFailure"><Value>Last error</Value></LocaleResource>
+  <LocaleResource Name="Admin.ConsecutiveFailures"><Value>Consecutive errors</Value></LocaleResource>
+  <LocaleResource Name="Admin.LastCacheClear"><Value>Last cache refresh</Value></LocaleResource>
+  <LocaleResource Name="Admin.PerInstance"><Value>These values are per application instance and reset on restart.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Never"><Value>Never</Value></LocaleResource>
+  <LocaleResource Name="Admin.RecentPosts"><Value>Recent posts</Value></LocaleResource>
+  <LocaleResource Name="Admin.NoPosts"><Value>No posts to show.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Title"><Value>Title</Value></LocaleResource>
+  <LocaleResource Name="Admin.Section"><Value>Section</Value></LocaleResource>
+  <LocaleResource Name="Admin.Published"><Value>Published</Value></LocaleResource>
+  <LocaleResource Name="Admin.Errors"><Value>Integration errors</Value></LocaleResource>
+  <LocaleResource Name="Admin.NoErrors"><Value>No errors recorded.</Value></LocaleResource>
+  <LocaleResource Name="Admin.ClearCache"><Value>Refresh cache</Value></LocaleResource>
+  <LocaleResource Name="Admin.CacheCleared"><Value>Blog cache refreshed ({0} entries). The next visit loads current content from WordPress.</Value></LocaleResource>
+  <LocaleResource Name="Admin.RebuildSitemap"><Value>Refresh sitemap</Value></LocaleResource>
+  <LocaleResource Name="Admin.SitemapInvalidated"><Value>The XML sitemap is rebuilt with the current posts on the next request.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Warning.DevFlags"><Value>AllowInsecureHttp or AllowPrivateNetwork is on in production. They are for local development only; turn them off.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Warning.ShortSecret"><Value>WebhookSecret must have at least {0} characters; the webhook is off.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Warning.NoGuideCategory"><Value>WordPress has no category with the slug "{0}"; /rehberler stays empty.</Value></LocaleResource>
+  <LocaleResource Name="Admin.Warning.SlugCollision"><Value>The URL "{0}" belongs to a {1} record (#{2}) and collides with the blog URL. Change the SEO name of that record.</Value></LocaleResource>
+</Language>

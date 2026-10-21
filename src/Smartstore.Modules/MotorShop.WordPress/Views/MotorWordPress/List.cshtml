@@ -1,0 +1,121 @@
+@using Microsoft.AspNetCore.Routing
+@using static MotorShop.WordPress.Controllers.MotorWordPressController
+@model BlogListModel
+
+@{
+    Layout = "_Layout";
+
+    var result = Model.Result;
+    var page = result.PageIndex;
+    var isGuides = Model.Section == BlogSection.Guides;
+
+    Assets.AppendTitleParts(page > 1 ? $"{Model.Title} – {T("Plugins.MotorShop.WordPress.PageNumber", page)}" : Model.Title);
+    if (Model.Intro.HasValue())
+    {
+        Assets.AppendMetaDescriptionParts(Model.Intro);
+    }
+
+    if (Model.Search.HasValue())
+    {
+        // Search results are thin, changing content.
+        Assets.AddMetaRobots(content: "noindex, follow");
+    }
+    else
+    {
+        Assets.AppendCanonicalUrlParts(Model.CanonicalUrl.HtmlEncode()!);
+    }
+
+    string PageUrl(int pageIndex)
+    {
+        var values = new RouteValueDictionary(Model.RouteValues);
+        if (pageIndex > 1)
+        {
+            values["page"] = pageIndex;
+        }
+        if (Model.Search.HasValue())
+        {
+            values["q"] = Model.Search;
+        }
+        return Url.RouteUrl(Model.RouteName, values)!;
+    }
+}
+
+<div class="page blog-page motor-blog">
+    <header class="motor-blog-head">
+        <span class="motor-eyebrow">@T(isGuides ? "Plugins.MotorShop.WordPress.Guides.Eyebrow" : "Plugins.MotorShop.WordPress.Blog.Eyebrow")</span>
+        <div class="page-title">
+            <h1>@Model.Title</h1>
+        </div>
+        @if (Model.Intro.HasValue())
+        {
+            <p class="motor-blog-lead">@Model.Intro</p>
+        }
+    </header>
+
+    @if (!isGuides)
+    {
+        <div class="motor-blog-toolbar">
+            @if (Model.Categories.Count > 0)
+            {
+                <nav class="motor-blog-chips" aria-label="@T("Plugins.MotorShop.WordPress.Categories")">
+                    <a class="motor-blog-chip" attr-class='(Model.ActiveCategorySlug == null && Model.RouteName == RouteNames.Blog, "active")'
+                       href="@Url.RouteUrl(RouteNames.Blog)">@T("Plugins.MotorShop.WordPress.AllPosts")</a>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <a class="motor-blog-chip" attr-class='(category.Slug.EqualsNoCase(Model.ActiveCategorySlug), "active")'
+                           attr-aria-current='(category.Slug.EqualsNoCase(Model.ActiveCategorySlug), "page")'
+                           href="@Url.BlogCategoryUrl(category)">@category.Name</a>
+                    }
+                </nav>
+            }
+
+            <form class="motor-blog-search" method="get" action="@Url.RouteUrl(RouteNames.Blog)" role="search">
+                <label class="sr-only" for="blog-search">@T("Plugins.MotorShop.WordPress.Search")</label>
+                <input id="blog-search" class="form-control" type="search" name="q" value="@Model.Search" maxlength="100"
+                       placeholder="@T("Plugins.MotorShop.WordPress.Search.Placeholder")" />
+                <button class="btn btn-motor" type="submit">@T("Plugins.MotorShop.WordPress.Search")</button>
+            </form>
+        </div>
+    }
+
+    @if (result.IsStale)
+    {
+        <p class="motor-blog-note">@T("Plugins.MotorShop.WordPress.StaleNotice")</p>
+    }
+
+    @if (result.Posts.Count == 0)
+    {
+        <div class="motor-blog-empty">
+            <p>@T(Model.Search.HasValue() ? "Plugins.MotorShop.WordPress.NoSearchResults" : "Plugins.MotorShop.WordPress.NoPosts")</p>
+        </div>
+    }
+    else
+    {
+        if (Model.Search.HasValue())
+        {
+            <p class="motor-blog-note">@T("Plugins.MotorShop.WordPress.SearchResults", result.TotalCount, Model.Search)</p>
+        }
+
+        <div class="motor-blog-grid" role="list" data-motor-stagger>
+            @foreach (var post in result.Posts)
+            {
+                <partial name="_PostCard" model="post" />
+            }
+        </div>
+    }
+
+    @if (result.TotalPages > 1)
+    {
+        <nav class="motor-blog-pager" aria-label="@T("Plugins.MotorShop.WordPress.Pagination")">
+            @if (page > 1)
+            {
+                <a class="btn btn-motor-ghost" rel="prev" href="@PageUrl(page - 1)">@T("Plugins.MotorShop.WordPress.Previous")</a>
+            }
+            <span class="motor-blog-pager-info">@T("Plugins.MotorShop.WordPress.PageOf", page, result.TotalPages)</span>
+            @if (page < result.TotalPages)
+            {
+                <a class="btn btn-motor-ghost" rel="next" href="@PageUrl(page + 1)">@T("Plugins.MotorShop.WordPress.Next")</a>
+            }
+        </nav>
+    }
+</div>

@@ -36,6 +36,12 @@
     <LocaleResource Name="EnableInstallments.Hint"><Value>iyzico ödeme sayfasında taksit sunar. Müşteriye yansıtılan taksit komisyonunu iyzico sipariş tutarının üzerine ekleyerek tahsil eder.</Value></LocaleResource>
     <LocaleResource Name="EnabledInstallments"><Value>Taksit seçenekleri</Value></LocaleResource>
     <LocaleResource Name="EnabledInstallments.Hint"><Value>Virgülle ayrılmış, ör. 1,2,3,6,9. Tek çekim (1) her zaman sunulur.</Value></LocaleResource>
+    <LocaleResource Name="MinOrderTotal"><Value>Kartla ödeme için en az sipariş tutarı</Value></LocaleResource>
+    <LocaleResource Name="MinOrderTotal.Hint"><Value>Bu tutarın altındaki siparişlerde kartla ödeme sunulmaz. Yalnızca aşağıdaki müşteri rollerine uygulanır. 0 = kapalı. Katalog: bayilerde tek çekim en az 5.000 TL.</Value></LocaleResource>
+    <LocaleResource Name="MinInstallmentOrderTotal"><Value>Taksit için en az sipariş tutarı</Value></LocaleResource>
+    <LocaleResource Name="MinInstallmentOrderTotal.Hint"><Value>Bu tutarın altındaki siparişlerde yalnızca tek çekim sunulur. Yalnızca aşağıdaki müşteri rollerine uygulanır. 0 = kapalı. Katalog: bayilerde taksitli çekim en az 10.000 TL.</Value></LocaleResource>
+    <LocaleResource Name="OrderMinimumsCustomerRoles"><Value>En az tutarların uygulandığı müşteri rolleri</Value></LocaleResource>
+    <LocaleResource Name="OrderMinimumsCustomerRoles.Hint"><Value>Virgülle ayrılmış rol sistem adları, ör. Dealer (Bayi). Boş bırakılırsa tüm müşterilere uygulanır.</Value></LocaleResource>
     <LocaleResource Name="RequireWebhookSignature"><Value>Webhook imzası zorunlu</Value></LocaleResource>
     <LocaleResource Name="VerifyResponseSignature"><Value>Yanıt imzalarını doğrula</Value></LocaleResource>
     <LocaleResource Name="SignatureChecks"><Value>İmza kontrolleri</Value></LocaleResource>

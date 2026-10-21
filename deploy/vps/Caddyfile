@@ -25,8 +25,13 @@
 	respond @health 404
 
 	# The installer is only needed once; it is reachable from the server itself
-	# (ssh tunnel to the web container) but never from the internet.
-	@install path /install /install/*
+	# (ssh tunnel to the web container) but never from the internet. For the first
+	# installation only, MOTOR_INSTALL_ALLOW_IP=<owner's IP>/32 lets the owner's
+	# browser open it; remove the variable again right after installing.
+	@install {
+		path /install /install/*
+		not remote_ip {$MOTOR_INSTALL_ALLOW_IP:255.255.255.255/32}
+	}
 	respond @install 404
 
 	reverse_proxy web:8080 {

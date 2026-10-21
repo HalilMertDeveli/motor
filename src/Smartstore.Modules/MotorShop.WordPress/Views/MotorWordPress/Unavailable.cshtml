@@ -1,0 +1,15 @@
+@{
+    Layout = "_Layout";
+    Assets.AppendTitleParts(T("Plugins.MotorShop.WordPress.Blog").ToString());
+    Assets.AddMetaRobots(content: "noindex");
+}
+
+<div class="page blog-page motor-blog">
+    <div class="page-title">
+        <h1>@T("Plugins.MotorShop.WordPress.Blog")</h1>
+    </div>
+    <div class="motor-blog-empty">
+        <p>@T("Plugins.MotorShop.WordPress.Unavailable")</p>
+        <a class="btn btn-motor" href="@Url.RouteUrl("Homepage")">@T("Plugins.MotorShop.WordPress.BackToShop")</a>
+    </div>
+</div>

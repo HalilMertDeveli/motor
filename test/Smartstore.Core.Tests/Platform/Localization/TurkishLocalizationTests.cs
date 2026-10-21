@@ -192,6 +192,7 @@ public class TurkishLocalizationTests
     {
         var builder = new LocaleResourcesBuilder();
         new MotorTurkishLocalization().MigrateLocaleResources(builder);
+        new ProsevStore().MigrateLocaleResources(builder);
         var entries = builder.Build().ToList();
 
         var viewsDir = WebPath("Themes", "MotorDark", "Views");

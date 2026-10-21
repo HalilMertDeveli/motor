@@ -1,0 +1,66 @@
+# Headless WordPress for MOTOR: content editing only (blog, guides, pages).
+#
+#   db         MariaDB, used by WordPress alone. Never the MOTOR (Supabase PostgreSQL) database.
+#   wordpress  Official WordPress image (PHP + Apache).
+#
+# MOTOR reads published content through the public REST API (/wp-json/wp/v2/...).
+# WordPress gets no access to the MOTOR database, products, orders or payments.
+#
+# Local development (from this directory, with .env next to this file, see .env.example):
+#   docker compose up -d
+#   open http://localhost:8097/wp-admin/install.php
+#
+# For a public server put WordPress behind HTTPS (e.g. Caddy as in deploy/vps) on its own
+# subdomain such as cms.example.com, and keep the loopback port binding below.
+# Setup and hardening: docs/motor/wordpress.md
+
+name: ${WP_PROJECT_NAME:-motor-wordpress}
+
+services:
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: ${WP_DB_PASSWORD:?Set WP_DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${WP_DB_ROOT_PASSWORD:?Set WP_DB_ROOT_PASSWORD in .env}
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  wordpress:
+    image: wordpress:6.8-php8.3-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # Loopback only: a reverse proxy with HTTPS publishes it.
+    ports:
+      - "127.0.0.1:${WP_PORT:-8097}:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PASSWORD:?Set WP_DB_PASSWORD in .env}
+      # Read by mu-plugins/motor-headless.php
+      MOTOR_STORE_URL: ${MOTOR_STORE_URL:?Set MOTOR_STORE_URL in .env}
+      MOTOR_WEBHOOK_URL: ${MOTOR_WEBHOOK_URL:-}
+      MOTOR_WEBHOOK_SECRET: ${MOTOR_WEBHOOK_SECRET:-}
+      MOTOR_GUIDE_CATEGORY: ${MOTOR_GUIDE_CATEGORY:-rehberler}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('DISALLOW_FILE_EDIT', true);
+        define('WP_POST_REVISIONS', 20);
+        define('AUTOMATIC_UPDATER_DISABLED', false);
+        define('WP_AUTO_UPDATE_CORE', 'minor');
+    volumes:
+      - wordpress:/var/www/html
+      - ./mu-plugins:/var/www/html/wp-content/mu-plugins:ro
+
+volumes:
+  db:
+  wordpress:

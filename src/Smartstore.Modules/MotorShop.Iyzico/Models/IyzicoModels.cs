@@ -49,6 +49,17 @@ public class ConfigurationModel : ModelBase
     [LocalizedDisplay("*EnabledInstallments")]
     public string EnabledInstallments { get; set; }
 
+    [LocalizedDisplay("*MinOrderTotal")]
+    [Range(0, 100_000_000)]
+    public decimal MinOrderTotal { get; set; }
+
+    [LocalizedDisplay("*MinInstallmentOrderTotal")]
+    [Range(0, 100_000_000)]
+    public decimal MinInstallmentOrderTotal { get; set; }
+
+    [LocalizedDisplay("*OrderMinimumsCustomerRoles")]
+    public string OrderMinimumsCustomerRoles { get; set; }
+
     /// <summary>
     /// Read-only. Signature checks can only be relaxed through configuration.
     /// </summary>

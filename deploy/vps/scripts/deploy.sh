@@ -53,7 +53,14 @@ fi
 
 set_tag "$NEW_TAG"
 docker compose config --quiet || { set_tag "$OLD_TAG"; die "compose config invalid"; }
-docker compose pull web || { set_tag "$OLD_TAG"; die "pull failed, still on $OLD_TAG"; }
+# MOTOR_IMAGE_PULL=never: the image is built on this server (scripts/build-image.sh),
+# so it must exist locally instead of being pulled from the registry.
+if [ "$(sed -n 's/^MOTOR_IMAGE_PULL=//p' .env | tail -n 1)" = "never" ]; then
+    image=$(sed -n 's/^MOTOR_IMAGE=//p' .env | tail -n 1)
+    docker image inspect "$image:$NEW_TAG" >/dev/null 2>&1 || { set_tag "$OLD_TAG"; die "image $image:$NEW_TAG not built on this server"; }
+else
+    docker compose pull web || { set_tag "$OLD_TAG"; die "pull failed, still on $OLD_TAG"; }
+fi
 
 wait_healthy() {
     cid=$(docker compose ps -q web)

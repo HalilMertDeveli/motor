@@ -11,6 +11,7 @@ using Smartstore.Core.Content.Media;
 using Smartstore.Core.Content.Media.Storage;
 using Smartstore.Core.Data;
 using Smartstore.Core.DataExchange.Import;
+using Smartstore.Core.Installation;
 using Smartstore.Core.Seo;
 using Smartstore.IO;
 using Smartstore.Utilities.Html;
@@ -250,6 +251,8 @@ public class SupplierCatalogImporter
     /// <summary>
     /// Copies catalog values to a product. New products stay unpublished; the published state of existing products
     /// is never changed. A missing price never overwrites an existing one.
+    /// A new product without a catalog price becomes "call for price" instead of a purchasable 0 TL product;
+    /// a later import that brings a price for such a product makes it purchasable again.
     /// </summary>
     internal static void ApplyValues(CatalogPackageProduct item, Product product, bool isNew)
     {
@@ -262,11 +265,19 @@ public class SupplierCatalogImporter
 
         if (item.Price.HasValue)
         {
+            // Only lift "call for price" that stands in for a missing price (price 0), never one an admin set
+            // for a priced product.
+            if (product.CallForPrice && product.Price == 0 && item.Price.Value > 0)
+            {
+                product.CallForPrice = false;
+            }
+
             product.Price = item.Price.Value;
         }
         else if (isNew)
         {
             product.Price = 0;
+            product.CallForPrice = true;
         }
 
         if (isNew)
@@ -292,6 +303,14 @@ public class SupplierCatalogImporter
             && !product.ProductCategories.Any(x => x.CategoryId == categoryId))
         {
             product.ProductCategories.Add(new ProductCategory { CategoryId = categoryId, DisplayOrder = item.DisplayOrder });
+        }
+
+        // Catalog campaign pages: campaign products are also listed in the campaign category.
+        if (item.Campaign
+            && categoryIds.TryGetValue(ProsevStoreDefaults.CampaignCategoryName, out var campaignCategoryId)
+            && !product.ProductCategories.Any(x => x.CategoryId == campaignCategoryId))
+        {
+            product.ProductCategories.Add(new ProductCategory { CategoryId = campaignCategoryId, DisplayOrder = item.DisplayOrder });
         }
 
         if (item.Brand.HasValue()
@@ -427,6 +446,11 @@ public class SupplierCatalogImporter
             .Select(x => NormalizeCategoryPath(x.Category))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        if (items.Any(x => x.Campaign) && !paths.Contains(ProsevStoreDefaults.CampaignCategoryName, StringComparer.OrdinalIgnoreCase))
+        {
+            paths.Insert(0, ProsevStoreDefaults.CampaignCategoryName);
+        }
 
         foreach (var path in paths)
         {
