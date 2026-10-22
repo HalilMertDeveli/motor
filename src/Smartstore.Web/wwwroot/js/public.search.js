@@ -89,12 +89,12 @@
 
             var debouncedInput = _.debounce(function (e) {
                 doSearch(box.val());
-            }, 180, false);
+            }, 250, false);
             box.on('input propertychange paste', debouncedInput);
 
             // Sometimes a previous search term finishes request AFTER
             // a subsequent one. We need to skip rendering in this case.
-            var lastTerm;
+            var lastTerm, lastXhr;
 
             function doSearch(term) {
                 if (term.length < minLength) {
@@ -117,7 +117,12 @@
                 // Save last entered term in a global variable.
                 lastTerm = term;
 
-                $.ajax({
+                // Cancel the outdated request instead of letting it occupy the server.
+                if (lastXhr && lastXhr.readyState !== 4) {
+                    lastXhr.abort();
+                }
+
+                lastXhr = $.ajax({
                     dataType: target.length ? 'json' : 'html',
                     url: url,
                     data: { q: term },
@@ -146,7 +151,11 @@
                             openDrop();
                         }
                     },
-                    error: function () {
+                    error: function (req, status) {
+                        if (status === 'abort') {
+                            return;
+                        }
+
                         closeDrop();
                         dropBody.html('');
                     },

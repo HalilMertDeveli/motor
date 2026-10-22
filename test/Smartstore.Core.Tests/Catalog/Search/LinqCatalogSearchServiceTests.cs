@@ -217,6 +217,41 @@ public class LinqCatalogSearchServiceTests : ServiceTestBase
         });
     }
 
+    [TestCase("KAPALI KASK", new[] { 2 })]
+    [TestCase("kask", new[] { 2, 1 })]
+    [TestCase("eldıven", new[] { 3 })]
+    [TestCase("S869-0220", new[] { 2 })]
+    public async Task LinqSearch_storefront_term_is_ranked(string term, int[] expectedIds)
+    {
+        var products = new List<Product>
+        {
+            new SearchProduct(1) { Name = "MTS 966 Kask Çene Pedi", ShortDescription = null },
+            new SearchProduct(2) { Name = "Scoyco 869 Shark Kapalı Kask", ShortDescription = null, Sku = "S869-0220" },
+            new SearchProduct(3) { Name = "Scoyco MC109 Motosiklet Eldiveni", ShortDescription = null },
+            new SearchProduct(4) { Name = "Free-M FR-612 Bella Kapalı Kask", ShortDescription = null, Published = false }
+        };
+
+        await InitTestDataAsync(products);
+
+        var service = new LinqCatalogSearchService(
+            DbContext,
+            [new CatalogSearchQueryVisitor()],
+            _services,
+            It.IsAny<ICategoryService>(),
+            new SearchSettings(),
+            new CatalogSettings(),
+            new CatalogTermIndexProvider());
+
+        var query = new CatalogSearchQuery(["name", "sku", "shortdescription"], term)
+            .OriginatesFrom("Search/Search")
+            .PublishedOnly(true)
+            .SortBy(ProductSortingEnum.Relevance);
+
+        var result = await service.SearchAsync(query);
+
+        Assert.That(result.HitsEntityIds, Is.EqualTo(expectedIds));
+    }
+
     [Test]
     public async Task LinqSearch_find_exact_match()
     {

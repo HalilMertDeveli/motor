@@ -1,0 +1,17 @@
+@using Smartstore.Web.Models.Media;
+
+@model MediaGalleryModel
+
+@*
+    MotorDark: core gallery plus motor-gallery.js, which adds previous/next buttons, a photo counter and an
+    "inspect" button over the main photo and zoom controls/thumbnails to the full-screen viewer.
+    This partial is also re-rendered when a variant with its own photos is selected (ProductController.UpdateProductDetails).
+*@
+
+<script src="~/themes/motordark/js/motor-gallery.js" asp-append-version="true" sm-target-zone="scripts"></script>
+
+<div id="pd-gallery-container-inner" class="motor-gallery" data-motor-gallery-count="@Model.Files.Count">
+    <div id="pd-gallery" class="mb-3">
+        <partial name="MediaGallery" model="Model" />
+    </div>
+</div>

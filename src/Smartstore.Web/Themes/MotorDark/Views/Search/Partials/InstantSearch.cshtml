@@ -1,0 +1,60 @@
+@using Smartstore.Web.Models.Search
+
+@model SearchResultModel
+
+@*
+    MotorDark instant search: products with photo, brand and price on the left,
+    matching categories and brands on the right, plus a link to all results.
+    Every link is a role="option" inside the #instasearch-drop-body listbox (AccessKit keyboard navigation).
+*@
+
+@{
+    var hitGroups = Model.HitGroups.Where(x => x.Hits.Count > 0).OrderBy(x => x.Ordinal).ToArray();
+    var numProducts = Model.TopProducts.Items.Count;
+    var hasContent = numProducts > 0 || hitGroups.Length > 0;
+    var searchUrl = Url.RouteUrl("Search", new { q = Model.Term });
+}
+
+@if (!hasContent)
+{
+    <div class="instasearch-no-hits motor-isearch-empty" role="status">
+        <strong class="d-block">@T("Search.NoResultsText")</strong>
+        <span class="d-block">Yazımı kontrol edin veya daha genel bir kelime deneyin, örneğin “kask”, “eldiven” ya da bir marka adı.</span>
+    </div>
+    return;
+}
+
+<div class="motor-isearch@(hitGroups.Length > 0 ? " has-side" : null)">
+    <div class="motor-isearch-main">
+        @if (numProducts > 0)
+        {
+            <h6 class="instasearch-group-header">Ürünler</h6>
+            <partial name="InstantSearch.TopProducts" model="Model" />
+        }
+        else
+        {
+            <p class="motor-isearch-noproducts">@T("Search.NoResultsText")</p>
+        }
+    </div>
+
+    @if (hitGroups.Length > 0)
+    {
+        <div class="motor-isearch-side">
+            @foreach (var group in hitGroups)
+            {
+                <partial name="InstantSearch.HitGroup" model="group" />
+            }
+        </div>
+    }
+
+    @if (Model.TotalProductsCount > 0)
+    {
+        <div class="motor-isearch-footer">
+            <a class="instasearch-hit motor-isearch-all" href="@searchUrl" role="option">
+                <span>Tüm sonuçları görüntüle</span>
+                <span class="motor-isearch-count">@Model.TotalProductsCount.ToString("N0") ürün</span>
+                <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+    }
+</div>

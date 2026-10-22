@@ -550,7 +550,7 @@
                     });
 
                     if (items.length > 0) {
-                        var options = $.extend({}, self.options.zoom, {
+                        var options = $.extend({}, self.options.box, {
                             index: self.currentIndex,
                             showHideOpacity: true,
                             //captionEl: false,
@@ -592,6 +592,9 @@
                         pswp.init();
 
                         AccessKitFocusTrap.activate(pswpEl);
+
+                        // Let themes enhance the opened box (zoom controls, thumbnails etc.).
+                        $(pswpEl).trigger('init.pswp', [pswp, self]);
                     }
 
                     return false;

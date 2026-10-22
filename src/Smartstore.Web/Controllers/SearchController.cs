@@ -1,4 +1,6 @@
 ﻿using Smartstore.Core.Catalog;
+using Smartstore.Core.Catalog.Brands;
+using Smartstore.Core.Catalog.Categories;
 using Smartstore.Core.Catalog.Products;
 using Smartstore.Core.Catalog.Search;
 using Smartstore.Core.Content.Media;
@@ -22,6 +24,7 @@ public class SearchController : PublicController
     private readonly SearchSettings _searchSettings;
     private readonly CatalogSettings _catalogSettings;
     private readonly SeoSettings _seoSettings;
+    private readonly ICategoryService _categoryService;
 
     public SearchController(
         CatalogHelper catalogHelper,
@@ -32,7 +35,8 @@ public class SearchController : PublicController
         MediaSettings mediaSettings,
         SearchSettings searchSettings,
         CatalogSettings catalogSettings,
-        SeoSettings seoSettings)
+        SeoSettings seoSettings,
+        ICategoryService categoryService)
     {
         _catalogHelper = catalogHelper;
         _catalogSearchService = catalogSearchService;
@@ -43,6 +47,7 @@ public class SearchController : PublicController
         _searchSettings = searchSettings;
         _catalogSettings = catalogSettings;
         _seoSettings = seoSettings;
+        _categoryService = categoryService;
     }
 
     [HttpPost]
@@ -72,7 +77,9 @@ public class SearchController : PublicController
 
         var mappingSettings = _catalogHelper.GetBestFitProductSummaryMappingSettings(ProductSummaryViewMode.Mini, x =>
         {
-            x.MapPrices = false;
+            // MOTOR: show prices in suggestions (price visibility permissions still apply).
+            x.MapPrices = true;
+            x.MapManufacturers = true;
             x.MapShortDescription = true;
             x.MapPictures = _searchSettings.ShowProductImagesInInstantSearch;
             x.ThumbnailSize = _mediaSettings.ProductThumbPictureSizeOnProductDetailsPage;
@@ -95,6 +102,8 @@ public class SearchController : PublicController
 
         // Add spell checker suggestions (if any).
         model.AddSpellCheckerSuggestions(result.SpellCheckerSuggestions, T, x => Url.RouteUrl("Search", new { q = x }));
+
+        await AddCategoryAndBrandHitsAsync(model, term);
 
         return PartialView(model);
     }
@@ -144,7 +153,9 @@ public class SearchController : PublicController
         }
         catch (Exception ex)
         {
-            model.Error = ex.ToString();
+            // MOTOR: never show exception details to customers.
+            Logger.Error(ex);
+            model.Error = T("Identity.Error.DefaultError");
             result = new CatalogSearchResult(query);
         }
 
@@ -197,5 +208,65 @@ public class SearchController : PublicController
         }
 
         return View(model);
+    }
+
+    /// <summary>
+    /// MOTOR: suggests published categories and brands whose name matches every word of the term
+    /// (Turkish-insensitive), e.g. "kapali" → "Kapalı Kask".
+    /// </summary>
+    private async Task AddCategoryAndBrandHitsAsync(SearchResultModel model, string term)
+    {
+        const int maxHits = 4;
+        var store = Services.StoreContext.CurrentStore;
+
+        var categoryTree = await _categoryService.GetCategoryTreeAsync(0, false, store.Id);
+        var categoryNodes = categoryTree
+            .Flatten(false)
+            .Where(x => x.ExternalLink.IsEmpty() && SearchTextNormalizer.MatchesAllWords(x.Name, term))
+            .Take(maxHits)
+            .ToList();
+
+        if (categoryNodes.Count > 0)
+        {
+            var group = new SearchResultModelBase.HitGroup(model) { Name = "Category", DisplayName = T("Search.Facet.Category"), Ordinal = 10 };
+            foreach (var node in categoryNodes)
+            {
+                var parent = categoryTree.SelectNodeById(node.Id)?.Parent;
+                group.Hits.Add(new SearchResultModelBase.HitItem
+                {
+                    Label = node.GetLocalized(x => x.Name),
+                    Tag = parent?.Value != null && parent.Depth > 0 ? parent.Value.GetLocalized(x => x.Name).Value : null,
+                    Url = Url.RouteUrl("Category", new { SeName = await node.GetActiveSlugAsync() })
+                });
+            }
+
+            model.HitGroups.Add(group);
+        }
+
+        var customerRoleIds = Services.WorkContext.CurrentCustomer.GetRoleIds();
+        var manufacturers = await Services.DbContext.Manufacturers
+            .AsNoTracking()
+            .ApplyStandardFilter(false, customerRoleIds, store.Id)
+            .ToListAsync();
+
+        var brandHits = manufacturers
+            .Where(x => SearchTextNormalizer.MatchesAllWords(x.Name, term))
+            .Take(maxHits)
+            .ToList();
+
+        if (brandHits.Count > 0)
+        {
+            var group = new SearchResultModelBase.HitGroup(model) { Name = "Brand", DisplayName = T("Search.Facet.Manufacturer"), Ordinal = 20 };
+            foreach (var brand in brandHits)
+            {
+                group.Hits.Add(new SearchResultModelBase.HitItem
+                {
+                    Label = brand.GetLocalized(x => x.Name),
+                    Url = Url.RouteUrl("Manufacturer", new { SeName = await brand.GetActiveSlugAsync() })
+                });
+            }
+
+            model.HitGroups.Add(group);
+        }
     }
 }

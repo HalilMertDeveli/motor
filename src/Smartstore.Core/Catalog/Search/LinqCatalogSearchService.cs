@@ -19,6 +19,7 @@ public partial class LinqCatalogSearchService : SearchServiceBase, ICatalogSearc
     private readonly ICategoryService _categoryService;
     private readonly SearchSettings _searchSettings;
     private readonly CatalogSettings _catalogSettings;
+    private readonly ICatalogTermIndexProvider _termIndexProvider;
 
     public LinqCatalogSearchService(
         SmartDbContext db,
@@ -26,7 +27,8 @@ public partial class LinqCatalogSearchService : SearchServiceBase, ICatalogSearc
         ICommonServices services,
         ICategoryService categoryService,
         SearchSettings searchSettings,
-        CatalogSettings catalogSettings)
+        CatalogSettings catalogSettings,
+        ICatalogTermIndexProvider termIndexProvider = null)
     {
         _db = db;
         _queryVisitors = [.. queryVisitors.OrderBy(x => x.Order)];
@@ -34,12 +36,15 @@ public partial class LinqCatalogSearchService : SearchServiceBase, ICatalogSearc
         _categoryService = categoryService;
         _searchSettings = searchSettings;
         _catalogSettings = catalogSettings;
+        _termIndexProvider = termIndexProvider;
     }
 
     public IQueryable<Product> PrepareQuery(CatalogSearchQuery searchQuery, IQueryable<Product> baseQuery = null)
     {
         return GetProductQuery(searchQuery, baseQuery);
     }
+
+    public ILogger Logger { get; set; } = NullLogger.Instance;
 
     public async Task<CatalogSearchResult> SearchAsync(CatalogSearchQuery searchQuery, bool direct = false)
     {
@@ -51,6 +56,8 @@ public partial class LinqCatalogSearchService : SearchServiceBase, ICatalogSearc
 
         if (searchQuery.Take > 0)
         {
+            await PrepareRelevanceRankingAsync(searchQuery);
+
             var query = GetProductQuery(searchQuery, null);
 
             totalHits = await query.CountAsync();
@@ -94,6 +101,35 @@ public partial class LinqCatalogSearchService : SearchServiceBase, ICatalogSearc
     }
 
     #region Utilities
+
+    /// <summary>
+    /// MOTOR: ranks storefront search terms in memory (Turkish-insensitive, by relevance).
+    /// The visitor turns the ranking into an ID filter and sort order.
+    /// </summary>
+    protected virtual async Task PrepareRelevanceRankingAsync(CatalogSearchQuery searchQuery)
+    {
+        searchQuery.CustomData.Remove(CatalogSearchRanking.CustomDataKey);
+
+        var term = searchQuery.DefaultTerm;
+        if (_termIndexProvider == null || term.IsEmpty() || searchQuery.ParseSearchTerm || !(searchQuery.IsSearchPage() || searchQuery.IsInstantSearch()))
+        {
+            return;
+        }
+
+        try
+        {
+            var index = await _termIndexProvider.GetIndexAsync(_db);
+            if (index != null)
+            {
+                searchQuery.CustomData[CatalogSearchRanking.CustomDataKey] = index.Rank(term);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Never break the search: fall back to the plain database term filter.
+            Logger.Error(ex, "Catalog relevance ranking failed. Falling back to the database search.");
+        }
+    }
 
     protected virtual IQueryable<Product> GetProductQuery(CatalogSearchQuery searchQuery, IQueryable<Product> baseQuery)
     {

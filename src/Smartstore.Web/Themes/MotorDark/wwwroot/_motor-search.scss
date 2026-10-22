@@ -1,0 +1,351 @@
+/// <reference path="../../Flex/wwwroot/references.scss" />
+
+//
+// MotorDark: search box, instant search suggestions and search page states
+// --------------------------------------------------
+
+// Search box with a visible submit button
+// --------------------------------------------------
+
+.motor-search-form {
+    --motor-search-submit-w: 44px;
+    --search-padding-start: 2.75rem;
+    --search-padding-end: calc(var(--motor-search-submit-w) + 2.25rem);
+    --search-addon-pos: calc(var(--motor-search-submit-w) + 0.5rem);
+
+    .instasearch-icon {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        inset-inline-start: 0.875rem !important;
+        width: auto;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        pointer-events: none;
+        opacity: 0.7;
+        z-index: 2;
+    }
+
+    .instasearch-clear {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: $motor-text-muted;
+
+        &:hover,
+        &:focus-visible {
+            color: $motor-text;
+            background-color: rgba(#fff, 0.08);
+        }
+    }
+
+    .instasearch-addon {
+        height: 32px;
+        margin-top: -16px;
+    }
+
+    @include media-breakpoint-up(lg) {
+        --motor-search-submit-w: 72px;
+    }
+}
+
+.motor-search-submit {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    inset-inline-end: 4px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-width: var(--motor-search-submit-w);
+    padding: 0 0.75rem;
+    border: 0;
+    border-radius: $border-radius;
+    background-color: $motor-accent;
+    color: $motor-on-accent;
+    font-family: $headings-font-family;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color .15s ease;
+
+    &:hover {
+        background-color: $motor-accent-hover;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $motor-text;
+        outline-offset: 2px;
+    }
+
+    .motor-search-submit-label {
+        display: none;
+    }
+
+    @include media-breakpoint-up(lg) {
+        .motor-search-submit-label {
+            display: inline;
+        }
+    }
+}
+
+// Instant search suggestions
+// --------------------------------------------------
+
+.motor-search-form .instasearch-drop {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    max-height: calc(100vh - var(--motor-header-h, 120px) - 1rem);
+    max-height: calc(100dvh - var(--motor-header-h, 120px) - 1rem);
+
+    @include media-breakpoint-up(lg) {
+        // unquote(): LibSass would try to evaluate min() with mixed units (HTTP 500).
+        min-width: unquote("min(720px, calc(100vw - 2rem))");
+    }
+}
+
+.motor-search-form .instasearch-drop-body {
+    margin: 0;
+    padding: 0.75rem 0 0;
+}
+
+.motor-isearch {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+
+    &.has-side {
+        @include media-breakpoint-up(md) {
+            grid-template-columns: minmax(0, 1fr) minmax(180px, 34%);
+        }
+    }
+
+    .instasearch-group-header {
+        margin: 0 1rem 0.25rem;
+        padding: 0;
+    }
+
+    .instasearch-hits {
+        margin: 0 0.5rem 0.75rem;
+    }
+}
+
+.motor-isearch-side {
+    border-top: 1px solid $motor-line;
+    padding-top: 0.75rem;
+
+    @include media-breakpoint-up(md) {
+        border-top: 0;
+        border-inline-start: 1px solid $motor-line;
+        padding-top: 0;
+    }
+}
+
+.motor-isearch-product {
+    display: grid !important;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem !important;
+}
+
+.motor-isearch-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    overflow: hidden;
+    border-radius: $border-radius;
+    background: #eceeea;
+    color: #9a9ca3;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        mix-blend-mode: multiply;
+    }
+}
+
+.motor-isearch-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.125rem;
+}
+
+.motor-isearch-brand {
+    color: $motor-text-muted;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.motor-isearch-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: $motor-text;
+    font-size: 0.875rem;
+    line-height: 1.3;
+}
+
+.motor-isearch-price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    white-space: nowrap;
+    font-size: 0.875rem;
+}
+
+.motor-isearch-finalprice {
+    color: $motor-text;
+    font-weight: 700;
+}
+
+.motor-isearch-oldprice {
+    color: $motor-text-muted;
+    font-size: 0.75rem;
+    text-decoration: line-through;
+}
+
+.instasearch-drop mark.instasearch-match {
+    padding: 0;
+    background: transparent;
+    color: $motor-accent-text;
+    font-weight: 700;
+}
+
+.motor-isearch-links .instasearch-hit {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 40px;
+}
+
+.motor-isearch-link-icon {
+    flex: none;
+    width: 1rem;
+    color: $motor-text-muted;
+    text-align: center;
+}
+
+.motor-isearch-link-label {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.motor-isearch-links .instasearch-hit-tag {
+    color: $motor-text-muted;
+    font-size: 0.75rem;
+}
+
+.motor-isearch-footer {
+    // Stays reachable at the bottom of the scrollable drop.
+    position: sticky;
+    bottom: 0;
+    grid-column: 1 / -1;
+    padding: 0.25rem 0.5rem 0.5rem;
+    border-top: 1px solid $motor-line;
+    background-color: $motor-surface;
+}
+
+.motor-isearch-all {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    font-weight: 700;
+
+    .motor-isearch-count {
+        margin-inline-start: auto;
+        color: $motor-text-muted;
+        font-weight: 400;
+    }
+
+    .fa {
+        color: $motor-accent-text;
+    }
+}
+
+.motor-isearch-empty,
+.motor-isearch-noproducts {
+    padding: 0.25rem 1rem 1rem;
+    color: $motor-text-muted;
+
+    strong {
+        margin-bottom: 0.25rem;
+        color: $motor-text;
+    }
+}
+
+// Search page
+// --------------------------------------------------
+
+.motor-search-empty {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid $motor-line;
+    border-radius: $border-radius-lg;
+    background: $motor-surface;
+}
+
+.motor-search-empty-title {
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+}
+
+.motor-search-empty-tips {
+    margin: 0;
+    padding-inline-start: 1.25rem;
+    color: $gray-700;
+
+    li + li {
+        margin-top: 0.25rem;
+    }
+}
+
+.motor-search-browse {
+    margin-bottom: 2rem;
+}
+
+.motor-search-browse-title {
+    margin-bottom: 0.75rem;
+    color: $motor-text-muted;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.motor-search-browse-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.motor-search-browse-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0.375rem 0.875rem;
+    border: 1px solid $motor-line-strong;
+    border-radius: 50rem;
+    color: $motor-text;
+    font-size: 0.875rem;
+    text-decoration: none !important;
+
+    &:hover,
+    &:focus-visible {
+        border-color: $motor-accent;
+        color: #fff;
+    }
+}
