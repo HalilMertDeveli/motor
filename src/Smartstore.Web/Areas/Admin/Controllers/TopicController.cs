@@ -462,31 +462,31 @@ public class TopicController : AdminController
         {
             new SelectListItem
             {
-                Text = "Required",
+                Text = CookieType.Required.GetLocalizedEnum(),
                 Value = ((int)CookieType.Required).ToString(),
                 Selected = CookieType.Required == (CookieType?)selectedType
             },
             new SelectListItem
             {
-                Text = "Analytics",
+                Text = CookieType.Analytics.GetLocalizedEnum(),
                 Value = ((int)CookieType.Analytics).ToString(),
                 Selected = CookieType.Analytics == (CookieType?)selectedType
             },
             new SelectListItem
             {
-                Text = "ThirdParty",
+                Text = CookieType.ThirdParty.GetLocalizedEnum(),
                 Value = ((int)CookieType.ThirdParty).ToString(),
                 Selected = CookieType.ThirdParty == (CookieType?)selectedType
             },
             new SelectListItem
             {
-                Text = "ConsentAdUserData",
+                Text = CookieType.ConsentAdUserData.GetLocalizedEnum(),
                 Value = ((int)CookieType.ConsentAdUserData).ToString(),
                 Selected = CookieType.ConsentAdUserData == (CookieType?)selectedType
             },
             new SelectListItem
             {
-                Text = "ConsentAdPersonalization",
+                Text = CookieType.ConsentAdPersonalization.GetLocalizedEnum(),
                 Value = ((int)CookieType.ConsentAdPersonalization).ToString(),
                 Selected = CookieType.ConsentAdPersonalization == (CookieType?)selectedType
             }

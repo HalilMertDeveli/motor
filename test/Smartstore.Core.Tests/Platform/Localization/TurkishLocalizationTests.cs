@@ -20,7 +20,8 @@ public class TurkishLocalizationTests
 {
     private static readonly Regex PlaceholderRegex = new(@"\{\d+(:[^}]*)?\}", RegexOptions.Compiled);
     private static readonly Regex LiquidRegex = new(@"\{\{[\s\S]*?\}\}|\{%[\s\S]*?%\}", RegexOptions.Compiled);
-    private static readonly Regex MotorDarkKeyRegex = new(@"T\(""(Themes\.MotorDark\.[A-Za-z0-9.]+)""\)", RegexOptions.Compiled);
+    private static readonly Regex MultiWordRegex = new(@"[A-Za-z]{2,}\s+[A-Za-z]{2,}", RegexOptions.Compiled);
+    private static readonly Regex MotorDarkKeyRegex =new(@"T\(""(Themes\.MotorDark\.[A-Za-z0-9.]+)""\)", RegexOptions.Compiled);
 
     private static string _repoRoot;
 
@@ -127,6 +128,36 @@ public class TurkishLocalizationTests
         Assert.That(tr["ShoppingCart.AddToCart"], Is.EqualTo("Sepete ekle"));
         Assert.That(tr["Address.Fields.City"], Is.EqualTo("İlçe"));
         Assert.That(tr["Address.Fields.StateProvince"], Is.EqualTo("İl"));
+    }
+
+    [Test]
+    public void Admin_Resources_Are_Turkish()
+    {
+        var en = LoadResources(WebPath("App_Data", "Localization", "App", "en", "all.smres.xml"));
+        var tr = LoadResources(WebPath("App_Data", "Localization", "App", "tr", "all.smres.xml"));
+
+        // Multi-word admin texts equal to the English value are untranslated, except these technical terms.
+        var keptInEnglish = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Admin.Configuration.Settings.GeneralCommon.MetaRobotsContent",
+            "Admin.Configuration.Settings.GeneralCommon.SocialSettings.FacebookAppId",
+            "Admin.ContentManagement.Menus.Item.HtmlId"
+        };
+
+        var untranslated = en
+            .Where(x => x.Key.StartsWith("Admin.", StringComparison.OrdinalIgnoreCase)
+                && !keptInEnglish.Contains(x.Key)
+                && tr[x.Key] == x.Value
+                && MultiWordRegex.IsMatch(x.Value))
+            .Select(x => x.Key)
+            .ToList();
+
+        Assert.That(untranslated, Is.Empty);
+
+        // Spot checks: the customer edit page the owner reported as English.
+        Assert.That(tr["Admin.Customers.Customers.EditCustomerDetails"], Is.EqualTo("Müşteri detaylarını düzenle"));
+        Assert.That(tr["Admin.Common.SaveContinue"], Is.EqualTo("Kaydet ve düzenlemeye devam et"));
+        Assert.That(tr["Admin.Customers.Customers.Fields.IsTaxExempt"], Is.EqualTo("Vergiden muaf"));
     }
 
     [Test]

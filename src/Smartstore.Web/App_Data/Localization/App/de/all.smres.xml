@@ -17044,25 +17044,25 @@ auch wenn die typspezifischen Limits nicht erreicht wurden. Ein leerer Wert bede
 	<LocaleResource Name="Enums.ReturnCaseKind.Withdrawal">
 		<Value>Widerruf</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.Cancelled">
+	<LocaleResource Name="Enums.ReturnCaseStatus.Cancelled">
 		<Value>Abgebrochen</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.ItemsRefunded">
+	<LocaleResource Name="Enums.ReturnCaseStatus.ItemsRefunded">
 		<Value>Artikel gutgeschrieben</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.ItemsRepaired">
+	<LocaleResource Name="Enums.ReturnCaseStatus.ItemsRepaired">
 		<Value>Artikel repariert</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.Pending">
+	<LocaleResource Name="Enums.ReturnCaseStatus.Pending">
 		<Value>Ausstehend</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.Received">
+	<LocaleResource Name="Enums.ReturnCaseStatus.Received">
 		<Value>Ware erhalten</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.RequestRejected">
+	<LocaleResource Name="Enums.ReturnCaseStatus.RequestRejected">
 		<Value>Antrag abgewiesen</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.ReturnAuthorized">
+	<LocaleResource Name="Enums.ReturnCaseStatus.ReturnAuthorized">
 		<Value>Rücksendung genehmigt</Value>
 	</LocaleResource>
 	<LocaleResource Name="Enums.RuleScope.Cart">
