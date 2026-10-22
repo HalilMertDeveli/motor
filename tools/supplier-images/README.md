@@ -97,6 +97,7 @@ node tools/supplier-images/official-images.mjs download --matches=work/matches-r
 node tools/supplier-images/official-images.mjs build    --products=package/products.json --images=package/images \
   --matches=work/matches-resolved.json --download=work/download --out=work/official \
   --fallback-images=improved/images [--reject=SKU1,SKU2]
+node tools/supplier-images/official-images.mjs check    --products=package/products.json --review=work/official/review.csv
 ```
 
 - `match`: model code (catalog code without its price group, e.g. `869-01780` -> `869`), brand, variant words
@@ -123,5 +124,36 @@ node tools/supplier-images/official-images.mjs build    --products=package/produ
   not found, per brand, with catalog and official pictures side by side).
 - Products that keep their catalog picture take it from `--fallback-images` when given (same file names), else
   from the package.
+- Uncertain products never get an official photo, not even after a manual review (owner decision 2026-10-22).
+  `check` fails (exit code 1) when a package gives an uncertain product of `review.csv` anything but its catalog
+  pictures; run it on every package that combines several runs or sources before importing it.
 - Check the result on contact sheets before importing. On 2026-10-20 the supplier's site had the photos of the
   JY01 red and black helmet pages swapped; the colour rule catches such cases, but only a person can confirm them.
+
+## Whole-bike photos of SHAD mounting kits (`crop-bike-photos.mjs`)
+
+Many official SHAD photos of mounting kits (racks, 3P/4P side case holders, backrests) show the whole motorcycle
+with the kit fitted, so customers thought the store sells motorcycles. This last step crops them to the area where
+the kit is mounted. Genuine pixels only: the photo is cut, nothing is added.
+
+```sh
+node tools/supplier-images/crop-bike-photos.mjs --products=work/official/products.json --images=work/official/images \
+  --out=work/cropped
+node --test tools/supplier-images/crop-bike-photos.test.mjs
+```
+
+- Kit products: brand SHAD, name contains `Bağlantı`, `3P System`, `4P System` or a motorcycle make; never tank
+  bags (`Depo Üstü`).
+- Whole-bike photo, all four needed: (1) the four corners are white (every channel ≥ 225); (2) the bounding box of
+  the non-white pixels keeps 1 % off every image edge; (3) box width / image width > 0.55 and box aspect > 1.2;
+  (4) two wheels: a row between 50 and 90 % of the box height has dark runs (< 110) whose outer span is > 0.7 of the
+  box width with a gap > 0.2 of it.
+- Crop: the rear 55 % of the box (the left side; SHAD photographs bikes facing right) at full box height, centred on
+  a white square (×1.06 margin), 1200 × 1200, JPEG q2 4:4:4.
+- `bike-photo-exceptions.json`, by package file name: `keep` for false positives (close-ups and part photos that
+  pass the tests), `mirror` for bikes facing left (the right side is kept). Add to it after checking `review.html`.
+- Output: same `products.json` and file names, cropped pictures replaced; `bike-crops.csv` (metrics and verdict of
+  every kit picture) and `review.html` (before / after).
+- On the Motosev 2026 package (2026-10-22): 484 kit pictures, 351 cropped, 7 exceptions, 1 mirrored, the same set the
+  live demo was cropped with by hand. The importer never replaces existing pictures: a store that already has the
+  uncropped pictures needs its picture links of these products removed before a re-import.
