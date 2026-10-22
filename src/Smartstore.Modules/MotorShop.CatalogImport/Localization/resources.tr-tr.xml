@@ -71,6 +71,7 @@
     <LocaleResource Name="Rematch.Done"><Value>{0} yeni uyumluluk önerisi.</Value></LocaleResource>
     <LocaleResource Name="Brand"><Value>Marka</Value></LocaleResource>
     <LocaleResource Name="Mpn"><Value>Parça numarası</Value></LocaleResource>
+    <LocaleResource Name="Name"><Value>Ad</Value></LocaleResource>
     <LocaleResource Name="ProductType"><Value>Parça türü</Value></LocaleResource>
     <LocaleResource Name="State"><Value>Durum</Value></LocaleResource>
     <LocaleResource Name="State.ResearchCandidate"><Value>A · Araştırma adayı</Value></LocaleResource>
