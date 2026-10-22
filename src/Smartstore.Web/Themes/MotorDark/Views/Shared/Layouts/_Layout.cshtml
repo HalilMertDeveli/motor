@@ -1,4 +1,7 @@
 @inject Smartstore.Core.Stores.IStoreContext StoreContext
+@inject Smartstore.Core.Common.Configuration.CompanyInformationSettings CompanySettings
+@inject Smartstore.Core.Common.Configuration.ContactDataSettings ContactSettings
+@inject Smartstore.Core.Common.Configuration.SocialSettings SocialSettings
 
 @{
     Layout = "_Document";
@@ -28,6 +31,21 @@
     {
         Assets.BodyAttributes.AppendCssClass("boxed");
     }
+
+    // Footer contact block from Admin > Configuration > Settings (company information, contact data, social).
+    var footerAddress = string.Join(", ", new[] { CompanySettings.Street, CompanySettings.Street2, CompanySettings.City }.Where(x => x.HasValue()));
+    var footerMapsUrl = "https://www.google.com/maps/search/?api=1&query=" + Uri.EscapeDataString(StoreContext.CurrentStore.Name + ", " + footerAddress);
+    var footerPhone = ContactSettings.CompanyTelephoneNumber.NullEmpty() ?? ContactSettings.HotlineTelephoneNumber.NullEmpty();
+    var footerPhoneHref = new string(footerPhone.EmptyNull().Where(char.IsDigit).ToArray());
+    if (footerPhoneHref.Length == 11 && footerPhoneHref[0] == '0')
+    {
+        // Turkish national format (0537 ...) to international.
+        footerPhoneHref = "+90" + footerPhoneHref[1..];
+    }
+    var footerInstagram = SocialSettings.InstagramLink?.Trim() is { Length: > 1 } instagramLink ? instagramLink : null;
+    var footerInstagramHandle = footerInstagram == null
+        ? null
+        : "@" + footerInstagram.TrimEnd('/').Split('/').Last();
 }
 
 <widget target-zone="head" key="motor-head">
@@ -54,6 +72,21 @@
                 <p class="motor-footer-note">
                     @T("Themes.MotorDark.Footer.Note")
                 </p>
+                <address sm-if="footerAddress.HasValue() || footerPhone.HasValue() || footerInstagram.HasValue()" class="motor-footer-contact">
+                    <strong class="motor-footer-contact-name">@StoreContext.CurrentStore.Name</strong>
+                    <a sm-if="footerAddress.HasValue()" href="@footerMapsUrl" target="_blank" rel="noopener">
+                        <i class="fa fa-location-dot" aria-hidden="true"></i>
+                        <span>@footerAddress</span>
+                    </a>
+                    <a sm-if="footerPhone.HasValue()" href="tel:@footerPhoneHref">
+                        <i class="fa fa-phone" aria-hidden="true"></i>
+                        <span>@footerPhone</span>
+                    </a>
+                    <a sm-if="footerInstagram.HasValue()" href="@footerInstagram" target="_blank" rel="noopener">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                        <span>@footerInstagramHandle</span>
+                    </a>
+                </address>
             </div>
         </div>
     </div>

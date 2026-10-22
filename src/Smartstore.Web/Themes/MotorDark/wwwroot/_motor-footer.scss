@@ -100,4 +100,43 @@
         color: $motor-text-muted;
         margin: 0;
     }
+
+    // Store address, phone and Instagram (company, contact and social settings)
+    .motor-footer-contact {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        max-width: 360px;
+        margin: 0;
+        font-style: normal;
+
+        a {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            color: $motor-text-muted;
+            text-decoration: none;
+
+            &:hover,
+            &:focus-visible {
+                color: $motor-text;
+            }
+        }
+
+        .fa,
+        .fab {
+            flex: 0 0 1rem;
+            text-align: center;
+            color: $motor-accent-text;
+        }
+    }
+
+    .motor-footer-contact-name {
+        font-family: $headings-font-family;
+        font-style: italic;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: $motor-text;
+    }
 }

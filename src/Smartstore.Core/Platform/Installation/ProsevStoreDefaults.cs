@@ -6,7 +6,7 @@ using Smartstore.Core.Seo;
 namespace Smartstore.Core.Installation;
 
 /// <summary>
-/// MOTOR: Prosev store identity and the category tree of the Motosev 2026 catalog
+/// MOTOR: MRT Motors store identity and the category tree of the Motosev 2026 catalog
 /// ("2026 KATALOG 12.10.2026.pdf", all 30 catalog sections).
 /// Used by <see cref="TrTRSeedData"/> (fresh installs) and the ProsevStore migration (existing databases).
 /// </summary>
@@ -17,7 +17,50 @@ namespace Smartstore.Core.Installation;
 /// </remarks>
 public static class ProsevStoreDefaults
 {
-    public const string StoreName = "Prosev";
+    public const string StoreName = "MRT Motors";
+
+    // Contact data of MRT Motors as given by the owner on 2026-10-22 (Instagram profile @mrtmotorservis).
+    // Legal title, tax number, MERSİS and IBAN are not known yet and stay placeholders.
+    public const string Street = "Mustafa Kemal Paşa Mahallesi, Yıldırım Beyazıt Caddesi No: 10/B";
+    public const string Street2 = "Parseller";
+    // Company addresses are formatted without a state, so the province is part of the city.
+    public const string City = "Avcılar / İstanbul";
+    public const string District = "Avcılar";
+    public const string StateName = "İstanbul";
+    public const string Phone = "0537 490 68 32";
+    public const string PhoneHref = "tel:+905374906832";
+    public const string InstagramUrl = "https://www.instagram.com/mrtmotorservis/";
+    public const string InstagramHandle = "@mrtmotorservis";
+
+    public static string FullAddress => $"{Street}, {Street2}, {City}";
+
+    public static string MapsUrl
+        => "https://www.google.com/maps/search/?api=1&query=" + Uri.EscapeDataString($"MRT Motors, {FullAddress}");
+
+    private static string ContactHtml =>
+        $"<p>Adres: {FullAddress}<br><a href=\"{MapsUrl}\" target=\"_blank\" rel=\"noopener\">Haritada göster</a></p>" +
+        $"<p>Telefon: <a href=\"{PhoneHref}\">{Phone}</a><br>" +
+        $"Instagram: <a href=\"{InstagramUrl}\" target=\"_blank\" rel=\"noopener\">{InstagramHandle}</a></p>";
+
+    public static string ContactUsBody =>
+        $"<p><strong>{StoreName}</strong> · Motosiklet servisi, yedek parça ve aksesuar</p>" + ContactHtml;
+
+    public static string AboutUsBody =>
+        $"<p><strong>{StoreName}</strong>, İstanbul Avcılar'da motosiklet servisi, yedek parça ve aksesuar hizmeti veren bir motosiklet bayisidir.</p>" +
+        "<p>Kask, sürücü ekipmanı, çanta ve aksesuarları bu mağazadan sipariş edebilirsiniz. Ürün ve uyumluluk sorularınız için bize telefonla ya da Instagram üzerinden ulaşın.</p>" +
+        ContactHtml;
+
+    public static string ImprintBody =>
+        $"<p><strong>{StoreName}</strong></p>" + ContactHtml +
+        "<p>Firma unvanı, vergi dairesi ve numarası, MERSİS numarası: [mağaza sahibi tarafından girilecek]</p>";
+
+    /// <summary>
+    /// Whether a topic body is still the text of a fresh install ("... buraya ekleyin").
+    /// </summary>
+    public static bool IsPlaceholderTopicBody(string body)
+        => string.IsNullOrWhiteSpace(body)
+        || body.Contains("buraya ekleyin", StringComparison.OrdinalIgnoreCase)
+        || body.Contains("Put your", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Store names of a fresh install or of the earlier MOTOR working name, which the migration replaces.

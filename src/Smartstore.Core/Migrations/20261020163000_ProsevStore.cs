@@ -8,7 +8,7 @@ using Smartstore.Data.Migrations;
 namespace Smartstore.Core.Data.Migrations;
 
 /// <summary>
-/// MOTOR: Prosev brand and the category tree of the 2026 catalog for EXISTING databases.
+/// MOTOR: store brand (first Prosev, now MRT Motors) and the category tree of the 2026 catalog for EXISTING databases.
 /// Fresh installs get the same data from <see cref="TrTRSeedData"/> (this seeder does not run on fresh installs,
 /// only its locale resources do).
 ///
@@ -79,7 +79,8 @@ internal class ProsevStore : Migration, ILocaleResourcesProvider, IDataSeeder<Sm
 
     public void MigrateLocaleResources(LocaleResourcesBuilder builder)
     {
-        // Prosev wording for the MotorDark theme (catalog: helmets, rider gear, bags and accessories).
+        // MRT Motors wording for the MotorDark theme (catalog: helmets, rider gear, bags and accessories).
+        // The store was renamed from Prosev on 2026-10-22: MrtMotorsRebrand applies these texts to existing databases.
         void Add(string key, string en, string tr)
             => builder.AddOrUpdate("Themes.MotorDark." + key).Value(en).Value("tr", tr);
 
@@ -88,8 +89,8 @@ internal class ProsevStore : Migration, ILocaleResourcesProvider, IDataSeeder<Sm
         Add("Hero.TitleLine2", "for the", "hazır");
         Add("Hero.TitleAccent", "road.", "ol.");
         Add("Hero.Subtitle",
-            "Helmets, jackets, gloves, bags and accessories from the Prosev 2026 catalog.",
-            "Prosev 2026 kataloğundan kask, mont, eldiven, çanta ve aksesuarlar.");
+            "Helmets, jackets, gloves, bags and accessories from the MRT Motors 2026 catalog.",
+            "MRT Motors 2026 kataloğundan kask, mont, eldiven, çanta ve aksesuarlar.");
         // Rendered after a red "3" tag.
         Add("Hero.Installments", "installments on all credit cards", "taksit · tüm kredi kartlarına");
 
@@ -98,7 +99,7 @@ internal class ProsevStore : Migration, ILocaleResourcesProvider, IDataSeeder<Sm
             "Every section of the 2026 catalog: from helmets and rider gear to bags, locks and accessories.",
             "2026 kataloğunun tüm bölümleri: kasktan sürücü ekipmanına, çantadan kilit ve aksesuara.");
 
-        Add("Story.Eyebrow", "Prosev 2026", "Prosev 2026");
+        Add("Story.Eyebrow", "MRT Motors 2026", "MRT Motors 2026");
         Add("Story.TitleStart", "Protection for", "Her sürüşte");
         Add("Story.TitleAccent", "every", "güvenli");
         Add("Story.TitleEnd", "ride.", "koruma.");
@@ -120,7 +121,7 @@ internal class ProsevStore : Migration, ILocaleResourcesProvider, IDataSeeder<Sm
         Add("Footer.ClaimLine1", "Ready for", "Her sürüşe");
         Add("Footer.ClaimLine2", "every ride.", "hazır.");
         Add("Footer.Note",
-            "Prosev: helmets, rider gear, bags and accessories for your motorcycle. Can't find what you are looking for? Write to us.",
-            "Prosev: motosikletin için kask, sürücü ekipmanı, çanta ve aksesuar. Aradığını bulamazsan bize yaz.");
+            "MRT Motors: helmets, rider gear, bags and accessories for your motorcycle. Can't find what you are looking for? Write to us.",
+            "MRT Motors: motosikletin için kask, sürücü ekipmanı, çanta ve aksesuar. Aradığını bulamazsan bize yaz.");
     }
 }

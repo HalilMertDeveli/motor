@@ -34,7 +34,7 @@ $prosev-slant: 0.7em;
     border-bottom: 1px solid $motor-line-strong;
 }
 
-// Wordmark: hexagon badge + PROSEV, tighter like the catalog logo
+// Wordmark: hexagon badge + MRT MOTORS, tighter like the catalog logo
 // --------------------------------------------------
 
 .shop-logo .brand.motor-wordmark {
@@ -46,6 +46,15 @@ $prosev-slant: 0.7em;
 
     .motor-wordmark-text {
         letter-spacing: 0.02em;
+        white-space: nowrap;
+    }
+
+    // "MOTORS" smaller and lighter, so the wordmark stays about as wide as a one-word name
+    .motor-wordmark-sub {
+        font-size: 0.6em;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        color: $motor-text-muted;
     }
 
     &:hover .motor-wordmark-mark {

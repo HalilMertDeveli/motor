@@ -1,11 +1,11 @@
 @model ShopLogoModel
 
 @{
-    // The PROSEV wordmark is used unless the theme variable "motor-use-logo" is switched on
-    // (Admin > Configuration > Themes > Prosev Dark) to show the uploaded store logo instead.
+    // The MRT MOTORS wordmark is used unless the theme variable "motor-use-logo" is switched on
+    // (Admin > Configuration > Themes > MRT Motors Dark) to show the uploaded store logo instead.
     var useUploadedLogo = Model.LogoUploaded && Display.GetThemeVariable<bool>("motor-use-logo");
     // Screen readers hear the wordmark plus the store name (when it differs).
-    var addStoreName = Model.LogoTitle.HasValue() && !Model.LogoTitle.EqualsNoCase("PROSEV");
+    var addStoreName = Model.LogoTitle.HasValue() && !Model.LogoTitle.EqualsNoCase("MRT Motors");
 }
 
 @* The accessible name must contain the visible wordmark text (WCAG 2.5.3), so no aria-label on the wordmark link. *@
@@ -37,10 +37,10 @@
     else
     {
         <span class="motor-wordmark-mark" aria-hidden="true">
-            @* Hexagon badge with the "P" of the catalog logo. *@
-            <svg viewBox="0 0 30 34" width="30" height="34" focusable="false"><path d="M15 1.5 27.5 8.75v16.5L15 32.5 2.5 25.25V8.75z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M10.5 26V8.5h6.2c3.6 0 6 2.2 6 5.4s-2.4 5.4-6 5.4h-1.9V26z" fill="#fff"/><path d="M14.8 12.2v3.6h1.6c1.2 0 1.9-.7 1.9-1.8s-.7-1.8-1.9-1.8z" fill="#08090b"/></svg>
+            @* Hexagon badge with the "M" of MRT Motors. *@
+            <svg viewBox="0 0 30 34" width="30" height="34" focusable="false"><path d="M15 1.5 27.5 8.75v16.5L15 32.5 2.5 25.25V8.75z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M8.5 25V9h3.2l3.3 6.4L18.3 9h3.2v16h-3.2v-9.6l-3.3 6.1-3.3-6.1V25z" fill="#fff"/></svg>
         </span>
-        <span class="motor-wordmark-text">PROSEV</span>
+        <span class="motor-wordmark-text">MRT <span class="motor-wordmark-sub">MOTORS</span></span>
         <span sm-if="addStoreName" class="sr-only">@Model.LogoTitle</span>
     }
 </a>
