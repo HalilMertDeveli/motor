@@ -4,7 +4,8 @@
 
 @{
     var brand = Model.Brands == null ? null : Model.Brands.FirstOrDefault();
-    var hasBrandImage = brand?.Image?.HasImage() ?? false;
+    // MOTOR: HasImage() is also true for the "no image" fallback; show the brand name instead.
+    var hasBrandImage = brand?.Image?.File != null;
 }
 
 <div class="pd-info pd-group">
