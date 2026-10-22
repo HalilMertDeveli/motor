@@ -1,0 +1,122 @@
+@using Smartstore.Core.Catalog.Categories;
+@using Smartstore.Core.Seo;
+@using Smartstore.Web.Models.Search;
+
+@model SearchResultModel
+
+@inject ICategoryService CategoryService
+
+@*
+    MotorDark: core search page plus a helpful empty state (tips and the real top-level categories)
+    instead of a bare "no results" line.
+*@
+
+@{
+    var encodedTerm = Model.Term.EmptyNull().HtmlEncode();
+    var encodedAttemptedTerm = Model.AttemptedTerm.EmptyNull().HtmlEncode();
+
+    var suggestions = Model.TotalProductsCount > 0
+        ? Model.SearchResult.SpellCheckerSuggestions
+        : Array.Empty<string>();
+
+    Assets.AppendTitleParts(encodedTerm.HasValue() ? T("Search.PageTitle", "\"" + encodedTerm + "\"") : T("Search.Title"));
+
+    if (Model.CanonicalUrl.HasValue())
+    {
+        Assets.AppendCanonicalUrlParts(Model.CanonicalUrl);
+    }
+
+    ViewBag.HideLeftCol = true; // ...on mobile
+
+    var showEmptyState = !Model.Error.HasValue() && Model.TotalProductsCount == 0;
+    var browseCategories = new List<(string Name, string Url)>();
+
+    if (showEmptyState || Model.Error.HasValue())
+    {
+        var tree = await CategoryService.GetCategoryTreeAsync(0, false, CommonServices.StoreContext.CurrentStore.Id);
+        foreach (var node in tree.Children.Where(x => x.Value.ExternalLink.IsEmpty()).Take(12))
+        {
+            browseCategories.Add((node.Value.GetLocalized(x => x.Name), Url.RouteUrl("Category", new { SeName = await node.Value.GetActiveSlugAsync() })));
+        }
+    }
+}
+
+<widget target-zone="left">
+    <partial name="Search.Filters" model="Model.TopProducts" />
+</widget>
+
+<div class="page search-page">
+    <div class="page-title">
+        <h1 class="h3 d-flex align-items-baseline">
+            @if (encodedTerm.HasValue())
+            {
+                @Html.Raw(T("Search.PageTitle", "<small class='search-term'>" + encodedTerm + "</small>"))
+            }
+            else
+            {
+                @T("Search.Title")
+            }
+        </h1>
+
+        @if (Model.TotalProductsCount > 0)
+        {
+            <partial name="SearchResultHitsCount" model="Model.SearchResult" />
+        }
+    </div>
+
+    <div class="page-body">
+        <div sm-if="encodedAttemptedTerm.HasValue()" class="alert alert-warning" role="alert">
+            @Html.Raw(T("Search.TermCorrectedHint", $"<strong>{encodedTerm}</strong>", $"<strong>{encodedAttemptedTerm}</strong>"))
+        </div>
+
+        @if (Model.Error.HasValue())
+        {
+            <div class="alert alert-warning" role="alert">
+                @Model.Error
+            </div>
+        }
+        else if (showEmptyState)
+        {
+            <div class="motor-search-empty" role="status">
+                <h2 class="h4 motor-search-empty-title">@T("Search.NoResultsText")</h2>
+                <ul class="motor-search-empty-tips">
+                    <li>Yazımı kontrol edin. Türkçe karakter kullanmak zorunda değilsiniz: “kapali kask” da çalışır.</li>
+                    <li>Daha genel bir kelime deneyin, örneğin “kapalı kask” yerine “kask”.</li>
+                    <li>Ürün kodu (SKU) veya marka adıyla arayın, örneğin “Scoyco”.</li>
+                </ul>
+            </div>
+        }
+
+        @if (browseCategories.Count > 0)
+        {
+            <nav class="motor-search-browse" aria-label="@T("Search.Facet.Category")">
+                <h2 class="h6 motor-search-browse-title">Kategorilere göz atın</h2>
+                <ul class="motor-search-browse-list">
+                    @foreach (var (name, url) in browseCategories)
+                    {
+                        <li><a class="motor-search-browse-link" href="@url">@name</a></li>
+                    }
+                </ul>
+            </nav>
+        }
+
+        <p sm-if="suggestions.Length > 0" class="search-suggestions">
+            <strong>@(T(encodedAttemptedTerm.HasValue() || Model.TotalProductsCount == 0 ? "Search.DidYouMean" : "Search.RelatedSearchTerms")):</strong>
+            @{
+                var links = string.Join(", ", suggestions.Select(x => "<a href='" + Url.RouteUrl("Search", new { q = x }) + $"'>{x.HtmlEncode()}</a>"));
+            }
+            @Html.Raw(links)
+        </p>
+
+        <zone name="search_results_before" />
+
+        <div class="search-results">
+            @if (Model.TotalProductsCount > 0)
+            {
+                <partial name="Product.List" model="Model.TopProducts" />
+            }
+        </div>
+
+        <zone name="search_results_after" />
+    </div>
+</div>

@@ -1,0 +1,58 @@
+@using Smartstore.Web.Models.Search;
+
+@model SearchBoxModel
+
+@*
+    MotorDark: same contract as the core SearchBox (public.search.js, AccessKit combobox),
+    plus a visible, keyboard-reachable submit button with a 44px touch target.
+*@
+
+@{
+    var idFriendlyOrigin = Model.Origin.Replace('/', '-').ToLowerInvariant();
+}
+
+<form action="@Model.SearchUrl" class="instasearch-form has-icon motor-search-form" method="get" role="search">
+    <span id="instasearch-desc-@idFriendlyOrigin" class="sr-only">
+        @T(Model.InstantSearchEnabled ? "Aria.Description.InstantSearch" : "Aria.Description.SearchBox")
+    </span>
+    <input type="search"
+           class="instasearch-term form-control text-truncate"
+           role="combobox"
+           aria-autocomplete="list"
+           aria-expanded="false"
+           aria-controls="instasearch-drop-body"
+           name="q"
+           value="@Model.CurrentQuery"
+           placeholder="@Model.InputPlaceholder"
+           aria-label="@Model.InputPlaceholder"
+           aria-describedby="instasearch-desc-@idFriendlyOrigin"
+           enterkeyhint="search"
+           maxlength="100"
+           data-instasearch="@(Model.InstantSearchEnabled ? "true" : "false")"
+           data-minlength="@(Model.SearchTermMinimumLength.ToString())"
+           data-showthumbs="@(Model.ShowThumbsInInstantSearch.ToString().ToLower())"
+           data-url="@Model.InstantSearchUrl"
+           data-origin="@Model.Origin"
+           attr-autocomplete='(Model.InstantSearchEnabled, "off")' />
+
+    <div class="instasearch-addon d-flex align-items-center justify-content-center">
+        <button type="button" class="instasearch-clear input-clear" aria-label="@T("Search.SearchBox.Clear")">
+            <i class="fa fa-xmark" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <span class="input-group-icon instasearch-icon" aria-hidden="true">
+        <i class="fa fa-magnifying-glass"></i>
+    </span>
+
+    <button type="submit" class="motor-search-submit" aria-label="@T("Search")">
+        <i class="fa fa-magnifying-glass" aria-hidden="true"></i>
+        <span class="motor-search-submit-label">@T("Search")</span>
+    </button>
+
+    <div class="instasearch-drop">
+        <div id="instasearch-drop-body" class="instasearch-drop-body clearfix" role="listbox" aria-label="@T("Search.Hits")"></div>
+    </div>
+
+    <zone name="searchbox_addon"></zone>
+</form>
