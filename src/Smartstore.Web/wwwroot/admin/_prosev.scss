@@ -2,7 +2,7 @@
 
 //
 // MOTOR: Prosev look for the admin area.
-// Dark graphite header with the Prosev wordmark and catalog red accents, like the MotorDark storefront.
+// Dark graphite header with the MRT Motors wordmark and catalog red accents, like the MotorDark storefront.
 // The content area stays light for readability. Colors come from _variables.scss.
 // --------------------------------------------------
 
@@ -64,6 +64,14 @@
         font-size: 1.625rem;
         line-height: 1;
         letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+
+    .prosev-wordmark-text-sub {
+        font-size: 0.6em;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        color: rgba(#fff, 0.72);
     }
 
     .prosev-wordmark-sub {

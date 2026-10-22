@@ -27,14 +27,14 @@ Google registrations, so dealer or admin roles are only assigned by an administr
 ## Google Cloud Console (manual, by the store owner)
 
 1. Create or select a project at <https://console.cloud.google.com/>.
-2. **Google Auth Platform > Branding**: app name "Prosev", support email, logo (optional),
+2. **Google Auth Platform > Branding**: app name "MRT Motors", support email, logo (optional),
    authorized domain (the store's domain, e.g. `prosev.com.tr` or `fly.dev` while on
    `prosev.fly.dev`), privacy policy and terms of service URLs of the store.
 3. **Audience**: *External*. While in *Testing*, only listed test users can sign in;
    choose **Publish app** (*In production*) when the store goes live. The basic scopes
    below do not require Google verification.
 4. **Data Access**: only `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile`.
-5. **Clients > Create client > Web application**, name e.g. "Prosev production":
+5. **Clients > Create client > Web application**, name e.g. "MRT Motors production":
    * Authorized JavaScript origins: not needed.
    * Authorized redirect URIs: `https://<store domain>/signin-google`, exactly, one per
      public host name (e.g. `https://prosev.fly.dev/signin-google` and later

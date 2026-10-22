@@ -153,10 +153,11 @@ public class TrTRSeedData : InvariantSeedData
         entity.LastName = "Yöneticisi";
         // Legal company title is not known yet: placeholder until the owner enters it in the admin.
         entity.Company = ProsevStoreDefaults.StoreName + " [firma unvanı]";
-        entity.Address1 = "Örnek Mah. Örnek Sok. No: 1";
-        entity.City = "Kadıköy";
-        entity.ZipPostalCode = "34710";
-        entity.PhoneNumber = "+90 212 000 00 00";
+        entity.Address1 = ProsevStoreDefaults.Street;
+        entity.Address2 = ProsevStoreDefaults.Street2;
+        entity.City = ProsevStoreDefaults.District;
+        entity.ZipPostalCode = null;
+        entity.PhoneNumber = ProsevStoreDefaults.Phone;
         entity.Country = country ?? entity.Country;
         entity.StateProvince = istanbul;
     }
@@ -362,7 +363,7 @@ public class TrTRSeedData : InvariantSeedData
             .Alter("AboutUs", x =>
             {
                 x.Title = "Hakkımızda";
-                x.Body = "<p>Mağazanız hakkındaki bilgileri buraya ekleyin." + editHint;
+                x.Body = ProsevStoreDefaults.AboutUsBody;
             })
             .Alter("CheckoutAsGuestOrRegister", x =>
             {
@@ -377,7 +378,7 @@ public class TrTRSeedData : InvariantSeedData
             .Alter("ContactUs", x =>
             {
                 x.Title = "İletişim";
-                x.Body = "<p>İletişim bilgilerinizi buraya ekleyin." + editHint;
+                x.Body = ProsevStoreDefaults.ContactUsBody;
             })
             .Alter("HomePageText", x =>
             {
@@ -404,7 +405,7 @@ public class TrTRSeedData : InvariantSeedData
             .Alter("Imprint", x =>
             {
                 x.Title = "Künye";
-                x.Body = "<p>Firma unvanı, adres, iletişim ve vergi bilgilerinizi buraya ekleyin." + editHint;
+                x.Body = ProsevStoreDefaults.ImprintBody;
             })
             .Alter("Disclaimer", x =>
             {
@@ -450,6 +451,7 @@ public class TrTRSeedData : InvariantSeedData
         var standardTaxCategoryName = TurkishStoreDefaults.TaxCategories[0].Name;
         var standardTaxCategoryId = DbContext.TaxCategories.FirstOrDefault(x => x.Name == standardTaxCategoryName)?.Id;
         var lowestPriceLabelId = DbContext.PriceLabels.FirstOrDefault(x => x.ShortName == "En düşük")?.Id;
+        var turkeyId = DbContext.Set<Country>().FirstOrDefault(x => x.ThreeLetterIsoCode == "TUR")?.Id;
 
         settings
             .Alter<MeasureSettings>(x =>
@@ -467,6 +469,25 @@ public class TrTRSeedData : InvariantSeedData
             })
             .Alter<DateTimeSettings>(x => x.DefaultStoreTimeZoneId = TurkishStoreDefaults.TimeZoneId)
             .Alter<SeoSettings>(x => x.MetaTitle = ProsevStoreDefaults.StoreName)
+            .Alter<CompanyInformationSettings>(x =>
+            {
+                // Legal title, tax number and commercial register stay empty until the owner enters them.
+                x.Street = ProsevStoreDefaults.Street;
+                x.Street2 = ProsevStoreDefaults.Street2;
+                x.City = ProsevStoreDefaults.City;
+                x.StateName = ProsevStoreDefaults.StateName;
+                x.CountryId = turkeyId ?? x.CountryId;
+            })
+            .Alter<ContactDataSettings>(x => x.CompanyTelephoneNumber = ProsevStoreDefaults.Phone)
+            .Alter<SocialSettings>(x =>
+            {
+                // Only Instagram exists; "#" placeholders would render dead icons in the footer (null falls back to "#").
+                x.InstagramLink = ProsevStoreDefaults.InstagramUrl;
+                x.FacebookLink = string.Empty;
+                x.TwitterLink = string.Empty;
+                x.YoutubeLink = string.Empty;
+                x.TikTokLink = string.Empty;
+            })
             .Alter<OrderSettings>(x =>
             {
                 x.ReturnRequestActions = "Ödeme yöntemine iade,Ürün değişimi,Başka bir ürünle değişim,Onarım,Hediye kartı / kupon,Diğer";
