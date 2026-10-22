@@ -1,0 +1,54 @@
+@using Smartstore.Core.Catalog.Search
+@using Smartstore.Web.Models.Search
+
+@model SearchResultModel
+
+@{
+    var list = Model.TopProducts;
+}
+
+<ul class="instasearch-hits motor-isearch-products" aria-label="@T("Search.Hits")">
+    @foreach (var hit in list.Items)
+    {
+        var price = hit.Price;
+        var showPrice = list.ShowPrice && price != null && (price.HasCalculation || price.CallForPrice);
+
+        <li>
+            <a class="instasearch-hit motor-isearch-product" asp-route="Product" asp-route-SeName="@hit.SeName" asp-area="" role="option">
+                <span class="motor-isearch-thumb" aria-hidden="true">
+                    @if (hit.Image?.File != null)
+                    {
+                        <img sm-model="@hit.Image" alt="" loading="lazy" />
+                    }
+                    else
+                    {
+                        <i class="fa fa-image"></i>
+                    }
+                </span>
+                <span class="motor-isearch-info">
+                    @if (hit.Brand != null && hit.Brand.Name.HasValue())
+                    {
+                        <span class="motor-isearch-brand">@hit.Brand.Name</span>
+                    }
+                    <span class="motor-isearch-name" sm-language-attributes-for="hit.Name">
+                        @Html.Raw(SearchTextNormalizer.HighlightHtml(hit.Name, Model.Term, "<mark class='instasearch-match'>", "</mark>"))
+                    </span>
+                </span>
+                @if (showPrice)
+                {
+                    <span class="motor-isearch-price">
+                        @if (price.CallForPrice)
+                        {
+                            @T("Products.CallForPrice")
+                        }
+                        else
+                        {
+                            <span sm-if="price.RegularPrice != null" class="motor-isearch-oldprice">@price.RegularPrice.Price</span>
+                            <span class="motor-isearch-finalprice">@Html.Raw(price.FinalPrice)</span>
+                        }
+                    </span>
+                }
+            </a>
+        </li>
+    }
+</ul>

@@ -1,0 +1,362 @@
+/// <reference path="../../Flex/wwwroot/references.scss" />
+
+//
+// MotorDark: product photo controls and the full-screen viewer (see js/motor-gallery.js)
+// --------------------------------------------------
+
+// Main photo controls
+// --------------------------------------------------
+
+.motor-gallery .gal-cell {
+    position: relative;
+}
+
+.motor-gallery .gal-item-viewport.motor-zoomable {
+    cursor: zoom-in;
+}
+
+// Keep the whole product visible; never crop it to fill the square.
+.motor-gallery .gal .gal-item-content {
+    object-fit: contain;
+}
+
+.motor-gal-ui {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+
+    > * {
+        pointer-events: auto;
+    }
+}
+
+.motor-gal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(#fff, 0.14);
+    border-radius: 50rem;
+    background-color: rgba(#08090b, 0.72);
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color .15s ease, opacity .15s ease, transform .15s ease;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+
+    &:hover {
+        background-color: rgba(#08090b, 0.9);
+    }
+
+    &:focus-visible {
+        outline: 2px solid $motor-accent-text;
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+.motor-gal-prev,
+.motor-gal-next {
+    position: absolute;
+    top: 50%;
+    margin-top: -22px;
+}
+
+.motor-gal-prev {
+    inset-inline-start: 0.75rem;
+}
+
+.motor-gal-next {
+    inset-inline-end: 0.75rem;
+}
+
+.motor-gal-counter {
+    position: absolute;
+    bottom: 0.75rem;
+    inset-inline-start: 0.75rem;
+    padding: 0.3125rem 0.625rem;
+    border-radius: 50rem;
+    background-color: rgba(#08090b, 0.72);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+.motor-gal-expand {
+    position: absolute;
+    bottom: 0.75rem;
+    inset-inline-end: 0.75rem;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    // Desktop: arrows appear with the pointer or keyboard focus; the photo stays clean otherwise.
+    .motor-gal-prev,
+    .motor-gal-next {
+        opacity: 0;
+    }
+
+    .motor-gallery .gal-cell:hover,
+    .motor-gallery .gal-cell:focus-within {
+        .motor-gal-prev:not(:disabled),
+        .motor-gal-next:not(:disabled) {
+            opacity: 1;
+        }
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    // Phones: keep the controls at the top, clear of the sticky buy bar at the bottom of the screen.
+    .motor-gal-counter {
+        bottom: auto;
+        top: 0.75rem;
+    }
+
+    .motor-gal-expand {
+        bottom: auto;
+        top: 0.75rem;
+    }
+
+    .motor-gal-prev,
+    .motor-gal-next {
+        min-width: 40px;
+        height: 40px;
+        margin-top: -20px;
+    }
+}
+
+// Full-screen viewer
+// --------------------------------------------------
+
+.motor-pswp {
+    .pswp__bg {
+        background: #08090b;
+    }
+
+    .pswp__img {
+        // The photos have a light studio background; give them a light stage instead of a black hole.
+        background-color: #f2f2f0;
+    }
+
+    .pswp__top-bar {
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: linear-gradient(to bottom, rgba(#08090b, 0.85), rgba(#08090b, 0));
+    }
+
+    .pswp__counter {
+        padding: 0.375rem 0.75rem;
+        border-radius: 50rem;
+        background-color: rgba(#fff, 0.1);
+        color: #fff;
+        font-size: 0.875rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .pswp__button,
+    .motor-pswp-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border: 1px solid rgba(#fff, 0.16);
+        border-radius: 50%;
+        background: rgba(#16181c, 0.85);
+        color: #fff;
+        opacity: 1;
+        font-size: 1.0625rem;
+        cursor: pointer;
+
+        &:hover {
+            background: rgba(#2a2e35, 0.95);
+        }
+
+        &:focus-visible {
+            outline: 2px solid $motor-accent-text;
+            outline-offset: 2px;
+        }
+
+        &:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+    }
+
+    .pswp__button--close {
+        font-size: 1.625rem;
+    }
+
+    // One photo: nothing to page through.
+    .pswp__ui--one-slide .pswp__arrow,
+    .pswp__ui--one-slide .pswp__counter {
+        display: none;
+    }
+
+    .pswp__arrow {
+        width: 52px;
+        height: 52px;
+        margin-top: -26px;
+        font-size: 1.25rem;
+    }
+
+    .pswp__preloader {
+        top: 0.75rem;
+        opacity: 0;
+    }
+
+    .pswp__preloader--active {
+        opacity: 1;
+    }
+
+    .pswp__error-msg {
+        color: $motor-text;
+
+        a {
+            color: $motor-accent-text;
+            text-decoration: underline;
+        }
+    }
+
+    .pswp__caption__center {
+        color: $motor-text-muted;
+    }
+
+    &.pswp--zoom-allowed .pswp__img,
+    .pswp__img {
+        cursor: zoom-in;
+    }
+
+    &.pswp--zoomed-in .pswp__img {
+        cursor: grab;
+    }
+
+    &.pswp--zoomed-in.pswp--dragging .pswp__img {
+        cursor: grabbing;
+    }
+}
+
+.motor-pswp-thumbs {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.75rem;
+    background: linear-gradient(to top, rgba(#08090b, 0.85), rgba(#08090b, 0));
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.motor-pswp-thumb {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: $border-radius;
+    background: #eceeea;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity .15s ease, border-color .15s ease;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        mix-blend-mode: multiply;
+        pointer-events: none;
+    }
+
+    &:hover {
+        opacity: 0.9;
+    }
+
+    &[aria-current="true"] {
+        border-color: $motor-accent;
+        opacity: 1;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 2px;
+    }
+}
+
+// The UI hides itself while idle on desktop; keep the strip with it.
+.pswp__ui--idle .motor-pswp-thumbs {
+    opacity: 0;
+}
+
+.motor-pswp-thumbs {
+    transition: opacity .25s ease;
+}
+
+@include media-breakpoint-down(sm) {
+    .motor-pswp-thumb {
+        width: 48px;
+        height: 48px;
+    }
+
+    .motor-pswp .pswp__top-bar {
+        padding: 0.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .motor-gal-btn,
+    .motor-pswp-thumb,
+    .motor-pswp-thumbs {
+        transition: none;
+    }
+}
+
+// Phones: long short descriptions push the photos below the fold; show three lines and a toggle.
+// --------------------------------------------------
+
+@include media-breakpoint-down(sm) {
+    .pd-info-mobile .pd-description.motor-clamped {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+.motor-more-toggle {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: $motor-accent-text;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}

@@ -1,0 +1,42 @@
+@*
+    MotorDark: PhotoSwipe root with Turkish labels, zoom in/out buttons and a thumbnail strip.
+    The extra controls are wired by themes/motordark/js/motor-gallery.js (init.pswp event).
+*@
+<div id="pswp" class="pswp motor-pswp" tabindex="-1" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Ürün fotoğrafları">
+    <div class="pswp__bg"></div>
+    <section class="pswp__scroll-wrap" aria-roledescription="carousel">
+        <div class="pswp__container" id="pswp__items" aria-live="off">
+            <div class="pswp__item" role="group" aria-roledescription="slide" aria-hidden="true"></div>
+            <div class="pswp__item" role="group" aria-roledescription="slide" aria-hidden="true"></div>
+            <div class="pswp__item" role="group" aria-roledescription="slide" aria-hidden="true"></div>
+        </div>
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar hstack">
+                <div class="pswp__counter mr-2" aria-live="polite"></div>
+                <div class="pswp__zoom-controls hstack gap-1 motor-pswp-ctl">
+                    <button type="button" class="reset motor-pswp-btn motor-pswp-zoom-out" title="Uzaklaştır (−)" aria-label="Uzaklaştır">
+                        <i class="fa fa-magnifying-glass-minus" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="reset motor-pswp-btn motor-pswp-zoom-in" title="Yakınlaştır (+)" aria-label="Yakınlaştır">
+                        <i class="fa fa-magnifying-glass-plus" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="reset pswp__button pswp-action pswp__button--fs motor-pswp-btn" title="Tam ekran" aria-label="Tam ekran"></button>
+                </div>
+                <div class="pswp__preloader" aria-hidden="true">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="reset pswp__button pswp__button--close motor-pswp-btn" title="Kapat (Esc)" aria-label="Kapat">&#215;</button>
+            </div>
+            <button type="button" class="reset pswp__button pswp__arrow pswp__button--arrow--left" title="Önceki fotoğraf (←)" aria-label="Önceki fotoğraf" aria-controls="pswp__items"></button>
+            <button type="button" class="reset pswp__button pswp__arrow pswp__button--arrow--right" title="Sonraki fotoğraf (→)" aria-label="Sonraki fotoğraf" aria-controls="pswp__items"></button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+            <div class="motor-pswp-thumbs motor-pswp-ctl" role="group" aria-label="Fotoğraflar"></div>
+        </div>
+    </section>
+</div>

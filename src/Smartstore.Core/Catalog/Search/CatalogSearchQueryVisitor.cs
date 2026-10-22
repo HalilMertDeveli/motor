@@ -22,6 +22,14 @@ public class CatalogSearchQueryVisitor : LinqSearchQueryVisitor<Product, Catalog
 
         if (_searchTermFields.Contains(fieldName) || fieldName == "searchterm")
         {
+            var ranking = CatalogSearchRanking.FromQuery(context.SearchQuery);
+            if (ranking != null && IsDefaultTermFilter(filter, context))
+            {
+                // MOTOR: the term was matched in memory (see LinqCatalogSearchService).
+                var rankedIds = ranking.ProductIds;
+                return query.Where(x => rankedIds.Contains(x.Id));
+            }
+
             return VisitTermFilter(filter, context, query);
         }
         else if (fieldName == names.ProductId)
@@ -584,7 +592,12 @@ public class CatalogSearchQueryVisitor : LinqSearchQueryVisitor<Product, Catalog
         if (sorting.FieldName.IsEmpty())
         {
             // Sort by relevance.
-            if (context.CategoryId > 0)
+            var ranking = CatalogSearchRanking.FromQuery(context.SearchQuery);
+            if (ranking != null)
+            {
+                return ApplyRelevanceSorting(query, ranking);
+            }
+            else if (context.CategoryId > 0)
             {
                 return ApplyFeaturedSorting(context, query, true);
             }
@@ -624,6 +637,11 @@ public class CatalogSearchQueryVisitor : LinqSearchQueryVisitor<Product, Catalog
     protected override IQueryable<Product> ApplyDefaultSorting(CatalogSearchQueryContext context, IQueryable<Product> query)
     {
         var sq = context.SearchQuery;
+        var ranking = CatalogSearchRanking.FromQuery(sq);
+        if (ranking != null)
+        {
+            return ApplyRelevanceSorting(query, ranking);
+        }
 
         if (context.CategoryId > 0 && sq.Origin.EqualsNoCase(CatalogSearchQuery.KnownOrigins.Category))
         {
@@ -642,6 +660,46 @@ public class CatalogSearchQueryVisitor : LinqSearchQueryVisitor<Product, Catalog
         }
 
         return query.OrderBy(x => x.Id);
+    }
+
+    /// <summary>
+    /// MOTOR: orders by the relevance buckets of <paramref name="ranking"/>, then by display order.
+    /// Builds "CASE WHEN Id IN (...) THEN 0 WHEN Id IN (...) THEN 1 ... END".
+    /// </summary>
+    protected virtual IQueryable<Product> ApplyRelevanceSorting(IQueryable<Product> query, CatalogSearchRanking ranking)
+    {
+        var p = Expression.Parameter(typeof(Product), "x");
+        var id = Expression.Property(p, nameof(Product.Id));
+        var containsMethod = typeof(Enumerable).GetMethods()
+            .First(x => x.Name == nameof(Enumerable.Contains) && x.GetParameters().Length == 2)
+            .MakeGenericMethod(typeof(int));
+
+        Expression body = Expression.Constant(ranking.Buckets.Length);
+        for (var i = ranking.Buckets.Length - 1; i >= 0; i--)
+        {
+            var contains = Expression.Call(containsMethod, Expression.Constant(ranking.Buckets[i]), id);
+            body = Expression.Condition(contains, Expression.Constant(i), body);
+        }
+
+        var keySelector = Expression.Lambda<Func<Product, int>>(body, p);
+
+        return OrderBy(query, keySelector)
+            .ThenBy(x => x.DisplayOrder)
+            .ThenBy(x => x.Id);
+    }
+
+    private static bool IsDefaultTermFilter(ISearchFilter filter, CatalogSearchQueryContext context)
+    {
+        if (filter.FieldName == "searchterm")
+        {
+            return true;
+        }
+
+        // A single search field is not combined (see SearchQuery ctor).
+        return filter is IAttributeSearchFilter af
+            && af.FieldName == CatalogSearchQuery.KnownFilters.Name
+            && af.Term is string term
+            && term == context.SearchQuery.DefaultTerm;
     }
 
     protected virtual IQueryable<Product> ApplyPriceSorting(IQueryable<Product> query, bool descending)
