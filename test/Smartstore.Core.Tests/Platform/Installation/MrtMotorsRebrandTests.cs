@@ -81,6 +81,26 @@ public class MrtMotorsRebrandTests
         Assert.That(ProsevStoreDefaults.IsPlaceholderTopicBody(body), Is.EqualTo(expected));
     }
 
+    [TestCase("Prosev 027 Rature Black 4 Mevsim Mont", "MRT Motors 027 Rature Black 4 Mevsim Mont")]
+    [TestCase("İnterkom yedek parça · PROSEV Q7 mikrofon seti", "İnterkom yedek parça · MRT Motors Q7 mikrofon seti")]
+    [TestCase("Prosevx Kask", "Prosevx Kask")]
+    [TestCase("SHAD SH58X", "SHAD SH58X")]
+    [TestCase(null, null)]
+    public void Supplier_brand_is_replaced_as_a_whole_word(string text, string expected)
+    {
+        Assert.That(ProsevStoreDefaults.ReplaceSupplierBrand(text), Is.EqualTo(expected));
+    }
+
+    [TestCase("prosev", "mrt-motors")]
+    [TestCase("prosev-q7-motosiklet-interkom", "mrt-motors-q7-motosiklet-interkom")]
+    [TestCase("kask-prosev-x", "kask-mrt-motors-x")]
+    [TestCase("prosevx-kask", "prosevx-kask")]
+    [TestCase("mrt-motors-q7", "mrt-motors-q7")]
+    public void Supplier_brand_slug_segment_is_replaced(string slug, string expected)
+    {
+        Assert.That(ProsevStoreDefaults.ReplaceSupplierBrandInSlug(slug), Is.EqualTo(expected));
+    }
+
     [TestCase("src/Smartstore.Web/Themes/MotorDark/Views/Shared/Components/ShopLogo/Default.cshtml")]
     [TestCase("src/Smartstore.Web/Areas/Admin/Views/Shared/Components/AdminNavbar/Default.cshtml")]
     [TestCase("src/Smartstore.Web/Themes/MotorDark/theme.config")]

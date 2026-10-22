@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using Smartstore.Core.Catalog.Categories;
 using Smartstore.Core.Data;
 using Smartstore.Core.Seo;
@@ -18,6 +19,35 @@ namespace Smartstore.Core.Installation;
 public static class ProsevStoreDefaults
 {
     public const string StoreName = "MRT Motors";
+
+    /// <summary>
+    /// House brand of the supplier Motosev. The owner sells this range under the store brand
+    /// (decision 2026-10-22), so it is replaced in product data, brand names and URL slugs.
+    /// </summary>
+    public const string SupplierBrandName = "Prosev";
+
+    /// <summary>
+    /// URL slug of the store brand (the manufacturer page of the former supplier brand).
+    /// </summary>
+    public const string StoreBrandSlug = "mrt-motors";
+
+    private static readonly Regex _supplierBrandRegex = new(@"\bProsev\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    private static readonly Regex _supplierBrandSlugRegex = new(@"(?<=^|-)prosev(?=-|$)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Replaces the supplier brand "Prosev" (whole word, any case) with the store brand.
+    /// </summary>
+    public static string ReplaceSupplierBrand(string text)
+        => string.IsNullOrEmpty(text) ? text : _supplierBrandRegex.Replace(text, StoreName);
+
+    /// <summary>
+    /// Replaces the slug segment "prosev" with "mrt-motors", e.g. "prosev-q7-motosiklet-interkom" → "mrt-motors-q7-motosiklet-interkom".
+    /// </summary>
+    public static string ReplaceSupplierBrandInSlug(string slug)
+        => string.IsNullOrEmpty(slug) ? slug : _supplierBrandSlugRegex.Replace(slug, StoreBrandSlug);
+
+    public static bool ContainsSupplierBrand(string text)
+        => !string.IsNullOrEmpty(text) && _supplierBrandRegex.IsMatch(text);
 
     // Contact data of MRT Motors as given by the owner on 2026-10-22 (Instagram profile @mrtmotorservis).
     // Legal title, tax number, MERSİS and IBAN are not known yet and stay placeholders.
