@@ -33,6 +33,15 @@ publishing; products are imported unpublished.
 **Way back:** the previous packages stay on the Desktop; re-import one of them into a store whose picture links of
 the affected products were removed (the importer never replaces existing pictures).
 
+## SHAD mounting kits: no whole motorcycles
+
+**Why:** SHAD photographs its mounting kits fitted to a whole motorcycle; customers took the store for a motorcycle
+dealer. On 2026-10-22 the live demo's 351 such photos were cropped to the mounting area.
+
+**Rule:** the last step of the package build, `tools/supplier-images/crop-bike-photos.mjs`, crops every whole-bike
+photo of a SHAD kit product to the rear of the bike (see the README for the tests). Cropping only removes pixels of the
+genuine photo. Known false positives and bikes facing left are listed in `bike-photo-exceptions.json`.
+
 ## Exception: AI upscaling of the Motosev 2026 catalog photos
 
 **Decision:** the store owner, 2026-10-20, after comparing samples (genuine pixels next to AI upscaling).
