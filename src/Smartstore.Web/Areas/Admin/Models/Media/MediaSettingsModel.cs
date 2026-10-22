@@ -108,15 +108,18 @@ public class MediaSettingsModel : ModelBase
 
     #region Image processing
 
+    [LocalizedDisplay("*DefaultResamplingMode")]
     public ResamplingMode DefaultResamplingMode { get; set; }
 
     [AdditionalMetadata("min", 0)]
     [AdditionalMetadata("max", 100)]
+    [LocalizedDisplay("*DefaultImageQuality")]
     public int DefaultImageQuality { get; set; }
 
     [LocalizedDisplay("*JpegColorType")]
     public JpegColorType? JpegColorType { get; set; }
 
+    [LocalizedDisplay("*PngCompressionLevel")]
     public PngCompressionLevel PngCompressionLevel { get; set; }
 
     [LocalizedDisplay("*PngQuantizationMethod")]
@@ -125,6 +128,7 @@ public class MediaSettingsModel : ModelBase
     [LocalizedDisplay("*PngInterlaced")]
     public bool PngInterlaced { get; set; }
 
+    [LocalizedDisplay("*PngIgnoreMetadata")]
     public bool PngIgnoreMetadata { get; set; }
 
     [LocalizedDisplay("*GifQuantizationMethod")]
@@ -138,12 +142,16 @@ public class MediaSettingsModel : ModelBase
     #region Response Caching
 
     [AdditionalMetadata("min", 0)]
+    [LocalizedDisplay("*ResponseCacheDuration")]
     public int ResponseCacheDuration { get; set; }
 
+    [LocalizedDisplay("*ResponseCacheLocation")]
     public ResponseCacheLocation ResponseCacheLocation { get; set; }
 
+    [LocalizedDisplay("*ResponseCacheNoStore")]
     public bool ResponseCacheNoStore { get; set; }
 
+    [LocalizedDisplay("*AppendFileVersionToUrl")]
     public bool AppendFileVersionToUrl { get; set; }
 
     #endregion
