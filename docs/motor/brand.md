@@ -31,14 +31,32 @@ E-mail templates and the legal documents (mesafeli satış, KVKK) use the store 
 company data from the database (`{{ Store.Name }}`, company settings), so they follow the
 store name.
 
+## Product brand: Prosev is sold as MRT Motors
+
+The supplier Motosev's house brand **Prosev** is sold under the store brand (owner decision
+2026-10-22: "hiç bir prosev olmasın sitemde", "Markayı MRT Motors yap"; the owner was told that
+this changes the manufacturer shown to customers and that product photos may still show Prosev
+logos).
+
+- Migration `20261022140000_MrtMotorsProductBrand` renames the manufacturer "Prosev" to
+  "MRT Motors", replaces the whole word "Prosev" in product names, short and full descriptions
+  (and their localized values), and moves the active URL slugs: `/prosev/` → `/mrt-motors/`,
+  `/prosev-…/` → `/mrt-motors-…/`. The old slugs stay as inactive URL records, so old links
+  redirect. SKUs, MPNs (`CE2700-…`) and pictures are not changed. Idempotent.
+- `MotorShop.SupplierCatalog` applies the same replacement to every import
+  (`SupplierCatalogImporter.ApplyStoreBrand`), so a re-import of the Motosev package does not
+  bring "Prosev" back.
+- Not changed: `tools/supplier-images` works on the supplier package and the supplier's website,
+  where the brand is still Prosev (it matches by SKU and brand tokens before the import), and
+  `MotorShop.CatalogImport` (generic parts feeds; its brand keys identify products). Product
+  photos are not edited.
+
 ## What stays Prosev
 
-- **Prosev** is also a product brand of the supplier Motosev (e.g. "Prosev Q7 Motosiklet
-  İnterkom", manufacturer "Prosev"). Products, the manufacturer, their URL slugs and photos
-  are supplier data and keep that name.
 - Code identifiers (`ProsevStoreDefaults`, `prosev-*` CSS classes, `_prosev.scss`, migration
-  class names) and infrastructure names (Tailscale host `prosev.tail41fdd8.ts.net`, Fly app
-  `prosev`, Supabase `prosev-prod`) are not visible as the store name and are unchanged.
+  class names) and the Fly app `prosev` / Supabase `prosev-prod` names are not visible on the site.
+- The public demo address moved from `prosev.tail41fdd8.ts.net` to `mrtmotors.tail41fdd8.ts.net`
+  (Tailscale machine name, see the live demo notes); old `prosev.…` links stop working.
 
 ## Existing databases
 
@@ -61,6 +79,10 @@ A name or text that an admin already changed is kept. Back up the database befor
 start with the new version (see the redeploy steps of the live demo).
 
 ## Manual steps for the owner
+
+- **Google sign-in after the address change**: in Google Cloud Console > Clients, add the authorized
+  redirect URI `https://mrtmotors.tail41fdd8.ts.net/signin-google` (the old `prosev.…` URI no
+  longer works), or Google login fails with redirect_uri_mismatch.
 
 - **Google sign-in**: Google Cloud Console > Google Auth Platform > Branding, set the app
   name to "MRT Motors" (the consent screen shows it). See [google-login.md](google-login.md).

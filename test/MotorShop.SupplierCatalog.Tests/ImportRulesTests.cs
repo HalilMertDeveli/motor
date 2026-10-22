@@ -121,4 +121,38 @@ public class ImportRulesTests
     [TestCase("Yedek Parça", "Yedek Parça")]
     public void Category_paths_are_normalized(string input, string expected)
         => Assert.That(SupplierCatalogImporter.NormalizeCategoryPath(input), Is.EqualTo(expected));
+
+    [Test]
+    public void Supplier_brand_prosev_is_imported_as_the_store_brand()
+    {
+        var item = new CatalogPackageProduct
+        {
+            Sku = "Q7-02990",
+            Brand = "PROSEV",
+            Name = "Prosev Q7 Motosiklet İnterkom",
+            ShortDescription = "İnterkom yedek parça · Prosev Q7 mikrofon seti",
+            DescriptionHtml = "<ul><li>Uyumluluk: Prosev Q7</li></ul>",
+            CatalogCode = "Q7-02990"
+        };
+
+        SupplierCatalogImporter.ApplyStoreBrand(item);
+
+        Assert.That(item.Brand, Is.EqualTo("MRT Motors"));
+        Assert.That(item.Name, Is.EqualTo("MRT Motors Q7 Motosiklet İnterkom"));
+        Assert.That(item.ShortDescription, Is.EqualTo("İnterkom yedek parça · MRT Motors Q7 mikrofon seti"));
+        Assert.That(item.DescriptionHtml, Is.EqualTo("<ul><li>Uyumluluk: MRT Motors Q7</li></ul>"));
+        Assert.That(item.Sku, Is.EqualTo("Q7-02990"));
+        Assert.That(item.CatalogCode, Is.EqualTo("Q7-02990"));
+    }
+
+    [Test]
+    public void Other_brands_are_imported_unchanged()
+    {
+        var item = new CatalogPackageProduct { Sku = "A", Brand = "SHAD", Name = "SHAD SH58X Arka Çanta" };
+
+        SupplierCatalogImporter.ApplyStoreBrand(item);
+
+        Assert.That(item.Brand, Is.EqualTo("SHAD"));
+        Assert.That(item.Name, Is.EqualTo("SHAD SH58X Arka Çanta"));
+    }
 }

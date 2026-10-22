@@ -116,6 +116,8 @@ public class SupplierCatalogImporter
             .DistinctBy(x => x.Sku.Trim(), StringComparer.OrdinalIgnoreCase)
             .ToList();
 
+        items.Each(ApplyStoreBrand);
+
         var skipped = package.Products.Count - items.Count;
         if (skipped > 0)
         {
@@ -254,6 +256,22 @@ public class SupplierCatalogImporter
     /// A new product without a catalog price becomes "call for price" instead of a purchasable 0 TL product;
     /// a later import that brings a price for such a product makes it purchasable again.
     /// </summary>
+    /// <summary>
+    /// The supplier's house brand "Prosev" is sold under the store brand (owner decision 2026-10-22), so brand,
+    /// names and descriptions of the package say MRT Motors before they reach the store. SKUs and codes stay.
+    /// </summary>
+    internal static void ApplyStoreBrand(CatalogPackageProduct item)
+    {
+        if (item.Brand?.Trim().EqualsNoCase(ProsevStoreDefaults.SupplierBrandName) == true)
+        {
+            item.Brand = ProsevStoreDefaults.StoreName;
+        }
+
+        item.Name = ProsevStoreDefaults.ReplaceSupplierBrand(item.Name);
+        item.ShortDescription = ProsevStoreDefaults.ReplaceSupplierBrand(item.ShortDescription);
+        item.DescriptionHtml = ProsevStoreDefaults.ReplaceSupplierBrand(item.DescriptionHtml);
+    }
+
     internal static void ApplyValues(CatalogPackageProduct item, Product product, bool isNew)
     {
         product.Name = item.Name.Trim().Truncate(400);
