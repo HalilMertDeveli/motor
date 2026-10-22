@@ -23,7 +23,7 @@ param(
     [Parameter(Mandatory)]
     [string] $CheckoutDir,
     [int] $Port = 5106,
-    [string] $TaskName = 'MRT Motors Demo',
+    [string] $TaskName = 'Prosev Demo',
     [switch] $Start
 )
 
