@@ -8,9 +8,10 @@
 //   download  fetches the pictures of matched pages (one request per second, resumable)
 //   build     checks every pair visually against the catalog picture, renders the pictures and writes
 //             the improved package folder, sources.csv/json and review.html/csv
+//   check     verifies that no uncertain product of a package carries anything but its catalog pictures
 //
 // A pair is only used when the model code, the variant and the picture agree. Everything else keeps the
-// catalog picture and is listed for review. Requires Node 20+ and ffmpeg/ffprobe on PATH.
+// catalog picture; uncertain pairs are listed but never used. Requires Node 20+ and ffmpeg/ffprobe on PATH.
 
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
@@ -27,7 +28,8 @@ const USAGE = `Usage:
                                     --download=work/download --out=work/matches-resolved.json
   node official-images.mjs download --matches=work/matches-resolved.json --out=work/download
   node official-images.mjs build    --products=package/products.json --images=package/images --matches=work/matches.json
-                                    --download=work/download --out=work/official [--fallback-images=improved/images] [--reject=SKU1,SKU2]`;
+                                    --download=work/download --out=work/official [--fallback-images=improved/images] [--reject=SKU1,SKU2]
+  node official-images.mjs check    --products=package/products.json --review=work/official/review.csv`;
 
 // Official sites. `brands` limits a site to products of these package brands (null: every brand).
 const SITES = [
@@ -712,7 +714,7 @@ function writeReview(rows, outDir, oldImagesDir, reviewDir, newImagesDir) {
 .pics{white-space:nowrap}figure{display:inline-block;margin:0 6px 0 0;text-align:center}img{width:120px;height:120px;object-fit:contain;background:#fff;border:1px solid #eee}
 figcaption{font-size:11px;color:#666}h2{margin-top:32px}</style></head><body>
 <h1>Resmi ürün fotoğrafları — inceleme listesi</h1>
-<p>Eşleşti: model kodu, varyant ve fotoğraf kontrolü tuttu; resmi fotoğraf kullanıldı. Belirsiz: katalog fotoğrafı kaldı, elle kontrol edin. Bulunamadı: resmi sayfa yok; katalog fotoğrafı kaldı.</p>
+<p>Eşleşti: model kodu, varyant ve fotoğraf kontrolü tuttu; resmi fotoğraf kullanıldı. Belirsiz: katalog fotoğrafı kaldı; aday fotoğraflar kullanılmaz (sahip kararı 2026-10-22). Bulunamadı: resmi sayfa yok; katalog fotoğrafı kaldı.</p>
 <table><tr><th>Marka</th><th>Eşleşti</th><th>Belirsiz</th><th>Bulunamadı</th></tr>${summary}</table>
 <h2>Belirsiz</h2><table>${section('uncertain', true)}</table>
 <h2>Eşleşti</h2><table>${section('matched', true)}</table>
@@ -723,8 +725,41 @@ figcaption{font-size:11px;color:#666}h2{margin-top:32px}</style></head><body>
     console.log('products:', t, 'pictures replaced or added:', rows.reduce((a, r) => a + r.newImages.length, 0));
 }
 
+// ---------------------------------------------------------------- check
+
+// Owner decision 2026-10-22: photos of "uncertain" products are never used, not even after a manual or another
+// tool's review; these products keep their catalog pictures. `check` verifies a package before it is imported
+// (e.g. one merged from other sources) against the review.csv of the official run and exits with 1 on a violation.
+function parseCsv(text) {
+    const rows = [];
+    let row = [], cell = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (quoted) {
+            if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') quoted = false; else cell += c;
+        } else if (c === '"') quoted = true;
+        else if (c === ';') { row.push(cell); cell = ''; }
+        else if (c === '\n') { row.push(cell.replace(/\r$/, '')); rows.push(row); row = []; cell = ''; }
+        else cell += c;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    const [head, ...body] = rows;
+    return body.filter(r => r.length === head.length).map(r => Object.fromEntries(head.map((k, i) => [k, r[i]])));
+}
+
+function check() {
+    need('products', 'review');
+    const products = readJson(args.products);
+    const review = parseCsv(fs.readFileSync(args.review, 'utf8').replace(/^﻿/, ''));
+    const uncertain = new Map(review.filter(r => r.status === STATUS_TR.uncertain).map(r => [r.sku, new Set(r.oldImages.split(' ').filter(Boolean))]));
+    const violations = products.filter(p => uncertain.has(p.sku) && (p.images || []).some(f => !uncertain.get(p.sku).has(f)));
+    for (const p of violations) console.log(`${p.sku}: ${(p.images || []).filter(f => !uncertain.get(p.sku).has(f)).join(' ')}`);
+    console.log(`uncertain products: ${uncertain.size}, in package: ${products.filter(p => uncertain.has(p.sku)).length}, with other than catalog pictures: ${violations.length}`);
+    if (violations.length) process.exit(1);
+}
+
 // ---------------------------------------------------------------- main
 
-const commands = { index, match, download, resolve, build };
+const commands = { index, match, download, resolve, build, check };
 if (!commands[command]) { console.error(USAGE); process.exit(2); }
 await commands[command]();

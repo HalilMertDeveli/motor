@@ -27,8 +27,15 @@ protection are never bypassed.
 agree and the official picture agrees with the catalog picture (shape and colour check), or when the name is not
 conclusive but the official page shows the very same photo as the catalog picture. Products without a catalog
 picture only get pictures from an exact manufacturer reference (SHAD). Everything else keeps its catalog picture and
-is listed in `review.html` as "Belirsiz" (uncertain) or "Bulunamadı" (not found). Check the uncertain list before
-publishing; products are imported unpublished.
+is listed in `review.html` as "Belirsiz" (uncertain) or "Bulunamadı" (not found). Products are imported unpublished.
+
+**Uncertain photos are never used** (decision: the store owner, 2026-10-22, "belirsiz ürün fotoğraflarını tamamen
+kaldır"). There is no manual review of the uncertain list: an uncertain product keeps its catalog picture, even when
+another tool or a person found an official photo for it. Before importing a package that was assembled from more
+than one run, run `official-images.mjs check` against the official run's `review.csv`; it fails when an uncertain
+product carries anything but its catalog pictures. Applied on 2026-10-22: the merged Motosev 2026 package
+(`motosev-2026-paket-birlesik.zip`, official run plus 72 photos from closed PR #39) carried such photos for 45 of the
+109 uncertain products and was replaced by `motosev-2026-paket-birlesik-belirsizsiz.zip`.
 
 **Way back:** the previous packages stay on the Desktop; re-import one of them into a store whose picture links of
 the affected products were removed (the importer never replaces existing pictures).

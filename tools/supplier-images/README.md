@@ -97,6 +97,7 @@ node tools/supplier-images/official-images.mjs download --matches=work/matches-r
 node tools/supplier-images/official-images.mjs build    --products=package/products.json --images=package/images \
   --matches=work/matches-resolved.json --download=work/download --out=work/official \
   --fallback-images=improved/images [--reject=SKU1,SKU2]
+node tools/supplier-images/official-images.mjs check    --products=package/products.json --review=work/official/review.csv
 ```
 
 - `match`: model code (catalog code without its price group, e.g. `869-01780` -> `869`), brand, variant words
@@ -123,5 +124,8 @@ node tools/supplier-images/official-images.mjs build    --products=package/produ
   not found, per brand, with catalog and official pictures side by side).
 - Products that keep their catalog picture take it from `--fallback-images` when given (same file names), else
   from the package.
+- Uncertain products never get an official photo, not even after a manual review (owner decision 2026-10-22).
+  `check` fails (exit code 1) when a package gives an uncertain product of `review.csv` anything but its catalog
+  pictures; run it on every package that combines several runs or sources before importing it.
 - Check the result on contact sheets before importing. On 2026-10-20 the supplier's site had the photos of the
   JY01 red and black helmet pages swapped; the colour rule catches such cases, but only a person can confirm them.
