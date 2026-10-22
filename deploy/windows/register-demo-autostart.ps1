@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Registers a Windows scheduled task that starts the Prosev demo store at boot.
+    Registers a Windows scheduled task that starts the MRT Motors demo store at boot.
 
 .DESCRIPTION
     The demo runs from a built checkout (Release build, SQLite tenant in
@@ -23,7 +23,7 @@ param(
     [Parameter(Mandatory)]
     [string] $CheckoutDir,
     [int] $Port = 5106,
-    [string] $TaskName = 'Prosev Demo',
+    [string] $TaskName = 'MRT Motors Demo',
     [switch] $Start
 )
 
@@ -57,7 +57,7 @@ $settings = New-ScheduledTaskSettingsSet `
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger `
     -Principal $taskPrincipal -Settings $settings `
-    -Description "Starts the Prosev demo store on http://localhost:$Port (public via Tailscale Funnel)." `
+    -Description "Starts the MRT Motors demo store on http://localhost:$Port (public via Tailscale Funnel)." `
     -Force | Out-Null
 
 Write-Host "Registered scheduled task '$TaskName' -> $exe"
