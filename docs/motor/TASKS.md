@@ -8,7 +8,7 @@ Rules: one task = one branch = one worktree = one PR against `preview`.
 Only the orchestrator merges into `preview`, one merge at a time.
 Nothing reaches `motor` without the owner's explicit approval (Gate F).
 
-Last updated: 2026-10-20
+Last updated: 2026-10-22
 
 ## Phase 1: integration of existing work (done)
 
@@ -80,6 +80,19 @@ of preview.
 | #33 | feat/motordark-ux-performance | Sticky mobile buy bar, responsive WebP hero, a11y and performance (home mobile perf 57→66, product CLS 0.187→0) | e0f49fff16 |
 | #30 + #34 | feat/motosev-catalog-import, fix/supplier-catalog-rules | MotorShop.SupplierCatalog (Motosev package importer) made to follow the rules: nothing published automatically, only own-supplier products updated, zip limits, HTML sanitized, KDV tax category | 84071a4643 |
 | #35 | feat/supplier-image-quality | Storefront picture sizes 512/1024 px, quality 90; `tools/supplier-images` rebuilds supplier pictures from the PDF originals (genuine pixels, per-page pairing) | 7804f02e4e |
+| #36 | feat/supplier-images-ai | Optional AI upscaling of supplier pictures with a review list (owner-approved exception) | 9b1c08add1 |
+| #37 | feat/prosev-rebrand-payment | Prosev brand, 2026 catalog categories, catalog-style design, dealer payment terms | c0aef97622 |
+| #38 | feat/helmet-type-tiles | Categories without a picture show their first product's photo; helmet types as five photo tiles | edfba6ddf7 |
+| #40 | feat/official-product-images | `official-images.mjs`: official photos from motosev.com and shad.es instead of PDF crops (691 matched, 109 uncertain, 348 not found) | 251fb58d90 |
+| #42 | chore/deploy-supabase-hosting | Fly.io hosting with Supabase PostgreSQL (runbook `docs/motor/fly.md`), Oracle ARM path | c98d52adb0 |
+| #43 | fix/supplier-unpriced-call-for-price | Unpriced supplier products become "Fiyat için arayın", not 0,00 ₺ | 523aaff756 |
+| #44 | feat/wordpress-headless-cms | MotorShop.WordPress headless blog module | 077542ef11 |
+| #45, #49, #50, #51 | feature/motor-premium-admin-foundation, feature/motor-panel-products, -orders, -reports | MotorShop.AdminPanel at `/motor-panel`: dashboard, products/categories/price lock, orders/shipments/customers/invoice status, reports/pages/coupons/settings (one-time module install per store) | a12e2901f4, fcb7c7db1f, 163e594bc1, 52354f2d7f |
+| #46 | fix/iyzico-admin-antiforgery | iyzico admin controller derives from `AdminController` (IP check, antiforgery), per-action permissions | cc971d55f3 |
+| #54 | feat/google-customer-auth | Google customer sign-in and registration; explicit account linking (no e-mail auto-link), Registered role only | a76e1a2303 |
+| #56, #57 | feat/admin-prosev-branding, feat/admin-turkish-complete | Prosev look and name for the admin area; fully Turkish admin (country and system names) | a786fa52d8, 1aae7bb4ce |
+
+Promotions to `motor`, each with the owner's explicit approval: #47 (010f934ea9), #48 (24bbd151cc), #52 (d1420d73d8), #53 (a9bd7b8f2f), #55 (56625ac5d1), #58 (558515f755). Since 2026-10-22 `motor` = `preview` = 558515f755. #41 (Fly.io dashboard files) went straight to `motor`; `fly.toml` exists only there.
 
 GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579). After #22 and #23: success. **Since 2026-10-20 GitHub Actions jobs do not start** (account billing: "recent account payments have failed or your spending limit needs to be increased"). #26, #27 and #21 had green PR checks before merge; #28 was merged on local evidence only.
 
@@ -105,6 +118,12 @@ GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579
 | F | legal-shipping-ops | Distance-sales acknowledgments, shipment tracking, order-ops audit, e-Arşiv boundary | feat/legal-checkout, feat/shipment-tracking, docs/order-ops-invoicing, fix/legal-confirm-terms-text | `MotorShop.Legal/**`, `MotorShop.Tracking/**`, `docs/motor/invoicing.md`, `docs/motor/order-operations.md` | Phase 1 | Done | #18, #22, #23, #27 |
 | G | motordark-ux | MotorDark UX, mobile, accessibility, performance | feat/motordark-ux-performance | MotorDark theme files | #26 | Merged | #33 |
 | H | Orchestrator | End-to-end QA, release gates | — | — | D2, G, C2, E-cat | Partial: Turkish fresh-install smoke and cart KDV done; full journey with iyzico mock, shipment and mobile pending | — |
+| I | Motor Premium admin panel | `/motor-panel` admin (phases 1-5) | feature/motor-premium-admin-foundation, feature/motor-panel-* | `src/Smartstore.Modules/MotorShop.AdminPanel/**` | #37 | Merged; write actions not yet tested on the live demo | #45, #49, #50, #51 |
+| J | Google giriş ve kayıt | Google customer login/registration and account linking | feat/google-customer-auth | Identity external login flow, Google.Auth configure page | — | Merged; a real Google sign-in waits for the owner's redirect URI update | #54 |
+| K | Admin Prosev look | Admin branding and complete Turkish admin | feat/admin-prosev-branding, feat/admin-turkish-complete | Admin theme, admin resources | #54 | Merged | #56, #57 |
+| L | Official photos | Supplier/manufacturer photos (motosev.com, shad.es) | feat/official-product-images | `tools/supplier-images/official-images.mjs` | #35 | Merged; the uncertain photos are being removed (owner decision 2026-10-22, session "Belirsiz ürün fotoğraflarını kaldır") | #40 |
+| M | canlı / deploy | Live demo on the owner's PC via Cloudflare quick tunnel; Fly.io + Supabase path | chore/deploy-supabase-hosting | `deploy/**`, `docs/motor/fly.md`, `docs/motor/oracle.md` | — | Demo runs `motor` 558515f755; the URL changes on every restart. Permanent address in progress (session "Kalıcı adres") | #42 |
+| N | catalog-fixes | Store installed against Supabase prosev-prod and catalog import there | — | Supabase prosev-prod | #42 | In progress: Data API exposure checks 7/7 passed, import running | — |
 
 ## Known blockers and open findings
 
@@ -114,12 +133,13 @@ GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579
 | ProductMotorVehicle FKs on PostgreSQL | **Fixed** by #19 (root cause applies to every module: constraints must be in the EF mapping) | All module PRs (iyzico, catalog import, legal) were told to declare constraints in the EF mapping |
 | Fitment sample vehicles on later module install | The `Initial` migration seeder still adds approximate sample vehicles when the module is installed into an existing store | Low: production is a fresh install without sample data. Optional follow-up: drop the seeder |
 | MotorDark not default on fresh install | **Fixed** by #26 (verified on a fresh tr-TR install) | — |
-| GitHub Actions billing | Jobs do not start since 2026-10-20 | **Owner:** fix billing / spending limit in GitHub settings. Until then merges rely on local build + test evidence |
+| GitHub Actions billing | **Resolved** 2026-10-21: the repository is public (gitleaks clean), CI runs again on PRs to preview/motor | Stacked PRs that target feature branches get no CI; run `motor-ci.yml` via workflow_dispatch on their branch |
 | Migration version collisions | Fixed by #28 for iyzico; #24 has the same collision | `Smartstore.Core.Tests/Data/MigrationVersionTests` now fails on duplicates |
 | Smartstore "Credit card (manual)" (Payments.Manual) | **Fixed** by #31 (hidden by filter, removed from active methods on install and by migration; verified on a fresh install) | — |
 | Turkish-I casing under tr-TR | **Fixed** by #32 for identifiers; display text intentionally culture-aware | Open notes: the SEO character map turns Ü into "ue" (German) |
 | Catalog research datasets (#25) | Excluded from every build unless `-p:IncludeCatalogResearch=true` | **Owner (legal):** may they ship; may Yamaha facts be used |
-| Motosev product pictures | The PDF catalog embeds 100-330 px photos; genuine-pixel cleanup done (#35) | **Owner:** ask Motosev for original photos or a print PDF |
+| Motosev product pictures | Official photos from motosev.com and shad.es (#40); the owner confirmed Motosev's permission for the brand photos on 2026-10-22. Uncertain matches are being removed | — |
+| Live demo address | Cloudflare quick tunnel from the owner's PC; the hostname changes on every restart and breaks the Google redirect URI | Permanent address (named tunnel on the owner's domain, or Fly.io with a card) in progress |
 | **AI upscaling exception** | Owner decision 2026-10-20: Motosev 2026 catalog photos may be enlarged with Real-ESRGAN (no generated photos); pictures with text or strong change are listed for review before publishing | See `docs/motor/product-images.md` |
 | F2 SQLitePCLRaw 2.1.11 (CVE-2025-6965) | Open; SQLite provider only | Production uses PostgreSQL; never use SQLite in production. Move to 3.x with upstream |
 | F6 DataProtection keys unencrypted at rest | Partly mitigated (#14/#16: root-only volume, GPG-encrypted backups) | Key-ring encryption with a certificate is application work; unowned |
@@ -127,7 +147,7 @@ GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579
 | Health check path | **Fixed** by #20: defaults to `/healthz/ready` | — |
 | Fresh-clone local build | `Smartstore.Data.*.dll` are not copied to `Smartstore.Web/bin` on the first build of a fresh clone (upstream glob evaluation); a second build of `Smartstore.Web` fixes it | Docker and CI unaffected (publish re-evaluates); local only |
 | iyzico sandbox | No credentials | **Owner:** iyzico merchant + sandbox account; set credentials via environment/admin, never in chat |
-| Supabase / VPS | No access | **Owner:** Supabase projects (staging + production), VPS, domain |
+| Supabase / VPS | Supabase `prosev-prod` exists and the store is being installed there; Fly app `prosev` prepared, blocked until a card is added | **Owner:** card for Fly.io, or a domain for a named tunnel |
 | Business data | Not available | **Owner:** tax rates, real prices, stock, verified fitment data, carrier, approved legal texts, e-invoice provider |
 
 ## Release gates
@@ -139,4 +159,4 @@ GitHub CI on `preview` after #19 and #18: success (runs 39243291820, 39243351579
 | C Payments | Not reached: module and hardening merged with mocks; real sandbox blocked on credentials |
 | D Catalog & operations | Partial: Fitment constraints fixed, order operations audited, shipment tracking, catalog import and supplier import merged; Motosev catalog imported unpublished in QA; real prices/stock policy and publishing review pending |
 | E Preview release candidate | Not reached |
-| F Production | Requires explicit owner approval |
+| F Production | Owner-approved promotions to `motor` done (#47 … #58). The live demo runs `motor` 558515f755 on the owner's PC; a permanent host is still missing |
