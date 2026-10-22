@@ -65,6 +65,7 @@ internal class CatalogStarter : StarterBase
         builder.RegisterType<CatalogSearchQueryFactory>().As<ICatalogSearchQueryFactory>().InstancePerLifetimeScope();
         builder.RegisterType<CatalogSearchQueryAliasMapper>().As<ICatalogSearchQueryAliasMapper>().InstancePerLifetimeScope();
         builder.RegisterType<CatalogFacetUrlHelper>().As<IFacetUrlHelper>().InstancePerLifetimeScope();
+        builder.RegisterType<CatalogTermIndexProvider>().As<ICatalogTermIndexProvider>().SingleInstance();
 
         // Pricing
         builder.RegisterType<PriceCalculationService>().As<IPriceCalculationService>().InstancePerLifetimeScope();
