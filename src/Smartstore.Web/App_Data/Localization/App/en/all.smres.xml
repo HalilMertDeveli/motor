@@ -17390,25 +17390,25 @@ within the observation window, additional requests may be denied, even if type-s
 	<LocaleResource Name="Enums.ReturnCaseKind.Withdrawal">
 		<Value>Withdrawal</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.Cancelled">
+	<LocaleResource Name="Enums.ReturnCaseStatus.Cancelled">
 		<Value>Cancelled</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.ItemsRefunded">
+	<LocaleResource Name="Enums.ReturnCaseStatus.ItemsRefunded">
 		<Value>Item(s) refunded</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.ItemsRepaired">
+	<LocaleResource Name="Enums.ReturnCaseStatus.ItemsRepaired">
 		<Value>Item(s) repaired</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.Pending">
+	<LocaleResource Name="Enums.ReturnCaseStatus.Pending">
 		<Value>Pending</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.Received">
+	<LocaleResource Name="Enums.ReturnCaseStatus.Received">
 		<Value>Received items</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.RequestRejected">
+	<LocaleResource Name="Enums.ReturnCaseStatus.RequestRejected">
 		<Value>Request rejected</Value>
 	</LocaleResource>
-	<LocaleResource Name="Enums.ReturnRequestStatus.ReturnAuthorized">
+	<LocaleResource Name="Enums.ReturnCaseStatus.ReturnAuthorized">
 		<Value>Return authorized</Value>
 	</LocaleResource>
 	<LocaleResource Name="Enums.RuleScope.Cart">
