@@ -71,6 +71,7 @@
     <LocaleResource Name="Rematch.Done"><Value>{0} new fitment proposals.</Value></LocaleResource>
     <LocaleResource Name="Brand"><Value>Brand</Value></LocaleResource>
     <LocaleResource Name="Mpn"><Value>Part number</Value></LocaleResource>
+    <LocaleResource Name="Name"><Value>Name</Value></LocaleResource>
     <LocaleResource Name="ProductType"><Value>Part type</Value></LocaleResource>
     <LocaleResource Name="State"><Value>State</Value></LocaleResource>
     <LocaleResource Name="State.ResearchCandidate"><Value>A · Research candidate</Value></LocaleResource>
