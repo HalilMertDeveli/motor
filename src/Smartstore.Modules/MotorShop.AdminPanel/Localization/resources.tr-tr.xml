@@ -602,4 +602,10 @@
     <LocaleResource Name="Simple.PriceStillHidden"><Value>Değişiklikler kaydedildi, ama bu ürünün fiyatı sitede gizli kalıyor: ürün tedarikçi kataloğunda henüz satışa onaylanmadı. Onay katalog ekranından verilir.</Value></LocaleResource>
     <LocaleResource Name="Toggle.PriceHint"><Value>Tıkla: fiyatı sitede göster / gizle</Value></LocaleResource>
     <LocaleResource Name="Js.PriceShown"><Value>Fiyat girildiği için ürünün fiyatı artık sitede görünüyor.</Value></LocaleResource>
+    <LocaleResource Name="Shipment.ShippedDate"><Value>Kargoya verildiği tarih</Value></LocaleResource>
+    <LocaleResource Name="Simple.PriceVisibility"><Value>Fiyat görünürlüğü</Value></LocaleResource>
+    <LocaleResource Name="Validation.Email"><Value>Geçerli bir e-posta adresi gir. Örnek: info@mrtmotors.com</Value></LocaleResource>
+    <LocaleResource Name="Js.UnsavedLeave"><Value>Kaydedilmemiş değişiklikler var. Sayfadan çıkılsın mı?</Value></LocaleResource>
+    <LocaleResource Name="Js.UnsavedAdvanced"><Value>Bu sayfada kaydedilmemiş değişiklikler var. Gelişmiş düzenleyicide kaydedersen bu değişiklikler kaybolur; önce "Değişiklikleri Kaydet"e bas. Yine de açılsın mı?</Value></LocaleResource>
+    <LocaleResource Name="Js.OpenAnyway"><Value>Yine de aç</Value></LocaleResource>
 </Language>

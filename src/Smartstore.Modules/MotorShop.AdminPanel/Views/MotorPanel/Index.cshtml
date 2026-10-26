@@ -78,7 +78,7 @@
         <div class="mp-panel mp-orders">
             <div class="mp-panel__head">
                 <h2 class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.RecentOrders")</h2>
-                <a class="mp-link" href="@Url.Action("List", "Order", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.AllOrders") →</a>
+                <a class="mp-link" href="@Url.Action("Index", "MotorPanelOrder", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.AllOrders") →</a>
             </div>
             @if (Model.RecentOrders.Count == 0)
             {
@@ -109,7 +109,7 @@
                                     _ => "mp-badge--amber"
                                 };
                                 <tr>
-                                    <td><a class="mp-link" href="@Url.Action("Edit", "Order", new { area = "Admin", id = order.Id })">#@order.OrderNumber</a></td>
+                                    <td><button type="button" class="mp-link mp-link-btn" data-open-editor="@Url.Action("Details", "MotorPanelOrder", new { area = "Admin", id = order.Id })">#@order.OrderNumber</button></td>
                                     <td class="mp-truncate">@order.Customer</td>
                                     <td class="mp-nowrap">@order.CreatedOn.ToString("g")</td>
                                     <td><span class="mp-badge @badge">@order.OrderStatusText</span></td>

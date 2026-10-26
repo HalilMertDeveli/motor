@@ -420,6 +420,23 @@ try {
     await evaluate(`document.querySelector('tr[data-id="${productId}"] [data-toggle="callForPrice"]').click(), true`);
     await waitFor(`document.querySelector('tr[data-id="${productId}"] [data-toggle="callForPrice"]').dataset.value === 'false'`);
 
+    // ---------- Search: several words must all match ----------
+    await go(`/motor-panel/products?q=${encodeURIComponent('kaskı ' + stamp)}`);
+    check('Two-word search finds the product', (await evaluate(`document.querySelectorAll('tr[data-id="${productId}"]').length`)) === 1);
+    await go(`/motor-panel/products?q=${encodeURIComponent('kaskı yokboyle' + stamp)}`);
+    check('Two-word search needs every word', (await evaluate(`document.querySelectorAll('tr[data-id]').length`)) === 0);
+
+    // ---------- Leaving with unsaved changes ----------
+    await go(editHref);
+    await type('input[name=Name]', name + ' (kaydedilmedi)');
+    await evaluate(`document.querySelector('input[name=Name]').dispatchEvent(new Event('input', { bubbles: true })), true`);
+    await click('[data-cancel]');
+    await waitFor(`document.getElementById('mp-confirm').open`);
+    check('Leaving asks "Sayfadan çıkılsın mı?"', /Sayfadan çıkılsın/.test(await text('#mp-confirm .mp-dialog__title')));
+    await click('#mp-confirm .mp-dialog__ok');
+    await waitFor(`location.pathname.startsWith('/motor-panel/products')`);
+    check('"Sayfadan çık" leaves the page without saving', true);
+
     // ---------- List filters ----------
     await go(`/motor-panel/products?q=${encodeURIComponent(stamp)}&status=Unpublished`);
     check('Status filter "Taslak" hides the published product', (await evaluate(`document.querySelectorAll('tr[data-id="${productId}"]').length`)) === 0);

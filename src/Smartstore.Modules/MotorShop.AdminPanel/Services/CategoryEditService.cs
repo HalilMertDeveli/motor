@@ -274,6 +274,15 @@ public class CategoryEditService
     {
         var model = new CategoryEditorModel { ParentId = parentId };
 
+        if (id == 0)
+        {
+            // A new category goes after its siblings, like "Yeni kategori oluştur" in the product form.
+            model.DisplayOrder = await _db.Categories
+                .Where(x => !x.Deleted && (x.ParentId ?? 0) == parentId)
+                .Select(x => (int?)x.DisplayOrder + 1)
+                .MaxAsync() ?? 0;
+        }
+
         if (id > 0)
         {
             var category = await _db.Categories.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id && !x.Deleted);
