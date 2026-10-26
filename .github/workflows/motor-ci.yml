@@ -86,6 +86,15 @@ jobs:
         --logger trx --results-directory TestResults
         --blame-hang-timeout 5m --blame-hang-dump-type none
 
+    # Image tooling rules (no browser, no store needed): header parsing, crop/duplicate/colour checks, fixes.json plan
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Image tool tests
+      run: node --test tools/image-audit/*.test.mjs tools/supplier-images/*.test.mjs
+
     - name: Test summary
       if: always()
       run: |

@@ -7,7 +7,8 @@ namespace Smartstore.Core.Installation;
 /// Product cards are about 280 CSS px wide, i.e. about 560 device pixels on phones; Smartstore's default
 /// card thumbnail (256 px) is stretched there and looks blurry. The product page shows its main picture at
 /// up to about 560 CSS px, so 1024 px stays sharp on high-density screens.
-/// Used by <see cref="InvariantSeedData"/> (fresh installs) and the MotorMediaSizes migration (existing databases).
+/// Media URLs carry a version hash so a photo corrected in place is not hidden behind cached copies.
+/// Used by <see cref="InvariantSeedData"/> (fresh installs) and the MotorMediaSizes and MediaUrlVersion migrations (existing databases).
 /// </summary>
 public static class MotorMediaDefaults
 {
@@ -29,5 +30,6 @@ public static class MotorMediaDefaults
         settings.CategoryThumbPictureSize = MediaSettings.ThumbnailSizeLg;
         settings.ManufacturerThumbPictureSize = MediaSettings.ThumbnailSizeLg;
         settings.DefaultImageQuality = 90;
+        settings.AppendFileVersionToUrl = true;
     }
 }
