@@ -1,0 +1,60 @@
+@model int
+@{
+    // Searchable category field: type to filter, pick with mouse or arrow keys. Without the create permission
+    // the "new category" option is not offered (the server checks it again).
+    var options = (List<CategoryPickerOption>)ViewBag.CategoryOptions ?? [];
+    var canCreate = ViewBag.CanCreateCategory == true;
+    var disabled = ViewData["PickerDisabled"] as bool? == true;
+    var selected = options.FirstOrDefault(x => x.Id == Model);
+    var hidden = T("Plugins.MotorShop.AdminPanel.Category.HiddenSuffix").Value;
+}
+
+<div class="mp-combo" data-combo data-quick-url="@(canCreate ? Url.Action("QuickCreate", "MotorPanelCategory", new { area = "Admin" }) : null)">
+    <input type="hidden" name="CategoryId" value="@(selected?.Id ?? 0)" data-combo-value />
+    <input id="mp-category-input" class="mp-input" type="text" role="combobox" autocomplete="off" aria-autocomplete="list"
+           aria-expanded="false" aria-controls="mp-category-list" aria-describedby="mp-category-hint"
+           placeholder="@T("Plugins.MotorShop.AdminPanel.Category.PickerPlaceholder")"
+           value="@selected?.Path" data-combo-input disabled="@disabled" />
+    <ul id="mp-category-list" class="mp-combo__list" role="listbox" hidden>
+        @foreach (var c in options)
+        {
+            <li role="option" id="mp-cat-@c.Id" class="mp-combo__option" data-id="@c.Id" data-path="@c.Path" aria-selected="@(c.Id == Model ? "true" : "false")">
+                @c.Path@(c.Published ? null : " " + hidden)
+            </li>
+        }
+        <li role="option" id="mp-cat-new" class="mp-combo__option mp-combo__option--create" data-create hidden>
+            + @T("Plugins.MotorShop.AdminPanel.Category.CreateOption") <strong data-create-name></strong>
+        </li>
+        <li class="mp-combo__empty" data-combo-empty hidden>@T("Plugins.MotorShop.AdminPanel.Category.NoMatch")</li>
+    </ul>
+
+    @if (canCreate)
+    {
+        <div class="mp-combo__create" data-combo-create hidden>
+            <p class="mp-legend">@T("Plugins.MotorShop.AdminPanel.Category.NewTitle")</p>
+            <div class="mp-form-grid">
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.Name")</span>
+                    <input class="mp-input" data-create-input maxlength="400" />
+                </label>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.Parent")</span>
+                    <select data-create-parent>
+                        <option value="0">@T("Plugins.MotorShop.AdminPanel.Category.Root")</option>
+                        @foreach (var c in options)
+                        {
+                            <option value="@c.Id">@c.Path</option>
+                        }
+                    </select>
+                </label>
+            </div>
+            <small class="mp-field-error" data-create-error></small>
+            <div class="mp-inline-form mp-section-gap-sm">
+                <button type="button" class="mp-btn mp-btn--accent" data-create-save>@T("Plugins.MotorShop.AdminPanel.Category.CreateButton")</button>
+                <button type="button" class="mp-btn mp-btn--ghost" data-create-cancel>@T("Plugins.MotorShop.AdminPanel.Js.Cancel")</button>
+            </div>
+        </div>
+    }
+</div>
+<small id="mp-category-hint" class="mp-muted">@T(canCreate ? "Plugins.MotorShop.AdminPanel.Category.PickerHintCreate" : "Plugins.MotorShop.AdminPanel.Category.PickerHint")</small>
+<small class="mp-field-error" data-error-for="CategoryId"></small>

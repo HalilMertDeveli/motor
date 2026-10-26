@@ -117,6 +117,13 @@ public class ProductEditService
 
             case ProductRules.Fields.Published:
                 product.Published = ParseBool(value);
+
+                // An incomplete product is not published from the list: customers could not find it in any category.
+                if (product.Published && !await _db.ProductCategories.AnyAsync(x => x.ProductId == product.Id && !x.Category.Deleted))
+                {
+                    await _db.Entry(product).ReloadAsync();
+                    return new() { Error = R("Publish.CategoryRequired") };
+                }
                 break;
 
             default:
@@ -201,9 +208,9 @@ public class ProductEditService
         foreach (var chunk in ids.Chunk(BatchSize))
         {
             var query = _db.Products.Where(x => chunk.Contains(x.Id) && !x.Deleted && !x.IsSystemProduct);
-            if (request.Action is BulkAction.AddCategory or BulkAction.RemoveCategory)
+            if (request.Action is BulkAction.AddCategory or BulkAction.RemoveCategory or BulkAction.Publish)
             {
-                query = query.Include(x => x.ProductCategories);
+                query = query.Include(x => x.ProductCategories).ThenInclude(x => x.Category);
             }
 
             var products = await query.ToListAsync();
@@ -275,6 +282,8 @@ public class ProductEditService
                 product.CallForPrice = request.Action == BulkAction.HidePrice;
                 changed = [ProductRules.Fields.CallForPrice];
                 break;
+            case BulkAction.Publish when !product.Published && !product.ProductCategories.Any(x => x.Category != null && !x.Category.Deleted):
+                return R("Publish.CategoryRequired");
             case BulkAction.Publish or BulkAction.Unpublish:
                 product.Published = request.Action == BulkAction.Publish;
                 changed = [ProductRules.Fields.Published];

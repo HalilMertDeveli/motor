@@ -22,22 +22,30 @@ public class MotorPanelController : AdminController
         _priceLock = priceLock;
     }
 
+    static readonly string[] ProductListKeys = ["q", "categoryId", "stock", "price", "status", "sort", "page", "size"];
+
     [HttpGet("")]
-    public async Task<IActionResult> Index(ProductFilter filter)
+    public async Task<IActionResult> Index()
     {
         PanelHttp.NoIndex(Response);
+
+        // The product list used to live on the dashboard; old deep links (?stock=OutOfStock...) still work.
+        if (Request.Query.Keys.Any(x => ProductListKeys.Contains(x, StringComparer.OrdinalIgnoreCase)))
+        {
+            return Redirect(Url.Action(nameof(Products), new { area = "Admin" }) + Request.QueryString);
+        }
 
         var model = new DashboardModel
         {
             CanReadProducts = await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Product.Read),
-            CanReadOrders = await Services.Permissions.AuthorizeAsync(Permissions.Order.Read)
+            CanReadOrders = await Services.Permissions.AuthorizeAsync(Permissions.Order.Read),
+            CanCreateProducts = await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Product.Create)
         };
 
         if (model.CanReadProducts)
         {
             model.Summary = await _queries.GetCatalogSummaryAsync();
-            model.Products = await GetProductListAsync(filter);
-            model.Products.Categories = await _queries.GetCategoryOptionsAsync();
+            model.RecentProducts = [.. (await _queries.GetProductsAsync(new ProductFilter())).Rows.Take(5)];
         }
 
         if (model.CanReadOrders)
@@ -67,7 +75,7 @@ public class MotorPanelController : AdminController
     }
 
     /// <summary>
-    /// Product grid only, for filtering and paging without a full page load.
+    /// Product list page. Script requests (filtering, paging) get the grid only, without a full page load.
     /// </summary>
     [HttpGet("products")]
     [Permission(Permissions.Catalog.Product.Read)]
@@ -75,7 +83,14 @@ public class MotorPanelController : AdminController
     {
         PanelHttp.NoIndex(Response);
 
-        return PartialView("_ProductGrid", await GetProductListAsync(filter));
+        var model = await GetProductListAsync(filter);
+        if (Request.IsAjax())
+        {
+            return PartialView("_ProductGrid", model);
+        }
+
+        model.Categories = await _queries.GetCategoryOptionsAsync();
+        return View(model);
     }
 
     /// <summary>

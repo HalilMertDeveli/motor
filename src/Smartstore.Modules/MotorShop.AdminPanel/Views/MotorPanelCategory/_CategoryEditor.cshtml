@@ -45,57 +45,64 @@
                     <input type="checkbox" name="Published" value="true" checked="@Model.Published" />
                     <span>@T("Plugins.MotorShop.AdminPanel.Status.Published")</span>
                 </label>
+            </div>
+        </fieldset>
+
+        <details class="mp-fieldset mp-advanced">
+            <summary class="mp-legend">@T("Plugins.MotorShop.AdminPanel.Simple.Advanced")</summary>
+            <fieldset class="mp-fieldset mp-fieldset--plain" disabled="@(!canSave)">
+                <div class="mp-form-grid">
+                    <label class="mp-form-field">
+                        <span>@T("Plugins.MotorShop.AdminPanel.Category.DisplayOrder")</span>
+                        <input type="number" name="DisplayOrder" value="@Model.DisplayOrder" step="1" />
+                    </label>
+                </div>
+            </fieldset>
+            <fieldset class="mp-fieldset mp-fieldset--plain" disabled="@(!canSave)">
+                <legend>@T("Plugins.MotorShop.AdminPanel.Category.Image")</legend>
+                @if (Model.ImageUrl.HasValue())
+                {
+                    <img class="mp-category-image" src="@Model.ImageUrl" alt="" width="128" height="128" />
+                    <label class="mp-check-field">
+                        <input type="checkbox" name="RemoveImage" value="true" />
+                        <span>@T("Plugins.MotorShop.AdminPanel.Category.RemoveImage")</span>
+                    </label>
+                }
                 <label class="mp-form-field">
-                    <span>@T("Plugins.MotorShop.AdminPanel.Category.DisplayOrder")</span>
-                    <input type="number" name="DisplayOrder" value="@Model.DisplayOrder" step="1" />
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.UploadImage")</span>
+                    <input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif" />
+                    <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Category.ImageHint")</small>
+                    <small class="mp-field-error" data-error-for="Image"></small>
                 </label>
-            </div>
-        </fieldset>
+            </fieldset>
 
-        <fieldset class="mp-fieldset" disabled="@(!canSave)">
-            <legend>@T("Plugins.MotorShop.AdminPanel.Category.Image")</legend>
-            @if (Model.ImageUrl.HasValue())
-            {
-                <img class="mp-category-image" src="@Model.ImageUrl" alt="" width="128" height="128" />
-                <label class="mp-check-field">
-                    <input type="checkbox" name="RemoveImage" value="true" />
-                    <span>@T("Plugins.MotorShop.AdminPanel.Category.RemoveImage")</span>
+            <fieldset class="mp-fieldset mp-fieldset--plain" disabled="@(!canSave)">
+                <legend>@T("Plugins.MotorShop.AdminPanel.Editor.Description")</legend>
+                <label class="mp-form-field">
+                    <span>@T("Plugins.MotorShop.AdminPanel.Category.Description")</span>
+                    <textarea name="Description" rows="5" class="mp-mono">@Model.Description</textarea>
+                    <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Editor.HtmlHint")</small>
                 </label>
-            }
-            <label class="mp-form-field">
-                <span>@T("Plugins.MotorShop.AdminPanel.Category.UploadImage")</span>
-                <input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif" />
-                <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Category.ImageHint")</small>
-                <small class="mp-field-error" data-error-for="Image"></small>
-            </label>
-        </fieldset>
+            </fieldset>
 
-        <fieldset class="mp-fieldset" disabled="@(!canSave)">
-            <legend>@T("Plugins.MotorShop.AdminPanel.Editor.Description")</legend>
-            <label class="mp-form-field">
-                <span>@T("Plugins.MotorShop.AdminPanel.Category.Description")</span>
-                <textarea name="Description" rows="5" class="mp-mono">@Model.Description</textarea>
-                <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Editor.HtmlHint")</small>
-            </label>
-        </fieldset>
-
-        <fieldset class="mp-fieldset" disabled="@(!canSave)">
-            <legend>SEO</legend>
-            <div class="mp-form-grid">
-                <label class="mp-form-field mp-form-field--wide">
-                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.SeName")</span>
-                    <input name="SeName" value="@Model.SeName" maxlength="400" />
-                </label>
-                <label class="mp-form-field mp-form-field--wide">
-                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaTitle")</span>
-                    <input name="MetaTitle" value="@Model.MetaTitle" maxlength="400" />
-                </label>
-                <label class="mp-form-field mp-form-field--wide">
-                    <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaDescription")</span>
-                    <textarea name="MetaDescription" rows="2" maxlength="4000">@Model.MetaDescription</textarea>
-                </label>
-            </div>
-        </fieldset>
+            <fieldset class="mp-fieldset mp-fieldset--plain" disabled="@(!canSave)">
+                <legend>SEO</legend>
+                <div class="mp-form-grid">
+                    <label class="mp-form-field mp-form-field--wide">
+                        <span>@T("Plugins.MotorShop.AdminPanel.Editor.SeName")</span>
+                        <input name="SeName" value="@Model.SeName" maxlength="400" />
+                    </label>
+                    <label class="mp-form-field mp-form-field--wide">
+                        <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaTitle")</span>
+                        <input name="MetaTitle" value="@Model.MetaTitle" maxlength="400" />
+                    </label>
+                    <label class="mp-form-field mp-form-field--wide">
+                        <span>@T("Plugins.MotorShop.AdminPanel.Editor.MetaDescription")</span>
+                        <textarea name="MetaDescription" rows="2" maxlength="4000">@Model.MetaDescription</textarea>
+                    </label>
+                </div>
+            </fieldset>
+        </details>
     </div>
 
     <footer class="mp-drawer__foot">
