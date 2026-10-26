@@ -1,5 +1,5 @@
 @{
-    var activeTab = ViewData["PanelTab"] as string ?? "products";
+    var activeTab = ViewData["PanelTab"] as string ?? "dashboard";
     var language = WorkContext.WorkingLanguage;
 
     // Texts the scripts need, in the admin language.
@@ -20,7 +20,22 @@
         ["deleteConfirm"] = T("Plugins.MotorShop.AdminPanel.Delete.Confirm"),
         ["duplicateConfirm"] = T("Plugins.MotorShop.AdminPanel.Duplicate.Confirm"),
         ["priceLockOn"] = T("Plugins.MotorShop.AdminPanel.PriceLock.ConfirmOn"),
-        ["priceLockOff"] = T("Plugins.MotorShop.AdminPanel.PriceLock.ConfirmOff")
+        ["priceLockOff"] = T("Plugins.MotorShop.AdminPanel.PriceLock.ConfirmOff"),
+        ["leave"] = T("Plugins.MotorShop.AdminPanel.Js.Leave"),
+        ["reload"] = T("Plugins.MotorShop.AdminPanel.Js.Reload"),
+        ["checkForm"] = T("Plugins.MotorShop.AdminPanel.Js.CheckForm"),
+        ["categoryNameRequired"] = T("Plugins.MotorShop.AdminPanel.Category.NameRequired"),
+        ["photoMain"] = T("Plugins.MotorShop.AdminPanel.Photo.Main"),
+        ["photoMakeMain"] = T("Plugins.MotorShop.AdminPanel.Photo.MakeMain"),
+        ["photoLeft"] = T("Plugins.MotorShop.AdminPanel.Photo.MoveLeft"),
+        ["photoRight"] = T("Plugins.MotorShop.AdminPanel.Photo.MoveRight"),
+        ["photoRemove"] = T("Plugins.MotorShop.AdminPanel.Photo.Remove"),
+        ["photoRemoveConfirm"] = T("Plugins.MotorShop.AdminPanel.Photo.RemoveConfirm"),
+        ["photoFailed"] = T("Plugins.MotorShop.AdminPanel.Photo.SaveFailedShort"),
+        ["photoType"] = T("Plugins.MotorShop.AdminPanel.Photo.Type"),
+        ["photoSize"] = T("Plugins.MotorShop.AdminPanel.Photo.TooLarge"),
+        ["photoMax"] = T("Plugins.MotorShop.AdminPanel.Photo.TooMany"),
+        ["photoTooLargeRequest"] = T("Plugins.MotorShop.AdminPanel.Photo.RequestTooLarge")
     };
 }
 <!DOCTYPE html>

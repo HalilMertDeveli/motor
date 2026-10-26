@@ -19,8 +19,8 @@ Storefront (MotorDark) ─┐
 
 | Module | Route | State | Not in the panel (and why) |
 | --- | --- | --- | --- |
-| Dashboard | `/motor-panel` | Fully functional | — |
-| Products | `/motor-panel` (list), drawer | Fully functional | Variant matrices, images, tax class, other languages: classic editor (linked), to avoid duplicating Smartstore's editors |
+| Dashboard | `/motor-panel` | Fully functional | — (product list moved to its own page; old `/motor-panel?stock=…` links redirect) |
+| Products | `/motor-panel/products`, `/motor-panel/product/new`, `/motor-panel/product/{id}`, drawer | Fully functional | Variant matrices, tax class, other languages: classic editor (linked), to avoid duplicating Smartstore's editors |
 | Categories | `/motor-panel/categories` | Fully functional | ACL/store mappings, localized names: classic editor |
 | Orders | `/motor-panel/orders` | Partially functional | Refunds, captures, voids and editing order items: payment module / classic admin. iyzico payments are excluded on purpose |
 | Shipments | `/motor-panel/shipments`, order drawer | Fully functional | Live courier API: none selected (tracking links come from MotorShop.Tracking templates) |
@@ -97,8 +97,63 @@ Verified locally on order #8 (bank transfer): note, shipment, deliver-before-shi
 
 Verified locally: report figures match the orders (1 paid, 6 awaiting, 1 cancelled); topic save, empty title refused; coupon percent 150 refused, duplicate code refused, category coupon without categories refused, unknown SKU listed, end → expired, restart → active, delete; settings with invalid e-mail, accent or free-shipping amount refused with Turkish messages; all ten panel pages without horizontal overflow at 375 px.
 
+## Phase 6: simple admin for store employees
+
+The panel was simplified for employees without technical knowledge. The dashboard design (header, colors,
+cards, recent orders, currency strip, typography, responsive layout) is unchanged; the product list moved from
+the dashboard to its own page.
+
+| Area | State | Notes |
+| --- | --- | --- |
+| Navigation | Done | Main tabs in this order: Genel Bakış, Ürünler, Kategoriler, Siparişler, Kargolar. Müşteriler, Raporlar, Kuponlar, Sayfalar & Blog, Faturalar, Ayarlar and the classic admin are under "Diğer İşlemler" (a `<details>` menu, no JavaScript needed). Same routes and read permissions as before (`MotorPanelHeaderViewComponent.MainTabs/MoreTabs`, covered by `PanelContractTests`). |
+| Dashboard | Done | Cards and recent orders as before, plus "Hızlı işlemler" (+ Yeni Ürün Ekle, Tüm ürünler, Taslak ürünler, Kategoriler) and the five newest products. Card links and old deep links (`/motor-panel?stock=OutOfStock`) open the product page with the same filter. |
+| Product list (`/motor-panel/products`) | Done | Columns Ürün (photo, name, SKU) · Fiyat · Stok · Kategori · Durum · İşlemler. Actions: Düzenle (simple editor; variant-stock products go to the classic editor), Sitede Gör (also for drafts: admin preview), Yayında/Taslak toggle, "⋯" with advanced editor (drawer), classic editor, copy, delete. Search by name and SKU, category and status filters; stock, price visibility and page size under "Gelişmiş filtreler". Inline price/stock editing, bulk actions, sorting and paging as before. Publishing from the list (toggle or bulk) needs a category. |
+| Yeni Ürün Ekle (`/motor-panel/product/new`) | Done | Name*, category* (searchable, full path "Kask › Açık Kask", new category inline when the user may create categories; the same name under the same parent returns the existing category), price* for publishing (1.250,50 · 4500 · 4.500,00), stock (empty = 0), short description, optional SKU (empty: unique `MP-yyMMdd-XXXXX`), up to 10 photos (JPG/PNG/WEBP/GIF, 10 MB each, checked by content, first = main, reorder, remove). "Taslak Kaydet" / "Yayınla" / "İptal", then a confirmation with "Sitede Gör". |
+| Simple editor (`/motor-panel/product/{id}`) | Done | Ürün Bilgileri, Satış Bilgileri, Ürün Fotoğrafları (saved at once), Yayın Durumu, "Değişiklikleri Kaydet", "Sitede Gör". "Gelişmiş Ayarlar" shows SKU, MPN, tax class, sale price, price visibility and stock mode read-only and opens the advanced or classic editor. |
+| Storefront draft notice | Done | `DraftNoticeWidgetSource` puts "Bu ürün taslak…" above an unpublished product page (zone `productdetails_top`). Only admins reach that page; customers get Smartstore's 404. |
+
+### What the simple screens write
+
+* **Create**: a Smartstore `Product` with the classic "add new product" defaults (simple product, full
+  visibility, first product template, default delivery time, stock tracked, no backorders, order quantity 1–50,
+  shipping enabled, reviews allowed), the "Genel KDV" tax class (like the DefaultProductTaxCategory migration;
+  else the class most products use), one `ProductCategory`, the slug through `IUrlService`, photos through
+  `IMediaService` into the catalog album as `ProductMediaFile`s, `MainPictureId` = first photo. Product, category
+  mapping, slug and photos are saved in one database transaction; if a photo cannot be stored, nothing is kept.
+  A product with price 0 is never published.
+* **Simple editor**: only name, short description, price, stock (only when stock is tracked per product),
+  published and the **main** category. The main category (first mapping) is replaced; other category mappings
+  and their order are kept. SKU, MPN, GTIN, tax class, sale price and dates, compare price, call for price,
+  visibility, shipping, dimensions, SEO, full description, stock mode and limits, variants are never written.
+  An existing slug is kept when the name changes. Publishing needs a price above 0 (unless call for price) and a
+  category.
+* **Concurrency**: the editor sends the version (`UpdatedOnUtc.Ticks`, as a string because it exceeds
+  JavaScript's safe integers); a changed product answers 409 "Bu ürün sen düzenlerken başka biri tarafından
+  değiştirildi…" and nothing is saved. Photo changes return the new version only when the editor was current.
+* **Duplicate submissions**: buttons are disabled while saving and every form carries a random `SubmissionId`;
+  the same id (per admin) returns the first product instead of a second one (in memory, one hour).
+* **Storefront sync**: everything goes through the tracked `SmartDbContext`, so Smartstore's hooks (audit dates,
+  caches, main picture, the CatalogImport sale guard) run as for the classic editor. No admin-only table, no
+  client-only state.
+
+### Tests
+
+* `QuickCreateTests`, `SimpleEditTests`, `PhotoTests`, `CategoryServiceTests` run the real services on SQLite in
+  memory (transactions, constraints and SQL translation as in production). `PanelContractTests` checks
+  permissions, antiforgery, size limits and the navigation.
+* `test/MotorShop.AdminPanel.Tests/e2e/simple-admin-e2e.mjs` drives a running store in headless Edge/Chrome:
+  login, dashboard, list, new product with photos and quick category, draft hidden from customers, publish,
+  price change (form and inline) and category change reaching the storefront, main photo, conflicts, server
+  validation, antiforgery, a customer without admin rights, 390 px layouts, console errors. It deletes its test
+  data. Never run it against production:
+
+  ```
+  node test/MotorShop.AdminPanel.Tests/e2e/simple-admin-e2e.mjs --base http://127.0.0.1:5111 --credentials <file: e-mail, password> [--customer <file>] [--photo <jpg>] [--out <dir>]
+  ```
+
 ## Security
 
+* Photo uploads: content-checked image formats only, 10 MB per photo, request size limited (`RequestSizeLimit`), saved through `IMediaService`.
 * Every panel controller derives from `AdminController`: `[AuthorizeAdmin]` (backend access), `[ValidateAdminIpAddress]`, `[AutoValidateAntiforgeryToken]`. Scripts send the token in the `X-XSRF-Token` header.
 * Every action checks the permission the classic admin uses for the same data (product, category, order, shipment, customer, topic, discount, setting, store). `PanelContractTests` fails if a new POST has no permission or opts out of antiforgery, or a GET has no permission (only the dashboard checks per block).
 * Orders and shipments are limited to the admin's authorized stores, like the classic lists.

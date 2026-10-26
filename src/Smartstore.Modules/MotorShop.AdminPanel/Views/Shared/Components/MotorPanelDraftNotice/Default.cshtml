@@ -1,0 +1,8 @@
+@model int
+
+@* Inline styles: the storefront theme does not know the panel's classes. *@
+<div class="mp-draft-notice" role="status"
+     style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 16px;padding:12px 16px;border-radius:10px;background:#fdf3e2;color:#5c3604;border:1px solid #f0c27a;font-weight:600;">
+    <span>@T("Plugins.MotorShop.AdminPanel.Draft.Notice")</span>
+    <a href="@Url.Action("Simple", "MotorPanelProduct", new { area = "Admin", id = Model })" style="color:#5c3604;text-decoration:underline;">@T("Plugins.MotorShop.AdminPanel.Draft.EditInPanel")</a>
+</div>

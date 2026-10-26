@@ -171,6 +171,105 @@ public class CategoryEditService
     internal static bool IsValidParent(int categoryId, int parentId, IEnumerable<(int Id, int? ParentId)> nodes)
         => parentId == 0 || categoryId == 0 || !Subtree(categoryId, nodes).Contains(parentId);
 
+    static readonly System.Globalization.CultureInfo Turkish = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+
+    /// <summary>
+    /// Trimmed, inner whitespace collapsed: "  Açık   Kask " = "Açık Kask".
+    /// </summary>
+    internal static string NormalizeName(string name)
+        => string.Join(' ', (name ?? string.Empty).Split((char[])null, StringSplitOptions.RemoveEmptyEntries));
+
+    /// <summary>
+    /// Same name in Turkish, ignoring case ("kask" = "KASK", "ışık" = "IŞIK").
+    /// </summary>
+    internal static bool SameName(string a, string b)
+        => string.Compare(NormalizeName(a), NormalizeName(b), Turkish, System.Globalization.CompareOptions.IgnoreCase) == 0;
+
+    /// <summary>
+    /// Another category with this name under the same parent.
+    /// </summary>
+    internal static int? FindSibling(string name, int parentId, int exceptId, IEnumerable<(int Id, int? ParentId, string Name)> nodes)
+        => nodes.FirstOrDefault(x => x.Id != exceptId && (x.ParentId ?? 0) == parentId && SameName(x.Name, name)) is var hit && hit.Id > 0 ? hit.Id : null;
+
+    /// <summary>
+    /// Every category with its full path ("Kask › Açık Kask"), sorted by path. Read directly from the database
+    /// (not the cached storefront tree), so a category created a moment ago is listed at once.
+    /// </summary>
+    public async Task<List<CategoryPickerOption>> GetPickerOptionsAsync()
+    {
+        var nodes = await LoadNodesAsync();
+        return BuildPickerOptions(nodes.Select(x => (x.Id, x.ParentId, x.Name, x.Published)));
+    }
+
+    internal static List<CategoryPickerOption> BuildPickerOptions(IEnumerable<(int Id, int? ParentId, string Name, bool Published)> nodes)
+    {
+        var byId = nodes.ToDictionary(x => x.Id);
+
+        string PathOf(int id)
+        {
+            var names = new List<string>();
+            var seen = new HashSet<int>();
+            for (int? current = id; current is int c && byId.TryGetValue(c, out var n) && seen.Add(c); current = n.ParentId)
+            {
+                names.Insert(0, n.Name);
+            }
+            return string.Join(" › ", names);
+        }
+
+        return [.. byId.Values
+            .Select(x => new CategoryPickerOption { Id = x.Id, Name = x.Name, Path = PathOf(x.Id), Published = x.Published })
+            .OrderBy(x => x.Path, StringComparer.Create(Turkish, true))];
+    }
+
+    /// <summary>
+    /// "Yeni kategori oluştur" from the product form: name and optional parent only. An existing category with the
+    /// same name under the same parent is returned instead of a twin.
+    /// </summary>
+    public async Task<QuickCategoryResult> QuickCreateAsync(string name, int parentId)
+    {
+        name = NormalizeName(name);
+        if (name.Length == 0)
+        {
+            return new() { Error = R("Category.NameRequired") };
+        }
+        if (name.Length > 400)
+        {
+            return new() { Error = R("Validation.TooLong") };
+        }
+
+        var nodes = await LoadNodesAsync();
+        if (parentId > 0 && !nodes.Any(x => x.Id == parentId))
+        {
+            return new() { Error = R("Category.ParentMissing") };
+        }
+
+        CategoryPickerOption Option(int id) => BuildPickerOptions(nodes.Select(x => (x.Id, x.ParentId, x.Name, x.Published))).First(x => x.Id == id);
+
+        var existing = FindSibling(name, parentId, 0, nodes.Select(x => (x.Id, x.ParentId, x.Name)));
+        if (existing.HasValue)
+        {
+            return new() { Success = true, Category = Option(existing.Value), Message = R("Category.Exists") };
+        }
+
+        var category = new Category
+        {
+            Name = name,
+            ParentId = parentId > 0 ? parentId : null,
+            Published = true,
+            DisplayOrder = nodes.Where(x => (x.ParentId ?? 0) == parentId).Select(x => x.DisplayOrder + 1).DefaultIfEmpty(0).Max()
+        };
+
+        _db.Categories.Add(category);
+        await _db.SaveChangesAsync();
+        await _urlService.SaveSlugAsync(category, null, category.Name, true);
+
+        _services.ActivityLogger.LogActivity(KnownActivityLogTypes.AddNewCategory, T("ActivityLog.AddNewCategory", category.Name));
+        await _db.SaveChangesAsync();
+
+        nodes.Add(new Node(category.Id, category.ParentId, category.Name, category.Published, category.DisplayOrder, null));
+        return new() { Success = true, Created = true, Category = Option(category.Id), Message = R("Category.Created", category.Name) };
+    }
+
     public async Task<CategoryEditorModel> LoadEditorAsync(int id, int parentId = 0)
     {
         var model = new CategoryEditorModel { ParentId = parentId };
@@ -244,7 +343,8 @@ public class CategoryEditService
             }
         }
 
-        var nodes = (await LoadNodesAsync()).Select(x => (x.Id, x.ParentId)).ToList();
+        var allNodes = await LoadNodesAsync();
+        var nodes = allNodes.Select(x => (x.Id, x.ParentId)).ToList();
         if (model.ParentId > 0 && !nodes.Any(x => x.Id == model.ParentId))
         {
             errors[nameof(model.ParentId)] = R("NotFound");
@@ -252,6 +352,16 @@ public class CategoryEditService
         else if (!IsValidParent(model.Id, model.ParentId, nodes))
         {
             errors[nameof(model.ParentId)] = R("Category.CircularParent");
+        }
+
+        model.Name = NormalizeName(model.Name);
+        if (model.Name.Length == 0)
+        {
+            errors[nameof(model.Name)] = R("Category.NameRequired");
+        }
+        else if (FindSibling(model.Name, model.ParentId, model.Id, allNodes.Select(x => (x.Id, x.ParentId, x.Name))).HasValue)
+        {
+            errors[nameof(model.Name)] = R("Category.Duplicate");
         }
 
         if (image != null && image.Length > 0)

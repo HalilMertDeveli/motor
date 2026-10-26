@@ -242,7 +242,8 @@ public class PanelQueryService
         foreach (var x in rows)
         {
             var method = (ManageInventoryMethod)x.ManageInventoryMethodId;
-            var slug = x.Published ? await _urlService.GetActiveSlugAsync(x.Id, nameof(Product), 0) : null;
+            // Drafts too: an admin sees the storefront page as a preview, customers get a 404.
+            var slug = await _urlService.GetActiveSlugAsync(x.Id, nameof(Product), 0);
 
             model.Rows.Add(new ProductRowModel
             {
