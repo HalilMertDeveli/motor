@@ -614,6 +614,11 @@ button.mp-icon-btn { border: 0; background: transparent; cursor: pointer; font: 
 .mp-choice__item:has(input:checked) { border-color: var(--mp-accent); background: var(--mp-accent-soft); }
 .mp-choice__item input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--mp-accent-ink); flex: none; }
 .mp-reload { margin-left: 8px; vertical-align: middle; }
+.mp-price-visibility { display: grid; gap: 8px; margin-top: 14px; }
+.mp-price-visibility .mp-note { margin: 0; }
+.mp-check-field--lg { min-height: 40px; padding: 8px 12px; border: 1px solid var(--mp-border); border-radius: var(--mp-radius-sm); font-size: 15px; }
+.mp-check-field--lg input { width: 20px; height: 20px; }
+.mp-check-field--lg:has(input:checked) { border-color: var(--mp-green); background: var(--mp-green-bg); }
 .mp-section-gap-sm { margin-top: 10px; }
 .mp-done { max-width: 760px; padding: 32px; text-align: center; }
 .mp-done:focus { outline: none; }

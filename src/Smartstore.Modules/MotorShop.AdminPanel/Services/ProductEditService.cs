@@ -79,6 +79,9 @@ public class ProductEditService
                 {
                     return new() { Error = R("Amount." + priceError) };
                 }
+
+                // A hidden price that only stood in for a missing one is shown once a price is entered.
+                product.CallForPrice = SimpleProductService.PriceVisibility(product.CallForPrice, product.Price, price, null);
                 product.Price = price;
                 break;
 
@@ -143,7 +146,7 @@ public class ProductEditService
         _services.ActivityLogger.LogActivity(KnownActivityLogTypes.EditProduct, R("Log.FieldChanged", product.Name, field, CurrentValue(product, field)));
         await _db.SaveChangesAsync();
 
-        return new() { Success = true, Value = CurrentValue(product, field), Display = Display(product, field) };
+        return new() { Success = true, Value = CurrentValue(product, field), Display = Display(product, field), CallForPrice = product.CallForPrice };
     }
 
     internal static string CurrentValue(Product p, string field) => field switch

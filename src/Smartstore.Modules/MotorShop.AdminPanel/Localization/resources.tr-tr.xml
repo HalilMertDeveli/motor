@@ -540,7 +540,7 @@
     <LocaleResource Name="Simple.SkuHint"><Value>Boş bırakırsan otomatik bir kod verilir.</Value></LocaleResource>
     <LocaleResource Name="Simple.OtherCategories"><Value>Ürün ayrıca şu kategorilerde: {0}. Bunlar korunur.</Value></LocaleResource>
     <LocaleResource Name="Simple.NoCategoryPermission"><Value>Kategori değiştirme yetkin yok.</Value></LocaleResource>
-    <LocaleResource Name="Simple.CallForPriceNote"><Value>Bu ürünün fiyatı sitede gizli ("Fiyat için arayın"). Bunu gelişmiş düzenleyiciden değiştirebilirsin.</Value></LocaleResource>
+    <LocaleResource Name="Simple.CallForPriceNote"><Value>Fiyat sitede gizli: müşteriler "Fiyat için arayın" görür ve ürünü sepete ekleyemez.</Value></LocaleResource>
     <LocaleResource Name="Simple.PublishedHint"><Value>Müşteriler ürünü sitede görür ve satın alabilir.</Value></LocaleResource>
     <LocaleResource Name="Simple.DraftHint"><Value>Ürün kaydedilir ama sitede görünmez.</Value></LocaleResource>
     <LocaleResource Name="Simple.DraftNote"><Value>Bu ürün taslak: müşteriler göremez. "Sitede Gör" sana önizleme gösterir.</Value></LocaleResource>
@@ -596,4 +596,10 @@
     <LocaleResource Name="Js.Leave"><Value>Sayfadan çık</Value></LocaleResource>
     <LocaleResource Name="Js.Reload"><Value>Sayfayı yenile</Value></LocaleResource>
     <LocaleResource Name="Js.CheckForm"><Value>Lütfen işaretli alanları düzelt.</Value></LocaleResource>
+    <LocaleResource Name="Simple.ShowPrice"><Value>Fiyat sitede görünsün</Value></LocaleResource>
+    <LocaleResource Name="Simple.ShowPriceAuto"><Value>Fiyat girdiğin için "Fiyat sitede görünsün" işaretlendi. Fiyatı gizli tutmak istersen işareti kaldır.</Value></LocaleResource>
+    <LocaleResource Name="Simple.ShowPriceNeedsPrice"><Value>Fiyatı sitede göstermek için 0'dan büyük bir fiyat gir.</Value></LocaleResource>
+    <LocaleResource Name="Simple.PriceStillHidden"><Value>Değişiklikler kaydedildi, ama bu ürünün fiyatı sitede gizli kalıyor: ürün tedarikçi kataloğunda henüz satışa onaylanmadı. Onay katalog ekranından verilir.</Value></LocaleResource>
+    <LocaleResource Name="Toggle.PriceHint"><Value>Tıkla: fiyatı sitede göster / gizle</Value></LocaleResource>
+    <LocaleResource Name="Js.PriceShown"><Value>Fiyat girildiği için ürünün fiyatı artık sitede görünüyor.</Value></LocaleResource>
 </Language>

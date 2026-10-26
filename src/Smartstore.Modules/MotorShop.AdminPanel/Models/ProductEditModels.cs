@@ -18,6 +18,11 @@ public class FieldUpdateResult
     /// Raw new value for the next optimistic check (invariant culture).
     /// </summary>
     public string Value { get; set; }
+
+    /// <summary>
+    /// Price visibility after the save (a price entered for a hidden, unpriced product shows it).
+    /// </summary>
+    public bool? CallForPrice { get; set; }
 }
 
 public enum BulkAction

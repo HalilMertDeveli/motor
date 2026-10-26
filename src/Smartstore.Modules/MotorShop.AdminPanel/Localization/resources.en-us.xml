@@ -540,7 +540,7 @@
     <LocaleResource Name="Simple.SkuHint"><Value>Leave empty to get a code automatically.</Value></LocaleResource>
     <LocaleResource Name="Simple.OtherCategories"><Value>The product is also in: {0}. These are kept.</Value></LocaleResource>
     <LocaleResource Name="Simple.NoCategoryPermission"><Value>You may not change categories.</Value></LocaleResource>
-    <LocaleResource Name="Simple.CallForPriceNote"><Value>This product's price is hidden on the site ("call for price"). Change it in the advanced editor.</Value></LocaleResource>
+    <LocaleResource Name="Simple.CallForPriceNote"><Value>The price is hidden on the site: customers see "call for price" and cannot add the product to the cart.</Value></LocaleResource>
     <LocaleResource Name="Simple.PublishedHint"><Value>Customers see the product and can buy it.</Value></LocaleResource>
     <LocaleResource Name="Simple.DraftHint"><Value>The product is saved but not shown on the site.</Value></LocaleResource>
     <LocaleResource Name="Simple.DraftNote"><Value>This product is a draft: customers cannot see it. "View on site" shows you a preview.</Value></LocaleResource>
@@ -596,4 +596,10 @@
     <LocaleResource Name="Js.Leave"><Value>Leave page</Value></LocaleResource>
     <LocaleResource Name="Js.Reload"><Value>Reload page</Value></LocaleResource>
     <LocaleResource Name="Js.CheckForm"><Value>Please correct the marked fields.</Value></LocaleResource>
+    <LocaleResource Name="Simple.ShowPrice"><Value>Show the price on the site</Value></LocaleResource>
+    <LocaleResource Name="Simple.ShowPriceAuto"><Value>Because you entered a price, "Show the price on the site" was ticked. Untick it to keep the price hidden.</Value></LocaleResource>
+    <LocaleResource Name="Simple.ShowPriceNeedsPrice"><Value>Enter a price above 0 to show it on the site.</Value></LocaleResource>
+    <LocaleResource Name="Simple.PriceStillHidden"><Value>Changes saved, but the price stays hidden: the product is not yet approved for sale in the supplier catalog.</Value></LocaleResource>
+    <LocaleResource Name="Toggle.PriceHint"><Value>Click: show / hide the price on the site</Value></LocaleResource>
+    <LocaleResource Name="Js.PriceShown"><Value>A price was entered, so the price is now shown on the site.</Value></LocaleResource>
 </Language>

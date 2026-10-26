@@ -376,6 +376,170 @@ try {
     await waitFor(`document.readyState === 'complete' && document.querySelector('[data-form-error]')?.hidden === true`);
     check('"Sayfayı yenile" loads the current values', (await evaluate(`document.querySelector('input[name=Stock]').value`)) === '6');
 
+    // ---------- Hidden price ("Fiyat için arayın"), as the supplier import leaves unpriced products ----------
+    // Turn the test product into one: draft, price 0, price hidden.
+    await go(editHref);
+    await evaluate(`document.querySelector('input[name=Published][value=false]').click(), true`);
+    check('Test product back to draft', await saveForm());
+    await panelPost(`/motor-panel/product/${productId}/field`, { field: 'price', value: '0', expected: '1450' });
+    const hide = await panelPost(`/motor-panel/product/${productId}/field`, { field: 'callForPrice', value: 'true', expected: 'false' });
+    check('Price can be hidden (call for price)', hide.status === 200 && hide.data?.value === 'true', `${hide.status}`);
+    await go(editHref);
+    check('Editor shows "Fiyat sitede görünsün" unticked for a hidden price', (await evaluate(`!document.querySelector('[data-show-price]').checked && !document.querySelector('[data-price-hidden-note]').hidden`)));
+    await type('input[name=Price]', '2.750');
+    await evaluate(`document.querySelector('input[name=Price]').dispatchEvent(new Event('input', { bubbles: true })), true`);
+    check('Typing a price ticks "Fiyat sitede görünsün" with an explanation', (await evaluate(`document.querySelector('[data-show-price]').checked && !document.querySelector('[data-price-auto-note]').hidden`)));
+    await shot('12-hidden-price-ticked');
+    await evaluate(`document.querySelector('input[name=Published][value=true]').click(), true`);
+    check('Save with visible price and publish', await saveForm());
+    html = await (await anonymous(siteHref)).text();
+    check('Customer sees the new price 2.750,00 and a cart button', html.includes('2.750,00') && /add-to-cart/i.test(html) && !/fiyat için arayın/i.test(html));
+
+    // Inline: hidden, unpriced product gets a price in the list.
+    await panelPost(`/motor-panel/product/${productId}/field`, { field: 'published', value: 'false', expected: 'true' });
+    await panelPost(`/motor-panel/product/${productId}/field`, { field: 'price', value: '0', expected: '2750' });
+    await panelPost(`/motor-panel/product/${productId}/field`, { field: 'callForPrice', value: 'true', expected: 'false' });
+    await go(`/motor-panel/products?q=${encodeURIComponent(stamp)}`);
+    check('List shows the "Fiyat gizli" switch', (await evaluate(`document.querySelector('tr[data-id="${productId}"] [data-toggle="callForPrice"]')?.dataset.value === 'true'`)));
+    await evaluate(`document.querySelector('tr[data-id="${productId}"] [data-edit=price]').click(), true`);
+    await type(`tr[data-id="${productId}"] .mp-cell-input`, '3.100');
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    await waitFor(`document.querySelector('tr[data-id="${productId}"] [data-edit=price]').dataset.value === '3100'`);
+    check('Inline price on a hidden, unpriced product shows the price', (await evaluate(`document.querySelector('tr[data-id="${productId}"] [data-toggle="callForPrice"]').dataset.value === 'false'`)));
+    // Publish again from the list toggle.
+    await evaluate(`document.querySelector('tr[data-id="${productId}"] [data-toggle="published"]').click(), true`);
+    await waitFor(`document.querySelector('tr[data-id="${productId}"] [data-toggle="published"]').dataset.value === 'true'`);
+    html = await (await anonymous(siteHref)).text();
+    check('List toggle publishes; customer sees 3.100,00', html.includes('3.100,00') && !/fiyat için arayın/i.test(html));
+    // Hide the price from the list switch; the customer sees no price.
+    await evaluate(`document.querySelector('tr[data-id="${productId}"] [data-toggle="callForPrice"]').click(), true`);
+    await waitFor(`document.querySelector('tr[data-id="${productId}"] [data-toggle="callForPrice"]').dataset.value === 'true'`);
+    html = await (await anonymous(siteHref)).text();
+    check('List switch hides the price again', !html.includes('3.100,00'));
+    await evaluate(`document.querySelector('tr[data-id="${productId}"] [data-toggle="callForPrice"]').click(), true`);
+    await waitFor(`document.querySelector('tr[data-id="${productId}"] [data-toggle="callForPrice"]').dataset.value === 'false'`);
+
+    // ---------- List filters ----------
+    await go(`/motor-panel/products?q=${encodeURIComponent(stamp)}&status=Unpublished`);
+    check('Status filter "Taslak" hides the published product', (await evaluate(`document.querySelectorAll('tr[data-id="${productId}"]').length`)) === 0);
+    await go(`/motor-panel/products?q=${encodeURIComponent(stamp)}&status=Published&stock=InStock`);
+    check('Status + advanced stock filter find it', (await evaluate(`document.querySelectorAll('tr[data-id="${productId}"]').length`)) === 1);
+    check('Active advanced filters open their area', (await evaluate(`document.querySelector('.mp-filters-more').open`)));
+    await go(`/motor-panel/products?q=${encodeURIComponent((await evaluate(`document.querySelector('tr[data-id="${productId}"] .mp-mono').textContent.trim()`)))}`);
+    check('Search by SKU finds the product', (await evaluate(`document.querySelectorAll('tr[data-id="${productId}"]').length`)) === 1);
+
+    // ---------- Bulk action ----------
+    await go(`/motor-panel/products?q=${encodeURIComponent(stamp)}`);
+    await evaluate(`(() => { const b = document.querySelector('tr[data-id="${productId}"] [data-select]'); b.click(); return true; })()`);
+    await waitFor(`!document.getElementById('mp-bulk').hidden`);
+    await evaluate(`(() => { const s = document.querySelector('#mp-bulk select[name=action]'); s.value = 'Unpublish'; s.dispatchEvent(new Event('change', { bubbles: true })); document.querySelector('#mp-bulk button[type=submit]').click(); return true; })()`);
+    await waitFor(`document.getElementById('mp-confirm').open`);
+    await click('#mp-confirm .mp-dialog__ok');
+    await waitFor(`document.querySelector('tr[data-id="${productId}"] [data-toggle="published"]')?.dataset.value === 'false'`);
+    check('Bulk "Yayından kaldır" on the selection', true);
+
+    // ---------- Duplicate and delete from the "⋯" menu ----------
+    await evaluate(`document.querySelector('tr[data-id="${productId}"] .mp-row-more summary').click(), true`);
+    check('Row menu opens', (await evaluate(`document.querySelector('tr[data-id="${productId}"] .mp-row-more').open`)));
+    await evaluate(`document.querySelector('tr[data-id="${productId}"] [data-duplicate]').click(), true`);
+    await waitFor(`document.getElementById('mp-confirm').open`);
+    await click('#mp-confirm .mp-dialog__ok');
+    await waitFor(`document.querySelectorAll('tr[data-id]').length === 2`);
+    const copyId = await evaluate(`[...document.querySelectorAll('tr[data-id]')].map(r => Number(r.dataset.id)).find(id => id !== ${productId})`);
+    created.push(copyId);
+    check('Copy is created unpublished', (await evaluate(`document.querySelector('tr[data-id="${copyId}"] [data-toggle="published"]').dataset.value === 'false'`)));
+    await evaluate(`document.querySelector('tr[data-id="${copyId}"] .mp-row-more summary').click(), true`);
+    await evaluate(`document.querySelector('tr[data-id="${copyId}"] [data-delete]').click(), true`);
+    await waitFor(`document.getElementById('mp-confirm').open`);
+    await click('#mp-confirm .mp-dialog__ok');
+    await waitFor(`document.querySelectorAll('tr[data-id="${copyId}"]').length === 0`);
+    check('Delete from the row menu', true);
+
+    // ---------- Categories page ----------
+    const catName = `QA Sayfa Kategori ${stamp}`;
+    await go('/motor-panel/categories');
+    await evaluate(`[...document.querySelectorAll('[data-open-editor]')].find(b => /editor\\/?$/.test(b.dataset.openEditor)).click(), true`);
+    await waitFor(`document.getElementById('mp-drawer').open && !!document.querySelector('#mp-drawer input[name=Name]')`);
+    await type('#mp-drawer input[name=Name]', catName);
+    await shot('13-category-editor');
+    await click('#mp-drawer button[type=submit]');
+    await waitFor(`!document.getElementById('mp-drawer').open && [...document.querySelectorAll('tr[data-name]')].some(r => r.dataset.name === ${JSON.stringify(catName)})`, 20000);
+    const catId = await evaluate(`Number([...document.querySelectorAll('tr[data-name]')].find(r => r.dataset.name === ${JSON.stringify(catName)}).dataset.id)`);
+    created.push('category:' + catId);
+    check('Category created on the categories page', catId > 0, `#${catId}`);
+    await sleep(800);
+    // Same name again under the same parent is refused.
+    await evaluate(`[...document.querySelectorAll('[data-open-editor]')].find(b => /editor\\/?$/.test(b.dataset.openEditor)).click(), true`);
+    await waitFor(`document.getElementById('mp-drawer').open && !!document.querySelector('#mp-drawer input[name=Name]')`);
+    await type('#mp-drawer input[name=Name]', catName.toLocaleUpperCase('tr'));
+    await click('#mp-drawer button[type=submit]');
+    await waitFor(`!!document.querySelector('#mp-drawer [data-error-for="Name"]')?.textContent`);
+    check('Duplicate category name is refused', /zaten var/.test(await text('#mp-drawer [data-error-for="Name"]')));
+    await click('#mp-drawer [data-close]');
+    await sleep(300);
+    if (await evaluate(`document.getElementById('mp-confirm').open`)) await click('#mp-confirm .mp-dialog__ok');
+    // Rename.
+    await go('/motor-panel/categories');
+    await evaluate(`document.querySelector('tr[data-id="${catId}"] [data-open-editor]').click(), true`);
+    await waitFor(`document.getElementById('mp-drawer').open && !!document.querySelector('#mp-drawer input[name=Name]')`);
+    await type('#mp-drawer input[name=Name]', catName + ' (yeni ad)');
+    await click('#mp-drawer button[type=submit]');
+    await waitFor(`!document.getElementById('mp-drawer').open && [...document.querySelectorAll('tr[data-name]')].some(r => r.dataset.name === ${JSON.stringify(catName + ' (yeni ad)')})`, 20000);
+    check('Category renamed', true);
+    await sleep(800);
+    // Move down/up keeps working.
+    const moved = await evaluate(`(async () => { const b = document.querySelector('tr[data-id="${catId}"] [data-move][data-up="true"]'); if (!b || b.disabled) return 'skip'; const fd = new FormData(); fd.append('up', 'true'); const r = await fetch(b.dataset.move, { method: 'POST', body: fd, headers: { 'X-XSRF-Token': document.querySelector('meta[name="mp-xsrf"]').content, 'X-Requested-With': 'XMLHttpRequest' } }); return (await r.json()).success; })()`);
+    check('Category move works', moved === true || moved === 'skip', String(moved));
+    // The new category is offered in the product form at once.
+    await go('/motor-panel/product/new');
+    check('New category is offered in the product form', (await evaluate(`!!document.querySelector('.mp-combo__option[data-id="${catId}"]')`)));
+    // Delete through its dialog.
+    await go('/motor-panel/categories');
+    await evaluate(`document.querySelector('tr[data-id="${catId}"] .mp-icon-btn--danger').click(), true`);
+    await waitFor(`document.getElementById('mp-drawer').open && !!document.querySelector('#mp-drawer button.mp-btn--danger')`);
+    await click('#mp-drawer button.mp-btn--danger');
+    await waitFor(`!document.getElementById('mp-drawer').open && !document.querySelector('tr[data-id="${catId}"]')`, 20000);
+    check('Category deleted', true);
+    created.splice(created.indexOf('category:' + catId), 1);
+
+    // ---------- "Tüm fiyatları gizle" (store-wide price lock) ----------
+    await panelPost(`/motor-panel/product/${productId}/field`, { field: 'published', value: 'true', expected: 'false' });
+    await go('/motor-panel');
+    const lockBefore = await evaluate(`document.querySelector('#mp-price-lock .mp-switch').getAttribute('aria-checked')`);
+    if (lockBefore === 'false') {
+        await click('#mp-price-lock .mp-switch');
+        await waitFor(`document.getElementById('mp-confirm').open`);
+        await click('#mp-confirm .mp-dialog__ok');
+        await waitFor(`document.querySelector('#mp-price-lock .mp-switch').getAttribute('aria-checked') === 'true'`);
+        html = await (await anonymous(siteHref)).text();
+        check('Price lock hides prices and cart on the storefront', !html.includes('3.100,00') && !/add-to-cart/i.test(html));
+        await click('#mp-price-lock .mp-switch');
+        await waitFor(`document.getElementById('mp-confirm').open`);
+        await click('#mp-confirm .mp-dialog__ok');
+        await waitFor(`document.querySelector('#mp-price-lock .mp-switch').getAttribute('aria-checked') === 'false'`);
+        html = await (await anonymous(siteHref)).text();
+        check('Price lock off: price is back', html.includes('3.100,00'));
+    } else {
+        check('Price lock was already on; not touched', true);
+    }
+
+    // ---------- Every other panel page renders ----------
+    for (const [label, url] of [['Siparişler', '/motor-panel/orders'], ['Kargolar', '/motor-panel/shipments'], ['Müşteriler', '/motor-panel/customers'],
+        ['Raporlar', '/motor-panel/reports'], ['Kuponlar', '/motor-panel/coupons'], ['Sayfalar', '/motor-panel/content'],
+        ['Faturalar', '/motor-panel/invoices'], ['Ayarlar', '/motor-panel/settings'], ['Klasik ürün editörü', `/admin/product/edit/${productId}`]]) {
+        await go(url);
+        const ok = await evaluate(`location.pathname.startsWith(${JSON.stringify(url.split('?')[0])}) && !/Bir hata oluştu|An error occurred/i.test(document.body.innerText)`);
+        check(`${label} page opens`, ok);
+    }
+    // Advanced editor (drawer) opens from the simple editor and saves.
+    await go(editHref);
+    await click('[data-reload-on-save]');
+    await waitFor(`document.getElementById('mp-drawer').open && !!document.querySelector('#mp-drawer form[data-editor]')`);
+    await click('#mp-drawer button[type=submit]');
+    await waitFor(`document.readyState === 'complete' && !document.getElementById('mp-drawer').open`, 20000);
+    check('Advanced editor saves and the simple editor reloads', true);
+
     // ---------- Server-side validation and security ----------
     const bypass = await panelPost('/motor-panel/product/create', { Name: 'QA bypass ' + stamp, CategoryId: firstCategory.id, Price: '0', Publish: 'true' });
     check('Publishing with price 0 is refused by the server (client checks bypassed)', bypass.status === 422 && /0'dan büyük/.test(bypass.data?.errors?.Price || ''), `${bypass.status} ${bypass.data?.errors?.Price}`);

@@ -403,6 +403,15 @@
 
     const tpl = el => el?.content?.textContent.trim() ?? '';
 
+    // Rough reading of a typed amount for client-side hints only; the server parses for real (AmountParser).
+    function parseAmount(text) {
+        let s = String(text || '').replace(/[\s₺]|TL/gi, '');
+        if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+        else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+        const n = Number(s);
+        return Number.isFinite(n) ? n : 0;
+    }
+
     // ---------- Menus ("Diğer İşlemler", row "⋯") ----------
 
     // A row menu sits in a scrolling table, so it is positioned fixed next to its button.
@@ -827,6 +836,29 @@
         const markDirty = () => { pageDirty = true; };
 
         form.querySelectorAll('[data-combo]').forEach(root => initCombo(root, markDirty));
+
+        // "Fiyat sitede görünsün": a hidden price that only stood in for a missing one is shown as soon as a
+        // price is typed (the same rule as the supplier import); the employee sees why and can untick it.
+        const showPrice = form.querySelector('[data-show-price]');
+        const priceInput = form.querySelector('input[name=Price]');
+        const syncPriceNote = () => {
+            const hiddenNote = form.querySelector('[data-price-hidden-note]');
+            if (hiddenNote && showPrice) hiddenNote.hidden = showPrice.checked;
+        };
+        if (showPrice && priceInput) {
+            showPrice.addEventListener('change', () => {
+                form.querySelector('[data-price-auto-note]').hidden = true;
+                syncPriceNote();
+            });
+            priceInput.addEventListener('input', () => {
+                if (!showPrice.checked && parseAmount(priceInput.dataset.originalPrice) <= 0 && parseAmount(priceInput.value) > 0) {
+                    showPrice.checked = true;
+                    form.querySelector('[data-price-auto-note]').hidden = false;
+                    syncPriceNote();
+                }
+            });
+        }
+
         const photosRoot = form.querySelector('[data-photos]');
         const photos = photosRoot
             ? initPhotos(photosRoot, () => versionInput?.value ?? '', v => { if (versionInput && v) versionInput.value = v; })
@@ -938,6 +970,18 @@
             const note = form.querySelector('[data-draft-note]');
             if (note) note.hidden = data.published;
             if (data.slug) form.querySelectorAll('[data-view-site]').forEach(a => (a.href = productUrl(data.slug)));
+            if (showPrice) {
+                showPrice.checked = !data.callForPrice;
+                form.querySelector('[data-price-auto-note]').hidden = true;
+                syncPriceNote();
+            }
+            if (priceInput) priceInput.dataset.originalPrice = priceInput.value;
+            if (data.warning) {
+                toast(data.warning, true);
+                const box = form.querySelector('[data-form-error]');
+                box.textContent = data.warning;
+                box.hidden = false;
+            }
         });
     });
 
@@ -1250,6 +1294,14 @@
                     cell.classList.toggle('mp-badge--red', !inStock);
                 }
                 cell.classList.remove('mp-muted', 'mp-strike');
+                // Entering a price for a hidden, unpriced product shows the price (server rule).
+                const cfp = row.querySelector('[data-toggle="callForPrice"]');
+                if (cfp && result.data.callForPrice === false && cfp.dataset.value === 'true') {
+                    cfp.dataset.value = 'false';
+                    cfp.textContent = cfp.dataset.labelFalse;
+                    cfp.classList.replace(cfp.dataset.classTrue, cfp.dataset.classFalse);
+                    toast(strings.priceShown);
+                }
                 flash(cell, true);
                 updateZeroBadge(row);
             } else {

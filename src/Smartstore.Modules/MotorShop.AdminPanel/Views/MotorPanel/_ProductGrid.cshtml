@@ -99,7 +99,14 @@ else
                             }
                             <span class="mp-price-badges">
                                 <span class="mp-badge mp-badge--red" data-zero-badge title="@T("Plugins.MotorShop.AdminPanel.ZeroPrice.Hint")" hidden="@(!zeroPrice)">@T("Plugins.MotorShop.AdminPanel.ZeroPrice")</span>
-                                @if (p.CallForPrice)
+                                @if (p.CallForPrice && Model.CanUpdate)
+                                {
+                                    <button type="button" class="mp-badge mp-badge-btn mp-badge--amber" data-toggle="callForPrice" data-value="true"
+                                            data-label-true="@T("Plugins.MotorShop.AdminPanel.Price.CallForPrice")" data-label-false="@T("Plugins.MotorShop.AdminPanel.Price.Visible")"
+                                            data-class-true="mp-badge--amber" data-class-false="mp-badge--green"
+                                            title="@T("Plugins.MotorShop.AdminPanel.Toggle.PriceHint")">@T("Plugins.MotorShop.AdminPanel.Price.CallForPrice")</button>
+                                }
+                                else if (p.CallForPrice)
                                 {
                                     <span class="mp-badge mp-badge--amber" title="@T("Plugins.MotorShop.AdminPanel.Card.CallForPriceHint")">@T("Plugins.MotorShop.AdminPanel.Price.CallForPrice")</span>
                                 }
