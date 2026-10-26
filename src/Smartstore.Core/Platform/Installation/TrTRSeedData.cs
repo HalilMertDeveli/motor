@@ -172,6 +172,8 @@ public class TrTRSeedData : InvariantSeedData
             .Alter("m", x => x.Name = "metre")
             .Alter("inch", x => x.Name = "inç")
             .Alter("ft", x => x.Name = "fit");
+
+        ApplyRatios(entities, x => x.SystemKeyword, (x, r) => x.Ratio = r, TurkishStoreDefaults.DimensionRatios);
     }
 
     protected override void Alter(IList<MeasureWeight> entities)
@@ -185,6 +187,21 @@ public class TrTRSeedData : InvariantSeedData
             .Alter("g", x => x.Name = "gram")
             .Alter("l", x => x.Name = "litre")
             .Alter("ml", x => x.Name = "mililitre");
+
+        ApplyRatios(entities, x => x.SystemKeyword, (x, r) => x.Ratio = r, TurkishStoreDefaults.WeightRatios);
+    }
+
+    // Base units kilogram and centimetre need ratio 1 (see TurkishStoreDefaults.WeightRatios).
+    private static void ApplyRatios<T>(IList<T> entities, Func<T, string> keyword, Action<T, decimal> set, (string Keyword, decimal Ratio)[] ratios)
+    {
+        foreach (var (key, ratio) in ratios)
+        {
+            var entity = entities.FirstOrDefault(x => keyword(x) == key);
+            if (entity != null)
+            {
+                set(entity, ratio);
+            }
+        }
     }
 
     protected override void Alter(IList<ShippingMethod> entities)
