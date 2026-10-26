@@ -43,6 +43,31 @@ public static class TurkishStoreDefaults
     ];
 
     /// <summary>
+    /// Measure ratios for the Turkish base units (kilogram, centimetre). Smartstore stores how many of a unit make one
+    /// base unit, so the base unit must be 1; the invariant seed is based on pound and inch, which made
+    /// Admin > System > Warnings report "Varsayılan ağırlık/boyut birimi. Oran 1 olarak ayarlanmalıdır."
+    /// </summary>
+    public static readonly (string Keyword, decimal Ratio)[] WeightRatios =
+    [
+        ("kg", 1M),
+        ("g", 1000M),
+        ("lb", 2.20462262M),
+        ("oz", 35.27396195M),
+        ("l", 1M),
+        ("ml", 1000M)
+    ];
+
+    /// <inheritdoc cref="WeightRatios"/>
+    public static readonly (string Keyword, decimal Ratio)[] DimensionRatios =
+    [
+        ("cm", 1M),
+        ("mm", 10M),
+        ("m", 0.01M),
+        ("inch", 0.39370079M),
+        ("ft", 0.0328084M)
+    ];
+
+    /// <summary>
     /// The 81 provinces (il) of Turkey with their official plate code, in Turkish alphabetical order.
     /// </summary>
     public static readonly (string Code, string Name)[] Provinces =
