@@ -1,0 +1,14 @@
+{
+  "name": "motor-image-audit",
+  "private": true,
+  "type": "module",
+  "description": "Image inventory, integrity checks and rendered-page image QA for the MRT Motors storefront",
+  "scripts": {
+    "test": "node --test",
+    "inventory": "node inventory.mjs",
+    "render": "node render-audit.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.58.2"
+  }
+}

@@ -1,0 +1,86 @@
+code,severity,media_id,product_id,sku,file,detail
+low-resolution,accepted,1,,,company-logo.png,280x50
+extreme-aspect,accepted,1,,,company-logo.png,5.60
+subject-cut,accepted,1,,,company-logo.png,product runs off the top/bottom edge
+subject-cut,needs-source,117,,,x340-03150-thunder-o1.jpg,product runs off the bottom edge
+subject-cut,accepted,118,,,x340-03150-thunder-o2.jpg,product runs off the bottom edge
+subject-cut,needs-source,137,,,x340-03150-soly-o1.jpg,product runs off the bottom edge
+subject-cut,accepted,138,,,x340-03150-soly-o2.jpg,product runs off the bottom edge
+subject-cut,accepted,593,,,tr-55-silver-016900-o2.jpg,product runs off the left/right edge
+subject-cut,accepted,596,,,tr-55-silver-016900-o5.jpg,product runs off the left/right edge
+subject-cut,accepted,604,,,tr-48-silver-015900-o3.jpg,product runs off the left/right edge
+subject-cut,accepted,605,,,tr-48-silver-015900-o4.jpg,product runs off the left/right edge
+subject-cut,accepted,606,,,tr-48-silver-015900-o5.jpg,product runs off the left/right edge
+subject-cut,accepted,611,,,tr-46-alu-08700-o5.jpg,product runs off the bottom edge
+subject-cut,accepted,616,,,tr-46-carbon-07900-o5.jpg,product runs off the bottom edge
+subject-cut,accepted,645,,,sh-40-05450-o3.jpg,product runs off the left/right edge
+subject-cut,accepted,664,,,sh38x-al-029900-o5.jpg,product runs off the bottom edge
+subject-cut,accepted,667,,,sh38x-carbon-024900-o3.jpg,product runs off the bottom edge
+subject-cut,accepted,671,,,tr40-020800-o2.jpg,product runs off the bottom edge
+subject-cut,accepted,672,,,tr40-020800-o3.jpg,product runs off the bottom edge
+subject-cut,accepted,673,,,tr40-020800-o4.jpg,product runs off the bottom edge
+subject-cut,accepted,676,,,tr27-carbon-09700-o2.jpg,product runs off the bottom edge
+subject-cut,accepted,678,,,tr27-carbon-09700-o4.jpg,product runs off the bottom edge
+subject-cut,accepted,679,,,tr27-carbon-09700-o5.jpg,product runs off the bottom edge
+subject-cut,accepted,681,,,tr27-al-011900-o2.jpg,product runs off the bottom edge
+subject-cut,accepted,683,,,tr27-al-011900-o4.jpg,product runs off the bottom edge
+subject-cut,accepted,684,,,tr27-al-011900-o5.jpg,product runs off the bottom edge
+subject-cut,accepted,698,,,e03cl-pro-03890-o3.jpg,product runs off the right edge
+subject-cut,accepted,699,,,e03cl-pro-03890-o4.jpg,product runs off the top/right edge
+subject-cut,accepted,901,,,je-020-0660-o4.jpg,product runs off the top/bottom edge
+subject-cut,accepted,911,,,jt35-01460-o4.jpg,product runs off the bottom/left edge
+subject-cut,accepted,920,,,mt61-0790-o2.jpg,product runs off the right edge
+subject-cut,accepted,928,,,wb30-30lt-01650-o3.jpg,product runs off the top/bottom/left/right edge
+subject-cut,accepted,938,,,jk57-01250-o4.jpg,product runs off the bottom/left edge
+subject-cut,accepted,1051,,,195-gp-knight-03890-red-o1.jpg,product runs off the bottom edge
+subject-cut,needs-source,1064,,,104-black-king-01690-o1.jpg,product runs off the top/bottom edge
+subject-cut,needs-source,1065,,,104-black-king-01690-o2.jpg,product runs off the top/bottom edge
+subject-cut,accepted,1069,,,ce2137-brown-01690-o2.jpg,product runs off the top/bottom edge
+subject-cut,accepted,1121,,,ce2600-02580-o2.jpg,product runs off the top/bottom edge
+subject-cut,accepted,1136,,,mb045-0560-o2.jpg,product runs off the left/right edge
+subject-cut,accepted,1139,,,mb015-0250-o2.jpg,product runs off the top/left edge
+subject-cut,accepted,1346,,,mp27-0280-o3.jpg,product runs off the top edge
+subject-cut,accepted,1347,,,mp27-0280-o4.jpg,product runs off the bottom edge
+subject-cut,accepted,1348,,,mp27-0280-o5.jpg,product runs off the left edge
+subject-cut,accepted,1388,,,am09-03790-o3.jpg,product runs off the left/right edge
+subject-cut,accepted,1389,,,am09-03790-o4.jpg,product runs off the left/right edge
+subject-cut,accepted,1400,,,k26-01590-o2.jpg,product runs off the top/bottom edge
+subject-cut,accepted,1401,,,k26-01590-o3.jpg,product runs off the top/bottom edge
+subject-cut,accepted,1408,,,k11-0990-o3.jpg,product runs off the bottom edge
+subject-cut,accepted,1424,,,h26-0990-o2.jpg,product runs off the top/bottom edge
+subject-cut,accepted,1449,,,k31-01060-o4.jpg,product runs off the left/right edge
+subject-cut,accepted,1520,,,fs-02-0230-o1.jpg,product runs off the top/bottom edge
+subject-cut,accepted,1538,,,zemin-aparati-0735-o1.jpg,product runs off the top/right edge
+subject-cut,accepted,1592,,,hg-e01-0485-o2.jpg,product runs off the top/bottom edge
+subject-cut,accepted,1614,,,mp36-carbon-0835-o5.jpg,product runs off the top/left/right edge
+subject-cut,accepted,1650,,,xt91-0295-o2.jpg,product runs off the top/left edge
+subject-cut,accepted,1695,,,tta-3346-0220-o3.jpg,product runs off the left/right edge
+subject-cut,accepted,1722,,,ws047a-01260-o1.jpg,product runs off the left edge
+subject-cut,accepted,1727,,,ws20-cnc-0450-o1.jpg,product runs off the left edge
+subject-cut,accepted,1735,,,bkf40-0125-o1.jpg,product runs off the left/right edge
+subject-cut,accepted,1737,,,bkf40-0125-o3.jpg,product runs off the left/right edge
+kit-shows-whole-bike,accepted,1821,,,h0nt74if-07850-o2.jpg,mounting kit pictured as a whole motorcycle
+subject-cut,accepted,1985,,,w0gs13st-03450-o3.jpg,product runs off the left/right edge
+subject-cut,accepted,1987,,,w0gs13st-03450-o5.jpg,product runs off the left/right edge
+subject-cut,accepted,2028,,,h0fr33st-02250-o4.jpg,product runs off the left/right edge
+subject-cut,accepted,2175,,,y0tm57st-04550-o3.jpg,product runs off the bottom/right edge
+subject-cut,accepted,2176,,,y0tm57st-04550-o4.jpg,product runs off the bottom/right edge
+kit-shows-whole-bike,accepted,2200,,,k0dw15st-02950-o2.jpg,mounting kit pictured as a whole motorcycle
+kit-shows-whole-bike,accepted,2219,,,v0mp43st-03700-o2.jpg,mounting kit pictured as a whole motorcycle
+low-resolution,needs-source,2220,,,d1b29mar-0850-o1.jpg,269x269
+low-resolution,needs-source,2224,,,d1b45mar-01600-o1.jpg,284x284
+low-resolution,needs-source,2231,,,d1b37par-0920-o1.jpg,247x247
+low-resolution,needs-source,2235,,,d1b40ptr-01335-o1.jpg,222x222
+below-detail-size,needs-source,2240,,,d1b401car-0580-o1.jpg,412x412
+low-resolution,needs-source,2241,,,d1b331car-0790-o1.jpg,372x372
+low-resolution,needs-source,2249,,,d1b1tir-0330-o1.jpg,325x325
+shared-photo-colour-conflict,accepted,467,143,A112-0770-GREY,a112-0770-grey-o2.jpg,"same photo as media 463 on ""Nikko A112 Mat Black Yarım Chopper Kask"" vs ""Nikko A112 Grey Yarım Chopper Kask"""
+shared-photo-colour-conflict,accepted,469,144,A112-0770-WHITE,a112-0770-white-o2.jpg,"same photo as media 463 on ""Nikko A112 Mat Black Yarım Chopper Kask"" vs ""Nikko A112 White Yarım Chopper Kask"""
+shared-photo-colour-conflict,accepted,473,146,A112-0770-RED,a112-0770-red-o2.jpg,"same photo as media 463 on ""Nikko A112 Mat Black Yarım Chopper Kask"" vs ""Nikko A112 Red Yarım Chopper Kask"""
+shared-photo-colour-conflict,accepted,467,143,A112-0770-GREY,a112-0770-grey-o2.jpg,"same photo as media 465 on ""Nikko A112 Black Yarım Chopper Kask"" vs ""Nikko A112 Grey Yarım Chopper Kask"""
+shared-photo-colour-conflict,accepted,469,144,A112-0770-WHITE,a112-0770-white-o2.jpg,"same photo as media 465 on ""Nikko A112 Black Yarım Chopper Kask"" vs ""Nikko A112 White Yarım Chopper Kask"""
+shared-photo-colour-conflict,accepted,473,146,A112-0770-RED,a112-0770-red-o2.jpg,"same photo as media 465 on ""Nikko A112 Black Yarım Chopper Kask"" vs ""Nikko A112 Red Yarım Chopper Kask"""
+shared-photo-colour-conflict,accepted,469,144,A112-0770-WHITE,a112-0770-white-o2.jpg,"same photo as media 467 on ""Nikko A112 Grey Yarım Chopper Kask"" vs ""Nikko A112 White Yarım Chopper Kask"""
+shared-photo-colour-conflict,accepted,473,146,A112-0770-RED,a112-0770-red-o2.jpg,"same photo as media 467 on ""Nikko A112 Grey Yarım Chopper Kask"" vs ""Nikko A112 Red Yarım Chopper Kask"""
+shared-photo-colour-conflict,accepted,473,146,A112-0770-RED,a112-0770-red-o2.jpg,"same photo as media 469 on ""Nikko A112 White Yarım Chopper Kask"" vs ""Nikko A112 Red Yarım Chopper Kask"""
+shared-photo-colour-conflict,needs-source,1333,542,4138-0650-GREY,4138-0650-grey-o2.jpg,"same photo as media 1331 on ""MRT Motors 4138 Kırmızı Motosiklet Eldiveni"" vs ""MRT Motors 4138 Gri Motosiklet Eldiveni"""
