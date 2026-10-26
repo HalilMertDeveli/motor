@@ -1,0 +1,254 @@
+{
+ "_comment": "Verified product photo corrections (2026-10-26). Applied by apply-fixes.mjs; products are matched by id AND sku, media by id AND file name, so a different database is never changed by mistake. Every decision was checked on the contact sheets of inventory.mjs.",
+ "removeMappings": [
+  {
+   "productId": 217,
+   "sku": "TR-48-BLACK-016900",
+   "mediaId": 601,
+   "file": "tr-48-black-016900-o5.jpg",
+   "reason": "same photo as the main photo (media 597) shown twice in the gallery"
+  },
+  {
+   "productId": 257,
+   "sku": "Y017CS-01250",
+   "mediaId": 754,
+   "file": "y017cs-01250-o4.jpg",
+   "reason": "same photo as media 751 shown twice in the gallery"
+  },
+  {
+   "productId": 92,
+   "sku": "M-966-V2-02750-WHITE",
+   "mediaId": 308,
+   "file": "m-966-v2-02750-white-o3.jpg",
+   "reason": "inside view of the black helmet (same photo as media 304 of the Mat Black product) on the white helmet"
+  },
+  {
+   "productId": 488,
+   "sku": "MC117-01160-BLACK-WHITE",
+   "mediaId": 1220,
+   "file": "mc117-01160-black-white-o2.jpg",
+   "reason": "black-red glove (same photo as media 1218 of MC117 Siyah-Kırmızı) on the black-white glove"
+  },
+  {
+   "productId": 550,
+   "sku": "MC117W-LADY-01550-BLACK",
+   "mediaId": 1357,
+   "file": "mc117w-lady-01550-black-o1.jpg",
+   "reason": "red glove (same photo as media 1360 of the red product) on the black glove"
+  },
+  {
+   "productId": 550,
+   "sku": "MC117W-LADY-01550-BLACK",
+   "mediaId": 1358,
+   "file": "mc117w-lady-01550-black-o2.jpg",
+   "reason": "red glove (same photo as media 1361 of the red product) on the black glove"
+  },
+  {
+   "productId": 551,
+   "sku": "MC117W-LADY-01550-RED",
+   "mediaId": 1362,
+   "file": "mc117w-lady-01550-red-o3.jpg",
+   "reason": "black glove (same photo as media 1359 of the black product) on the red glove"
+  }
+ ],
+ "reorder": [
+  {
+   "productId": 257,
+   "sku": "Y017CS-01250",
+   "mediaIds": [
+    752,
+    753,
+    751,
+    755
+   ],
+   "reason": "tank ring adapter was pictured as a whole Yamaha motorcycle; the part photo and the fitting drawing come first"
+  },
+  {
+   "productId": 29,
+   "sku": "X340-03150-THUNDER",
+   "mediaIds": [
+    119,
+    117,
+    120
+   ],
+   "reason": "main side view is cut at the left and bottom edge (supplier crop); the complete front view comes first"
+  },
+  {
+   "productId": 34,
+   "sku": "X340-03150-SOLY",
+   "mediaIds": [
+    139,
+    137,
+    140
+   ],
+   "reason": "main side view is cut at the left and bottom edge (supplier crop); the complete front view comes first"
+  }
+ ],
+ "trimWhitespace": [
+  {
+   "mediaId": 2220,
+   "file": "d1b29mar-0850-o1.jpg",
+   "reason": "spare part drawing used 27% of the frame"
+  },
+  {
+   "mediaId": 2224,
+   "file": "d1b45mar-01600-o1.jpg",
+   "reason": "spare part drawing used 28% of the frame"
+  },
+  {
+   "mediaId": 2231,
+   "file": "d1b37par-0920-o1.jpg",
+   "reason": "spare part drawing used 25% of the frame"
+  },
+  {
+   "mediaId": 2235,
+   "file": "d1b40ptr-01335-o1.jpg",
+   "reason": "spare part drawing used 23% of the frame"
+  },
+  {
+   "mediaId": 2240,
+   "file": "d1b401car-0580-o1.jpg",
+   "reason": "spare part drawing used 42% of the frame"
+  },
+  {
+   "mediaId": 2241,
+   "file": "d1b331car-0790-o1.jpg",
+   "reason": "spare part drawing used 38% of the frame"
+  },
+  {
+   "mediaId": 2249,
+   "file": "d1b1tir-0330-o1.jpg",
+   "reason": "spare part drawing used 33% of the frame"
+  }
+ ],
+ "reviewed": [
+  {
+   "mediaIds": [
+    463,
+    465,
+    467,
+    469,
+    473
+   ],
+   "verdict": "OK",
+   "reason": "Nikko A112: the same black visor photo on every helmet colour; the visor is identical"
+  },
+  {
+   "mediaIds": [
+    1331,
+    1333
+   ],
+   "verdict": "NEEDS_SOURCE",
+   "reason": "MRT Motors 4138 red/grey gloves share a plain black glove photo; colour cannot be confirmed"
+  },
+  {
+   "mediaIds": [
+    1821,
+    2200,
+    2219
+   ],
+   "verdict": "OK",
+   "reason": "SHAD kits: the bike part is the mounting position of the kit, the kit is visible"
+  },
+  {
+   "mediaIds": [
+    1064,
+    1065
+   ],
+   "verdict": "NEEDS_SOURCE",
+   "reason": "MRT Motors 104 Black King jacket: both photos are worn and cut at the edges, no complete product photo"
+  },
+  {
+   "mediaIds": [
+    1
+   ],
+   "verdict": "OK",
+   "reason": "store logo, not a product photo"
+  },
+  {
+   "mediaIds": [
+    2220,
+    2224,
+    2231,
+    2235,
+    2240,
+    2241,
+    2249
+   ],
+   "verdict": "NEEDS_SOURCE",
+   "reason": "SHAD spare part drawings are only about 200-370 px; trimmed so they fill the card, a larger drawing from SHAD is needed for sharp product pages on phones"
+  },
+  {
+   "mediaIds": [
+    117,
+    137
+   ],
+   "verdict": "NEEDS_SOURCE",
+   "reason": "MTS X340 Thunder/Soly side views are cut at the left and bottom edge by the supplier; moved behind the complete front view, an uncut side view is needed"
+  },
+  {
+   "mediaIds": [
+    118,
+    138,
+    593,
+    596,
+    604,
+    605,
+    606,
+    611,
+    616,
+    645,
+    664,
+    667,
+    671,
+    672,
+    673,
+    676,
+    678,
+    679,
+    681,
+    683,
+    684,
+    698,
+    699,
+    901,
+    911,
+    920,
+    928,
+    938,
+    1051,
+    1069,
+    1121,
+    1136,
+    1139,
+    1346,
+    1347,
+    1348,
+    1388,
+    1389,
+    1400,
+    1401,
+    1408,
+    1424,
+    1449,
+    1520,
+    1538,
+    1592,
+    1614,
+    1650,
+    1695,
+    1722,
+    1727,
+    1735,
+    1737,
+    1985,
+    1987,
+    2028,
+    2175,
+    2176
+   ],
+   "verdict": "OK",
+   "reason": "Touch the frame on purpose: lifestyle and worn photos, close-up details and supplier infographics; checked on the subject-cut contact sheet, the product is recognisable"
+  }
+ ]
+}
