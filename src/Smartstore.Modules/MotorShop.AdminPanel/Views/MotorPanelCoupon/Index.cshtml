@@ -69,7 +69,7 @@
                                 }
                                 @if (canDelete)
                                 {
-                                    <form method="post" class="mp-inline-form" action="@Url.Action("Delete", "MotorPanelCoupon", new { area = "Admin", id = c.Id })" data-page-action
+                                    <form method="post" class="mp-inline-form" action="@Url.Action("Delete", "MotorPanelCoupon", new { area = "Admin", id = c.Id })" data-page-action data-danger
                                           data-confirm="@T("Plugins.MotorShop.AdminPanel.Coupon.DeleteConfirm", c.Name)">
                                         <button type="submit" class="mp-icon-btn mp-icon-btn--danger" title="@T("Plugins.MotorShop.AdminPanel.Action.Delete")">
                                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3" /></svg>

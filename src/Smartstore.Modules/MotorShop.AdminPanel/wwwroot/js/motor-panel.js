@@ -306,6 +306,9 @@
             openDrawer(opener.dataset.openEditor);
         } else {
             // On a product page the drawer is the advanced editor: reload so the simple form shows the saved values.
+            // Changes typed in the simple form would be lost by that reload, so ask first.
+            if (opener.hasAttribute('data-reload-on-save') && pageDirty
+                && !await confirmDialog({ title: strings.unsavedAdvanced, okLabel: strings.openAnyway, danger: true })) return;
             openDrawer(opener.dataset.openEditor, opener.hasAttribute('data-reload-on-save')
                 ? () => { pageDirty = false; window.location.reload(); }
                 : () => refreshGrid?.());
@@ -338,7 +341,7 @@
         if (!form) return;
         e.preventDefault();
 
-        if (form.dataset.confirm && !await confirmDialog({ title: form.dataset.confirm })) return;
+        if (form.dataset.confirm && !await confirmDialog({ title: form.dataset.confirm, danger: form.hasAttribute('data-danger') })) return;
 
         const result = await post(form.action, new FormData(form));
         if (result.ok && result.data.success !== false) {
@@ -885,9 +888,11 @@
         form.querySelector('[data-cancel]')?.addEventListener('click', async e => {
             if (!pageDirty) return;
             e.preventDefault();
-            if (await confirmDialog({ title: strings.unsaved, okLabel: strings.leave, danger: true })) {
+            // Read before awaiting: currentTarget is null once the event has finished dispatching.
+            const href = e.currentTarget.href;
+            if (await confirmDialog({ title: strings.unsavedLeave, okLabel: strings.leave, danger: true })) {
                 pageDirty = false;
-                window.location.href = e.currentTarget.href;
+                window.location.href = href;
             }
         });
 
@@ -1303,6 +1308,7 @@
                     toast(strings.priceShown);
                 }
                 flash(cell, true);
+                toast(strings.saved);
                 updateZeroBadge(row);
             } else {
                 if (result.data.conflict) {
@@ -1358,6 +1364,7 @@
         if (result.ok && result.data.success) {
             apply(result.data.value === 'true');
             flash(button, true);
+            toast(strings.saved);
             updateZeroBadge(row);
         } else {
             if (result.data.conflict) apply(result.data.value === 'true');

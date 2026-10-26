@@ -602,4 +602,10 @@
     <LocaleResource Name="Simple.PriceStillHidden"><Value>Changes saved, but the price stays hidden: the product is not yet approved for sale in the supplier catalog.</Value></LocaleResource>
     <LocaleResource Name="Toggle.PriceHint"><Value>Click: show / hide the price on the site</Value></LocaleResource>
     <LocaleResource Name="Js.PriceShown"><Value>A price was entered, so the price is now shown on the site.</Value></LocaleResource>
+    <LocaleResource Name="Shipment.ShippedDate"><Value>Shipped on</Value></LocaleResource>
+    <LocaleResource Name="Simple.PriceVisibility"><Value>Price visibility</Value></LocaleResource>
+    <LocaleResource Name="Validation.Email"><Value>Enter a valid e-mail address, e.g. info@example.com</Value></LocaleResource>
+    <LocaleResource Name="Js.UnsavedLeave"><Value>You have unsaved changes. Leave the page?</Value></LocaleResource>
+    <LocaleResource Name="Js.UnsavedAdvanced"><Value>This page has unsaved changes. Saving in the advanced editor discards them; save first. Open anyway?</Value></LocaleResource>
+    <LocaleResource Name="Js.OpenAnyway"><Value>Open anyway</Value></LocaleResource>
 </Language>

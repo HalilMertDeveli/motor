@@ -296,9 +296,20 @@ public class PanelQueryService
         return result;
     }
 
+    /// <summary>
+    /// Words of the search box, at most five. "shad sh58" means both words, as a store employee expects.
+    /// </summary>
+    internal static string[] SearchTerms(string q)
+        => [.. (q ?? string.Empty)
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(5)];
+
     internal IQueryable<Product> BuildProductQuery(ProductFilter filter)
     {
-        var searchQuery = new CatalogSearchQuery(["name", "sku"], filter.Q);
+        // Smartstore's term search matches ANY word; several words are applied one by one below (ALL words).
+        var terms = SearchTerms(filter.Q);
+        var searchQuery = new CatalogSearchQuery(["name", "sku"], terms.Length > 1 ? null : filter.Q);
         searchQuery.ParseSearchTerm = true;
 
         if (filter.CategoryId > 0)
@@ -312,6 +323,16 @@ public class PanelQueryService
         }
 
         var query = _catalogSearchService.PrepareQuery(searchQuery, CountableProducts(_db.Products.AsNoTracking()));
+
+        if (terms.Length > 1)
+        {
+            foreach (var term in terms)
+            {
+                var termQuery = new CatalogSearchQuery(["name", "sku"], term) { ParseSearchTerm = true };
+                var matching = _catalogSearchService.PrepareQuery(termQuery, CountableProducts(_db.Products.AsNoTracking())).Select(x => x.Id);
+                query = query.Where(x => matching.Contains(x.Id));
+            }
+        }
 
         query = ApplyPriceFilter(query, filter.Price);
 
