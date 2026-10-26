@@ -97,6 +97,13 @@ public class CheckoutAddressMapper : Mapper<CheckoutContext, CheckoutAddressMode
                 .ApplyStandardFilter(false, _storeContext.CurrentStore.Id)
                 .ToListAsync();
 
+            // MOTOR: a store that sells to a single country (Türkiye) preselects it instead of an empty, required field.
+            if (selectedCountryId == null && countries.Count == 1)
+            {
+                selectedCountryId = countries[0].Id;
+                to.NewAddress.CountryId = selectedCountryId;
+            }
+
             to.NewAddress.AvailableCountries = countries.ToSelectListItems(selectedCountryId ?? 0);
         }
     }
