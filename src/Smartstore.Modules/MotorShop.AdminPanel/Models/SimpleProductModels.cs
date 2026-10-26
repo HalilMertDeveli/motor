@@ -54,6 +54,11 @@ public class SimpleProductModel
     public string ShortDescription { get; set; }
     public bool Published { get; set; }
 
+    /// <summary>
+    /// "Fiyat sitede görünsün" (the opposite of call for price). <c>null</c>: not sent, see <c>SimpleProductService.PriceVisibility</c>.
+    /// </summary>
+    public bool? ShowPrice { get; set; }
+
     // Display only.
     public string Sku { get; set; }
     public string ManufacturerPartNumber { get; set; }
@@ -97,6 +102,12 @@ public class SimpleProductResult
     public Dictionary<string, string> Errors { get; set; } = [];
 
     public string Message { get; set; }
+
+    /// <summary>
+    /// Saved, but something did not turn out as asked (e.g. the price stays hidden).
+    /// </summary>
+    public string Warning { get; set; }
+
     public int ProductId { get; set; }
     public string ProductName { get; set; }
 

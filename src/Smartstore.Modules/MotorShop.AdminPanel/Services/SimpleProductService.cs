@@ -376,12 +376,14 @@ public class SimpleProductService
             errors[nameof(model.CategoryId)] = R("Validation.CategoryRequired");
         }
 
+        var callForPrice = PriceVisibility(product.CallForPrice, product.Price, price, model.ShowPrice);
+        if (!callForPrice && price <= 0 && !errors.ContainsKey(nameof(model.Price)) && (model.ShowPrice == true || model.Published))
+        {
+            errors[nameof(model.Price)] = R(model.ShowPrice == true && !model.Published ? "Simple.ShowPriceNeedsPrice" : "Publish.PriceRequired");
+        }
+
         if (model.Published)
         {
-            if (price <= 0 && !product.CallForPrice && !errors.ContainsKey(nameof(model.Price)))
-            {
-                errors[nameof(model.Price)] = R("Publish.PriceRequired");
-            }
             if (mappings.Count == 0 && !changeCategory && !errors.ContainsKey(nameof(model.CategoryId)))
             {
                 errors[nameof(model.CategoryId)] = R("Publish.CategoryRequired");
@@ -397,10 +399,11 @@ public class SimpleProductService
         product.Name = name;
         product.ShortDescription = shortDescription;
         product.Price = price;
+        product.CallForPrice = callForPrice;
         product.StockQuantity = stock;
         product.Published = model.Published;
 
-        var violation = ProductRules.Validate(product, ProductRules.Fields.Price, ProductRules.Fields.Stock, ProductRules.Fields.Published);
+        var violation = ProductRules.Validate(product, ProductRules.Fields.Price, ProductRules.Fields.CallForPrice, ProductRules.Fields.Stock, ProductRules.Fields.Published);
         if (violation != null)
         {
             // The request-wide SaveChanges filter would otherwise persist the refused values.
@@ -426,7 +429,33 @@ public class SimpleProductService
 
         var result = await GetResultAsync(product.Id);
         result.Message = R("Simple.Saved");
+
+        // A save hook (e.g. the supplier sale guard of MotorShop.CatalogImport) may keep the price hidden.
+        if (!callForPrice && result.CallForPrice)
+        {
+            result.Warning = R("Simple.PriceStillHidden");
+        }
+
         return result;
+    }
+
+    /// <summary>
+    /// Whether the price stays hidden ("Fiyat için arayın") after a save.
+    /// </summary>
+    /// <param name="showPrice">The form's "Fiyat sitede görünsün" choice; <c>null</c> when the form did not send it.</param>
+    /// <remarks>
+    /// Without an explicit choice, "call for price" that only stands in for a missing price (stored price 0) is lifted
+    /// as soon as a price is entered, the same rule the supplier import uses. A price an admin hid on purpose
+    /// (stored price above 0) stays hidden.
+    /// </remarks>
+    internal static bool PriceVisibility(bool callForPrice, decimal oldPrice, decimal newPrice, bool? showPrice)
+    {
+        if (showPrice.HasValue)
+        {
+            return !showPrice.Value;
+        }
+
+        return callForPrice && !(oldPrice <= 0 && newPrice > 0);
     }
 
     /// <summary>

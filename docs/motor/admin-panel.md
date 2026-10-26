@@ -127,6 +127,7 @@ the dashboard to its own page.
   visibility, shipping, dimensions, SEO, full description, stock mode and limits, variants are never written.
   An existing slug is kept when the name changes. Publishing needs a price above 0 (unless call for price) and a
   category.
+* **Price visibility** ("Fiyat sitede görünsün", the opposite of call for price): shown in the simple editor and as a switch in the list. Supplier imports leave unpriced products with price 0 and the price hidden; entering a price for such a product (editor or inline list) shows it, the same rule the supplier import uses. A price an admin hid on purpose (stored price above 0) stays hidden until the box is ticked. A visible price must be above 0. If a save hook (CatalogImport sale guard) keeps the price hidden, the editor says so.
 * **Concurrency**: the editor sends the version (`UpdatedOnUtc.Ticks`, as a string because it exceeds
   JavaScript's safe integers); a changed product answers 409 "Bu ürün sen düzenlerken başka biri tarafından
   değiştirildi…" and nothing is saved. Photo changes return the new version only when the editor was current.

@@ -78,7 +78,7 @@
                 <div class="mp-form-grid">
                     <label class="mp-form-field">
                         <span>@T("Plugins.MotorShop.AdminPanel.Simple.Price", Model.CurrencyCode) <em class="mp-req">*</em></span>
-                        <input name="Price" value="@Model.Price" inputmode="decimal" autocomplete="off" />
+                        <input name="Price" value="@Model.Price" inputmode="decimal" autocomplete="off" data-original-price="@Model.Price" />
                         <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Simple.PriceHint")</small>
                         <small class="mp-field-error" data-error-for="Price"></small>
                     </label>
@@ -98,10 +98,16 @@
                         </div>
                     }
                 </div>
-                @if (Model.CallForPrice)
-                {
-                    <p class="mp-note">@T("Plugins.MotorShop.AdminPanel.Simple.CallForPriceNote")</p>
-                }
+                <div class="mp-price-visibility" data-price-visibility>
+                    <label class="mp-check-field mp-check-field--lg">
+                        <input type="checkbox" name="ShowPrice" value="true" checked="@(!Model.CallForPrice)" data-show-price />
+                        <span><strong>@T("Plugins.MotorShop.AdminPanel.Simple.ShowPrice")</strong></span>
+                    </label>
+                    @* Unchecked boxes are not posted; the first value wins, so this is the "false" fallback. *@
+                    <input type="hidden" name="ShowPrice" value="false" />
+                    <p class="mp-note" data-price-hidden-note hidden="@(!Model.CallForPrice)">@T("Plugins.MotorShop.AdminPanel.Simple.CallForPriceNote")</p>
+                    <p class="mp-note mp-note--info" data-price-auto-note hidden>@T("Plugins.MotorShop.AdminPanel.Simple.ShowPriceAuto")</p>
+                </div>
             </fieldset>
 
             <fieldset class="mp-fieldset">
