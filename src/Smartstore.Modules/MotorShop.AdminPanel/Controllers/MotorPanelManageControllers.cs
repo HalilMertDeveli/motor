@@ -19,9 +19,12 @@ internal static class PanelForms
         {
             if (entry.Errors.Count > 0)
             {
-                errors[key[(key.LastIndexOf('.') + 1)..]] = entry.AttemptedValue.IsEmpty()
+                var field = key[(key.LastIndexOf('.') + 1)..];
+                errors[field] = entry.AttemptedValue.IsEmpty()
                     ? T("Plugins.MotorShop.AdminPanel.Required")
-                    : T("Plugins.MotorShop.AdminPanel.InvalidValue");
+                    : field.EndsWith("Email", StringComparison.OrdinalIgnoreCase)
+                        ? T("Plugins.MotorShop.AdminPanel.Validation.Email")
+                        : T("Plugins.MotorShop.AdminPanel.InvalidValue");
             }
         }
 

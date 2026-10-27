@@ -1,0 +1,25 @@
+@model SimpleProductModel
+@{
+    // Create (Model == null): files stay in the browser and are sent with the form.
+    // Edit: every change is saved at once through the photo endpoints.
+    var isEdit = Model != null;
+    var photos = Model?.Photos ?? [];
+    var json = System.Text.Json.JsonSerializer.Serialize(photos.Select(x => new { id = x.FileId, url = x.ThumbUrl, name = x.Name }));
+}
+
+<div class="mp-photos" data-photos data-mode="@(isEdit ? "edit" : "create")"
+     data-max="@ProductPhotoRules.MaxPhotos" data-max-bytes="@ProductPhotoRules.MaxBytes"
+     data-upload-url="@(isEdit ? Url.Action("AddPhotos", "MotorPanelProduct", new { area = "Admin", id = Model.Id }) : null)"
+     data-order-url="@(isEdit ? Url.Action("OrderPhotos", "MotorPanelProduct", new { area = "Admin", id = Model.Id }) : null)"
+     data-remove-url="@(isEdit ? Url.Action("RemovePhoto", "MotorPanelProduct", new { area = "Admin", id = Model.Id, fileId = 0 }) : null)"
+     data-initial="@json">
+    <ul class="mp-photos__list" data-photo-list aria-live="polite"></ul>
+
+    <label class="mp-photos__drop" data-photo-drop>
+        <input type="file" class="mp-sr" accept="image/jpeg,image/png,image/webp,image/gif" multiple data-photo-input />
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="10" r="2" /><path d="m21 16-5-5-8 8" /></svg>
+        <strong>@T("Plugins.MotorShop.AdminPanel.Photo.Choose")</strong>
+        <span class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Photo.Hint", ProductPhotoRules.MaxPhotos, ProductPhotoRules.MaxBytes / 1024 / 1024)</span>
+    </label>
+    <small class="mp-field-error" data-error-for="Photos" role="alert"></small>
+</div>

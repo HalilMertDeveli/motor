@@ -2,15 +2,14 @@
 @model DashboardModel
 @{
     ViewBag.Title = T("Plugins.MotorShop.AdminPanel.PageTitle").Value;
-    ViewData["PanelTab"] = "products";
-    var products = Model.Products;
+    ViewData["PanelTab"] = "dashboard";
 }
 
 <section class="mp-overview" aria-label="@T("Plugins.MotorShop.AdminPanel.Overview")">
     <div class="mp-cards">
         @if (Model.CanReadProducts)
         {
-            <a class="mp-card" href="@Url.Action("Index", "MotorPanel", new { area = "Admin" })#mp-products">
+            <a class="mp-card" href="@Url.Action("Products", "MotorPanel", new { area = "Admin" })">
                 <span class="mp-card__icon mp-card__icon--blue" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Zm0 0L12 12m0 0 9-4.5M12 12v9" /></svg>
                 </span>
@@ -19,7 +18,7 @@
                 <span class="mp-card__hint">@T("Plugins.MotorShop.AdminPanel.Card.TotalHint", Model.Summary.PublishedProducts.ToString("N0"))</span>
             </a>
 
-            <a class="mp-card" href="@Url.Action("Index", "MotorPanel", new { area = "Admin", stock = StockFilter.OutOfStock.ToString() })#mp-products">
+            <a class="mp-card" href="@Url.Action("Products", "MotorPanel", new { area = "Admin", stock = StockFilter.OutOfStock.ToString() })">
                 <span class="mp-card__icon mp-card__icon--red" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 17.5A2 2 0 0 0 4.1 20.5h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /></svg>
                 </span>
@@ -28,7 +27,7 @@
                 <span class="mp-card__hint">@T("Plugins.MotorShop.AdminPanel.Card.OutOfStockHint")</span>
             </a>
 
-            <a class="mp-card" href="@Url.Action("Index", "MotorPanel", new { area = "Admin", price = PriceVisibilityFilter.CallForPrice.ToString() })#mp-products">
+            <a class="mp-card" href="@Url.Action("Products", "MotorPanel", new { area = "Admin", price = PriceVisibilityFilter.CallForPrice.ToString() })">
                 <span class="mp-card__icon mp-card__icon--amber" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 10 7a12.6 12.6 0 0 1-2.9 4M6.6 6.6C4.4 8 2.8 10.2 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 5.4-1.6" /></svg>
                 </span>
@@ -79,7 +78,7 @@
         <div class="mp-panel mp-orders">
             <div class="mp-panel__head">
                 <h2 class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.RecentOrders")</h2>
-                <a class="mp-link" href="@Url.Action("List", "Order", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.AllOrders") →</a>
+                <a class="mp-link" href="@Url.Action("Index", "MotorPanelOrder", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.AllOrders") →</a>
             </div>
             @if (Model.RecentOrders.Count == 0)
             {
@@ -110,7 +109,7 @@
                                     _ => "mp-badge--amber"
                                 };
                                 <tr>
-                                    <td><a class="mp-link" href="@Url.Action("Edit", "Order", new { area = "Admin", id = order.Id })">#@order.OrderNumber</a></td>
+                                    <td><button type="button" class="mp-link mp-link-btn" data-open-editor="@Url.Action("Details", "MotorPanelOrder", new { area = "Admin", id = order.Id })">#@order.OrderNumber</button></td>
                                     <td class="mp-truncate">@order.Customer</td>
                                     <td class="mp-nowrap">@order.CreatedOn.ToString("g")</td>
                                     <td><span class="mp-badge @badge">@order.OrderStatusText</span></td>
@@ -148,138 +147,56 @@
 
 @if (Model.CanReadProducts)
 {
-    var f = products.Filter;
-    <section id="mp-products" class="mp-panel mp-products" aria-labelledby="mp-products-title">
+    <section class="mp-panel mp-quick" aria-labelledby="mp-quick-title">
         <div class="mp-panel__head">
-            <h2 id="mp-products-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Products")</h2>
-            <a class="mp-btn mp-btn--accent" href="@Url.Action("Create", "Product", new { area = "Admin" })">+ @T("Plugins.MotorShop.AdminPanel.NewProduct")</a>
+            <h2 id="mp-quick-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Quick.Title")</h2>
         </div>
+        <div class="mp-quick__actions">
+            @if (Model.CanCreateProducts)
+            {
+                <a class="mp-btn mp-btn--accent mp-btn--lg" href="@Url.Action("New", "MotorPanelProduct", new { area = "Admin" })">+ @T("Plugins.MotorShop.AdminPanel.NewProductLong")</a>
+            }
+            <a class="mp-btn mp-btn--outline mp-btn--lg" href="@Url.Action("Products", "MotorPanel", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Quick.AllProducts")</a>
+            <a class="mp-btn mp-btn--outline mp-btn--lg" href="@Url.Action("Products", "MotorPanel", new { area = "Admin", status = PublishFilter.Unpublished.ToString() })">@T("Plugins.MotorShop.AdminPanel.Quick.Drafts")</a>
+            <a class="mp-btn mp-btn--outline mp-btn--lg" href="@Url.Action("Index", "MotorPanelCategory", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Tab.Categories")</a>
+        </div>
+    </section>
 
-        <form class="mp-toolbar" method="get" action="@Url.Action("Index", "MotorPanel", new { area = "Admin" })"
-              data-grid-url="@Url.Action("Products", "MotorPanel", new { area = "Admin" })"
-              data-error-text="@T("Plugins.MotorShop.AdminPanel.LoadError")" role="search">
-            <label class="mp-field mp-field--search">
-                <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Search")</span>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                <input type="search" name="q" value="@f.Q" maxlength="200" autocomplete="off" placeholder="@T("Plugins.MotorShop.AdminPanel.SearchPlaceholder")" />
-            </label>
-            <label class="mp-field">
-                <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Filter.Category")</span>
-                <select name="categoryId">
-                    <option value="0">@T("Plugins.MotorShop.AdminPanel.Filter.AllCategories")</option>
-                    @foreach (var c in products.Categories)
-                    {
-                        <option value="@c.Id" selected="@(c.Id == f.CategoryId)">@(new string(' ', c.Depth * 3))@c.Name</option>
-                    }
-                </select>
-            </label>
-            <label class="mp-field">
-                <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Filter.Stock")</span>
-                <select name="stock">
-                    <option value="All">@T("Plugins.MotorShop.AdminPanel.Filter.AllStock")</option>
-                    <option value="InStock" selected="@(f.Stock == StockFilter.InStock)">@T("Plugins.MotorShop.AdminPanel.Stock.InStock")</option>
-                    <option value="OutOfStock" selected="@(f.Stock == StockFilter.OutOfStock)">@T("Plugins.MotorShop.AdminPanel.Stock.OutOfStock")</option>
-                    <option value="NotTracked" selected="@(f.Stock == StockFilter.NotTracked)">@T("Plugins.MotorShop.AdminPanel.Stock.NotTracked")</option>
-                </select>
-            </label>
-            <label class="mp-field">
-                <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Filter.Price")</span>
-                <select name="price">
-                    <option value="All">@T("Plugins.MotorShop.AdminPanel.Filter.AllPrices")</option>
-                    <option value="Visible" selected="@(f.Price == PriceVisibilityFilter.Visible)">@T("Plugins.MotorShop.AdminPanel.Price.Visible")</option>
-                    <option value="CallForPrice" selected="@(f.Price == PriceVisibilityFilter.CallForPrice)">@T("Plugins.MotorShop.AdminPanel.Price.CallForPrice")</option>
-                    <option value="ZeroPrice" selected="@(f.Price == PriceVisibilityFilter.ZeroPrice)">@T("Plugins.MotorShop.AdminPanel.ZeroPrice")</option>
-                </select>
-            </label>
-            <label class="mp-field">
-                <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Filter.Status")</span>
-                <select name="status">
-                    <option value="All">@T("Plugins.MotorShop.AdminPanel.Filter.AllStatus")</option>
-                    <option value="Published" selected="@(f.Status == PublishFilter.Published)">@T("Plugins.MotorShop.AdminPanel.Status.Published")</option>
-                    <option value="Unpublished" selected="@(f.Status == PublishFilter.Unpublished)">@T("Plugins.MotorShop.AdminPanel.Status.Unpublished")</option>
-                </select>
-            </label>
-            <label class="mp-field">
-                <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Filter.PageSize")</span>
-                <select name="size">
-                    @foreach (var size in ProductFilter.PageSizes)
-                    {
-                        <option value="@size" selected="@(f.Size == size)">@T("Plugins.MotorShop.AdminPanel.Filter.PerPage", size)</option>
-                    }
-                </select>
-            </label>
-            <input type="hidden" name="sort" value="@(f.Sort == ProductSort.Newest ? "" : f.Sort.ToString())" />
-            <noscript><button type="submit" class="mp-btn mp-btn--outline">@T("Plugins.MotorShop.AdminPanel.Apply")</button></noscript>
-        </form>
-
-        @if (products.CanUpdate)
+    <section class="mp-panel mp-recent" aria-labelledby="mp-recent-title">
+        <div class="mp-panel__head">
+            <h2 id="mp-recent-title" class="mp-panel__title">@T("Plugins.MotorShop.AdminPanel.Recent.Title")</h2>
+            <a class="mp-link" href="@Url.Action("Products", "MotorPanel", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.Quick.AllProducts") →</a>
+        </div>
+        @if (Model.RecentProducts.Count == 0)
         {
-            <form class="mp-bulk" id="mp-bulk" hidden data-url="@Url.Action("Bulk", "MotorPanelProduct", new { area = "Admin" })"
-                  data-all-label="@T("Plugins.MotorShop.AdminPanel.Bulk.SelectAll")">
-                <div class="mp-bulk__info">
-                    <strong data-bulk-count></strong>
-                    <button type="button" class="mp-link mp-link-btn" data-bulk-all hidden></button>
-                    <button type="button" class="mp-link mp-link-btn" data-bulk-clear>@T("Plugins.MotorShop.AdminPanel.Bulk.Clear")</button>
-                </div>
-                <div class="mp-bulk__controls">
-                    <label class="mp-field">
-                        <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Bulk.Action")</span>
-                        <select name="action" required>
-                            <option value="">@T("Plugins.MotorShop.AdminPanel.Bulk.Choose")</option>
-                            <optgroup label="@T("Plugins.MotorShop.AdminPanel.Bulk.GroupPrice")">
-                                <option value="PricePercent" data-input="percent">@T("Plugins.MotorShop.AdminPanel.Bulk.PricePercent")</option>
-                                <option value="PriceFixed" data-input="signed">@T("Plugins.MotorShop.AdminPanel.Bulk.PriceFixed")</option>
-                                <option value="HidePrice">@T("Plugins.MotorShop.AdminPanel.Bulk.HidePrice")</option>
-                                <option value="ShowPrice">@T("Plugins.MotorShop.AdminPanel.Bulk.ShowPrice")</option>
-                            </optgroup>
-                            <optgroup label="@T("Plugins.MotorShop.AdminPanel.Bulk.GroupStock")">
-                                <option value="SetStock" data-input="integer">@T("Plugins.MotorShop.AdminPanel.Bulk.SetStock")</option>
-                                <option value="TrackStock">@T("Plugins.MotorShop.AdminPanel.Bulk.TrackStock")</option>
-                                <option value="UntrackStock">@T("Plugins.MotorShop.AdminPanel.Bulk.UntrackStock")</option>
-                            </optgroup>
-                            <optgroup label="@T("Plugins.MotorShop.AdminPanel.Bulk.GroupPublish")">
-                                <option value="Publish">@T("Plugins.MotorShop.AdminPanel.Bulk.Publish")</option>
-                                <option value="Unpublish">@T("Plugins.MotorShop.AdminPanel.Bulk.Unpublish")</option>
-                            </optgroup>
-                            @if (products.CanEditCategories)
-                            {
-                                <optgroup label="@T("Plugins.MotorShop.AdminPanel.Bulk.GroupCategory")">
-                                    <option value="AddCategory" data-input="category">@T("Plugins.MotorShop.AdminPanel.Bulk.AddCategory")</option>
-                                    <option value="RemoveCategory" data-input="category">@T("Plugins.MotorShop.AdminPanel.Bulk.RemoveCategory")</option>
-                                </optgroup>
-                            }
-                            @if (products.CanDelete)
-                            {
-                                <optgroup label="@T("Plugins.MotorShop.AdminPanel.Bulk.GroupDanger")">
-                                    <option value="Delete" data-danger="true">@T("Plugins.MotorShop.AdminPanel.Bulk.Delete")</option>
-                                </optgroup>
-                            }
-                        </select>
-                    </label>
-                    <label class="mp-field" data-bulk-value hidden>
-                        <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Bulk.Value")</span>
-                        <input name="value" inputmode="decimal" autocomplete="off" maxlength="20" />
-                    </label>
-                    <label class="mp-field" data-bulk-category hidden>
-                        <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.Filter.Category")</span>
-                        <select name="categoryId">
-                            @foreach (var c in products.Categories)
-                            {
-                                <option value="@c.Id">@(new string(' ', c.Depth * 3))@c.Name</option>
-                            }
-                        </select>
-                    </label>
-                    <button type="submit" class="mp-btn mp-btn--accent">@T("Plugins.MotorShop.AdminPanel.Apply")</button>
-                </div>
-                <p class="mp-bulk__hint mp-muted" data-hint-percent hidden>@T("Plugins.MotorShop.AdminPanel.Bulk.HintPercent")</p>
-                <p class="mp-bulk__hint mp-muted" data-hint-signed hidden>@T("Plugins.MotorShop.AdminPanel.Bulk.HintSigned")</p>
-            </form>
+            <p class="mp-empty mp-empty--small">@T("Plugins.MotorShop.AdminPanel.NoProducts")</p>
         }
-
-        <div id="mp-grid" class="mp-grid" aria-live="polite" aria-busy="false"
-             data-field-url="@Url.Action("Field", "MotorPanelProduct", new { area = "Admin", id = 0 })">
-            <partial name="_ProductGrid" model="products" />
-        </div>
+        else
+        {
+            <ul class="mp-recent__list">
+                @foreach (var p in Model.RecentProducts)
+                {
+                    var editUrl = p.Stock == StockState.ByAttributes
+                        ? Url.Action("Edit", "Product", new { area = "Admin", id = p.Id })
+                        : Url.Action("Simple", "MotorPanelProduct", new { area = "Admin", id = p.Id });
+                    <li>
+                        <a class="mp-recent__item" href="@editUrl">
+                            @if (p.ThumbnailUrl.HasValue())
+                            {
+                                <img class="mp-thumb" src="@p.ThumbnailUrl" alt="" loading="lazy" width="40" height="40" />
+                            }
+                            else
+                            {
+                                <span class="mp-thumb mp-thumb--empty" aria-hidden="true"></span>
+                            }
+                            <span class="mp-recent__name">@p.Name</span>
+                            <span class="mp-nowrap mp-num">@(p.CallForPrice ? T("Plugins.MotorShop.AdminPanel.Price.CallForPrice").Value : p.Price.ToString())</span>
+                            <span class="mp-badge @(p.Published ? "mp-badge--green" : "mp-badge--gray")">@(p.Published ? T("Plugins.MotorShop.AdminPanel.Status.Published") : T("Plugins.MotorShop.AdminPanel.Status.Draft"))</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
     </section>
 }
 else

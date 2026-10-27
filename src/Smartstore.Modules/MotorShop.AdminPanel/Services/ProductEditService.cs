@@ -79,6 +79,9 @@ public class ProductEditService
                 {
                     return new() { Error = R("Amount." + priceError) };
                 }
+
+                // A hidden price that only stood in for a missing one is shown once a price is entered.
+                product.CallForPrice = SimpleProductService.PriceVisibility(product.CallForPrice, product.Price, price, null);
                 product.Price = price;
                 break;
 
@@ -117,6 +120,13 @@ public class ProductEditService
 
             case ProductRules.Fields.Published:
                 product.Published = ParseBool(value);
+
+                // An incomplete product is not published from the list: customers could not find it in any category.
+                if (product.Published && !await _db.ProductCategories.AnyAsync(x => x.ProductId == product.Id && !x.Category.Deleted))
+                {
+                    await _db.Entry(product).ReloadAsync();
+                    return new() { Error = R("Publish.CategoryRequired") };
+                }
                 break;
 
             default:
@@ -136,7 +146,7 @@ public class ProductEditService
         _services.ActivityLogger.LogActivity(KnownActivityLogTypes.EditProduct, R("Log.FieldChanged", product.Name, field, CurrentValue(product, field)));
         await _db.SaveChangesAsync();
 
-        return new() { Success = true, Value = CurrentValue(product, field), Display = Display(product, field) };
+        return new() { Success = true, Value = CurrentValue(product, field), Display = Display(product, field), CallForPrice = product.CallForPrice };
     }
 
     internal static string CurrentValue(Product p, string field) => field switch
@@ -201,9 +211,9 @@ public class ProductEditService
         foreach (var chunk in ids.Chunk(BatchSize))
         {
             var query = _db.Products.Where(x => chunk.Contains(x.Id) && !x.Deleted && !x.IsSystemProduct);
-            if (request.Action is BulkAction.AddCategory or BulkAction.RemoveCategory)
+            if (request.Action is BulkAction.AddCategory or BulkAction.RemoveCategory or BulkAction.Publish)
             {
-                query = query.Include(x => x.ProductCategories);
+                query = query.Include(x => x.ProductCategories).ThenInclude(x => x.Category);
             }
 
             var products = await query.ToListAsync();
@@ -275,6 +285,8 @@ public class ProductEditService
                 product.CallForPrice = request.Action == BulkAction.HidePrice;
                 changed = [ProductRules.Fields.CallForPrice];
                 break;
+            case BulkAction.Publish when !product.Published && !product.ProductCategories.Any(x => x.Category != null && !x.Category.Deleted):
+                return R("Publish.CategoryRequired");
             case BulkAction.Publish or BulkAction.Unpublish:
                 product.Published = request.Action == BulkAction.Publish;
                 changed = [ProductRules.Fields.Published];

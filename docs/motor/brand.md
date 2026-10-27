@@ -17,6 +17,7 @@ The values live in `ProsevStoreDefaults` (seed) and, at runtime, in the admin se
 | --- | --- |
 | Storefront header wordmark (hexagon "M" badge + MRT MOTORS) | `Themes/MotorDark/Views/Shared/Components/ShopLogo/Default.cshtml`, `_prosev.scss` |
 | Admin header wordmark, admin favicon, admin browser title | `Areas/Admin/.../AdminNavbar/Default.cshtml`, `wwwroot/admin/images/mrt-motors-icon.svg`, resource `Admin.PageTitle` |
+| Admin texts that named the platform ("MRT Motors hakkında", "MRT Motors sürümü", update and package messages, module descriptions), storefront `<meta name="generator">` | tr language packs, migration `MrtMotorsAdminBrand`, `Views/Shared/Layouts/_Document.cshtml` |
 | Theme name in Admin > Themes ("MRT Motors Dark") | `Themes/MotorDark/theme.config` |
 | Home hero, story and footer texts | resources `Themes.MotorDark.*` (migration `ProsevStore`) |
 | Store name, e-mail sender name, SEO meta title (so page titles, e-mails, legal pages) | `ProsevStoreDefaults.StoreName`, `TrTRSeedData` |
@@ -50,6 +51,21 @@ logos).
   where the brand is still Prosev (it matches by SKU and brand tokens before the import), and
   `MotorShop.CatalogImport` (generic parts feeds; its brand keys identify products). Product
   photos are not edited.
+
+## Platform name (Smartstore) in the admin
+
+Owner request 2026-10-27: "bütün marka isimleri mrt motors olacak". Migration `20261027120000_MrtMotorsAdminBrand`
+replaces "Smartstore" in the Turkish admin texts of existing databases (only rows that still contain the old text and
+that no admin edited); the tr app pack and the module packs carry the same texts for new installs. The test
+`Turkish_Texts_Name_The_Store_Not_The_Platform` keeps the packs clean.
+
+Still says Smartstore, on purpose:
+
+- the copyright notice of the software on Admin > About ("Copyright © SmartStore AG", source links) and the
+  "by SmartStore AG" line in the storefront footer: AGPL-3.0 legal notices of the platform the store runs on;
+- the author column of upstream modules and themes (their copyright holder);
+- technical names: module system names (`Smartstore.PayPal`), package file names (`Smartstore.Module.*.zip`),
+  configuration keys, web addresses (translate.smartstore.com), assembly names on the system information page.
 
 ## What stays Prosev
 

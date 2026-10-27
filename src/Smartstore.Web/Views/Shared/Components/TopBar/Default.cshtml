@@ -67,7 +67,8 @@
     </div>
 
     <div sm-if="Model.DisplayAdminLink" class="menubar-group menubar-group--special d-none d-xl-block">
-        <a class="menubar-link" asp-area="Admin" asp-controller="Home" asp-action="Index" target="_admin" rel="nofollow">
+        @* MOTOR: opens the simple employee panel (MotorShop.AdminPanel, /motor-panel); the classic admin is one click away there. Falls back to the classic admin without the module. *@
+        <a class="menubar-link" href="@(Url.Action("Index", "MotorPanel", new { area = "Admin" }) ?? Url.Action("Index", "Home", new { area = "Admin" }))" target="_admin" rel="nofollow">
             <i class="fal fa-cog menubar-icon"></i>
             <span>@T("Account.Administration")</span>
         </a>

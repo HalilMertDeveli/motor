@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MotorShop.AdminPanel.Models;
 using MotorShop.AdminPanel.Services;
@@ -14,12 +15,130 @@ namespace MotorShop.AdminPanel.Controllers;
 [Route("motor-panel/product")]
 public class MotorPanelProductController : AdminController
 {
-    private readonly ProductEditService _products;
+    // Ten photos of at most 10 MB each, plus the form fields.
+    const long MaxCreateRequest = ProductPhotoRules.MaxPhotos * ProductPhotoRules.MaxBytes + 1024 * 1024;
 
-    public MotorPanelProductController(ProductEditService products)
+    private readonly ProductEditService _products;
+    private readonly SimpleProductService _simple;
+    private readonly CategoryEditService _categories;
+
+    public MotorPanelProductController(ProductEditService products, SimpleProductService simple, CategoryEditService categories)
     {
         _products = products;
+        _simple = simple;
+        _categories = categories;
     }
+
+    #region Quick create and simple editor
+
+    [HttpGet("new")]
+    [Permission(Permissions.Catalog.Product.Create)]
+    public async Task<IActionResult> New()
+    {
+        PanelHttp.NoIndex(Response);
+
+        ViewBag.SubmissionId = Guid.NewGuid().ToString("N");
+        await SetFormViewDataAsync();
+
+        return View("Create", new QuickProductModel());
+    }
+
+    [HttpPost("create")]
+    [Permission(Permissions.Catalog.Product.Create)]
+    [RequestSizeLimit(MaxCreateRequest)]
+    [RequestFormLimits(MultipartBodyLengthLimit = MaxCreateRequest)]
+    public async Task<IActionResult> Create(QuickProductModel model, List<IFormFile> photos)
+    {
+        photos = photos?.Where(x => x != null).ToList() ?? [];
+        if (photos.Count > 0 && !await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Product.EditPicture))
+        {
+            return Forbidden(Permissions.Catalog.Product.EditPicture);
+        }
+
+        var result = await _simple.CreateAsync(model ?? new(), photos, Services.WorkContext.CurrentCustomer.Id);
+        return SimpleJson(result);
+    }
+
+    [HttpGet("{id:int}")]
+    [Permission(Permissions.Catalog.Product.Read)]
+    public async Task<IActionResult> Simple(int id)
+    {
+        PanelHttp.NoIndex(Response);
+
+        var model = await _simple.LoadAsync(id);
+        if (model == null)
+        {
+            return NotFound();
+        }
+
+        // Stock per variant combination: only the classic editor can handle it.
+        if (model.ManageInventoryMethod == Smartstore.Core.Catalog.Products.ManageInventoryMethod.ManageStockByAttributes)
+        {
+            return RedirectToAction("Edit", "Product", new { area = "Admin", id });
+        }
+
+        await SetFormViewDataAsync();
+        model.CategoryOptions = ViewBag.CategoryOptions;
+        model.CurrencyCode = Services.CurrencyService.PrimaryCurrency.CurrencyCode;
+
+        return View("Edit", model);
+    }
+
+    [HttpPost("{id:int}/simple")]
+    [Permission(Permissions.Catalog.Product.Update)]
+    public async Task<IActionResult> SaveSimple(int id, SimpleProductModel model)
+    {
+        model ??= new();
+        model.Id = id;
+
+        var canEditCategories = await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Product.EditCategory);
+        return SimpleJson(await _simple.SaveAsync(model, canEditCategories));
+    }
+
+    [HttpPost("{id:int}/photos")]
+    [Permission(Permissions.Catalog.Product.EditPicture)]
+    [RequestSizeLimit(MaxCreateRequest)]
+    [RequestFormLimits(MultipartBodyLengthLimit = MaxCreateRequest)]
+    public async Task<IActionResult> AddPhotos(int id, long version, List<IFormFile> photos)
+        => SimpleJson(await _simple.AddPhotosAsync(id, version, photos?.Where(x => x != null).ToList() ?? []));
+
+    [HttpPost("{id:int}/photos/{fileId:int}/remove")]
+    [Permission(Permissions.Catalog.Product.EditPicture)]
+    public async Task<IActionResult> RemovePhoto(int id, int fileId, long version)
+        => SimpleJson(await _simple.RemovePhotoAsync(id, version, fileId));
+
+    [HttpPost("{id:int}/photos/order")]
+    [Permission(Permissions.Catalog.Product.EditPicture)]
+    public async Task<IActionResult> OrderPhotos(int id, long version, int[] fileIds)
+        => SimpleJson(await _simple.ReorderPhotosAsync(id, version, fileIds));
+
+    private IActionResult SimpleJson(SimpleProductResult result)
+    {
+        if (!result.Success)
+        {
+            Response.StatusCode = result.Conflict ? 409 : 422;
+        }
+
+        return Json(result, SmartJsonOptions.CamelCased);
+    }
+
+    private IActionResult Forbidden(string permission)
+    {
+        Response.StatusCode = 403;
+        return Json(SimpleProductResult.Fail(string.Empty, T("Plugins.MotorShop.AdminPanel.NoPermission").Value), SmartJsonOptions.CamelCased);
+    }
+
+    private async Task SetFormViewDataAsync()
+    {
+        ViewBag.CanEditPictures = await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Product.EditPicture);
+        ViewBag.CanEditCategories = await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Product.EditCategory);
+        ViewBag.CanCreateCategory = await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Category.Create);
+        ViewBag.CanUpdate = await Services.Permissions.AuthorizeAsync(Permissions.Catalog.Product.Update);
+        ViewBag.CategoryOptions ??= await _categories.GetPickerOptionsAsync();
+        ViewBag.CurrencyCode = Services.CurrencyService.PrimaryCurrency.CurrencyCode;
+    }
+
+    #endregion
 
     [HttpPost("{id:int}/field")]
     [Permission(Permissions.Catalog.Product.Update)]

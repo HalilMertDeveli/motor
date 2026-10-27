@@ -1,0 +1,185 @@
+@using Smartstore.Core.Catalog.Products
+@model SimpleProductModel
+@{
+    ViewBag.Title = Model.Name;
+    ViewData["PanelTab"] = "products";
+    ViewBag.CategoryOptions = Model.CategoryOptions;
+    var canUpdate = ViewBag.CanUpdate == true;
+    var canEditPictures = ViewBag.CanEditPictures == true;
+    var canEditCategories = ViewBag.CanEditCategories == true;
+    ViewData["PickerDisabled"] = !canUpdate || !canEditCategories;
+    var listUrl = Url.Action("Products", "MotorPanel", new { area = "Admin" });
+    var siteUrl = Model.Slug.HasValue() ? Url.RouteUrl("Product", new { SeName = Model.Slug, area = "" }) : null;
+    var classicUrl = Url.Action("Edit", "Product", new { area = "Admin", id = Model.Id });
+}
+
+<nav class="mp-crumbs" aria-label="@T("Plugins.MotorShop.AdminPanel.Breadcrumb")">
+    <a class="mp-link" href="@listUrl">← @T("Plugins.MotorShop.AdminPanel.Products")</a>
+</nav>
+
+<form class="mp-simple" method="post" novalidate
+      action="@Url.Action("SaveSimple", "MotorPanelProduct", new { area = "Admin", id = Model.Id })"
+      data-simple-form="edit" data-product-url-template="@Url.RouteUrl("Product", new { SeName = "__slug__", area = "" })">
+    <input type="hidden" name="Version" value="@Model.Version" data-version />
+
+    <header class="mp-simple__head">
+        <div>
+            <h1 class="mp-page-title" data-title>@Model.Name</h1>
+            <p class="mp-muted">
+                <span class="mp-badge @(Model.Published ? "mp-badge--green" : "mp-badge--gray")" data-state-badge
+                      data-label-true="@T("Plugins.MotorShop.AdminPanel.Status.Published")" data-label-false="@T("Plugins.MotorShop.AdminPanel.Status.Draft")">
+                    @(Model.Published ? T("Plugins.MotorShop.AdminPanel.Status.Published") : T("Plugins.MotorShop.AdminPanel.Status.Draft"))
+                </span>
+                <span class="mp-mono">@(Model.Sku.NullEmpty() ?? "-")</span>
+            </p>
+        </div>
+        @if (siteUrl != null)
+        {
+            <a class="mp-btn mp-btn--outline mp-btn--lg" href="@siteUrl" target="_blank" rel="noopener" data-view-site>@T("Plugins.MotorShop.AdminPanel.ViewOnSite")</a>
+        }
+    </header>
+
+    <p class="mp-note" data-draft-note hidden="@Model.Published">@T("Plugins.MotorShop.AdminPanel.Simple.DraftNote")</p>
+
+    <div class="mp-form-error" data-form-error role="alert" hidden></div>
+
+    <div class="mp-simple__grid">
+        <div class="mp-simple__main">
+            <fieldset class="mp-fieldset" disabled="@(!canUpdate)">
+                <legend>@T("Plugins.MotorShop.AdminPanel.Simple.Info")</legend>
+                <div class="mp-form-stack">
+                    <label class="mp-form-field">
+                        <span>@T("Plugins.MotorShop.AdminPanel.Simple.Name") <em class="mp-req">*</em></span>
+                        <input name="Name" value="@Model.Name" maxlength="400" required autocomplete="off" />
+                        <small class="mp-field-error" data-error-for="Name"></small>
+                    </label>
+                    <div class="mp-form-field">
+                        <label for="mp-category-input"><span>@T("Plugins.MotorShop.AdminPanel.Simple.Category")</span></label>
+                        <partial name="_CategoryPicker" model="Model.CategoryId" />
+                        @if (Model.OtherCategories.Count > 0)
+                        {
+                            <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Simple.OtherCategories", string.Join(", ", Model.OtherCategories))</small>
+                        }
+                        @if (!canEditCategories)
+                        {
+                            <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Simple.NoCategoryPermission")</small>
+                        }
+                    </div>
+                    <label class="mp-form-field">
+                        <span>@T("Plugins.MotorShop.AdminPanel.Simple.ShortDescription")</span>
+                        <textarea name="ShortDescription" rows="3" maxlength="4000">@Model.ShortDescription</textarea>
+                        <small class="mp-field-error" data-error-for="ShortDescription"></small>
+                    </label>
+                </div>
+            </fieldset>
+
+            <fieldset class="mp-fieldset" disabled="@(!canUpdate)">
+                <legend>@T("Plugins.MotorShop.AdminPanel.Simple.Sales")</legend>
+                <div class="mp-form-grid">
+                    <label class="mp-form-field">
+                        <span>@T("Plugins.MotorShop.AdminPanel.Simple.Price", Model.CurrencyCode) <em class="mp-req">*</em></span>
+                        <input name="Price" value="@Model.Price" inputmode="decimal" autocomplete="off" data-original-price="@Model.Price" />
+                        <small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Simple.PriceHint")</small>
+                        <small class="mp-field-error" data-error-for="Price"></small>
+                    </label>
+                    @if (Model.ManageInventoryMethod == ManageInventoryMethod.ManageStock)
+                    {
+                        <label class="mp-form-field">
+                            <span>@T("Plugins.MotorShop.AdminPanel.Simple.Stock") <em class="mp-req">*</em></span>
+                            <input name="Stock" value="@Model.Stock" inputmode="numeric" autocomplete="off" />
+                            <small class="mp-field-error" data-error-for="Stock"></small>
+                        </label>
+                    }
+                    else
+                    {
+                        <div class="mp-form-field">
+                            <span>@T("Plugins.MotorShop.AdminPanel.Simple.Stock")</span>
+                            <p class="mp-note mp-note--info">@T("Plugins.MotorShop.AdminPanel.Simple.StockNotTracked")</p>
+                        </div>
+                    }
+                </div>
+                <div class="mp-price-visibility" data-price-visibility>
+                    <label class="mp-check-field mp-check-field--lg">
+                        <input type="checkbox" name="ShowPrice" value="true" checked="@(!Model.CallForPrice)" data-show-price />
+                        <span><strong>@T("Plugins.MotorShop.AdminPanel.Simple.ShowPrice")</strong></span>
+                    </label>
+                    @* Unchecked boxes are not posted; the first value wins, so this is the "false" fallback. *@
+                    <input type="hidden" name="ShowPrice" value="false" />
+                    <p class="mp-note" data-price-hidden-note hidden="@(!Model.CallForPrice)">@T("Plugins.MotorShop.AdminPanel.Simple.CallForPriceNote")</p>
+                    <p class="mp-note mp-note--info" data-price-auto-note hidden>@T("Plugins.MotorShop.AdminPanel.Simple.ShowPriceAuto")</p>
+                </div>
+            </fieldset>
+
+            <fieldset class="mp-fieldset">
+                <legend>@T("Plugins.MotorShop.AdminPanel.Simple.Photos")</legend>
+                @if (canEditPictures)
+                {
+                    <partial name="_PhotoManager" model="Model" />
+                }
+                else
+                {
+                    <p class="mp-note">@T("Plugins.MotorShop.AdminPanel.Photo.NoPermission")</p>
+                    <div class="mp-gallery">
+                        @foreach (var photo in Model.Photos)
+                        {
+                            <img src="@photo.ThumbUrl" alt="" loading="lazy" />
+                        }
+                    </div>
+                }
+            </fieldset>
+
+            <details class="mp-fieldset mp-advanced">
+                <summary class="mp-legend">@T("Plugins.MotorShop.AdminPanel.Simple.Advanced")</summary>
+                <p class="mp-muted mp-small">@T("Plugins.MotorShop.AdminPanel.Simple.AdvancedHint")</p>
+                <dl class="mp-facts-list">
+                    <dt>@T("Plugins.MotorShop.AdminPanel.Simple.Sku")</dt>
+                    <dd class="mp-mono">@(Model.Sku.NullEmpty() ?? "-")</dd>
+                    <dt>@T("Plugins.MotorShop.AdminPanel.Editor.Mpn")</dt>
+                    <dd class="mp-mono">@(Model.ManufacturerPartNumber.NullEmpty() ?? "-")</dd>
+                    <dt>@T("Plugins.MotorShop.AdminPanel.Editor.TaxCategory")</dt>
+                    <dd>@(Model.TaxCategoryName ?? "-")</dd>
+                    <dt>@T("Plugins.MotorShop.AdminPanel.Col.SpecialPrice")</dt>
+                    <dd>@(Model.SpecialPrice ?? "-")</dd>
+                    <dt>@T("Plugins.MotorShop.AdminPanel.Simple.PriceVisibility")</dt>
+                    <dd>@(Model.CallForPrice ? T("Plugins.MotorShop.AdminPanel.Price.CallForPrice") : T("Plugins.MotorShop.AdminPanel.Price.Visible"))</dd>
+                    <dt>@T("Plugins.MotorShop.AdminPanel.Editor.StockMethod")</dt>
+                    <dd>@CommonServices.Localization.GetLocalizedEnum(Model.ManageInventoryMethod)</dd>
+                </dl>
+                <div class="mp-actions mp-section-gap">
+                    <button type="button" class="mp-btn mp-btn--outline" data-open-editor="@Url.Action("Edit", "MotorPanelProduct", new { area = "Admin", id = Model.Id })" data-reload-on-save>@T("Plugins.MotorShop.AdminPanel.Action.AdvancedEdit")</button>
+                    <a class="mp-btn mp-btn--ghost" href="@classicUrl">@T("Plugins.MotorShop.AdminPanel.Editor.OpenClassic")</a>
+                </div>
+            </details>
+        </div>
+
+        <aside class="mp-simple__side">
+            <fieldset class="mp-fieldset" disabled="@(!canUpdate)">
+                <legend>@T("Plugins.MotorShop.AdminPanel.Simple.Publication")</legend>
+                <div class="mp-choice" role="radiogroup">
+                    <label class="mp-choice__item">
+                        <input type="radio" name="Published" value="true" checked="@Model.Published" />
+                        <span><strong>@T("Plugins.MotorShop.AdminPanel.Status.Published")</strong><br /><small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Simple.PublishedHint")</small></span>
+                    </label>
+                    <label class="mp-choice__item">
+                        <input type="radio" name="Published" value="false" checked="@(!Model.Published)" />
+                        <span><strong>@T("Plugins.MotorShop.AdminPanel.Status.Draft")</strong><br /><small class="mp-muted">@T("Plugins.MotorShop.AdminPanel.Simple.DraftHint")</small></span>
+                    </label>
+                </div>
+                <small class="mp-field-error" data-error-for="Published"></small>
+            </fieldset>
+        </aside>
+    </div>
+
+    <footer class="mp-simple__foot">
+        <a class="mp-btn mp-btn--ghost mp-btn--lg" href="@listUrl" data-cancel>@T("Plugins.MotorShop.AdminPanel.Create.BackToList")</a>
+        <span class="mp-spacer"></span>
+        @if (siteUrl != null)
+        {
+            <a class="mp-btn mp-btn--outline mp-btn--lg" href="@siteUrl" target="_blank" rel="noopener" data-view-site>@T("Plugins.MotorShop.AdminPanel.ViewOnSite")</a>
+        }
+        @if (canUpdate)
+        {
+            <button type="submit" class="mp-btn mp-btn--accent mp-btn--lg">@T("Plugins.MotorShop.AdminPanel.Simple.Save")</button>
+        }
+    </footer>
+</form>

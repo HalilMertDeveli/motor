@@ -13,6 +13,11 @@ public class PanelHeaderModel
     public string UserName { get; set; }
     public string ActiveTab { get; set; }
     public List<PanelTab> Tabs { get; set; } = [];
+
+    /// <summary>
+    /// Rarely used pages, under "Diğer İşlemler".
+    /// </summary>
+    public List<PanelTab> MoreTabs { get; set; } = [];
 }
 
 /// <param name="Classic">Opens a page of the classic Smartstore admin.</param>
@@ -28,7 +33,12 @@ public class DashboardModel
     public PriceLockState PriceLock { get; set; }
     public List<RecentOrderModel> RecentOrders { get; set; } = [];
     public CurrencyStripModel Currency { get; set; }
-    public ProductListModel Products { get; set; }
+
+    /// <summary>
+    /// Newest products for the dashboard; the full list is on its own page.
+    /// </summary>
+    public List<ProductRowModel> RecentProducts { get; set; } = [];
+    public bool CanCreateProducts { get; set; }
 }
 
 /// <summary>
@@ -139,6 +149,12 @@ public class ProductFilter
     public ProductSort Sort { get; set; }
     public int Page { get; set; } = 1;
     public int Size { get; set; } = DefaultPageSize;
+
+    /// <summary>
+    /// Filters in the optional "Gelişmiş filtreler" area that are not at their default.
+    /// </summary>
+    public int AdvancedFilterCount
+        => (Stock != StockFilter.All ? 1 : 0) + (Price != PriceVisibilityFilter.All ? 1 : 0) + (Size != DefaultPageSize ? 1 : 0);
 
     /// <summary>
     /// Query values for links, without defaults so deep links stay short.

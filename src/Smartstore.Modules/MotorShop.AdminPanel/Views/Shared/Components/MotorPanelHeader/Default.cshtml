@@ -25,29 +25,48 @@
                 <span class="mp-user__name">@Model.UserName</span>
             </span>
             <a class="mp-btn mp-btn--ghost" href="@Url.Content("~/")" target="_blank" rel="noopener">@T("Plugins.MotorShop.AdminPanel.ViewSite")</a>
-            <a class="mp-btn mp-btn--ghost" href="@Url.Action("Index", "Home", new { area = "Admin" })">@T("Plugins.MotorShop.AdminPanel.ClassicAdmin")</a>
             <a class="mp-btn mp-btn--outline" href="@Url.RouteUrl("Logout")">@T("Plugins.MotorShop.AdminPanel.Logout")</a>
         </nav>
     </div>
 </header>
 
+@{
+    var moreActive = Model.MoreTabs.Any(x => x.Key == Model.ActiveTab);
+}
 <nav class="mp-tabs" aria-label="@T("Plugins.MotorShop.AdminPanel.ModuleNav")">
-    <ul class="mp-tabs__list">
-        @foreach (var tab in Model.Tabs)
+    <div class="mp-tabs__inner">
+        <ul class="mp-tabs__list">
+            @foreach (var tab in Model.Tabs)
+            {
+                var active = tab.Key == Model.ActiveTab;
+                <li>
+                    <a class="mp-tabs__link@(active ? " is-active" : "")" href="@tab.Url" aria-current="@(active ? "page" : null)">@tab.Title</a>
+                </li>
+            }
+        </ul>
+        @if (Model.MoreTabs.Count > 0)
         {
-            var active = tab.Key == Model.ActiveTab;
-            <li>
-                <a class="mp-tabs__link@(active ? " is-active" : "")" href="@tab.Url" aria-current="@(active ? "page" : null)">
-                    @tab.Title
-                    @if (tab.Classic)
+            <details class="mp-more" data-menu>
+                <summary class="mp-tabs__link mp-more__toggle@(moreActive ? " is-active" : "")">
+                    @T("Plugins.MotorShop.AdminPanel.Tab.More")
+                    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                </summary>
+                <ul class="mp-menu">
+                    @foreach (var tab in Model.MoreTabs)
                     {
-                        <span class="mp-tabs__classic" title="@T("Plugins.MotorShop.AdminPanel.OpensClassic")">
-                            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M6 3h7v7M13 3 6 10M11 13H3V5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            <span class="mp-sr">@T("Plugins.MotorShop.AdminPanel.OpensClassic")</span>
-                        </span>
+                        var active = tab.Key == Model.ActiveTab;
+                        <li>
+                            <a class="mp-menu__item@(active ? " is-active" : "")" href="@tab.Url" aria-current="@(active ? "page" : null)">
+                                @tab.Title
+                                @if (tab.Classic)
+                                {
+                                    <span class="mp-muted mp-small">· @T("Plugins.MotorShop.AdminPanel.Tab.Advanced")</span>
+                                }
+                            </a>
+                        </li>
                     }
-                </a>
-            </li>
+                </ul>
+            </details>
         }
-    </ul>
+    </div>
 </nav>

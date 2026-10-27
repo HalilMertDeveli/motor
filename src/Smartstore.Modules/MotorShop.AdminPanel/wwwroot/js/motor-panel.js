@@ -305,7 +305,13 @@
             if (drawerDirty && !await confirmDialog({ title: strings.unsaved, okLabel: strings.close, danger: true })) return;
             openDrawer(opener.dataset.openEditor);
         } else {
-            openDrawer(opener.dataset.openEditor, () => refreshGrid?.());
+            // On a product page the drawer is the advanced editor: reload so the simple form shows the saved values.
+            // Changes typed in the simple form would be lost by that reload, so ask first.
+            if (opener.hasAttribute('data-reload-on-save') && pageDirty
+                && !await confirmDialog({ title: strings.unsavedAdvanced, okLabel: strings.openAnyway, danger: true })) return;
+            openDrawer(opener.dataset.openEditor, opener.hasAttribute('data-reload-on-save')
+                ? () => { pageDirty = false; window.location.reload(); }
+                : () => refreshGrid?.());
         }
     });
 
@@ -335,7 +341,7 @@
         if (!form) return;
         e.preventDefault();
 
-        if (form.dataset.confirm && !await confirmDialog({ title: form.dataset.confirm })) return;
+        if (form.dataset.confirm && !await confirmDialog({ title: form.dataset.confirm, danger: form.hasAttribute('data-danger') })) return;
 
         const result = await post(form.action, new FormData(form));
         if (result.ok && result.data.success !== false) {
@@ -396,6 +402,592 @@
         } else {
             toast(result.data.error || strings.error, true);
         }
+    });
+
+    const tpl = el => el?.content?.textContent.trim() ?? '';
+
+    // Rough reading of a typed amount for client-side hints only; the server parses for real (AmountParser).
+    function parseAmount(text) {
+        let s = String(text || '').replace(/[\s₺]|TL/gi, '');
+        if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+        else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+        const n = Number(s);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    // ---------- Menus ("Diğer İşlemler", row "⋯") ----------
+
+    // A row menu sits in a scrolling table, so it is positioned fixed next to its button.
+    function placeMenu(details) {
+        const menu = details.querySelector('.mp-menu');
+        if (!menu || !details.hasAttribute('data-menu-fixed')) return;
+        const rect = details.querySelector('summary').getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.top = Math.min(rect.bottom + 4, window.innerHeight - menu.offsetHeight - 8) + 'px';
+        menu.style.left = Math.max(8, rect.right - menu.offsetWidth) + 'px';
+    }
+
+    function closeMenus(except) {
+        document.querySelectorAll('details[data-menu][open]').forEach(d => {
+            if (d !== except) d.open = false;
+        });
+    }
+
+    document.addEventListener('toggle', e => {
+        const details = e.target;
+        if (!(details instanceof HTMLDetailsElement) || !details.hasAttribute('data-menu') || !details.open) return;
+        closeMenus(details);
+        placeMenu(details);
+    }, true);
+
+    document.addEventListener('click', e => {
+        const inside = e.target.closest('details[data-menu]');
+        closeMenus(inside);
+        // A chosen menu entry closes its menu.
+        if (inside && e.target.closest('.mp-menu__item')) inside.open = false;
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
+        const open = document.querySelector('details[data-menu][open]');
+        if (open) {
+            open.open = false;
+            open.querySelector('summary')?.focus();
+        }
+    });
+
+    window.addEventListener('scroll', () => closeMenus(null), { passive: true });
+
+    // ---------- Category picker ----------
+
+    const norm = s => String(s || '').toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ').trim();
+
+    function initCombo(root, onChange) {
+        const input = root.querySelector('[data-combo-input]');
+        const value = root.querySelector('[data-combo-value]');
+        const list = root.querySelector('.mp-combo__list');
+        const createOption = list.querySelector('[data-create]');
+        const empty = list.querySelector('[data-combo-empty]');
+        const createBox = root.querySelector('[data-combo-create]');
+        const quickUrl = root.dataset.quickUrl;
+        let active = null;
+
+        const options = () => [...list.querySelectorAll('.mp-combo__option:not([data-create])')];
+        const visible = () => [...list.querySelectorAll('.mp-combo__option:not([hidden])')];
+        const selectedPath = () => options().find(o => o.dataset.id === value.value)?.dataset.path || '';
+
+        function open() {
+            list.hidden = false;
+            input.setAttribute('aria-expanded', 'true');
+        }
+
+        function close() {
+            list.hidden = true;
+            input.setAttribute('aria-expanded', 'false');
+            setActive(null);
+        }
+
+        function setActive(option) {
+            active?.classList.remove('is-active');
+            active = option;
+            if (option) {
+                option.classList.add('is-active');
+                input.setAttribute('aria-activedescendant', option.id);
+                option.scrollIntoView({ block: 'nearest' });
+            } else {
+                input.removeAttribute('aria-activedescendant');
+            }
+        }
+
+        function filter() {
+            const term = norm(input.value);
+            let exact = false;
+            let shown = 0;
+            for (const o of options()) {
+                const path = norm(o.dataset.path);
+                const name = norm(path.split('›').pop());
+                const match = term === '' || path.includes(term);
+                o.hidden = !match;
+                if (match) shown++;
+                if (term !== '' && (path === term || name === term)) exact = true;
+            }
+            if (createOption) {
+                createOption.hidden = !quickUrl || term === '' || exact;
+                createOption.querySelector('[data-create-name]').textContent = `"${input.value.trim()}"`;
+            }
+            if (empty) empty.hidden = shown > 0 || (createOption && !createOption.hidden);
+            setActive(null);
+        }
+
+        function choose(option) {
+            if (option.hasAttribute('data-create')) {
+                startCreate();
+                return;
+            }
+            value.value = option.dataset.id;
+            input.value = option.dataset.path;
+            options().forEach(o => o.setAttribute('aria-selected', o === option ? 'true' : 'false'));
+            close();
+            onChange?.();
+        }
+
+        function startCreate() {
+            if (!createBox) return;
+            close();
+            createBox.hidden = false;
+            const name = createBox.querySelector('[data-create-input]');
+            // "Kask › Yeni" typed as a path: preselect the parent when it exists.
+            const parts = input.value.split('›').map(x => x.trim()).filter(Boolean);
+            name.value = parts.pop() || '';
+            const parentPath = norm(parts.join(' › '));
+            const parent = options().find(o => norm(o.dataset.path) === parentPath);
+            createBox.querySelector('[data-create-parent]').value = parent ? parent.dataset.id : '0';
+            createBox.querySelector('[data-create-error]').textContent = '';
+            name.focus();
+        }
+
+        input.addEventListener('focus', () => { filter(); open(); });
+        input.addEventListener('input', () => { filter(); open(); });
+        input.addEventListener('keydown', e => {
+            const items = visible();
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                open();
+                const i = items.indexOf(active);
+                const next = e.key === 'ArrowDown' ? items[Math.min(items.length - 1, i + 1)] : items[Math.max(0, i - 1)];
+                setActive(next || null);
+            } else if (e.key === 'Enter') {
+                if (!list.hidden && (active || items.length === 1)) {
+                    e.preventDefault();
+                    choose(active || items[0]);
+                }
+            } else if (e.key === 'Escape' && !list.hidden) {
+                e.preventDefault();
+                e.stopPropagation();
+                input.value = selectedPath();
+                close();
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            // Let a click on an option land first.
+            setTimeout(() => {
+                if (root.contains(document.activeElement) && document.activeElement !== input) return;
+                if (input.value.trim() === '') {
+                    value.value = '0';
+                    if (!createBox || createBox.hidden) onChange?.();
+                } else if (input.value !== selectedPath()) {
+                    input.value = selectedPath();
+                }
+                close();
+            }, 150);
+        });
+
+        list.addEventListener('mousedown', e => e.preventDefault());
+        list.addEventListener('click', e => {
+            const option = e.target.closest('.mp-combo__option');
+            if (option) choose(option);
+        });
+
+        if (!createBox) return;
+
+        createBox.querySelector('[data-create-cancel]').addEventListener('click', () => {
+            createBox.hidden = true;
+            input.value = selectedPath();
+            input.focus();
+        });
+
+        createBox.querySelector('[data-create-input]').addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                createBox.querySelector('[data-create-save]').click();
+            }
+        });
+
+        createBox.querySelector('[data-create-save]').addEventListener('click', async () => {
+            const name = createBox.querySelector('[data-create-input]').value.trim();
+            const error = createBox.querySelector('[data-create-error]');
+            const button = createBox.querySelector('[data-create-save]');
+            if (!name) {
+                error.textContent = strings.categoryNameRequired;
+                return;
+            }
+
+            const body = new FormData();
+            body.append('name', name);
+            body.append('parentId', createBox.querySelector('[data-create-parent]').value);
+            button.disabled = true;
+            const result = await post(quickUrl, body);
+            button.disabled = false;
+
+            if (!result.ok || !result.data.success) {
+                error.textContent = result.data.error || strings.error;
+                return;
+            }
+
+            const c = result.data.category;
+            let option = options().find(o => o.dataset.id === String(c.id));
+            if (!option) {
+                option = document.createElement('li');
+                option.className = 'mp-combo__option';
+                option.setAttribute('role', 'option');
+                option.id = `mp-cat-${c.id}`;
+                option.dataset.id = c.id;
+                option.dataset.path = c.path;
+                option.textContent = c.path;
+                list.insertBefore(option, createOption);
+                const parentOption = document.createElement('option');
+                parentOption.value = c.id;
+                parentOption.textContent = c.path;
+                createBox.querySelector('[data-create-parent]').appendChild(parentOption);
+            }
+            createBox.hidden = true;
+            choose(option);
+            toast(result.data.message);
+            input.focus();
+        });
+    }
+
+    // ---------- Photos ----------
+
+    function initPhotos(root, getVersion, setVersion) {
+        const mode = root.dataset.mode;
+        const listEl = root.querySelector('[data-photo-list]');
+        const input = root.querySelector('[data-photo-input]');
+        const drop = root.querySelector('[data-photo-drop]');
+        const errorEl = root.querySelector('[data-error-for="Photos"]');
+        const max = Number(root.dataset.max || 10);
+        const maxBytes = Number(root.dataset.maxBytes || 10485760);
+        const types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        let items = JSON.parse(root.dataset.initial || '[]');
+        let busy = false;
+
+        const setError = text => { errorEl.textContent = text || ''; };
+
+        function button(label, action, extraClass = '') {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'mp-photo__btn ' + extraClass;
+            b.dataset.action = action;
+            b.textContent = label;
+            return b;
+        }
+
+        function render() {
+            listEl.replaceChildren(...items.map((item, i) => {
+                const li = document.createElement('li');
+                li.className = 'mp-photo' + (i === 0 ? ' is-main' : '') + (item.uploading ? ' is-busy' : '');
+                li.dataset.index = i;
+                const img = document.createElement('img');
+                img.src = item.url;
+                img.alt = item.name || '';
+                img.width = 120;
+                img.height = 120;
+                li.appendChild(img);
+                if (i === 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'mp-photo__main';
+                    badge.textContent = strings.photoMain;
+                    li.appendChild(badge);
+                }
+                const tools = document.createElement('div');
+                tools.className = 'mp-photo__tools';
+                if (i > 0) tools.appendChild(button(strings.photoMakeMain, 'main'));
+                if (i > 0) tools.appendChild(button('←', 'left')).setAttribute('aria-label', strings.photoLeft);
+                if (i < items.length - 1) tools.appendChild(button('→', 'right')).setAttribute('aria-label', strings.photoRight);
+                tools.appendChild(button(strings.photoRemove, 'remove', 'mp-photo__btn--danger'));
+                li.appendChild(tools);
+                return li;
+            }));
+            drop.hidden = items.length >= max;
+            root.classList.toggle('is-busy', busy);
+        }
+
+        async function send(url, body) {
+            busy = true;
+            render();
+            body.append('version', getVersion());
+            const result = await post(url, body);
+            busy = false;
+            if (result.ok && result.data.success) {
+                items = (result.data.photos || []).map(p => ({ id: p.fileId, url: p.thumbUrl, name: p.name }));
+                setVersion(result.data.version);
+                setError('');
+                toast(result.data.message);
+            } else {
+                setError(result.data.errors?.Photos || result.data.errors?.[''] || result.data.error || strings.photoFailed);
+                toast(strings.photoFailed, true);
+            }
+            render();
+            return result.ok;
+        }
+
+        // Same content check as the server (ProductPhotoRules): a renamed PDF is not a photo.
+        async function isImage(file) {
+            let h;
+            try {
+                h = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+            } catch {
+                return false;
+            }
+            const ascii = (from, to) => String.fromCharCode(...h.slice(from, to));
+            return (h[0] === 0xFF && h[1] === 0xD8 && h[2] === 0xFF)
+                || (h[0] === 0x89 && ascii(1, 4) === 'PNG')
+                || (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP')
+                || ascii(0, 6) === 'GIF87a' || ascii(0, 6) === 'GIF89a';
+        }
+
+        async function add(files) {
+            setError('');
+            const accepted = [];
+            for (const file of files) {
+                if (!types.includes(file.type) || !await isImage(file)) { setError(fmt(strings.photoType, file.name)); continue; }
+                if (file.size > maxBytes) { setError(fmt(strings.photoSize, file.name, Math.round(maxBytes / 1048576))); continue; }
+                if (items.length + accepted.length >= max) { setError(fmt(strings.photoMax, max)); break; }
+                accepted.push(file);
+            }
+            if (accepted.length === 0) return;
+
+            if (mode === 'create') {
+                accepted.forEach(file => items.push({ file, url: URL.createObjectURL(file), name: file.name }));
+                render();
+                root.dispatchEvent(new Event('input', { bubbles: true }));
+                return;
+            }
+
+            const body = new FormData();
+            accepted.forEach(file => body.append('photos', file, file.name));
+            await send(root.dataset.uploadUrl, body);
+        }
+
+        async function reorder(next) {
+            if (mode === 'create') {
+                items = next;
+                render();
+                root.dispatchEvent(new Event('input', { bubbles: true }));
+                return;
+            }
+            const body = new FormData();
+            next.forEach(item => body.append('fileIds', item.id));
+            await send(root.dataset.orderUrl, body);
+        }
+
+        listEl.addEventListener('click', async e => {
+            const b = e.target.closest('button[data-action]');
+            if (!b || busy) return;
+            const i = Number(b.closest('li').dataset.index);
+            const next = [...items];
+            switch (b.dataset.action) {
+                case 'main':
+                    next.unshift(...next.splice(i, 1));
+                    await reorder(next);
+                    break;
+                case 'left':
+                    [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                    await reorder(next);
+                    break;
+                case 'right':
+                    [next[i + 1], next[i]] = [next[i], next[i + 1]];
+                    await reorder(next);
+                    break;
+                case 'remove':
+                    if (mode === 'create') {
+                        URL.revokeObjectURL(items[i].url);
+                        items.splice(i, 1);
+                        render();
+                        root.dispatchEvent(new Event('input', { bubbles: true }));
+                    } else if (await confirmDialog({ title: strings.photoRemoveConfirm, danger: true, okLabel: strings.photoRemove })) {
+                        await send(root.dataset.removeUrl.replace(/\/0\/remove/, `/${items[i].id}/remove`), new FormData());
+                    }
+                    break;
+            }
+            listEl.querySelector(`li[data-index="${Math.min(i, items.length - 1)}"] button`)?.focus();
+        });
+
+        input.addEventListener('change', () => {
+            add([...input.files]);
+            input.value = '';
+        });
+
+        ['dragenter', 'dragover'].forEach(type => drop.addEventListener(type, e => {
+            e.preventDefault();
+            drop.classList.add('is-over');
+        }));
+        ['dragleave', 'drop'].forEach(type => drop.addEventListener(type, () => drop.classList.remove('is-over')));
+        drop.addEventListener('drop', e => {
+            e.preventDefault();
+            add([...(e.dataTransfer?.files || [])]);
+        });
+
+        render();
+        return { files: () => items.filter(x => x.file).map(x => x.file), setError };
+    }
+
+    // ---------- Simple product forms (new product, simple editor) ----------
+
+    let pageDirty = false;
+    window.addEventListener('beforeunload', e => {
+        if (pageDirty) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    document.querySelectorAll('form[data-simple-form]').forEach(form => {
+        const isCreate = form.dataset.simpleForm === 'create';
+        const versionInput = form.querySelector('[data-version]');
+        const markDirty = () => { pageDirty = true; };
+
+        form.querySelectorAll('[data-combo]').forEach(root => initCombo(root, markDirty));
+
+        // "Fiyat sitede görünsün": a hidden price that only stood in for a missing one is shown as soon as a
+        // price is typed (the same rule as the supplier import); the employee sees why and can untick it.
+        const showPrice = form.querySelector('[data-show-price]');
+        const priceInput = form.querySelector('input[name=Price]');
+        const syncPriceNote = () => {
+            const hiddenNote = form.querySelector('[data-price-hidden-note]');
+            if (hiddenNote && showPrice) hiddenNote.hidden = showPrice.checked;
+        };
+        if (showPrice && priceInput) {
+            showPrice.addEventListener('change', () => {
+                form.querySelector('[data-price-auto-note]').hidden = true;
+                syncPriceNote();
+            });
+            priceInput.addEventListener('input', () => {
+                if (!showPrice.checked && parseAmount(priceInput.dataset.originalPrice) <= 0 && parseAmount(priceInput.value) > 0) {
+                    showPrice.checked = true;
+                    form.querySelector('[data-price-auto-note]').hidden = false;
+                    syncPriceNote();
+                }
+            });
+        }
+
+        const photosRoot = form.querySelector('[data-photos]');
+        const photos = photosRoot
+            ? initPhotos(photosRoot, () => versionInput?.value ?? '', v => { if (versionInput && v) versionInput.value = v; })
+            : null;
+
+        form.addEventListener('input', e => {
+            // A corrected field loses its old error message right away.
+            const field = e.target.name || (e.target.matches?.('[data-combo-input]') ? 'CategoryId' : null);
+            if (field) {
+                const slot = form.querySelector(`[data-error-for="${CSS.escape(field)}"]`);
+                if (slot) slot.textContent = '';
+                e.target.removeAttribute('aria-invalid');
+            }
+
+            // Photo changes of an existing product are saved at once.
+            if (!isCreate && e.target.closest?.('[data-photos]')) return;
+            markDirty();
+        });
+        form.addEventListener('change', e => {
+            if (e.target.matches('[data-photo-input]')) return;
+            markDirty();
+        });
+
+        form.querySelector('[data-cancel]')?.addEventListener('click', async e => {
+            if (!pageDirty) return;
+            e.preventDefault();
+            // Read before awaiting: currentTarget is null once the event has finished dispatching.
+            const href = e.currentTarget.href;
+            if (await confirmDialog({ title: strings.unsavedLeave, okLabel: strings.leave, danger: true })) {
+                pageDirty = false;
+                window.location.href = href;
+            }
+        });
+
+        let sending = false;
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            if (sending) return;
+
+            const submitter = e.submitter || form.querySelector('button[type=submit]');
+
+            // A field submitted with Enter fires its "change" only when it loses focus, which would mark the page
+            // dirty again after a successful save. Let it fire now.
+            if (form.contains(document.activeElement)) document.activeElement.blur();
+
+            if (isCreate) {
+                form.querySelector('[data-publish-field]').value = submitter?.dataset.publish === 'true' ? 'true' : 'false';
+            }
+
+            clearFormErrors(form);
+            const body = new FormData(form);
+            photos?.files().forEach(file => body.append('photos', file, file.name));
+
+            const buttons = [...form.querySelectorAll('button[type=submit]')];
+            const label = submitter?.textContent;
+            sending = true;
+            buttons.forEach(b => (b.disabled = true));
+            if (submitter) submitter.textContent = strings.saving;
+
+            const result = await post(form.action, body);
+
+            sending = false;
+            buttons.forEach(b => (b.disabled = false));
+            if (submitter) submitter.textContent = label;
+
+            const data = result.data || {};
+            if (!result.ok || !data.success) {
+                if (result.status === 413) {
+                    data.errors = { Photos: strings.photoTooLargeRequest };
+                }
+                showFormErrors(form, { errors: data.errors && Object.keys(data.errors).length ? data.errors : { '': data.error || strings.error } });
+                if (data.conflict) {
+                    const box = form.querySelector('[data-form-error]');
+                    const reload = document.createElement('button');
+                    reload.type = 'button';
+                    reload.className = 'mp-btn mp-btn--outline mp-btn--sm mp-reload';
+                    reload.textContent = strings.reload;
+                    reload.addEventListener('click', () => { pageDirty = false; window.location.reload(); });
+                    box.append(' ', reload);
+                }
+                toast(data.errors?.[''] || strings.checkForm, true);
+                return;
+            }
+
+            pageDirty = false;
+            const productUrl = slug => (form.dataset.productUrlTemplate || tpl(document.querySelector('template[data-product-url-template]')))
+                .replace('__slug__', encodeURIComponent(slug));
+
+            if (isCreate) {
+                const done = document.querySelector('[data-create-done]');
+                done.querySelector('[data-done-title]').textContent = data.message;
+                done.querySelector('[data-done-text]').textContent = tpl(done.querySelector(data.published ? '[data-text-published]' : '[data-text-draft]'));
+                const view = done.querySelector('[data-done-view]');
+                view.hidden = !data.slug;
+                if (data.slug) view.href = productUrl(data.slug);
+                done.querySelector('[data-done-edit]').href = tpl(done.querySelector('[data-edit-url-template]')).replace(/\/0(\/?)$/, `/${data.productId}$1`);
+                form.hidden = true;
+                done.hidden = false;
+                done.focus();
+                window.scrollTo({ top: 0 });
+                return;
+            }
+
+            toast(data.message || strings.saved);
+            if (versionInput) versionInput.value = data.version;
+            form.querySelector('[data-title]').textContent = data.productName;
+            const badge = form.querySelector('[data-state-badge]');
+            badge.textContent = data.published ? badge.dataset.labelTrue : badge.dataset.labelFalse;
+            badge.classList.toggle('mp-badge--green', data.published);
+            badge.classList.toggle('mp-badge--gray', !data.published);
+            const note = form.querySelector('[data-draft-note]');
+            if (note) note.hidden = data.published;
+            if (data.slug) form.querySelectorAll('[data-view-site]').forEach(a => (a.href = productUrl(data.slug)));
+            if (showPrice) {
+                showPrice.checked = !data.callForPrice;
+                form.querySelector('[data-price-auto-note]').hidden = true;
+                syncPriceNote();
+            }
+            if (priceInput) priceInput.dataset.originalPrice = priceInput.value;
+            if (data.warning) {
+                toast(data.warning, true);
+                const box = form.querySelector('[data-form-error]');
+                box.textContent = data.warning;
+                box.hidden = false;
+            }
+        });
     });
 
     // ---------- Products: filters, grid, selection, inline edits, bulk ----------
@@ -707,7 +1299,16 @@
                     cell.classList.toggle('mp-badge--red', !inStock);
                 }
                 cell.classList.remove('mp-muted', 'mp-strike');
+                // Entering a price for a hidden, unpriced product shows the price (server rule).
+                const cfp = row.querySelector('[data-toggle="callForPrice"]');
+                if (cfp && result.data.callForPrice === false && cfp.dataset.value === 'true') {
+                    cfp.dataset.value = 'false';
+                    cfp.textContent = cfp.dataset.labelFalse;
+                    cfp.classList.replace(cfp.dataset.classTrue, cfp.dataset.classFalse);
+                    toast(strings.priceShown);
+                }
                 flash(cell, true);
+                toast(strings.saved);
                 updateZeroBadge(row);
             } else {
                 if (result.data.conflict) {
@@ -763,6 +1364,7 @@
         if (result.ok && result.data.success) {
             apply(result.data.value === 'true');
             flash(button, true);
+            toast(strings.saved);
             updateZeroBadge(row);
         } else {
             if (result.data.conflict) apply(result.data.value === 'true');

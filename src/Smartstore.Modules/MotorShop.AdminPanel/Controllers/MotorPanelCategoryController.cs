@@ -71,6 +71,23 @@ public class MotorPanelCategoryController : AdminController
         return Json(new { success = true, id = model.Id, message = T("Plugins.MotorShop.AdminPanel.Saved").Value });
     }
 
+    /// <summary>
+    /// "Yeni kategori oluştur" from the product form. Returns the existing category when the name is taken
+    /// under the same parent.
+    /// </summary>
+    [HttpPost("quick")]
+    [Permission(Permissions.Catalog.Category.Create)]
+    public async Task<IActionResult> QuickCreate(string name, int parentId = 0)
+    {
+        var result = await _categories.QuickCreateAsync(name, parentId);
+        if (!result.Success)
+        {
+            Response.StatusCode = 422;
+        }
+
+        return Json(result, Smartstore.Json.SmartJsonOptions.CamelCased);
+    }
+
     [HttpPost("{id:int}/move")]
     [Permission(Permissions.Catalog.Category.Update)]
     public async Task<IActionResult> Move(int id, bool up)

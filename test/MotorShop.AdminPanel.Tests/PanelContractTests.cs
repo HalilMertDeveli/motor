@@ -90,6 +90,78 @@ public class PanelContractTests
         Assert.That(requirement?.SystemName, Is.EqualTo(Permissions.Catalog.Product.Read));
     }
 
+[TestCase(nameof(MotorPanelProductController.New), Permissions.Catalog.Product.Create)]
+    [TestCase(nameof(MotorPanelProductController.Create), Permissions.Catalog.Product.Create)]
+    [TestCase(nameof(MotorPanelProductController.Simple), Permissions.Catalog.Product.Read)]
+    [TestCase(nameof(MotorPanelProductController.SaveSimple), Permissions.Catalog.Product.Update)]
+    [TestCase(nameof(MotorPanelProductController.AddPhotos), Permissions.Catalog.Product.EditPicture)]
+    [TestCase(nameof(MotorPanelProductController.RemovePhoto), Permissions.Catalog.Product.EditPicture)]
+    [TestCase(nameof(MotorPanelProductController.OrderPhotos), Permissions.Catalog.Product.EditPicture)]
+    public void Simple_product_actions_require_the_classic_permission(string action, string permission)
+    {
+        var method = typeof(MotorPanelProductController).GetMethod(action)!;
+        var requirement = method.GetCustomAttribute<PermissionAttribute>()?.Arguments?.OfType<PermissionRequirement>().SingleOrDefault();
+
+        Assert.That(requirement?.SystemName, Is.EqualTo(permission), action);
+    }
+
+    [Test]
+    public void Editor_version_is_sent_as_text_so_javascript_keeps_every_digit()
+    {
+        // 639286465365955133 is above 2^53: as a JSON number the browser would round it and every save would conflict.
+        var json = System.Text.Json.JsonSerializer.Serialize(new SimpleProductResult { Version = 639286465365955133 }, Smartstore.Json.SmartJsonOptions.CamelCased);
+
+        Assert.That(json, Does.Contain("\"version\":\"639286465365955133\""));
+    }
+
+    [Test]
+    public void Quick_category_requires_category_create()
+    {
+        var method = typeof(MotorPanelCategoryController).GetMethod(nameof(MotorPanelCategoryController.QuickCreate))!;
+        var requirement = method.GetCustomAttribute<PermissionAttribute>()?.Arguments?.OfType<PermissionRequirement>().SingleOrDefault();
+
+        Assert.That(requirement?.SystemName, Is.EqualTo(Permissions.Catalog.Category.Create));
+        Assert.That(method.GetCustomAttribute<HttpPostAttribute>(), Is.Not.Null);
+    }
+
+    [Test]
+    public void Photo_uploads_are_size_limited()
+    {
+        foreach (var action in new[] { nameof(MotorPanelProductController.Create), nameof(MotorPanelProductController.AddPhotos) })
+        {
+            var limit = typeof(MotorPanelProductController).GetMethod(action)!.GetCustomAttribute<RequestSizeLimitAttribute>();
+            Assert.That(limit, Is.Not.Null, action);
+        }
+    }
+
+    [Test]
+    public void Navigation_puts_daily_work_first_and_keeps_every_page()
+    {
+        Assert.That(MotorPanelHeaderViewComponent.MainTabs.Select(x => x.Key),
+            Is.EqualTo(new[] { "dashboard", "products", "categories", "orders", "shipments" }));
+
+        // Every page the panel had before is still in the navigation, with its read permission.
+        var all = MotorPanelHeaderViewComponent.MainTabs.Concat(MotorPanelHeaderViewComponent.MoreTabs).ToDictionary(x => x.Key);
+        Assert.That(all["customers"].Permission, Is.EqualTo(Permissions.Customer.Read));
+        Assert.That(all["reports"].Permission, Is.EqualTo(Permissions.Order.Read));
+        Assert.That(all["coupons"].Permission, Is.EqualTo(Permissions.Promotion.Discount.Read));
+        Assert.That(all["content"].Permission, Is.EqualTo(Permissions.Cms.Topic.Read));
+        Assert.That(all["invoices"].Permission, Is.EqualTo(Permissions.Order.Read));
+        Assert.That(all["settings"].Permission, Is.EqualTo(Permissions.Configuration.Setting.Read));
+        Assert.That(all["products"].Permission, Is.EqualTo(Permissions.Catalog.Product.Read));
+        Assert.That(all["categories"].Permission, Is.EqualTo(Permissions.Catalog.Category.Read));
+        Assert.That(all["orders"].Permission, Is.EqualTo(Permissions.Order.Read));
+        Assert.That(all["shipments"].Permission, Is.EqualTo(Permissions.Order.Read));
+        Assert.That(all["classic"].Classic, Is.True);
+
+        // Each entry points to an existing panel action.
+        foreach (var tab in all.Values.Where(x => !x.Classic))
+        {
+            var controller = typeof(MotorPanelController).Assembly.GetTypes().Single(x => x.Name == tab.Controller + "Controller");
+            Assert.That(controller.GetMethods().Any(m => m.Name == tab.Action && m.GetCustomAttribute<HttpGetAttribute>() != null), Is.True, tab.Key);
+        }
+    }
+
     [TestCase(null, ExpectedResult = MotorPanelHeaderViewComponent.DefaultAccent)]
     [TestCase("", ExpectedResult = MotorPanelHeaderViewComponent.DefaultAccent)]
     [TestCase("#12AB9f", ExpectedResult = "#12ab9f")]

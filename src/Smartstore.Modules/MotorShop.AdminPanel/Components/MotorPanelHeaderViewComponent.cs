@@ -47,26 +47,52 @@ public partial class MotorPanelHeaderViewComponent : SmartViewComponent
             ActiveTab = activeTab
         };
 
-        model.Tabs.Add(new("products", T("Plugins.MotorShop.AdminPanel.Tab.Products"), Url.Action("Index", "MotorPanel", new { area = "Admin" }), false));
-
-        await AddTabAsync(model, "orders", "Tab.Orders", Permissions.Order.Read, "Index", "MotorPanelOrder");
-        await AddTabAsync(model, "customers", "Tab.Customers", Permissions.Customer.Read, "Index", "MotorPanelCustomer");
-        await AddTabAsync(model, "reports", "Tab.Reports", Permissions.Order.Read, "Index", "MotorPanelReport");
-        await AddTabAsync(model, "content", "Tab.Content", Permissions.Cms.Topic.Read, "Index", "MotorPanelContent");
-        await AddTabAsync(model, "settings", "Tab.Settings", Permissions.Configuration.Setting.Read, "Index", "MotorPanelSettings");
-        await AddTabAsync(model, "coupons", "Tab.Coupons", Permissions.Promotion.Discount.Read, "Index", "MotorPanelCoupon");
-        await AddTabAsync(model, "categories", "Tab.Categories", Permissions.Catalog.Category.Read, "Index", "MotorPanelCategory");
-        await AddTabAsync(model, "invoices", "Tab.Invoices", Permissions.Order.Read, "Index", "MotorPanelInvoice");
-        await AddTabAsync(model, "shipments", "Tab.Shipments", Permissions.Order.Read, "Index", "MotorPanelShipment");
+        foreach (var tab in MainTabs)
+        {
+            await AddTabAsync(model.Tabs, tab);
+        }
+        foreach (var tab in MoreTabs)
+        {
+            await AddTabAsync(model.MoreTabs, tab);
+        }
 
         return View(model);
     }
 
-    private async Task AddTabAsync(PanelHeaderModel model, string key, string resource, string permission, string action, string controller, bool classic = false)
+    /// <param name="Permission"><c>null</c>: shown to everyone with backend access.</param>
+    internal record TabDefinition(string Key, string Resource, string Permission, string Action, string Controller, bool Classic = false);
+
+    /// <summary>
+    /// Daily work of store employees, in this order.
+    /// </summary>
+    internal static readonly TabDefinition[] MainTabs =
+    [
+        new("dashboard", "Tab.Dashboard", null, "Index", "MotorPanel"),
+        new("products", "Tab.Products", Permissions.Catalog.Product.Read, "Products", "MotorPanel"),
+        new("categories", "Tab.Categories", Permissions.Catalog.Category.Read, "Index", "MotorPanelCategory"),
+        new("orders", "Tab.Orders", Permissions.Order.Read, "Index", "MotorPanelOrder"),
+        new("shipments", "Tab.Shipments", Permissions.Order.Read, "Index", "MotorPanelShipment")
+    ];
+
+    /// <summary>
+    /// Rarely used pages under "Diğer İşlemler". Still one click away, with the same permissions as before.
+    /// </summary>
+    internal static readonly TabDefinition[] MoreTabs =
+    [
+        new("customers", "Tab.Customers", Permissions.Customer.Read, "Index", "MotorPanelCustomer"),
+        new("reports", "Tab.Reports", Permissions.Order.Read, "Index", "MotorPanelReport"),
+        new("coupons", "Tab.Coupons", Permissions.Promotion.Discount.Read, "Index", "MotorPanelCoupon"),
+        new("content", "Tab.Content", Permissions.Cms.Topic.Read, "Index", "MotorPanelContent"),
+        new("invoices", "Tab.Invoices", Permissions.Order.Read, "Index", "MotorPanelInvoice"),
+        new("settings", "Tab.Settings", Permissions.Configuration.Setting.Read, "Index", "MotorPanelSettings"),
+        new("classic", "ClassicAdmin", null, "Index", "Home", Classic: true)
+    ];
+
+    private async Task AddTabAsync(List<PanelTab> tabs, TabDefinition tab)
     {
-        if (await Services.Permissions.AuthorizeAsync(permission))
+        if (tab.Permission == null || await Services.Permissions.AuthorizeAsync(tab.Permission))
         {
-            model.Tabs.Add(new(key, T("Plugins.MotorShop.AdminPanel." + resource), Url.Action(action, controller, new { area = "Admin" }), classic));
+            tabs.Add(new(tab.Key, T("Plugins.MotorShop.AdminPanel." + tab.Resource), Url.Action(tab.Action, tab.Controller, new { area = "Admin" }), tab.Classic));
         }
     }
 
