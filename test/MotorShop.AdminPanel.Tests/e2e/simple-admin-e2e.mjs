@@ -219,6 +219,12 @@ try {
     await waitFor(`location.pathname.startsWith('/motor-panel') && !!document.querySelector('.mp-cards')`);
     check('Admin login opens the dashboard', true);
 
+    // The storefront "Yönetim" link (top bar, wide screens) opens the simple panel, not the classic admin.
+    await go('/');
+    const adminLink = await evaluate(`document.querySelector('.menubar-group--special a.menubar-link')?.getAttribute('href')`);
+    check('Storefront "Yönetim" link opens /motor-panel', /^\/motor-panel\/?$/.test(adminLink || ''), adminLink);
+    await go('/motor-panel');
+
     // ---------- Dashboard ----------
     const tabs = await evaluate(`[...document.querySelectorAll('.mp-tabs__list .mp-tabs__link')].map(x => x.textContent.trim())`);
     check('Main navigation: Genel Bakış, Ürünler, Kategoriler, Siparişler, Kargolar', JSON.stringify(tabs) === JSON.stringify(['Genel Bakış', 'Ürünler', 'Kategoriler', 'Siparişler', 'Kargolar']), tabs.join(' | '));
