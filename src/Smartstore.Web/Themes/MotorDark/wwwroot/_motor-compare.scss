@@ -1,0 +1,444 @@
+/// <reference path="../../Flex/wwwroot/references.scss" />
+
+//
+// MotorDark: compare page (Views/Catalog/CompareProducts.cshtml)
+// Product cards on top, then grouped rows. Phones drop the label column and show
+// each label as its own row above the values.
+// --------------------------------------------------
+
+.compare-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.compare-subtitle {
+    margin: 0.35rem 0 0;
+    color: $motor-text-muted;
+}
+
+.compare-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+}
+
+.compare-diff-switch {
+    margin: 0;
+
+    .form-check-label {
+        cursor: pointer;
+        user-select: none;
+    }
+}
+
+.compare-diff-count {
+    display: inline-block;
+    min-width: 1.6em;
+    margin-inline-start: 0.25rem;
+    padding: 0.05em 0.45em;
+    border-radius: 999px;
+    background: rgba($motor-accent, 0.18);
+    color: $motor-accent-text;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-align: center;
+}
+
+.compare-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid $motor-line;
+    border-radius: $border-radius-lg;
+    background: $motor-surface;
+}
+
+.compare-table {
+    --compare-label-width: 10.5rem;
+    --compare-col-width: 12rem;
+    width: 100%;
+    min-width: calc(var(--compare-label-width) + var(--compare-count) * var(--compare-col-width));
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: $body-color;
+    font-size: $font-size-sm;
+
+    :is(th, td) {
+        padding: 0.8rem 1rem;
+        vertical-align: top;
+        border-bottom: 1px solid $motor-line;
+        overflow-wrap: anywhere;
+    }
+
+    :is(th, td) + :is(th, td) {
+        border-inline-start: 1px solid $motor-line;
+    }
+
+    > tbody:last-child > tr:last-child > :is(th, td) {
+        border-bottom: 0;
+    }
+
+    @include media-breakpoint-up(lg) {
+        --compare-label-width: 13rem;
+    }
+}
+
+// Label column stays visible while the table scrolls sideways
+.compare-label-col {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 2;
+    width: var(--compare-label-width);
+    background: $motor-surface;
+    color: $motor-text;
+    font-weight: 600;
+    text-align: start;
+}
+
+.compare-row.is-diff > .compare-label-col {
+    box-shadow: inset 3px 0 0 $motor-accent;
+}
+
+.compare-row.is-same > td {
+    color: $motor-text-muted;
+}
+
+.compare-yes {
+    color: $success;
+    font-size: 1.05rem;
+}
+
+.compare-none {
+    color: rgba($motor-text-muted, 0.6);
+}
+
+.compare-row-description .html-editor-content {
+    font-size: $font-size-sm;
+}
+
+.compare-highlights {
+    margin: 0;
+    padding-inline-start: 1rem;
+
+    li + li {
+        margin-top: 0.4rem;
+    }
+
+    strong {
+        color: $motor-text;
+        font-weight: 600;
+    }
+}
+
+// Product cards
+.compare-table > thead > tr > :is(th, td) {
+    // A height lets the cards fill the cell, so the buttons line up at the bottom.
+    height: 1px;
+    padding: 1rem;
+    border-bottom: 1px solid $motor-line-strong;
+    font-weight: 400;
+}
+
+.compare-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+}
+
+.compare-remove {
+    position: absolute;
+    top: -0.25rem;
+    inset-inline-end: -0.25rem;
+    z-index: 3;
+}
+
+.compare-card-media {
+    position: relative;
+    width: 100%;
+    max-width: 12.5rem;
+    margin: 0 auto 0.5rem;
+
+    .art-badges {
+        top: 0.5rem;
+        inset-inline-start: 0.5rem;
+    }
+}
+
+.compare-card-brand {
+    color: $motor-text-muted;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.compare-card-name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    color: $motor-text;
+    font-weight: 600;
+    line-height: 1.35;
+
+    &:hover,
+    &:focus {
+        color: $motor-accent-text;
+    }
+}
+
+.compare-card-price {
+    --art-finalprice-font-size: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    padding-top: 0.35rem;
+
+    .art-price-block {
+        margin: 0;
+    }
+}
+
+.compare-best-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba($success, 0.14);
+    color: $success;
+    font-size: $font-size-xs;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.compare-card.is-best .art-price-value {
+    color: $success;
+}
+
+.compare-price-diff {
+    color: $motor-text-muted;
+    font-size: $font-size-xs;
+}
+
+.compare-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+
+    .compare-cart {
+        flex: 1 1 auto;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+// Empty slot that invites a fourth product
+.compare-add-col {
+    background: transparent;
+}
+
+.compare-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    height: 100%;
+    min-height: 16rem;
+    padding: 1.5rem 1rem;
+    border: 1px dashed $motor-line-strong;
+    border-radius: $border-radius-lg;
+    color: $motor-text-muted;
+    text-align: center;
+    text-decoration: none !important;
+    transition: border-color 0.2s, color 0.2s;
+
+    &:hover,
+    &:focus {
+        border-color: $motor-accent;
+        color: $motor-text;
+    }
+}
+
+.compare-add-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: $motor-surface-2;
+    color: $motor-accent-text;
+    font-size: 1.1rem;
+}
+
+.compare-add-title {
+    color: $motor-text;
+    font-weight: 600;
+}
+
+.compare-add-text {
+    max-width: 14rem;
+    font-size: $font-size-xs;
+}
+
+// Group headings
+.compare-group-title > th {
+    padding: 1.5rem 1rem 0.6rem;
+    border-bottom-color: $motor-line-strong;
+    background: $motor-bg;
+    color: $motor-text;
+    font-family: $headings-font-family;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.compare-group-note {
+    display: block;
+    margin-top: 0.15rem;
+    color: $motor-text-muted;
+    font-family: $font-family-base;
+    font-size: $font-size-xs;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+// Keeps labels in full-width rows readable while the table scrolls sideways
+.compare-sticky {
+    position: sticky;
+    inset-inline-start: 1rem;
+    display: inline-block;
+    max-width: calc(100vw - 4rem);
+}
+
+.compare-row-caption {
+    display: none;
+}
+
+.compare-no-diff {
+    display: none;
+
+    td {
+        padding: 1.5rem 1rem;
+        color: $motor-text-muted;
+        text-align: center;
+    }
+}
+
+// "Show differences only"
+.compare-only-diff {
+    [data-same] {
+        display: none;
+    }
+
+    .compare-no-diff {
+        display: table-row-group;
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    .compare-header {
+        align-items: flex-start;
+    }
+
+    .compare-table {
+        --compare-col-width: 9.5rem;
+        min-width: calc(var(--compare-count) * var(--compare-col-width));
+
+        :is(th, td) {
+            padding: 0.65rem 0.75rem;
+        }
+    }
+
+    .compare-label-col,
+    .compare-add-col {
+        display: none;
+    }
+
+    // The full-width rows still span the hidden columns, so the products must claim the whole width.
+    .compare-product {
+        width: calc(100% / var(--compare-count));
+    }
+
+    .compare-table :is(.compare-label-col, .compare-add-col) + :is(th, td) {
+        border-inline-start: 0;
+    }
+
+    .compare-row-caption {
+        display: table-row;
+
+        > td {
+            padding-bottom: 0;
+            border-bottom: 0;
+            color: $motor-text;
+            font-weight: 600;
+        }
+    }
+
+    .compare-row > td {
+        padding-top: 0.35rem;
+    }
+
+    .compare-row-caption:has(+ .compare-row.is-diff) > td {
+        box-shadow: inset 3px 0 0 $motor-accent;
+    }
+
+    .compare-row.is-diff > td:nth-child(2) {
+        box-shadow: inset 3px 0 0 $motor-accent;
+    }
+
+    .compare-card-media {
+        max-width: 6.5rem;
+    }
+
+    .compare-remove {
+        width: 1.75rem;
+        height: 1.75rem;
+        padding: 0;
+        font-size: 0.8rem;
+    }
+
+    .compare-card-name {
+        -webkit-line-clamp: 4;
+    }
+
+    .compare-card-price {
+        --art-finalprice-font-size: 1.05rem;
+    }
+
+    .compare-best-badge {
+        padding: 0.15rem 0.45rem;
+        font-size: 0.65rem;
+        white-space: nowrap;
+
+        .fa {
+            display: none;
+        }
+    }
+
+    .compare-card-actions {
+        .compare-cart {
+            flex-basis: 0;
+        }
+
+        .compare-cart span {
+            display: none;
+        }
+    }
+}
