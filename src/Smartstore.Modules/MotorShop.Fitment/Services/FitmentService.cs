@@ -2,7 +2,11 @@ using System.Globalization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MotorShop.Fitment.Domain;
+using Smartstore.Core;
+using Smartstore.Core.Catalog.Products;
 using Smartstore.Core.Data;
+using Smartstore.Core.Security;
+using Smartstore.Core.Stores;
 
 namespace MotorShop.Fitment.Services;
 
@@ -29,17 +33,24 @@ public class FitmentService
 
     private readonly SmartDbContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IStoreContext _storeContext;
+    private readonly IWorkContext _workContext;
 
-    public FitmentService(SmartDbContext db, IHttpContextAccessor httpContextAccessor)
+    public FitmentService(
+        SmartDbContext db,
+        IHttpContextAccessor httpContextAccessor,
+        IStoreContext storeContext,
+        IWorkContext workContext)
     {
         _db = db;
         _httpContextAccessor = httpContextAccessor;
+        _storeContext = storeContext;
+        _workContext = workContext;
     }
 
     public Task<List<string>> GetMakesAsync()
     {
-        return _db.MotorVehicles()
-            .AsNoTracking()
+        return GetVehiclesWithParts()
             .Select(x => x.Make)
             .Distinct()
             .OrderBy(x => x)
@@ -53,8 +64,7 @@ public class FitmentService
             return Task.FromResult(new List<string>());
         }
 
-        return _db.MotorVehicles()
-            .AsNoTracking()
+        return GetVehiclesWithParts()
             .Where(x => x.Make == make)
             .Select(x => x.Model)
             .Distinct()
@@ -69,8 +79,7 @@ public class FitmentService
             return [];
         }
 
-        var ranges = await _db.MotorVehicles()
-            .AsNoTracking()
+        var ranges = await GetVehiclesWithParts()
             .Where(x => x.Make == make && x.Model == model)
             .Select(x => new { x.YearFrom, x.YearTo })
             .ToListAsync();
@@ -80,6 +89,32 @@ public class FitmentService
             .SelectMany(x => Enumerable.Range(Math.Min(x.YearFrom, x.YearTo), Math.Abs(x.YearTo - x.YearFrom) + 1))
             .Distinct()
             .OrderByDescending(x => x)];
+    }
+
+    /// <summary>
+    /// Motorcycles with at least one part the results page would list, so the picker never offers a dead end.
+    /// Mirrors the storefront search filter: published, fully visible, available by date, store and ACL.
+    /// </summary>
+    private IQueryable<MotorVehicle> GetVehiclesWithParts()
+    {
+        var utcNow = DateTime.UtcNow;
+
+        var productIds = _db.Products
+            .ApplyStandardFilter()
+            .Where(x => x.Visibility == ProductVisibility.Full
+                && (x.AvailableStartDateTimeUtc == null || x.AvailableStartDateTimeUtc < utcNow)
+                && (x.AvailableEndDateTimeUtc == null || x.AvailableEndDateTimeUtc > utcNow))
+            .ApplyStoreFilter(_storeContext.CurrentStore.Id)
+            .ApplyAclFilter(_workContext.CurrentCustomer)
+            .Select(x => x.Id);
+
+        var vehicleIds = _db.ProductMotorVehicles()
+            .Where(m => productIds.Contains(m.ProductId))
+            .Select(m => m.MotorVehicleId);
+
+        return _db.MotorVehicles()
+            .AsNoTracking()
+            .Where(x => vehicleIds.Contains(x.Id));
     }
 
     /// <summary>

@@ -9,6 +9,10 @@ using MotorShop.Fitment.Domain;
 using MotorShop.Fitment.Models;
 using MotorShop.Fitment.Services;
 using NUnit.Framework;
+using Smartstore.Core;
+using Smartstore.Core.Catalog.Products;
+using Smartstore.Core.Identity;
+using Smartstore.Core.Stores;
 
 namespace MotorShop.Fitment.Tests;
 
@@ -23,6 +27,8 @@ public class FitmentServiceTests : FitmentTestBase
         DbContext.ChangeTracker.Clear();
         DbContext.ProductMotorVehicles().RemoveRange(await DbContext.ProductMotorVehicles().ToListAsync());
         DbContext.MotorVehicles().RemoveRange(await DbContext.MotorVehicles().ToListAsync());
+        DbContext.StoreMappings.RemoveRange(await DbContext.StoreMappings.ToListAsync());
+        DbContext.Products.RemoveRange(await DbContext.Products.IgnoreQueryFilters().ToListAsync());
         await DbContext.SaveChangesAsync();
         DbContext.ChangeTracker.Clear();
     }
@@ -39,10 +45,10 @@ public class FitmentServiceTests : FitmentTestBase
     [Test]
     public async Task GetYears_expands_ranges_distinct_and_descending()
     {
-        await AddVehicleAsync("Honda", "CBR 250R", 2011, 2013);
-        await AddVehicleAsync("Honda", "CBR 250R", 2013, 2014);
-        await AddVehicleAsync("Honda", "CBR 500R", 2019, 2020);
-        await AddVehicleAsync("Yamaha", "CBR 250R", 2000, 2001);
+        await AddVehicleWithPartAsync("Honda", "CBR 250R", 2011, 2013);
+        await AddVehicleWithPartAsync("Honda", "CBR 250R", 2013, 2014);
+        await AddVehicleWithPartAsync("Honda", "CBR 500R", 2019, 2020);
+        await AddVehicleWithPartAsync("Yamaha", "CBR 250R", 2000, 2001);
 
         var years = await CreateService().GetYearsAsync("Honda", "CBR 250R");
 
@@ -52,7 +58,7 @@ public class FitmentServiceTests : FitmentTestBase
     [Test]
     public async Task GetYears_single_year_range()
     {
-        await AddVehicleAsync("Honda", "CBR 250R", 2015, 2015);
+        await AddVehicleWithPartAsync("Honda", "CBR 250R", 2015, 2015);
 
         var years = await CreateService().GetYearsAsync("Honda", "CBR 250R");
 
@@ -62,7 +68,7 @@ public class FitmentServiceTests : FitmentTestBase
     [Test]
     public async Task GetYears_reversed_range_is_read_as_min_to_max()
     {
-        await AddVehicleAsync("Honda", "CBR 250R", 2015, 2012);
+        await AddVehicleWithPartAsync("Honda", "CBR 250R", 2015, 2012);
 
         var years = await CreateService().GetYearsAsync("Honda", "CBR 250R");
 
@@ -75,11 +81,83 @@ public class FitmentServiceTests : FitmentTestBase
     [TestCase("Honda", "")]
     public async Task GetYears_requires_make_and_model(string make, string model)
     {
-        await AddVehicleAsync("Honda", "CBR 250R", 2011, 2013);
+        await AddVehicleWithPartAsync("Honda", "CBR 250R", 2011, 2013);
 
         var years = await CreateService().GetYearsAsync(make, model);
 
         Assert.That(years, Is.Empty);
+    }
+
+    #endregion
+
+    #region Picker lists only vehicles with parts
+
+    [Test]
+    public async Task Picker_skips_vehicles_without_parts()
+    {
+        await AddVehicleWithPartAsync("Honda", "CBR 250R", 2011, 2013);
+        await AddVehicleAsync("Honda", "CB650R", 2019, 2023);
+        await AddVehicleAsync("Honda", "CBR 250R", 2017, 2019);
+        await AddVehicleAsync("Kawasaki", "Versys 650", 2015, 2025);
+        var service = CreateService();
+
+        Assert.That(await service.GetMakesAsync(), Is.EqualTo(new[] { "Honda" }));
+        Assert.That(await service.GetModelsAsync("Honda"), Is.EqualTo(new[] { "CBR 250R" }));
+        Assert.That(await service.GetModelsAsync("Kawasaki"), Is.Empty);
+        Assert.That(await service.GetYearsAsync("Honda", "CBR 250R"), Is.EqualTo(new[] { 2013, 2012, 2011 }));
+        Assert.That(await service.GetYearsAsync("Honda", "CB650R"), Is.Empty);
+    }
+
+    [TestCase("unpublished")]
+    [TestCase("deleted")]
+    [TestCase("system")]
+    [TestCase("search-results-only")]
+    [TestCase("product-page-only")]
+    [TestCase("hidden")]
+    [TestCase("not-yet-available")]
+    [TestCase("no-longer-available")]
+    [TestCase("other-store")]
+    public async Task Picker_skips_vehicles_whose_parts_the_storefront_hides(string reason)
+    {
+        var vehicle = await AddVehicleAsync("Kawasaki", "Versys 650", 2015, 2025);
+        var part = await AddProductAsync(p =>
+        {
+            switch (reason)
+            {
+                case "unpublished": p.Published = false; break;
+                case "deleted": p.Deleted = true; break;
+                case "system": p.IsSystemProduct = true; break;
+                case "search-results-only": p.Visibility = ProductVisibility.SearchResults; break;
+                case "product-page-only": p.Visibility = ProductVisibility.ProductPage; break;
+                case "hidden": p.Visibility = ProductVisibility.Hidden; break;
+                case "not-yet-available": p.AvailableStartDateTimeUtc = DateTime.UtcNow.AddDays(1); break;
+                case "no-longer-available": p.AvailableEndDateTimeUtc = DateTime.UtcNow.AddDays(-1); break;
+                case "other-store": p.LimitedToStores = true; break;
+            }
+        });
+        if (reason == "other-store")
+        {
+            await AddStoreMappingAsync(part, CurrentStoreId + 1);
+        }
+        await AddMappingAsync(part, vehicle);
+
+        Assert.That(await CreateService().GetMakesAsync(), Is.Empty);
+    }
+
+    [Test]
+    public async Task Picker_lists_vehicle_whose_part_is_available_in_this_store()
+    {
+        var vehicle = await AddVehicleAsync("Kawasaki", "Versys 650", 2015, 2025);
+        var part = await AddProductAsync(p =>
+        {
+            p.LimitedToStores = true;
+            p.AvailableStartDateTimeUtc = DateTime.UtcNow.AddDays(-1);
+            p.AvailableEndDateTimeUtc = DateTime.UtcNow.AddDays(1);
+        });
+        await AddStoreMappingAsync(part, CurrentStoreId);
+        await AddMappingAsync(part, vehicle);
+
+        Assert.That(await CreateService().GetMakesAsync(), Is.EqualTo(new[] { "Kawasaki" }));
     }
 
     #endregion
@@ -152,7 +230,8 @@ public class FitmentServiceTests : FitmentTestBase
     public async Task GetFittingProductIds_matches_every_year_offered_by_GetYears()
     {
         var vehicle = await AddVehicleAsync("Honda", "CBR 250R", 2015, 2010);
-        await AddMappingAsync(500, vehicle);
+        var part = await AddProductAsync();
+        await AddMappingAsync(part, vehicle);
         var service = CreateService();
 
         var years = await service.GetYearsAsync("Honda", "CBR 250R");
@@ -161,7 +240,7 @@ public class FitmentServiceTests : FitmentTestBase
         foreach (var year in years)
         {
             var ids = await service.GetFittingProductIdsAsync(new VehicleSelection("Honda", "CBR 250R", year));
-            Assert.That(ids, Does.Contain(500), $"Year {year}");
+            Assert.That(ids, Does.Contain(part), $"Year {year}");
         }
     }
 
@@ -358,11 +437,20 @@ public class FitmentServiceTests : FitmentTestBase
 
     #region Utilities
 
+    const int CurrentStoreId = 1;
+
     private FitmentService CreateService(HttpContext httpContext = null)
     {
         var accessor = new Mock<IHttpContextAccessor>();
         accessor.Setup(x => x.HttpContext).Returns(httpContext ?? new DefaultHttpContext());
-        return new FitmentService(DbContext, accessor.Object);
+
+        var storeContext = new Mock<IStoreContext>();
+        storeContext.Setup(x => x.CurrentStore).Returns(new Store { Id = CurrentStoreId });
+
+        var workContext = new Mock<IWorkContext>();
+        workContext.Setup(x => x.CurrentCustomer).Returns(new Customer());
+
+        return new FitmentService(DbContext, accessor.Object, storeContext.Object, workContext.Object);
     }
 
     /// <summary>
@@ -396,6 +484,31 @@ public class FitmentServiceTests : FitmentTestBase
         DbContext.MotorVehicles().Add(vehicle);
         await DbContext.SaveChangesAsync();
         return vehicle;
+    }
+
+    private async Task<MotorVehicle> AddVehicleWithPartAsync(string make, string model, int yearFrom, int yearTo)
+    {
+        var vehicle = await AddVehicleAsync(make, model, yearFrom, yearTo);
+        await AddMappingAsync(await AddProductAsync(), vehicle);
+        return vehicle;
+    }
+
+    /// <summary>
+    /// Adds a part the storefront lists, unless <paramref name="configure"/> hides it.
+    /// </summary>
+    private async Task<int> AddProductAsync(Action<Product> configure = null)
+    {
+        var product = new Product { Name = "Part", Published = true, Visibility = ProductVisibility.Full };
+        configure?.Invoke(product);
+        DbContext.Products.Add(product);
+        await DbContext.SaveChangesAsync();
+        return product.Id;
+    }
+
+    private async Task AddStoreMappingAsync(int productId, int storeId)
+    {
+        DbContext.StoreMappings.Add(new StoreMapping { EntityName = nameof(Product), EntityId = productId, StoreId = storeId });
+        await DbContext.SaveChangesAsync();
     }
 
     private async Task AddMappingAsync(int productId, params MotorVehicle[] vehicles)
