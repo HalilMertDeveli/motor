@@ -1,3 +1,4 @@
+using Smartstore.Core.Catalog;
 using Smartstore.Core.Catalog.Brands;
 using Smartstore.Core.Catalog.Categories;
 using Smartstore.Core.Catalog.Pricing;
@@ -512,6 +513,8 @@ public class TrTRSeedData : InvariantSeedData
                 // Statutory withdrawal period for distance sales in Turkey. NEEDS OWNER CONFIRMATION.
                 x.NumberOfDaysReturnRequestAvailable = 14;
             })
+            // The compare page builds its feature rows from the bulleted full descriptions.
+            .Alter<CatalogSettings>(x => x.IncludeFullDescriptionInCompareProducts = true)
             .Alter<ShippingSettings>(x => x.EstimateShippingEnabled = false)
             .Alter<TaxSettings>(x =>
             {
