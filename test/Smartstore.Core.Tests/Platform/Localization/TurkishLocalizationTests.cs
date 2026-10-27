@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using NUnit.Framework;
@@ -189,6 +190,39 @@ public class TurkishLocalizationTests
     }
 
     [Test]
+    public void Turkish_Texts_Name_The_Store_Not_The_Platform()
+    {
+        // Web addresses, package file names and configuration keys are technical names and stay.
+        var technical = new Regex(@"https?://\S+|[\w.-]*smartstore\.com\S*|Smartstore\.[\w*.]+", RegexOptions.IgnoreCase);
+        var platform = new Regex(@"smart\s*store", RegexOptions.IgnoreCase);
+
+        var offenders = TurkishResources()
+            .Where(x => platform.IsMatch(technical.Replace(x.Value, string.Empty)))
+            .Select(x => x.Key)
+            .ToList();
+
+        Assert.That(offenders, Is.Empty);
+    }
+
+    [Test]
+    public void Admin_Brand_Migration_Matches_The_Language_Packs()
+    {
+        var tr = TurkishResources();
+
+        foreach (var (key, oldText, newText) in MrtMotorsAdminBrand.Replacements)
+        {
+            Assert.That(tr.TryGetValue(key, out var value), Is.True, key);
+            Assert.That(value, Does.Not.Contain(oldText), key);
+            Assert.That(value, Does.Contain(newText), key);
+        }
+
+        Assert.That(MrtMotorsAdminBrand.Apply("admin.common.about", "Smartstore hakkında"), Is.EqualTo("MRT Motors hakkında"));
+        Assert.That(MrtMotorsAdminBrand.Apply("Admin.Common.About", "Hakkımızda"), Is.EqualTo("Hakkımızda"));
+        Assert.That(MrtMotorsAdminBrand.Apply("Admin.Packaging.NotAPackage", "Lütfen bir 'Smartstore.*.zip' dosyası yükleyin."),
+            Is.EqualTo("Lütfen bir 'Smartstore.*.zip' dosyası yükleyin."));
+    }
+
+    [Test]
     public void Email_Templates_Match_English_Templates()
     {
         var enDir = WebPath("App_Data", "EmailTemplates", "en");
@@ -260,6 +294,32 @@ public class TurkishLocalizationTests
                 .Select(x => (string)x.Attribute("Name"));
 
             result[string.Join(".", names)] = node.Element("Value")?.Value ?? string.Empty;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The app pack and all module packs, keyed like the database (module keys with their resource root key).
+    /// </summary>
+    private static Dictionary<string, string> TurkishResources()
+    {
+        var result = LoadResources(WebPath("App_Data", "Localization", "App", "tr", "all.smres.xml"));
+        var files = Directory.GetFiles(Path.Combine(RepoRoot, "src", "Smartstore.Modules"), "resources.tr-tr.xml", SearchOption.AllDirectories);
+
+        foreach (var file in files)
+        {
+            var moduleJson = Path.Combine(Path.GetDirectoryName(file), "..", "module.json");
+            var rootKey = JsonDocument.Parse(File.ReadAllText(moduleJson)).RootElement.TryGetProperty("ResourceRootKey", out var root)
+                ? root.GetString()
+                : null;
+
+            foreach (var node in XDocument.Load(file).Root.Elements("LocaleResource"))
+            {
+                var name = (string)node.Attribute("Name");
+                var key = (string)node.Attribute("AppendRootKey") == "false" ? name : $"{rootKey}.{name}";
+                result[key] = node.Element("Value")?.Value ?? string.Empty;
+            }
         }
 
         return result;

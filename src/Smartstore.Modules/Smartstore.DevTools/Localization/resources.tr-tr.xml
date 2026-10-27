@@ -3,7 +3,7 @@
         <Value>Geliştirici Araçları</Value>
     </LocaleResource>
     <LocaleResource Name="Plugins.Description.SmartStore.DevTools" AppendRootKey="false">
-        <Value>Smartstore Geliştirici Araçları (MiniProfiler ve diğer faydalı araçlar).</Value>
+        <Value>MRT Motors geliştirici araçları (MiniProfiler ve diğer faydalı araçlar).</Value>
     </LocaleResource>
     <LocaleResource Name="Plugins.FriendlyName.Widgets.DevToolsDemo" AppendRootKey="false">
         <Value>Geliştirici Araçları demo widget'ı</Value>

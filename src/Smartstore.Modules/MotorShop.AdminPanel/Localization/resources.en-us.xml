@@ -1,6 +1,6 @@
 <Language Name="English" IsDefault="false" IsRightToLeft="false">
     <LocaleResource Name="Plugins.FriendlyName.MotorShop.AdminPanel" AppendRootKey="false"><Value>MOTOR Admin Panel</Value></LocaleResource>
-    <LocaleResource Name="Plugins.Description.MotorShop.AdminPanel" AppendRootKey="false"><Value>A light administration panel at /motor-panel on top of the existing Smartstore services, permissions and data. The classic /admin stays available.</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.AdminPanel" AppendRootKey="false"><Value>A light administration panel at /motor-panel on top of the existing store services, permissions and data. The classic /admin stays available.</Value></LocaleResource>
     <LocaleResource Name="PageTitle"><Value>Admin panel</Value></LocaleResource>
     <LocaleResource Name="Subtitle"><Value>Products, orders, stock and categories</Value></LocaleResource>
     <LocaleResource Name="SkipToContent"><Value>Skip to content</Value></LocaleResource>
@@ -391,7 +391,7 @@
     <LocaleResource Name="Report.StockAlertsHint"><Value>Published, stock-tracked products at or below their minimum. Per-variant stock is not included.</Value></LocaleResource>
     <LocaleResource Name="Report.NoStockAlerts"><Value>No products at minimum stock.</Value></LocaleResource>
     <LocaleResource Name="Content.Pages"><Value>Pages</Value></LocaleResource>
-    <LocaleResource Name="Content.PagesHint"><Value>The store's content pages (Smartstore topics): about, contracts, help…</Value></LocaleResource>
+    <LocaleResource Name="Content.PagesHint"><Value>The store's content pages: about, contracts, help…</Value></LocaleResource>
     <LocaleResource Name="Content.Title"><Value>Title</Value></LocaleResource>
     <LocaleResource Name="Content.SystemName"><Value>System name</Value></LocaleResource>
     <LocaleResource Name="Content.Kind"><Value>Kind</Value></LocaleResource>
@@ -404,7 +404,7 @@
     <LocaleResource Name="Content.BlogWordPress"><Value>Blog posts are written in WordPress and shown in the store by MotorShop.WordPress. Add or edit posts in WordPress.</Value></LocaleResource>
     <LocaleResource Name="Content.BlogOpen"><Value>See blog connection and latest posts</Value></LocaleResource>
     <LocaleResource Name="Content.BlogNotInstalled"><Value>The blog module (MotorShop.WordPress) is not installed.</Value></LocaleResource>
-    <LocaleResource Name="Coupon.Hint"><Value>Smartstore discounts. Amounts are calculated by the store's pricing engine.</Value></LocaleResource>
+    <LocaleResource Name="Coupon.Hint"><Value>Store discounts. Amounts are calculated by the store's pricing engine.</Value></LocaleResource>
     <LocaleResource Name="Coupon.New"><Value>New coupon</Value></LocaleResource>
     <LocaleResource Name="Coupon.None"><Value>No coupons or discounts yet.</Value></LocaleResource>
     <LocaleResource Name="Coupon.Name"><Value>Name</Value></LocaleResource>
