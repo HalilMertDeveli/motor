@@ -1,0 +1,558 @@
+@using System.Text.RegularExpressions
+@using Smartstore.Web.Models.Catalog
+@using Smartstore.Core.Checkout.Cart
+
+@model ProductSummaryModel
+
+@*
+    MOTOR: compare page. The 2026 catalog has no specification attributes, its product data lives in the bulleted
+    full description ("Güneş vizörlü", "Menşei: TÜRKİYE"). So besides the Smartstore rows this view builds a feature
+    matrix from those bullets, marks the best price and lets the customer hide rows without differences.
+*@
+
+@functions {
+    // ProductCompareService keeps the last 4 products.
+    const int MaxCompareItems = 4;
+
+    static readonly Regex ListItemRegex = new(@"<li\b[^>]*>(.*?)</li>", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+    static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled);
+    static readonly CultureInfo TurkishCulture = CultureInfo.GetCultureInfo("tr-TR");
+
+    class CompareRow
+    {
+        public string Label { get; init; }
+        public IHtmlContent[] Cells { get; init; }
+        // Normalized value per product to detect differences, null if the product has none.
+        public string[] Keys { get; init; }
+        public string CssClass { get; init; }
+        public bool IsSame => Keys.Length > 1 && Keys.All(x => x != null && x == Keys[0]);
+    }
+
+    class CompareGroup
+    {
+        public string Title { get; init; }
+        public string Note { get; init; }
+        public List<CompareRow> Rows { get; } = [];
+        public bool IsSame => Rows.All(x => x.IsSame);
+    }
+
+    // One description bullet: "Menşei: TÜRKİYE" is a key/value pair, "Güneş vizörlü" a flag (Value is null).
+    record Feature(string Key, string Label, string Value);
+
+    class FeatureRow
+    {
+        public string Key { get; init; }
+        public string Label { get; init; }
+        public bool IsFlag { get; init; }
+        public string[] Values { get; init; }
+    }
+
+    static List<Feature> ParseFeatures(string html)
+    {
+        var result = new List<Feature>();
+        if (html.IsEmpty())
+        {
+            return result;
+        }
+
+        foreach (Match match in ListItemRegex.Matches(html))
+        {
+            var text = Clean(match.Groups[1].Value);
+            if (text.IsEmpty())
+            {
+                continue;
+            }
+
+            // A short text before the first colon is a label ("Beden seçenekleri: S, M, L"),
+            // but not the colon of a standard ("CE onaylı - EN 1621-3:2018").
+            var colon = text.IndexOf(':');
+            if (colon > 1 && colon <= 40 && colon < text.Length - 1 && !(char.IsDigit(text[colon - 1]) && char.IsDigit(text[colon + 1])))
+            {
+                var label = text[..colon].Trim();
+                result.Add(new(Normalize(label), label, text[(colon + 1)..].Trim()));
+            }
+            else
+            {
+                result.Add(new(Normalize(text), text, null));
+            }
+        }
+
+        return result;
+    }
+
+    // Values that read like sentences ("Hijyenik konfor: Tamamen sökülüp yıkanabilir iç astar sayesinde ...") go into
+    // one highlights row instead of a tall row each. Lists ("Beden seçenekleri: S, M, L, XL") have a comma every few words.
+    static bool IsSentence(string value)
+    {
+        if (value == null || value.Length <= 50)
+        {
+            return false;
+        }
+
+        var words = value.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+        return value.Count(x => x == ',') < words / 4.0;
+    }
+
+    static string Clean(string html)
+        => WhitespaceRegex.Replace(html.RemoveHtml(), " ").Trim().TrimEnd('.', ';', ',').TrimEnd();
+
+    static string Normalize(string text)
+        => text.IsEmpty() ? null : WhitespaceRegex.Replace(text, " ").Trim().ToLower(TurkishCulture);
+
+    static IHtmlContent Text(string value)
+        => new HtmlContentBuilder().Append(value ?? string.Empty);
+}
+
+@{
+    Assets.AppendTitleParts(T("PageTitle.CompareProducts"));
+    Assets.AppendMetaDescriptionParts(T("PageDescription.CompareProducts", CommonServices.StoreContext.CurrentStore.Name));
+
+    var items = Model.Items;
+    var count = items.Count;
+    var showAddSlot = count > 0 && count < MaxCompareItems;
+    var anyBrand = items.Any(x => x.Brand != null);
+
+    var notListedText = Html.Encode(T("Themes.MotorDark.Compare.NotListed").Value);
+    var missing = new HtmlString($"<span class=\"compare-none\" title=\"{notListedText}\" aria-hidden=\"true\">–</span><span class=\"sr-only\">{notListedText}</span>");
+    var listed = new HtmlString($"<i class=\"fa fa-check compare-yes\" aria-hidden=\"true\"></i><span class=\"sr-only\">{Html.Encode(T("Themes.MotorDark.Compare.Listed").Value)}</span>");
+
+    // Best price: only when at least two products have a price and the prices differ.
+    var pricedItems = items
+        .Where(x => Model.ShowPrice && x.Price != null && x.Price.HasCalculation && !x.Price.CallForPrice)
+        .ToList();
+    Money? bestPrice = null;
+    if (pricedItems.Count > 1 && pricedItems.Select(x => x.Price.FinalPrice.Amount).Distinct().Count() > 1)
+    {
+        bestPrice = pricedItems.MinBy(x => x.Price.FinalPrice.Amount).Price.FinalPrice;
+    }
+
+    var features = items.Select(x => ParseFeatures(x.FullDescription?.Value)).ToArray();
+    var groups = new List<CompareGroup>();
+
+    // Overview
+    var general = new CompareGroup { Title = T("Themes.MotorDark.Compare.Group.General") };
+    groups.Add(general);
+
+    if (Model.ShowBrand && anyBrand)
+    {
+        general.Rows.Add(new CompareRow
+        {
+            Label = T("Products.Manufacturer"),
+            Cells = items.Select(x => x.Brand != null ? Text(x.Brand.Name) : missing).ToArray(),
+            Keys = items.Select(x => Normalize(x.Brand?.Name?.Value)).ToArray()
+        });
+    }
+
+    var hasDelivery = Model.DeliveryTimesPresentation != DeliveryTimesPresentation.None && items.Any(x =>
+        x.IsShippingEnabled && x.DeliveryTime?.ShowDeliveryTime == true && (x.DeliveryTime.StatusLabel.HasValue() || x.DeliveryTime.DeliveryTimeDate.HasValue()));
+    if (hasDelivery)
+    {
+        var cells = new List<IHtmlContent>();
+        foreach (var item in items)
+        {
+            cells.Add(await Html.PartialAsync("Product.List.Item.Delivery", item));
+        }
+
+        general.Rows.Add(new CompareRow
+        {
+            Label = T("Themes.MotorDark.Compare.Delivery"),
+            Cells = cells.ToArray(),
+            Keys = items.Select(x => x.DeliveryTime == null ? null : $"{x.DeliveryTime.StatusLabel}|{x.DeliveryTime.DeliveryTimeDate}").ToArray()
+        });
+    }
+
+    if (items.Any(x => x.TotalReviews > 0))
+    {
+        var cells = new List<IHtmlContent>();
+        foreach (var item in items)
+        {
+            cells.Add(await Html.PartialAsync("Product.List.Item.Rating", item));
+        }
+
+        general.Rows.Add(new CompareRow
+        {
+            Label = T("Themes.MotorDark.Compare.Rating"),
+            Cells = cells.ToArray(),
+            Keys = items.Select(x => $"{x.RatingSum}/{x.TotalReviews}").ToArray()
+        });
+    }
+
+    if (Model.ShowSku && items.Any(x => x.Sku.HasValue()))
+    {
+        general.Rows.Add(new CompareRow
+        {
+            Label = T("Products.Sku"),
+            Cells = items.Select(x => x.Sku.HasValue() ? Text(x.Sku) : missing).ToArray(),
+            Keys = items.Select(x => x.Sku.NullEmpty()).ToArray()
+        });
+    }
+
+    if (items.Any(x => !x.Weight.IsEmpty))
+    {
+        general.Rows.Add(new CompareRow
+        {
+            Label = T("Products.Weight"),
+            Cells = items.Select(x => x.Weight.IsEmpty ? missing : new HtmlString($"<span class=\"lrm\">{Html.Encode(x.Weight.ToString())}</span>")).ToArray(),
+            Keys = items.Select(x => x.Weight.IsEmpty ? null : x.Weight.ToString()).ToArray()
+        });
+    }
+
+    if (items.Any(x => x.Dimensions.HasValue()))
+    {
+        general.Rows.Add(new CompareRow
+        {
+            Label = T("Products.Dimensions"),
+            Cells = items.Select(x => x.Dimensions.HasValue() ? new HtmlString($"<span class=\"lrm\">{x.Dimensions}</span>") : missing).ToArray(),
+            Keys = items.Select(x => x.Dimensions.NullEmpty()).ToArray()
+        });
+    }
+
+    // The short description repeats the first bullets, so it is only needed for products without a bullet list.
+    var showShortDescription = Model.ShowDescription
+        && items.Where((x, i) => features[i].Count == 0).Any(x => x.ShortDescription?.Value.HasValue() == true);
+    if (showShortDescription)
+    {
+        general.Rows.Add(new CompareRow
+        {
+            Label = T("Products.Compare.ShortDescription"),
+            Cells = items.Select(x => x.ShortDescription.Value.HasValue() ? Html.Raw(x.ShortDescription.Value) : missing).ToArray(),
+            Keys = items.Select(x => Normalize(x.ShortDescription.Value?.RemoveHtml())).ToArray()
+        });
+    }
+
+    // Specification attributes (none in the current catalog, kept for products that get them).
+    var specificationAttributes = items
+        .SelectMany(x => x.SpecificationAttributes)
+        .GroupBy(x => x.SpecificationAttributeId)
+        .Select(x => x.First())
+        .ToList();
+    if (specificationAttributes.Count > 0)
+    {
+        var specs = new CompareGroup { Title = T("Themes.MotorDark.Compare.Group.Specifications") };
+        groups.Add(specs);
+
+        foreach (var attribute in specificationAttributes)
+        {
+            var values = items
+                .Select(x => x.SpecificationAttributes
+                    .Where(s => s.SpecificationAttributeId == attribute.SpecificationAttributeId)
+                    .Select(s => s.SpecificationAttributeOption?.Value)
+                    .Where(s => s.HasValue())
+                    .ToList())
+                .ToArray();
+
+            specs.Rows.Add(new CompareRow
+            {
+                Label = attribute.SpecificationAttributeName,
+                CssClass = attribute.Essential ? "pd-spec-essential" : null,
+                Cells = values.Select(x => x.Count > 0 ? Text(string.Join(", ", x)) : missing).ToArray(),
+                Keys = values.Select(x => x.Count > 0 ? Normalize(string.Join(", ", x)) : null).ToArray()
+            });
+        }
+    }
+
+    // Feature matrix from the description bullets, in the order of their first appearance.
+    if (features.Any(x => x.Count > 0))
+    {
+        var featureRows = new List<FeatureRow>();
+        var rowIndex = new Dictionary<string, FeatureRow>();
+        var highlights = items.Select(x => new List<Feature>()).ToArray();
+
+        for (var i = 0; i < count; i++)
+        {
+            foreach (var feature in features[i])
+            {
+                if (IsSentence(feature.Value))
+                {
+                    highlights[i].Add(feature);
+                    continue;
+                }
+
+                var isFlag = feature.Value == null;
+                var key = (isFlag ? "f:" : "v:") + feature.Key;
+                if (!rowIndex.TryGetValue(key, out var row))
+                {
+                    row = new FeatureRow { Key = feature.Key, Label = feature.Label, IsFlag = isFlag, Values = new string[count] };
+                    rowIndex[key] = row;
+                    featureRows.Add(row);
+                }
+
+                var value = feature.Value ?? feature.Label;
+                row.Values[i] = row.Values[i] == null || isFlag ? value : row.Values[i] + ", " + value;
+            }
+        }
+
+        // A flag that is not a bullet of its own may still be mentioned in a sentence ("Full face tasarımıyla").
+        // The space before each tag keeps the words of adjacent bullets apart.
+        var descriptionTexts = items.Select(x => Normalize(x.FullDescription?.Value?.Replace("<", " <").RemoveHtml())).ToArray();
+        foreach (var row in featureRows.Where(x => x.IsFlag))
+        {
+            var pattern = new Regex(@"(?<!\w)" + Regex.Escape(row.Key) + @"(?!\w)");
+            for (var i = 0; i < count; i++)
+            {
+                if (row.Values[i] == null && descriptionTexts[i] != null && pattern.IsMatch(descriptionTexts[i]))
+                {
+                    row.Values[i] = row.Label;
+                }
+            }
+        }
+
+        var group = new CompareGroup
+        {
+            Title = T("Themes.MotorDark.Compare.Group.Features"),
+            Note = count > 1 ? T("Themes.MotorDark.Compare.FeaturesNote").Value : null
+        };
+        groups.Add(group);
+
+        foreach (var row in featureRows)
+        {
+            group.Rows.Add(new CompareRow
+            {
+                Label = row.Label,
+                CssClass = row.IsFlag ? "compare-row-flag" : null,
+                Cells = row.Values.Select(x => x == null ? missing : row.IsFlag ? listed : Text(x)).ToArray(),
+                Keys = row.Values.Select(x => x == null ? null : row.IsFlag ? "1" : Normalize(x)).ToArray()
+            });
+        }
+
+        // Last, so the short rows above stay easy to scan.
+        if (highlights.Any(x => x.Count > 0))
+        {
+            group.Rows.Add(new CompareRow
+            {
+                Label = T("Themes.MotorDark.Compare.Highlights"),
+                CssClass = "compare-row-highlights",
+                Cells = highlights
+                    .Select(x => x.Count == 0 ? missing : new HtmlString("<ul class=\"compare-highlights\">"
+                        + string.Concat(x.Select(f => $"<li><strong>{Html.Encode(f.Label)}:</strong> {Html.Encode(f.Value)}</li>"))
+                        + "</ul>"))
+                    .ToArray(),
+                Keys = highlights.Select(x => x.Count == 0 ? null : Normalize(string.Join("|", x.Select(f => f.Label + ":" + f.Value)))).ToArray()
+            });
+        }
+    }
+
+    // Full description only for products whose description is not a bullet list.
+    if (Model.ShowFullDescription && items.Where((x, i) => features[i].Count == 0).Any(x => x.FullDescription?.Value.HasValue() == true))
+    {
+        groups.Add(new CompareGroup { Title = T("Products.Compare.FullDescription") });
+        groups[^1].Rows.Add(new CompareRow
+        {
+            Label = T("Common.Description"),
+            CssClass = "compare-row-description",
+            Cells = items
+                .Select((x, i) => features[i].Count == 0 && x.FullDescription.Value.HasValue()
+                    ? new HtmlString($"<div class=\"html-editor-content\">{x.FullDescription.Value}</div>")
+                    : missing)
+                .ToArray(),
+            Keys = new string[count]
+        });
+    }
+
+    groups.RemoveAll(x => x.Rows.Count == 0);
+
+    var rows = groups.SelectMany(x => x.Rows).ToList();
+    var sameCount = rows.Count(x => x.IsSame);
+    var canFilter = count > 1 && sameCount > 0;
+    var columnCount = count + (showAddSlot ? 2 : 1);
+}
+
+<div class="page compare-products-page">
+    <div class="compare-header">
+        <div class="heading mb-0">
+            <h1 class="heading-title fs-h1">@T("Products.Compare.Title")</h1>
+            <p sm-if="count > 0" class="compare-subtitle">@T("Themes.MotorDark.Compare.Count", count, MaxCompareItems)</p>
+        </div>
+        <div sm-if="count > 0" class="compare-toolbar">
+            <div sm-if="canFilter" class="form-check form-switch compare-diff-switch">
+                <input type="checkbox" class="form-check-input" id="compare-only-diff" aria-controls="compare-table" />
+                <label class="form-check-label" for="compare-only-diff">
+                    @T("Themes.MotorDark.Compare.OnlyDifferences")
+                    <span class="compare-diff-count">@(rows.Count - sameCount)</span>
+                </label>
+            </div>
+            <button data-href="@Url.Action("ClearCompareList", "Catalog", new { redirect = true })"
+                    type="button"
+                    class="btn btn-secondary btn-sm btn-to-danger ajax-cart-link"
+                    data-type="compare"
+                    data-action="remove">
+                <i class="far fa-trash-can" aria-hidden="true"></i>
+                <span>@T("Products.Compare.Clear")</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="page-body">
+        @if (count == 0)
+        {
+            <div class="motor-empty">
+                <svg class="motor-empty-icon" aria-hidden="true"><use href="#mi-grid" /></svg>
+                <p class="motor-empty-title">@T("Themes.MotorDark.Compare.EmptyTitle")</p>
+                <p class="motor-empty-text">@T("Themes.MotorDark.Compare.EmptyText")</p>
+                <div class="motor-empty-actions">
+                    <a href="@(Url.RouteUrl("Homepage"))#motor-categories" class="btn btn-primary">@T("Themes.MotorDark.Products.BrowseCategories")</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="compare-scroll">
+                <table id="compare-table" class="compare-table" style="--compare-count: @count">
+                    <caption class="sr-only">@T("Products.Compare.Title"): @(string.Join(", ", items.Select(x => x.Name)))</caption>
+                    <thead>
+                        <tr>
+                            <td class="compare-label-col compare-corner"></td>
+                            @foreach (var product in items)
+                            {
+                                var showAddToCart = !product.Price.DisableBuyButton && !product.Price.CallForPrice && product.Parent.BuyEnabled;
+                                var showWishlist = !product.Price.DisableWishlistButton && product.Parent.WishlistEnabled;
+                                var isBest = bestPrice.HasValue && pricedItems.Contains(product) && product.Price.FinalPrice.Amount == bestPrice.Value.Amount;
+
+                                <th class="compare-product" scope="col">
+                                    <div class="compare-card@(isBest ? " is-best" : null)">
+                                        <button data-href="@Url.Action("RemoveProductFromCompare", "Catalog", new { id = product.Id, redirect = true })"
+                                                type="button"
+                                                class="btn btn-secondary btn-flat btn-sm btn-icon btn-to-danger compare-remove ajax-cart-link"
+                                                title="@T("Common.Remove")"
+                                                aria-label="@T("Common.Remove") @product.Name"
+                                                data-type="compare"
+                                                data-action="remove">
+                                            <i class="fa fa-xmark" aria-hidden="true"></i>
+                                        </button>
+
+                                        <div class="compare-card-media">
+                                            <a class="art-picture img-center-container" href="@product.DetailUrl" tabindex="-1" aria-hidden="true">
+                                                <img sm-if="product.Image.HasImage()" sm-model="product.Image" loading="lazy" attr-alt='(product.Image.Alt.IsEmpty(), product.Name)' />
+                                            </a>
+                                            <div sm-if="product.Badges.Count > 0" class="art-badges">
+                                                @foreach (var badge in product.Badges.OrderBy(x => x.DisplayOrder))
+                                                {
+                                                    <span class="art-badge badge badge-@badge.Style">@Html.Raw(badge.Label)</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        @if (product.Brand != null)
+                                        {
+                                            <div class="compare-card-brand" sm-language-attributes-for="product.Brand.Name">@product.Brand.Name</div>
+                                        }
+                                        else if (anyBrand)
+                                        {
+                                            @* Keeps the names of all cards on one line *@
+                                            <div class="compare-card-brand" aria-hidden="true">&nbsp;</div>
+                                        }
+                                        <a class="compare-card-name" href="@product.DetailUrl" sm-language-attributes-for="product.Name">@product.Name</a>
+
+                                        <div class="compare-card-price">
+                                            <partial name="Product.List.Item.Price" model="product" />
+                                            @if (isBest)
+                                            {
+                                                <span class="compare-best-badge">
+                                                    <i class="fa fa-arrow-trend-down" aria-hidden="true"></i>
+                                                    @T("Themes.MotorDark.Compare.BestPrice")
+                                                </span>
+                                            }
+                                            else if (bestPrice.HasValue && pricedItems.Contains(product))
+                                            {
+                                                <span class="compare-price-diff">@T("Themes.MotorDark.Compare.PriceDifference", product.Price.FinalPrice.WithAmount(product.Price.FinalPrice.Amount - bestPrice.Value.Amount).WithPostFormat(null).ToString())</span>
+                                            }
+                                        </div>
+
+                                        <div sm-if="showAddToCart || showWishlist" class="compare-card-actions">
+                                            @if (showAddToCart)
+                                            {
+                                                <button data-href='@Url.Action("AddProductSimple", "ShoppingCart", new { productId = product.Id, shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart })'
+                                                        type="button"
+                                                        class="btn btn-primary btn-sm compare-cart ajax-cart-link"
+                                                        aria-label="@T("ShoppingCart.AddToCart") @product.Name"
+                                                        data-type="cart"
+                                                        data-action="add">
+                                                    <i class="fa fa-cart-arrow-down" aria-hidden="true"></i>
+                                                    <span>@T("ShoppingCart.AddToCart")</span>
+                                                </button>
+                                            }
+                                            @if (showWishlist)
+                                            {
+                                                <button data-href='@Url.Action("AddProductSimple", "ShoppingCart", new { productId = product.Id, shoppingCartTypeId = (int)ShoppingCartType.Wishlist })'
+                                                        type="button"
+                                                        class="btn btn-secondary btn-icon btn-sm ajax-cart-link"
+                                                        title="@T("ShoppingCart.AddToWishlist")"
+                                                        aria-label="@T("ShoppingCart.AddToWishlist") @product.Name"
+                                                        data-type="wishlist"
+                                                        data-action="add">
+                                                    <i class="fal fa-heart" aria-hidden="true"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </th>
+                            }
+                            @if (showAddSlot)
+                            {
+                                <td class="compare-add-col">
+                                    <a class="compare-add" href="@(Url.RouteUrl("Homepage"))#motor-categories">
+                                        <span class="compare-add-icon"><i class="fa fa-plus" aria-hidden="true"></i></span>
+                                        <span class="compare-add-title">@T("Themes.MotorDark.Compare.AddProduct")</span>
+                                        <span class="compare-add-text">@T("Themes.MotorDark.Compare.AddProductText", MaxCompareItems - count)</span>
+                                    </a>
+                                </td>
+                            }
+                        </tr>
+                    </thead>
+
+                    @foreach (var group in groups)
+                    {
+                        <tbody class="compare-group" attr-data-same='(group.IsSame, "true")'>
+                            <tr class="compare-group-title">
+                                <th colspan="@columnCount" scope="colgroup">
+                                    <span class="compare-sticky">
+                                        @group.Title
+                                        <small sm-if="group.Note.HasValue()" class="compare-group-note">@group.Note</small>
+                                    </span>
+                                </th>
+                            </tr>
+                            @foreach (var row in group.Rows)
+                            {
+                                var isSame = row.IsSame;
+                                var rowClass = (isSame ? "compare-row is-same" : count > 1 ? "compare-row is-diff" : "compare-row") + (row.CssClass != null ? " " + row.CssClass : null);
+
+                                @* Phones have no room for a label column: the label gets its own row above the values. *@
+                                <tr class="compare-row-caption" attr-data-same='(isSame, "true")' aria-hidden="true">
+                                    <td colspan="@columnCount"><span class="compare-sticky">@row.Label</span></td>
+                                </tr>
+                                <tr class="@rowClass" attr-data-same='(isSame, "true")'>
+                                    <th class="compare-label-col" scope="row">@row.Label</th>
+                                    @foreach (var cell in row.Cells)
+                                    {
+                                        <td>@cell</td>
+                                    }
+                                    <td sm-if="showAddSlot" class="compare-add-col"></td>
+                                </tr>
+                            }
+                        </tbody>
+                    }
+
+                    <tbody sm-if="canFilter && sameCount == rows.Count" class="compare-no-diff">
+                        <tr>
+                            <td colspan="@columnCount">@T("Themes.MotorDark.Compare.NoDifferences")</td>
+                        </tr>
+                    </tbody>
+
+                    <tbody>
+                        <zone name="compareproducts_row" />
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<script sm-if="canFilter" sm-target-zone="scripts" data-origin="compare-products">
+    $(function () {
+        const table = document.getElementById('compare-table');
+        const toggle = document.getElementById('compare-only-diff');
+        if (!table || !toggle) return;
+
+        toggle.addEventListener('change', () => table.classList.toggle('compare-only-diff', toggle.checked));
+    });
+</script>
