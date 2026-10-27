@@ -1318,7 +1318,7 @@
 		<Value>Çevir</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.AppNews">
-		<Value>Smartstore Haberleri</Value>
+		<Value>Platform haberleri</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.AppNews.HideAdv">
 		<Value>Reklamları gizle</Value>
@@ -3617,7 +3617,7 @@
 		<Value>Otomatik güncelleme mümkün</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.CheckUpdate.AutoUpdatePossibleInfo">
-		<Value>&amp;lt;p&amp;gt;Bu güncelleme otomatik olarak kurulabilir. Bunun için Smartstore web sunucunuza bir kurulum paketi indirir, çalıştırır ve uygulamayı yeniden başlatır. Kurulumdan önce mağaza dizininiz yedeklenir; &amp;lt;i&amp;gt;App_Data&amp;lt;/i&amp;gt; ve &amp;lt;i&amp;gt;Media&amp;lt;/i&amp;gt; klasörleri ile SQL Server veritabanı dosyası bu yedeğe dahil değildir. &amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;Paketi indirip kurmak için &amp;lt;b&amp;gt;Şimdi güncelle&amp;lt;/b&amp;gt; düğmesine tıklayın. Alternatif olarak paketi aşağıdan kendi bilgisayarınıza indirip kurulumu daha sonra elle yapabilirsiniz.&amp;lt;/p&amp;gt;</Value>
+		<Value>&amp;lt;p&amp;gt;Bu güncelleme otomatik olarak kurulabilir. Bunun için MRT Motors web sunucunuza bir kurulum paketi indirir, çalıştırır ve uygulamayı yeniden başlatır. Kurulumdan önce mağaza dizininiz yedeklenir; &amp;lt;i&amp;gt;App_Data&amp;lt;/i&amp;gt; ve &amp;lt;i&amp;gt;Media&amp;lt;/i&amp;gt; klasörleri ile SQL Server veritabanı dosyası bu yedeğe dahil değildir. &amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;Paketi indirip kurmak için &amp;lt;b&amp;gt;Şimdi güncelle&amp;lt;/b&amp;gt; düğmesine tıklayın. Alternatif olarak paketi aşağıdan kendi bilgisayarınıza indirip kurulumu daha sonra elle yapabilirsiniz.&amp;lt;/p&amp;gt;</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.CheckUpdate.CurrentVersion">
 		<Value>Güncel sürüm</Value>
@@ -3626,7 +3626,7 @@
 		<Value>Bir daha bildirme</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.CheckUpdate.IsUpToDate">
-		<Value>Smartstore güncel</Value>
+		<Value>MRT Motors güncel</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.CheckUpdate.ReleaseNotes">
 		<Value>Sürüm notları</Value>
@@ -3644,7 +3644,7 @@
 		<Value>İşlemler</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Common.About">
-		<Value>Smartstore hakkında</Value>
+		<Value>MRT Motors hakkında</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Common.Acl.AvailableFor.Hint">
 		<Value>Kayda erişebilecek müşteri rollerini seçin. Seçilmeyen tüm roller için bu kayıt gizlenir.</Value>
@@ -5090,7 +5090,7 @@
 		<Value>Eklenti kur veya güncelle</Value>
 	</LocaleResource>
 	<LocaleResource Name="admin.configuration.plugins.description.step1">
-		<Value>&lt;a id='{0}' href='{1}' data-toggle='modal'&gt;Paket yükleyiciyi&lt;/a&gt; kullanın veya eklentiyi elle (ör. FTP ile) Smartstore dizininizdeki &lt;i&gt;/Modules&lt;/i&gt; klasörüne yükleyin.</Value>
+		<Value>&lt;a id='{0}' href='{1}' data-toggle='modal'&gt;Paket yükleyiciyi&lt;/a&gt; kullanın veya eklentiyi elle (ör. FTP ile) MRT Motors dizininizdeki &lt;i&gt;/Modules&lt;/i&gt; klasörüne yükleyin.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Configuration.Plugins.Description.Step2">
 		<Value>Elle yüklemede: uygulamayı yeniden başlatın (veya &lt;i&gt;Eklenti listesini yeniden yükle&lt;/i&gt; düğmesine tıklayın).</Value>
@@ -6312,7 +6312,7 @@
 	</LocaleResource>
 	<LocaleResource Name="Admin.Configuration.Settings.CustomerUser.Privacy.Cookies.AdminInstruction">
 		<Value>&lt;p&gt;
-					Mağazanıza çerez kullanan ve Smartstore'a bir eklenti aracılığıyla entegre edilmemiş üçüncü taraf betikler eklediyseniz,
+					Mağazanıza çerez kullanan ve MRT Motors'a bir eklenti aracılığıyla entegre edilmemiş üçüncü taraf betikler eklediyseniz,
 					bu çerezlerle ilgili kendi bilgilerinizi aşağıdaki tabloda Çerez Yöneticisi için sağlayabilirsiniz.
 					Eklenen bilgiler, türüne göre vitrindeki Çerez Yöneticisi'nde gösterilir.
 					Etkin eklentilerin Çerez Yöneticisi'ne sağladığı çerez bilgileri bu tabloda gösterilir,
@@ -6678,13 +6678,13 @@
 		<Value>Forumlardaki konular için sayfa boyutunu ayarlayın, ör. sayfa başına '10' konu.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Configuration.Settings.General">
-		<Value>CAPTCHA, kullanıcısının insan mı yoksa bilgisayar mı olduğunu ayırt edebilen bir programdır. Muhtemelen görmüşsünüzdür: web kayıt formlarının altındaki, bozulmuş metin içeren renkli resimler. CAPTCHA'lar birçok web sitesi tarafından "bot"ların, yani genellikle spam üretmek için yazılmış otomatik programların kötüye kullanımını önlemek için kullanılır. Hiçbir bilgisayar programı bozulmuş metni insanlar kadar iyi okuyamaz; bu nedenle botlar CAPTCHA ile korunan sitelerde gezinemez. SmartStore.NET reCAPTCHA kullanır.</Value>
+		<Value>CAPTCHA, kullanıcısının insan mı yoksa bilgisayar mı olduğunu ayırt edebilen bir programdır. Muhtemelen görmüşsünüzdür: web kayıt formlarının altındaki, bozulmuş metin içeren renkli resimler. CAPTCHA'lar birçok web sitesi tarafından "bot"ların, yani genellikle spam üretmek için yazılmış otomatik programların kötüye kullanımını önlemek için kullanılır. Hiçbir bilgisayar programı bozulmuş metni insanlar kadar iyi okuyamaz; bu nedenle botlar CAPTCHA ile korunan sitelerde gezinemez. MRT Motors reCAPTCHA kullanır.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Configuration.Settings.General.Common">
-		<Value>CAPTCHA, kullanıcısının insan mı yoksa bilgisayar mı olduğunu ayırt edebilen bir programdır. Muhtemelen görmüşsünüzdür: web kayıt formlarının altındaki, bozulmuş metin içeren renkli resimler. CAPTCHA'lar birçok web sitesi tarafından "bot"ların, yani genellikle spam üretmek için yazılmış otomatik programların kötüye kullanımını önlemek için kullanılır. Hiçbir bilgisayar programı bozulmuş metni insanlar kadar iyi okuyamaz; bu nedenle botlar CAPTCHA ile korunan sitelerde gezinemez. SmartStore.NET reCAPTCHA kullanır.</Value>
+		<Value>CAPTCHA, kullanıcısının insan mı yoksa bilgisayar mı olduğunu ayırt edebilen bir programdır. Muhtemelen görmüşsünüzdür: web kayıt formlarının altındaki, bozulmuş metin içeren renkli resimler. CAPTCHA'lar birçok web sitesi tarafından "bot"ların, yani genellikle spam üretmek için yazılmış otomatik programların kötüye kullanımını önlemek için kullanılır. Hiçbir bilgisayar programı bozulmuş metni insanlar kadar iyi okuyamaz; bu nedenle botlar CAPTCHA ile korunan sitelerde gezinemez. MRT Motors reCAPTCHA kullanır.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Configuration.Settings.General.Common.Captcha">
-		<Value>CAPTCHA, kullanıcısının insan mı yoksa bilgisayar mı olduğunu ayırt edebilen bir programdır. Muhtemelen görmüşsünüzdür: web kayıt formlarının altındaki, bozulmuş metin içeren renkli resimler. CAPTCHA'lar birçok web sitesi tarafından "bot"ların, yani genellikle spam üretmek için yazılmış otomatik programların kötüye kullanımını önlemek için kullanılır. Hiçbir bilgisayar programı bozulmuş metni insanlar kadar iyi okuyamaz; bu nedenle botlar CAPTCHA ile korunan sitelerde gezinemez. SmartStore.NET reCAPTCHA kullanır.</Value>
+		<Value>CAPTCHA, kullanıcısının insan mı yoksa bilgisayar mı olduğunu ayırt edebilen bir programdır. Muhtemelen görmüşsünüzdür: web kayıt formlarının altındaki, bozulmuş metin içeren renkli resimler. CAPTCHA'lar birçok web sitesi tarafından "bot"ların, yani genellikle spam üretmek için yazılmış otomatik programların kötüye kullanımını önlemek için kullanılır. Hiçbir bilgisayar programı bozulmuş metni insanlar kadar iyi okuyamaz; bu nedenle botlar CAPTCHA ile korunan sitelerde gezinemez. MRT Motors reCAPTCHA kullanır.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Configuration.Settings.General.Common.Captcha.Hint">
 		<Value>CAPTCHA, gerçek kullanıcıları botlardan ayıran otomatik bir testtir; ör. kısa bir doğrulama görevi veya görünmez bir risk kontrolü ile. Formları ve girişleri spam ve kötüye kullanıma karşı korur.</Value>
@@ -9083,13 +9083,13 @@ bu sınırı aşarsa, türe özgü sınırlara ulaşılmamış olsa bile ek iste
 		<Value>Masaüstü mağaza teması</Value>
 	</LocaleResource>
 	<LocaleResource Name="admin.configuration.themes.option.defaultdesktoptheme.hint">
-		<Value>Masaüstü cihazlar için mağaza önyüzü teması. Temaları www.SmartStore.com adresindeki eklentiler sayfasından indirebilirsiniz</Value>
+		<Value>Masaüstü cihazlar için mağaza önyüzü teması. Yeni temaları Temalar sayfasından paket olarak yükleyebilirsiniz</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Configuration.Themes.Option.DefaultMobileTheme">
 		<Value>Mobil mağaza teması</Value>
 	</LocaleResource>
 	<LocaleResource Name="admin.configuration.themes.option.defaultmobiletheme.hint">
-		<Value>Mobil cihazlar için mağaza önyüzü teması. Temaları www.SmartStore.com adresindeki eklentiler sayfasından indirebilirsiniz .</Value>
+		<Value>Mobil cihazlar için mağaza önyüzü teması. Yeni temaları Temalar sayfasından paket olarak yükleyebilirsiniz .</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Configuration.Themes.Option.MobileDevicesSupported">
 		<Value>Mobil cihazlar destekleniyor</Value>
@@ -11654,7 +11654,7 @@ bu sınırı aşarsa, türe özgü sınırlara ulaşılmamış olsa bile ek iste
 		<Value>Topluluk</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Help.OtherWorkNote">
-		<Value>Smartstore, aşağıda listelenen lisanslar altında dağıtılan çalışmalar içerir. Yazarlar, telif hakkı bildirimleri ve lisanslar hakkında daha ayrıntılı bilgi için lütfen ilgili kaynaklara başvurun.</Value>
+		<Value>MRT Motors, aşağıda listelenen lisanslar altında dağıtılan çalışmalar içerir. Yazarlar, telif hakkı bildirimleri ve lisanslar hakkında daha ayrıntılı bilgi için lütfen ilgili kaynaklara başvurun.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Help.Topics">
 		<Value>Yardım konuları</Value>
@@ -12836,7 +12836,7 @@ bu sınırı aşarsa, türe özgü sınırlara ulaşılmamış olsa bile ek iste
 		<Value>'{0}' teması başarıyla yüklendi ve kuruldu. Lütfen listeyi yeniden yükleyin.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Packaging.IsIncompatible">
-		<Value>Paket, mevcut uygulama sürümüyle ({0}) uyumlu değil. Lütfen Smartstore'u güncelleyin veya bu paketin başka bir sürümünü kurun.</Value>
+		<Value>Paket, mevcut uygulama sürümüyle ({0}) uyumlu değil. Lütfen MRT Motors'u güncelleyin veya bu paketin başka bir sürümünü kurun.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Packaging.NotAModule">
 		<Value>Paket bir eklenti içermiyor.</Value>
@@ -12869,7 +12869,7 @@ bu sınırı aşarsa, türe özgü sınırlara ulaşılmamış olsa bile ek iste
 		<Value>Tema yükle</Value>
 	</LocaleResource>
 	<LocaleResource Name="admin.pagetitle">
-		<Value>Smartstore yönetim paneli</Value>
+		<Value>MRT Motors yönetimi</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Permissions.AddedPermissions">
 		<Value>Eklenen izinler: {0}</Value>
@@ -14300,7 +14300,7 @@ bu sınırı aşarsa, türe özgü sınırlara ulaşılmamış olsa bile ek iste
 		<Value>'{0}' veri sağlayıcısı desteklemediği için veritabanı geri yüklenemiyor.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.System.Maintenance.DbBackup.RestoreVersionWarning">
-		<Value>Yedek, farklı bir Smartstore sürümüyle oluşturulmuş. Geri yüklemek öngörülemeyen sorunlara yol açabilir. Yine de devam etmek istiyor musunuz?</Value>
+		<Value>Yedek, farklı bir MRT Motors sürümüyle oluşturulmuş. Geri yüklemek öngörülemeyen sorunlara yol açabilir. Yine de devam etmek istiyor musunuz?</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.System.Maintenance.DbBackup.SameServerNote">
 		<Value>Veritabanlarının yedeklenmesi ve geri yüklenmesi, yalnızca veritabanı sunucusu (ör. MS SQL Server veya MySQL) ile mağaza kurulumunun fiziksel konumu aynı sunucudaysa mümkündür.</Value>
@@ -14759,13 +14759,13 @@ bu sınırı aşarsa, türe özgü sınırlara ulaşılmamış olsa bile ek iste
 		<Value>Oluşturulma tarihi</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.System.SystemInfo.AppDate.Hint">
-		<Value>Bu Smartstore sürümünün oluşturulma tarihi.</Value>
+		<Value>Bu MRT Motors sürümünün oluşturulma tarihi.</Value>
 	</LocaleResource>
 	<LocaleResource Name="admin.system.systeminfo.appversion">
-		<Value>Smartstore sürümü</Value>
+		<Value>MRT Motors sürümü</Value>
 	</LocaleResource>
 	<LocaleResource Name="admin.system.systeminfo.appversion.hint">
-		<Value>Smartstore sürümü</Value>
+		<Value>MRT Motors sürümü</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.System.SystemInfo.ASPNETInfo">
 		<Value>ASP.NET bilgisi</Value>
@@ -14936,7 +14936,7 @@ bu sınırı aşarsa, türe özgü sınırlara ulaşılmamış olsa bile ek iste
 		<Value>'{0}' hesabına '{1}' dosyasında Değiştirme izni verilmemiş. Lütfen bu izinleri yapılandırın.</Value>
 	</LocaleResource>
 	<LocaleResource Name="admin.system.warnings.incompatibleplugin">
-		<Value>'{0}' eklentisi Smartstore sürümünüzle uyumlu değil. Eklentiyi silin veya en son sürüme güncelleyin.</Value>
+		<Value>'{0}' eklentisi MRT Motors sürümünüzle uyumlu değil. Eklentiyi silin veya en son sürüme güncelleyin.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.System.Warnings.NoPermissionsDefined">
 		<Value>Tanımlı izin yok.</Value>
@@ -15002,7 +15002,7 @@ bu sınırı aşarsa, türe özgü sınırlara ulaşılmamış olsa bile ek iste
 		<Value>Kalın</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Theme.GoogleFonts.Gdpr.Hint">
-		<Value>Münih Bölge Mahkemesi'nin (LG München, 20.01.2022, Az. 3 O 17493/20) kararına göre Google Fonts'un yerel olarak yüklenmeden kullanılmasının AB GDPR'ını ihlal ettiğini lütfen unutmayın. Web yazı tiplerini kullanmadan önce lütfen güncel hukuki durum hakkında bilgi edinin. Smartstore olası sonuçlardan sorumlu değildir.</Value>
+		<Value>Münih Bölge Mahkemesi'nin (LG München, 20.01.2022, Az. 3 O 17493/20) kararına göre Google Fonts'un yerel olarak yüklenmeden kullanılmasının AB GDPR'ını ihlal ettiğini lütfen unutmayın. Web yazı tiplerini kullanmadan önce lütfen güncel hukuki durum hakkında bilgi edinin. Yazılım sağlayıcısı olası sonuçlardan sorumlu değildir.</Value>
 	</LocaleResource>
 	<LocaleResource Name="Admin.Theme.GoogleFonts.Hint">
 		<Value>&lt;p&gt;&lt;b&gt;Google Fonts&lt;/b&gt; yazı tiplerini eklemek için lütfen aşağıdaki önerilere dikkat edin.&lt;/p&gt;

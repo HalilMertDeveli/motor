@@ -1,6 +1,6 @@
 <Language Name="Türkçe" IsDefault="false" IsRightToLeft="false">
     <LocaleResource Name="Plugins.FriendlyName.MotorShop.AdminPanel" AppendRootKey="false"><Value>MOTOR Yönetim Paneli</Value></LocaleResource>
-    <LocaleResource Name="Plugins.Description.MotorShop.AdminPanel" AppendRootKey="false"><Value>Mevcut Smartstore servisleri, yetkileri ve verileri üzerinde çalışan sade yönetim paneli: /motor-panel. Klasik /admin paneli kullanılmaya devam eder.</Value></LocaleResource>
+    <LocaleResource Name="Plugins.Description.MotorShop.AdminPanel" AppendRootKey="false"><Value>Mevcut mağaza servisleri, yetkileri ve verileri üzerinde çalışan sade yönetim paneli: /motor-panel. Klasik /admin paneli kullanılmaya devam eder.</Value></LocaleResource>
     <LocaleResource Name="PageTitle"><Value>Yönetim paneli</Value></LocaleResource>
     <LocaleResource Name="Subtitle"><Value>Ürün, sipariş, stok ve kategori yönetimi</Value></LocaleResource>
     <LocaleResource Name="SkipToContent"><Value>İçeriğe geç</Value></LocaleResource>
@@ -391,7 +391,7 @@
     <LocaleResource Name="Report.StockAlertsHint"><Value>Yayındaki, stoğu takip edilen ve stok ≤ kritik seviye olan ürünler. Varyant bazlı stok burada sayılmaz.</Value></LocaleResource>
     <LocaleResource Name="Report.NoStockAlerts"><Value>Kritik seviyede ürün yok.</Value></LocaleResource>
     <LocaleResource Name="Content.Pages"><Value>Sayfalar</Value></LocaleResource>
-    <LocaleResource Name="Content.PagesHint"><Value>Mağazanın içerik sayfaları (Smartstore Topics): hakkımızda, sözleşmeler, yardım…</Value></LocaleResource>
+    <LocaleResource Name="Content.PagesHint"><Value>Mağazanın içerik sayfaları: hakkımızda, sözleşmeler, yardım…</Value></LocaleResource>
     <LocaleResource Name="Content.Title"><Value>Başlık</Value></LocaleResource>
     <LocaleResource Name="Content.SystemName"><Value>Sistem adı</Value></LocaleResource>
     <LocaleResource Name="Content.Kind"><Value>Tür</Value></LocaleResource>
@@ -404,7 +404,7 @@
     <LocaleResource Name="Content.BlogWordPress"><Value>Blog yazıları WordPress'te yazılır ve MotorShop.WordPress modülüyle mağazada gösterilir. Yazı eklemek veya düzenlemek WordPress yönetiminde yapılır.</Value></LocaleResource>
     <LocaleResource Name="Content.BlogOpen"><Value>Blog bağlantısını ve son yazıları gör</Value></LocaleResource>
     <LocaleResource Name="Content.BlogNotInstalled"><Value>Blog modülü (MotorShop.WordPress) kurulu değil.</Value></LocaleResource>
-    <LocaleResource Name="Coupon.Hint"><Value>Smartstore indirimleri. Tutar hesaplaması mağazanın fiyat motorunda yapılır.</Value></LocaleResource>
+    <LocaleResource Name="Coupon.Hint"><Value>Mağaza indirimleri. Tutar hesaplaması mağazanın fiyat motorunda yapılır.</Value></LocaleResource>
     <LocaleResource Name="Coupon.New"><Value>Yeni kupon</Value></LocaleResource>
     <LocaleResource Name="Coupon.None"><Value>Henüz kupon veya indirim yok.</Value></LocaleResource>
     <LocaleResource Name="Coupon.Name"><Value>Ad</Value></LocaleResource>

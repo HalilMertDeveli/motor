@@ -3,7 +3,7 @@
         <Value>Web API</Value>
     </LocaleResource>
     <LocaleResource Name="Plugins.Description.SmartStore.WebApi" AppendRootKey="false">
-        <Value>Smartstore ile veri alışverişi sağlar.</Value>
+        <Value>MRT Motors ile veri alışverişi sağlar.</Value>
     </LocaleResource>
     <LocaleResource Name="Plugins.Permissions.DisplayName.WebApi" AppendRootKey="false">
         <Value>Web API</Value>
